@@ -3,22 +3,42 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>Archetype Created Web Application</display-name>
-  
-  	<servlet>
+	<display-name>Archetype Created Web Application</display-name>
+
+	<servlet>
 		<servlet-name>payment-serlvet</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
-		     <param-name>com.sun.jersey.config.property.packages</param-name>
-		     <param-value>com.limitless.services.payment.PaymentService.resources</param-value>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>com.limitless.services.payment.PaymentService.resources</param-value>
 		</init-param>
-		
+
 		<init-param>
 			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
 			<param-value>true</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+	<servlet>
+		<servlet-name>limitlessbg</servlet-name>
+		<jsp-file>/limitlessbg.jsp</jsp-file>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>limitlessru</servlet-name>
+		<jsp-file>/limitlessru.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>limitlessru</servlet-name>
+		<url-pattern>/limitlessru</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>limitlessbg</servlet-name>
+		<url-pattern>/limitlessbg</url-pattern>
+	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>payment-serlvet</servlet-name>
