@@ -1,5 +1,10 @@
 package com.limitless.services.payment.PaymentService;
 
+/*
+ * @author veejay.developer@gmail.com
+ * ©www.limitlesscircle.com 
+ */
+
 public class AppTokenBean {
 	
 	String appAccessToken;

@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
                                          "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
- <session-factory name="hibernateSessionFactory">
+ <session-factory>
   <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
   <property name="hibernate.connection.password">llcuser</property>
   <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/llcdb</property>
@@ -13,6 +13,6 @@
   <!-- <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentTxn"/> -->
   <property name="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext</property>
   <!-- <property name="hibernate.current_session_context_class">org.springframework.orm.hibernate4.SpringSessionContext</property> -->
-  <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentTxn" />
+  <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentTxn"/>
  </session-factory>
 </hibernate-configuration>

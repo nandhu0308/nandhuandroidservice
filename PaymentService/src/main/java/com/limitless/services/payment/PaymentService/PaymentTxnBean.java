@@ -1,21 +1,52 @@
 package com.limitless.services.payment.PaymentService;
 
+/*
+ * @author veejay.developer@gmail.com
+ * ©www.limitlesscircle.com 
+ */
+
 public class PaymentTxnBean {
 	
 	private int txnId;
-	private int sellerId;
+	private String sellerId;
 	private String sellerName;
 	private float txnAmount;
+	private String citrusMpTxnId;
+	private String splitId;
+	public enum TxnStatus {
+		PAYMENT_INITIATED, PAYMENT_SUCCESSFUL, PAYMENT_FAILED, FUND_RELEASED, REFUND_INITIATED, REFUND_PROCESSED;
+	}
+	private TxnStatus txnStatus;
+	
+	public TxnStatus getTxnStatus() {
+		return txnStatus;
+	}
+	public void setTxnStatus(TxnStatus txnStatus) {
+		this.txnStatus = txnStatus;
+	}
+	
+	public String getCitrusMpTxnId() {
+		return citrusMpTxnId;
+	}
+	public void setCitrusMpTxnId(String citrusMpTxnId) {
+		this.citrusMpTxnId = citrusMpTxnId;
+	}
+	public String getSplitId() {
+		return splitId;
+	}
+	public void setSplitId(String splitId) {
+		this.splitId = splitId;
+	}
 	public int getTxnId() {
 		return txnId;
 	}
 	public void setTxnId(int txnId) {
 		this.txnId = txnId;
 	}
-	public int getSellerId() {
+	public String getSellerId() {
 		return sellerId;
 	}
-	public void setSellerId(int sellerId) {
+	public void setSellerId(String sellerId) {
 		this.sellerId = sellerId;
 	}
 	public String getSellerName() {

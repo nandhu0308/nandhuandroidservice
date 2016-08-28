@@ -1,4 +1,10 @@
+
 package com.limitless.services.payment.PaymentService.resources;
+
+/*
+ * @author veejay.developer@gmail.com
+ * ©www.limitlesscircle.com 
+ */
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +12,7 @@ import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -15,7 +22,10 @@ import javax.ws.rs.core.Response;
 import org.json.JSONObject;
 
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
+import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
+import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
+import com.limitless.services.payment.PaymentService.TxnResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
 import com.sun.jersey.api.client.Client;
@@ -57,25 +67,30 @@ public class PaymentResource {
 	    @Path("/trans")
 		@Produces(MediaType.APPLICATION_JSON)
 		@Consumes(MediaType.APPLICATION_JSON)
-		public Response addTxn(PaymentTxnBean bean){
+		public TxnResponseBean addTxn(PaymentTxnBean bean){
+			TxnResponseBean txnResp = new TxnResponseBean();
 			
 			PaymentTxn paymentTxn = new PaymentTxn();
-			paymentTxn.setTxnId(bean.getTxnId());
 			paymentTxn.setSellerId(bean.getSellerId());
 			paymentTxn.setTxnAmount(bean.getTxnAmount());
 			paymentTxn.setSellerName(bean.getSellerName());
+			paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
 			
 			PaymentTxnManager manager = new PaymentTxnManager();
 			manager.persist(paymentTxn);
 			
-			return Response.status(200).entity("success").build();
+			txnResp.setTxnId(paymentTxn.getTxnId());
+			txnResp.setMessage("Success");
+			return txnResp;
 		}
 		
-		@POST
+		@PUT
 	    @Path("/trans/{id}/split")
+		@Consumes(MediaType.APPLICATION_JSON)
 		@Produces(MediaType.APPLICATION_JSON)
-		public SplitResponseBean splitTxn(@PathParam("id") int id){
+		public SplitResponseBean splitTxn(@PathParam("id") int id, SplitRequestBean splitReq){
 			SplitResponseBean splitResp = new SplitResponseBean();
+			String citrusMpTxnId = splitReq.getCitrusMpTxnId();
 			try{
 				System.out.println("Id:" + id);
 				
@@ -83,7 +98,7 @@ public class PaymentResource {
 				PaymentTxn paymentTxn = manager.findById(id);
 				
 				int txnId = paymentTxn.getTxnId();
-				int sellerId = paymentTxn.getSellerId();
+				String sellerId = paymentTxn.getSellerId();
 				String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
 				//TODO
 				double feePercent = 2.00;
@@ -97,7 +112,7 @@ public class PaymentResource {
 				Client client = Client.create(clientConfig);
 				
 				Map<String,Object> splitRequest = new HashMap<String,Object>();
-				splitRequest.put("trans_id", txnId);
+				splitRequest.put("trans_id", citrusMpTxnId);
 				splitRequest.put("seller_id", sellerId);
 				splitRequest.put("merchant_split_ref", merchantSplitRef);
 				splitRequest.put("split_amount", splitAmount);
@@ -108,23 +123,22 @@ public class PaymentResource {
 
 				ClientResponse splitResponse = webResource.accept("application/json").
 						type("application/json")
-						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0wOC0yN1QxNzo1MzowMC42NzBaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.eUKRRTvUioJlnm_c9fFRhc_kwU2yvHkCyYzab2p19mo")
+						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0wOS0wMlQxMTozOTo1Ni44NDNaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.miHkBxYAQGJck-XwgU0y6bQQruGUpTneAutpmZcagGM")
 						.post(ClientResponse.class, splitRequest);
 				
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();
 				System.out.println(splitResponseStr);
 				
-				/*JSONObject jsonObject = new JSONObject(splitResponseStr);
-				String splitIdStr = jsonObject.get("split_id").toString();*/
-				//TODO
+				JSONObject jsonObject = new JSONObject(splitResponseStr);
+				String splitId = jsonObject.get("split_id").toString();
+				
+				/*//TODO
 				splitResponseStr = splitResponseStr.substring(1,splitResponseStr.length()-2);
 				splitResponseStr = splitResponseStr.split(",")[0];
-				String splitIdStr =  splitResponseStr.split("=")[1];
-						
-				int splitId = Integer.parseInt(splitIdStr);
-				
+				String splitId =  splitResponseStr.split("=")[1];*/
+
 				//TODO
-				paymentTxn = manager.updateSplitId(txnId, splitId);
+				paymentTxn = manager.updateSplitId(txnId, citrusMpTxnId, splitId, TxnStatus.PAYMENT_SUCCESSFUL.toString());
 				
 				splitResp.setSplitId(paymentTxn.getSplitId());
 				splitResp.setMessage("Success");

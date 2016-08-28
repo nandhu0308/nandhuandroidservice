@@ -5,9 +5,9 @@ package com.limitless.services.payment.PaymentService;
  * ©www.limitlesscircle.com 
  */
 
-public class SplitResponseBean {
+public class TxnResponseBean {
 	
-	private String splitId;
+	private int txnId;
 	private String message = "Failure";
 	
 	public String getMessage() {
@@ -18,12 +18,12 @@ public class SplitResponseBean {
 		this.message = message;
 	}
 
-	public String getSplitId() {
-		return splitId;
+	public int getTxnId() {
+		return txnId;
 	}
 
-	public void setSplitId(String splitId) {
-		this.splitId = splitId;
+	public void setTxnId(int txnId) {
+		this.txnId = txnId;
 	}
 
 	

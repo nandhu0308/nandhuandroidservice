@@ -1,11 +1,15 @@
 package com.limitless.services.payment.PaymentService.dao;
 
-// Generated Aug 6, 2016 10:06:53 PM by Hibernate Tools 3.4.0.CR1
+/*
+ * @author veejay.developer@gmail.com
+ * ©www.limitlesscircle.com 
+ */
 
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -20,17 +24,21 @@ import javax.persistence.Version;
 @Table(name = "payment_txn", catalog = "llcdb")
 public class PaymentTxn implements java.io.Serializable {
 	
-	@Id
+	@Id @GeneratedValue
 	@Column(name="TXN_ID")
 	private int txnId;
 	@Column(name="SELLER_ID")
-	private int sellerId;
+	private String sellerId;
 	@Column(name="SELLER_NAME")
 	private String sellerName;
 	@Column(name="TXN_AMOUNT")
 	private float txnAmount;
+	@Column(name="CITRUS_MP_TXN_ID")
+	private String citrusMpTxnId;
 	@Column(name="SPLIT_ID")
-	private Integer splitId;
+	private String splitId;
+	@Column(name="TXN_STATUS")
+	private String txnStatus;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="TXN_CREATED_TIME")
 	private Date txnCreatedTime;
@@ -42,24 +50,24 @@ public class PaymentTxn implements java.io.Serializable {
 	public PaymentTxn() {
 	}
 
-	public PaymentTxn(int txnId, int sellerId, String sellerName,
-			float txnAmount, Date txnCreatedTime, Date txnUpdatedTime) {
-		this.txnId = txnId;
+	public PaymentTxn(String sellerId, String sellerName, float txnAmount,
+			Date txnCreatedTime, Date txnUpdatedTime) {
 		this.sellerId = sellerId;
 		this.sellerName = sellerName;
 		this.txnAmount = txnAmount;
 		this.txnCreatedTime = txnCreatedTime;
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
-	
-	public PaymentTxn(int txnId, int sellerId, String sellerName,
-			float txnAmount, Integer splitId, Date txnCreatedTime,
-			Date txnUpdatedTime) {
-		this.txnId = txnId;
+
+	public PaymentTxn(String sellerId, String sellerName, float txnAmount,
+			String citrusMpTxnId, String splitId, String txnStatus,
+			Date txnCreatedTime, Date txnUpdatedTime) {
 		this.sellerId = sellerId;
 		this.sellerName = sellerName;
 		this.txnAmount = txnAmount;
+		this.citrusMpTxnId = citrusMpTxnId;
 		this.splitId = splitId;
+		this.txnStatus = txnStatus;
 		this.txnCreatedTime = txnCreatedTime;
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
@@ -72,11 +80,11 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnId = txnId;
 	}
 
-	public int getSellerId() {
+	public String getSellerId() {
 		return this.sellerId;
 	}
 
-	public void setSellerId(int sellerId) {
+	public void setSellerId(String sellerId) {
 		this.sellerId = sellerId;
 	}
 
@@ -96,11 +104,11 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnAmount = txnAmount;
 	}
 	
-	public Integer getSplitId() {
+	public String getSplitId() {
 		return this.splitId;
 	}
 
-	public void setSplitId(Integer splitId) {
+	public void setSplitId(String splitId) {
 		this.splitId = splitId;
 	}
 
@@ -120,4 +128,20 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
 
+	public String getCitrusMpTxnId() {
+		return citrusMpTxnId;
+	}
+
+	public void setCitrusMpTxnId(String citrusMpTxnId) {
+		this.citrusMpTxnId = citrusMpTxnId;
+	}
+
+	public String getTxnStatus() {
+		return txnStatus;
+	}
+
+	public void setTxnStatus(String txnStatus) {
+		this.txnStatus = txnStatus;
+	}
+	
 }

@@ -1,6 +1,9 @@
 package com.limitless.services.payment.PaymentService.dao;
 
-// Generated Aug 6, 2016 10:06:53 PM by Hibernate Tools 3.4.0.CR1
+/*
+ * @author veejay.developer@gmail.com
+ * ©www.limitlesscircle.com 
+ */
 
 import java.util.List;
 
@@ -11,6 +14,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
 
+import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -97,7 +101,7 @@ public class PaymentTxnManager {
 		}
 	}
 	
-	public PaymentTxn updateSplitId(int txnId, int splitId) {
+	public PaymentTxn updateSplitId(int txnId, String citrusMpTxnId, String splitId, String txnStatus) {
 		Transaction tx = null;
 		try {
 			
@@ -108,7 +112,9 @@ public class PaymentTxnManager {
 			PaymentTxn instance = (PaymentTxn)session.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn",
 					txnId);
 			
+			instance.setCitrusMpTxnId(citrusMpTxnId);
 			instance.setSplitId(splitId);
+			instance.setTxnStatus(txnStatus);
 			
 			session.update(instance);
 			
@@ -165,6 +171,6 @@ public class PaymentTxnManager {
 	
 	public static void main(String[] args) {
 		PaymentTxnManager manager = new PaymentTxnManager();
-		manager.updateSplitId(26215, 31746);
+		manager.updateSplitId(946706, "28698", "31747", TxnStatus.PAYMENT_SUCCESSFUL.toString());
 	}
 }
