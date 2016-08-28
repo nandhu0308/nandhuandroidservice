@@ -1,3 +1,4 @@
+<%@page import="com.limitless.services.payment.PaymentService.SplitRequestBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.SplitResponseBean"%>
 <%@page import="com.sun.jersey.api.client.WebResource"%>
 <%@page import="com.sun.jersey.api.client.Client"%>
@@ -70,10 +71,15 @@ clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.T
 Client client = Client.create(clientConfig);
 
 String txnId = request.getParameter("TxId");
-WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans").path(txnId).path("split");
-SplitResponseBean bean = webResource.type("application/json").accept("application/json").post(SplitResponseBean.class);
+String citrusMpTxnId = request.getParameter("marketplaceTxId");
 
-System.out.println("Split Id" + bean.getSplitId());
+SplitRequestBean splitReqbean = new SplitRequestBean();
+splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
+
+WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans").path(txnId).path("split");
+SplitResponseBean splitRespBean = webResource.type("application/json").accept("application/json").put(SplitResponseBean.class, splitReqbean);
+
+System.out.println("Split Id" + splitRespBean.getSplitId());
 
 %>   
 
