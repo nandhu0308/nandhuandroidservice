@@ -85,12 +85,28 @@ public class PaymentResource {
 		}
 		
 		@PUT
+	    @Path("/trans")
+		@Produces(MediaType.APPLICATION_JSON)
+		@Consumes(MediaType.APPLICATION_JSON)
+		public TxnResponseBean updateTxn(PaymentTxnBean paymentTxnBean){
+			TxnResponseBean txnResp = new TxnResponseBean();
+			
+			//TODO - currently only the Status
+			PaymentTxnManager manager = new PaymentTxnManager();
+			PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(), paymentTxnBean.getTxnStatus().toString());
+			
+			txnResp.setTxnId(paymentTxn.getTxnId());
+			txnResp.setMessage("Success");
+			return txnResp;
+		}
+		
+		@PUT
 	    @Path("/trans/{id}/split")
 		@Consumes(MediaType.APPLICATION_JSON)
 		@Produces(MediaType.APPLICATION_JSON)
 		public SplitResponseBean splitTxn(@PathParam("id") int id, SplitRequestBean splitReq){
 			SplitResponseBean splitResp = new SplitResponseBean();
-			String citrusMpTxnId = splitReq.getCitrusMpTxnId();
+			int citrusMpTxnId = splitReq.getCitrusMpTxnId();
 			try{
 				System.out.println("Id:" + id);
 				
@@ -98,7 +114,7 @@ public class PaymentResource {
 				PaymentTxn paymentTxn = manager.findById(id);
 				
 				int txnId = paymentTxn.getTxnId();
-				String sellerId = paymentTxn.getSellerId();
+				int sellerId = paymentTxn.getSellerId();
 				String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
 				//TODO
 				double feePercent = 2.00;
@@ -129,13 +145,18 @@ public class PaymentResource {
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();
 				System.out.println(splitResponseStr);
 				
-				JSONObject jsonObject = new JSONObject(splitResponseStr);
-				String splitId = jsonObject.get("split_id").toString();
+				//TODO
+				/*JSONObject jsonObject = new JSONObject(splitResponseStr);
+				int splitId = Integer.parseInt(jsonObject.get("split_id").toString());*/
 				
-				/*//TODO
+				//TODO
 				splitResponseStr = splitResponseStr.substring(1,splitResponseStr.length()-2);
 				splitResponseStr = splitResponseStr.split(",")[0];
-				String splitId =  splitResponseStr.split("=")[1];*/
+				String[] splitArr =  splitResponseStr.split("=");
+				int splitId = 0;
+				if(splitArr[0].equals("split_id")){
+					splitId = Integer.parseInt(splitArr[1]);
+				}
 
 				//TODO
 				paymentTxn = manager.updateSplitId(txnId, citrusMpTxnId, splitId, TxnStatus.PAYMENT_SUCCESSFUL.toString());

@@ -7,7 +7,7 @@ package com.limitless.services.payment.PaymentService;
 
 public class SplitResponseBean {
 	
-	private String splitId;
+	private int splitId;
 	private String message = "Failure";
 	
 	public String getMessage() {
@@ -18,11 +18,11 @@ public class SplitResponseBean {
 		this.message = message;
 	}
 
-	public String getSplitId() {
+	public int getSplitId() {
 		return splitId;
 	}
 
-	public void setSplitId(String splitId) {
+	public void setSplitId(int splitId) {
 		this.splitId = splitId;
 	}
 

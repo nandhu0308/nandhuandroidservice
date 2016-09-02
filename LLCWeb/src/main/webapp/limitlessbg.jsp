@@ -33,9 +33,9 @@ Client client = Client.create(clientConfig);
 WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans");
 
 PaymentTxnBean bean = new PaymentTxnBean();
-bean.setSellerId(sellerId);
+bean.setSellerId(Integer.parseInt(sellerId));
 //TODO
-bean.setSellerName("Dummy");
+bean.setSellerName("Nandhana");
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 

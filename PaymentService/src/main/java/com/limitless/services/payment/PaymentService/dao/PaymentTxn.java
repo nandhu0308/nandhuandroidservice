@@ -28,15 +28,15 @@ public class PaymentTxn implements java.io.Serializable {
 	@Column(name="TXN_ID")
 	private int txnId;
 	@Column(name="SELLER_ID")
-	private String sellerId;
+	private int sellerId;
 	@Column(name="SELLER_NAME")
 	private String sellerName;
 	@Column(name="TXN_AMOUNT")
 	private float txnAmount;
 	@Column(name="CITRUS_MP_TXN_ID")
-	private String citrusMpTxnId;
+	private int citrusMpTxnId;
 	@Column(name="SPLIT_ID")
-	private String splitId;
+	private int splitId;
 	@Column(name="TXN_STATUS")
 	private String txnStatus;
 	@Temporal(TemporalType.TIMESTAMP)
@@ -50,7 +50,7 @@ public class PaymentTxn implements java.io.Serializable {
 	public PaymentTxn() {
 	}
 
-	public PaymentTxn(String sellerId, String sellerName, float txnAmount,
+	public PaymentTxn(int sellerId, String sellerName, float txnAmount,
 			Date txnCreatedTime, Date txnUpdatedTime) {
 		this.sellerId = sellerId;
 		this.sellerName = sellerName;
@@ -59,8 +59,8 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
 
-	public PaymentTxn(String sellerId, String sellerName, float txnAmount,
-			String citrusMpTxnId, String splitId, String txnStatus,
+	public PaymentTxn(int sellerId, String sellerName, float txnAmount,
+			int citrusMpTxnId, int splitId, String txnStatus,
 			Date txnCreatedTime, Date txnUpdatedTime) {
 		this.sellerId = sellerId;
 		this.sellerName = sellerName;
@@ -80,11 +80,11 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnId = txnId;
 	}
 
-	public String getSellerId() {
+	public int getSellerId() {
 		return this.sellerId;
 	}
 
-	public void setSellerId(String sellerId) {
+	public void setSellerId(int sellerId) {
 		this.sellerId = sellerId;
 	}
 
@@ -104,11 +104,11 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnAmount = txnAmount;
 	}
 	
-	public String getSplitId() {
+	public int getSplitId() {
 		return this.splitId;
 	}
 
-	public void setSplitId(String splitId) {
+	public void setSplitId(int splitId) {
 		this.splitId = splitId;
 	}
 
@@ -128,11 +128,11 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
 
-	public String getCitrusMpTxnId() {
+	public int getCitrusMpTxnId() {
 		return citrusMpTxnId;
 	}
 
-	public void setCitrusMpTxnId(String citrusMpTxnId) {
+	public void setCitrusMpTxnId(int citrusMpTxnId) {
 		this.citrusMpTxnId = citrusMpTxnId;
 	}
 

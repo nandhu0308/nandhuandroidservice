@@ -7,13 +7,13 @@ package com.limitless.services.payment.PaymentService;
 
 public class SplitRequestBean {
 	
-	private String citrusMpTxnId;
+	private int citrusMpTxnId;
 
-	public String getCitrusMpTxnId() {
+	public int getCitrusMpTxnId() {
 		return citrusMpTxnId;
 	}
 
-	public void setCitrusMpTxnId(String citrusMpTxnId) {
+	public void setCitrusMpTxnId(int citrusMpTxnId) {
 		this.citrusMpTxnId = citrusMpTxnId;
 	}
 	

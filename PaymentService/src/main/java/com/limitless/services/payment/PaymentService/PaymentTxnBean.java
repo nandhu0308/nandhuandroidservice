@@ -8,11 +8,11 @@ package com.limitless.services.payment.PaymentService;
 public class PaymentTxnBean {
 	
 	private int txnId;
-	private String sellerId;
+	private int sellerId;
 	private String sellerName;
 	private float txnAmount;
-	private String citrusMpTxnId;
-	private String splitId;
+	private int citrusMpTxnId;
+	private int splitId;
 	public enum TxnStatus {
 		PAYMENT_INITIATED, PAYMENT_SUCCESSFUL, PAYMENT_FAILED, FUND_RELEASED, REFUND_INITIATED, REFUND_PROCESSED;
 	}
@@ -25,16 +25,16 @@ public class PaymentTxnBean {
 		this.txnStatus = txnStatus;
 	}
 	
-	public String getCitrusMpTxnId() {
+	public int getCitrusMpTxnId() {
 		return citrusMpTxnId;
 	}
-	public void setCitrusMpTxnId(String citrusMpTxnId) {
+	public void setCitrusMpTxnId(int citrusMpTxnId) {
 		this.citrusMpTxnId = citrusMpTxnId;
 	}
-	public String getSplitId() {
+	public int getSplitId() {
 		return splitId;
 	}
-	public void setSplitId(String splitId) {
+	public void setSplitId(int splitId) {
 		this.splitId = splitId;
 	}
 	public int getTxnId() {
@@ -43,10 +43,10 @@ public class PaymentTxnBean {
 	public void setTxnId(int txnId) {
 		this.txnId = txnId;
 	}
-	public String getSellerId() {
+	public int getSellerId() {
 		return sellerId;
 	}
-	public void setSellerId(String sellerId) {
+	public void setSellerId(int sellerId) {
 		this.sellerId = sellerId;
 	}
 	public String getSellerName() {

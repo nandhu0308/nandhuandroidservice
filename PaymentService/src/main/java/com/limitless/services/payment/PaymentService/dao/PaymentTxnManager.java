@@ -101,7 +101,7 @@ public class PaymentTxnManager {
 		}
 	}
 	
-	public PaymentTxn updateSplitId(int txnId, String citrusMpTxnId, String splitId, String txnStatus) {
+	public PaymentTxn updateSplitId(int txnId, int citrusMpTxnId, int splitId, String txnStatus) {
 		Transaction tx = null;
 		try {
 			
@@ -114,6 +114,33 @@ public class PaymentTxnManager {
 			
 			instance.setCitrusMpTxnId(citrusMpTxnId);
 			instance.setSplitId(splitId);
+			instance.setTxnStatus(txnStatus);
+			
+			session.update(instance);
+			
+			PaymentTxn paymentTxn = (PaymentTxn)session.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn",
+					txnId);
+			
+			return paymentTxn;
+		} catch (RuntimeException re) {
+			log.error("merge failed", re);
+			throw re;
+		} finally {
+			tx.commit();
+		}
+	}
+	
+	public PaymentTxn updateTxn(int txnId, String txnStatus) {
+		Transaction tx = null;
+		try {
+			
+			//TODO
+			
+			Session session = sessionFactory.getCurrentSession();
+			tx = session.beginTransaction();
+			PaymentTxn instance = (PaymentTxn)session.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn",
+					txnId);
+			
 			instance.setTxnStatus(txnStatus);
 			
 			session.update(instance);
@@ -171,6 +198,7 @@ public class PaymentTxnManager {
 	
 	public static void main(String[] args) {
 		PaymentTxnManager manager = new PaymentTxnManager();
-		manager.updateSplitId(946706, "28698", "31747", TxnStatus.PAYMENT_SUCCESSFUL.toString());
+		//manager.updateSplitId(946706, 28698, 31747, TxnStatus.PAYMENT_SUCCESSFUL.toString());
+		manager.findById(946707);
 	}
 }

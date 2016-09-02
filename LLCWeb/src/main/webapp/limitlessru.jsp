@@ -1,3 +1,6 @@
+<%@page import="com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus"%>
+<%@page import="com.limitless.services.payment.PaymentService.PaymentTxnBean"%>
+<%@page import="com.limitless.services.payment.PaymentService.TxnResponseBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.SplitRequestBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.SplitResponseBean"%>
 <%@page import="com.sun.jersey.api.client.WebResource"%>
@@ -66,20 +69,33 @@ System.out.println("RESPONSE " + "THIS IS TEST");
 
 //Backend Payment Service Call
 
-ClientConfig clientConfig = new DefaultClientConfig();              
+ClientConfig clientConfig = new DefaultClientConfig();
 clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
 Client client = Client.create(clientConfig);
 
-String txnId = request.getParameter("TxId");
-String citrusMpTxnId = request.getParameter("marketplaceTxId");
+String respCode = request.getParameter("pgRespCode");
+String txnIdStr = request.getParameter("TxId");
 
-SplitRequestBean splitReqbean = new SplitRequestBean();
-splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
+if(respCode.equals("0")){
+	SplitRequestBean splitReqbean = new SplitRequestBean();
+	String citrusMpTxnIdStr = request.getParameter("marketplaceTxId");
+	int citrusMpTxnId = Integer.parseInt(citrusMpTxnIdStr);
+	splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
 
-WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans").path(txnId).path("split");
-SplitResponseBean splitRespBean = webResource.type("application/json").accept("application/json").put(SplitResponseBean.class, splitReqbean);
+	WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans").path(txnIdStr).path("split");
+	SplitResponseBean splitRespBean = webResource.type("application/json").accept("application/json").put(SplitResponseBean.class, splitReqbean);
 
-System.out.println("Split Id" + splitRespBean.getSplitId());
+	System.out.println("Split Id" + splitRespBean.getSplitId());           
+} else {
+	WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans");
+	
+	PaymentTxnBean paymentTxnBean = new PaymentTxnBean();
+	paymentTxnBean.setTxnId(Integer.parseInt(txnIdStr));
+	paymentTxnBean.setTxnStatus(TxnStatus.PAYMENT_FAILED);
+	TxnResponseBean txnResponse = webResource.type("application/json").accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
+	System.out.println("Txn Id: " + txnResponse.getTxnId() + " Status: " + txnResponse.getMessage());
+}
+
 
 %>   
 
