@@ -8,6 +8,7 @@ package com.limitless.services.payment.PaymentService;
 public class PaymentTxnBean {
 	
 	private int txnId;
+	private int engageCustomerId;
 	private int sellerId;
 	private String sellerName;
 	private float txnAmount;
@@ -61,5 +62,10 @@ public class PaymentTxnBean {
 	public void setTxnAmount(float txnAmount) {
 		this.txnAmount = txnAmount;
 	}
-	
+	public int getEngageCustomerId() {
+		return engageCustomerId;
+	}
+	public void setEngageCustomerId(int engageCustomerId) {
+		this.engageCustomerId = engageCustomerId;
+	}
 }

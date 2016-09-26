@@ -27,6 +27,8 @@ public class PaymentTxn implements java.io.Serializable {
 	@Id @GeneratedValue
 	@Column(name="TXN_ID")
 	private int txnId;
+	@Column(name="ENGAGE_CUSTOMER_ID")
+	private int engageCustomerId;
 	@Column(name="SELLER_ID")
 	private int sellerId;
 	@Column(name="SELLER_NAME")
@@ -50,8 +52,9 @@ public class PaymentTxn implements java.io.Serializable {
 	public PaymentTxn() {
 	}
 
-	public PaymentTxn(int sellerId, String sellerName, float txnAmount,
+	public PaymentTxn(int engageCustomerId, int sellerId, String sellerName, float txnAmount,
 			Date txnCreatedTime, Date txnUpdatedTime) {
+		this.engageCustomerId = engageCustomerId;
 		this.sellerId = sellerId;
 		this.sellerName = sellerName;
 		this.txnAmount = txnAmount;
@@ -59,9 +62,10 @@ public class PaymentTxn implements java.io.Serializable {
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
 
-	public PaymentTxn(int sellerId, String sellerName, float txnAmount,
+	public PaymentTxn(int engageCustomerId, int sellerId, String sellerName, float txnAmount,
 			int citrusMpTxnId, int splitId, String txnStatus,
 			Date txnCreatedTime, Date txnUpdatedTime) {
+		this.engageCustomerId = engageCustomerId;
 		this.sellerId = sellerId;
 		this.sellerName = sellerName;
 		this.txnAmount = txnAmount;
@@ -142,6 +146,14 @@ public class PaymentTxn implements java.io.Serializable {
 
 	public void setTxnStatus(String txnStatus) {
 		this.txnStatus = txnStatus;
+	}
+	
+	public int getEngageCustomerId() {
+		return engageCustomerId;
+	}
+
+	public void setEngageCustomerId(int engageCustomerId) {
+		this.engageCustomerId = engageCustomerId;
 	}
 	
 }

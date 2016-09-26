@@ -71,6 +71,7 @@ public class PaymentResource {
 			TxnResponseBean txnResp = new TxnResponseBean();
 			
 			PaymentTxn paymentTxn = new PaymentTxn();
+			paymentTxn.setEngageCustomerId(bean.getEngageCustomerId());
 			paymentTxn.setSellerId(bean.getSellerId());
 			paymentTxn.setTxnAmount(bean.getTxnAmount());
 			paymentTxn.setSellerName(bean.getSellerName());
@@ -139,7 +140,7 @@ public class PaymentResource {
 
 				ClientResponse splitResponse = webResource.accept("application/json").
 						type("application/json")
-						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0wOS0wMlQxMTozOTo1Ni44NDNaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.miHkBxYAQGJck-XwgU0y6bQQruGUpTneAutpmZcagGM")
+						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0wOS0xOFQwNzo0NjozOS4zOTJaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.ttgiY9F5_f2mM4t5fdbv2T3Oz2ZARbVH3MvlgsPfHOc")
 						.post(ClientResponse.class, splitRequest);
 				
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();

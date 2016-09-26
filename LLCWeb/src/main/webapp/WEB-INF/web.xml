@@ -42,6 +42,15 @@
 
 	<servlet-mapping>
 		<servlet-name>payment-serlvet</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/engage/*</url-pattern>
 	</servlet-mapping>
+	
+	<filter>
+    <filter-name>AuthenticationFilter</filter-name>
+    <filter-class>com.limitless.services.engage.filters.RestAuthenticationFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthenticationFilter</filter-name>
+    <url-pattern>/engage/*</url-pattern>
+  </filter-mapping>
 </web-app>

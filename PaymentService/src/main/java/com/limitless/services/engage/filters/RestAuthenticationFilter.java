@@ -1,0 +1,62 @@
+package com.limitless.services.engage.filters;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.limitless.services.payment.PaymentService.util.AuthenticationUtil;
+
+public class RestAuthenticationFilter implements Filter {
+	public static final String AUTHENTICATION_HEADER = "Authorization";
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain filter) throws IOException, ServletException {
+		if (request instanceof HttpServletRequest) {
+			HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+			String authCredentials = httpServletRequest
+					.getHeader(AUTHENTICATION_HEADER);
+			
+			HttpServletRequest httpRequest = (HttpServletRequest) request;
+			String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
+			
+			System.out.println("Path: " + path);
+			
+			boolean authenticationStatus = false;
+			
+			//Get Version
+			if(path.contains("getVersion")){
+				authenticationStatus = true;
+			} else if(path.endsWith("customer") && httpRequest.getMethod().equals("POST") ){
+				authenticationStatus = AuthenticationUtil.getInstance().validateAdminCredentials(authCredentials);
+			} else {
+				authenticationStatus = AuthenticationUtil.getInstance().validateUserCredentials(authCredentials);
+			}
+
+			if (authenticationStatus) {
+				filter.doFilter(request, response);
+			} else {
+				if (response instanceof HttpServletResponse) {
+					HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+					httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing / Wrong Authentication Credentials");
+				}
+			}
+			
+		}
+	}
+
+	@Override
+	public void destroy() {
+	}
+
+	@Override
+	public void init(FilterConfig arg0) throws ServletException {
+	}
+}
