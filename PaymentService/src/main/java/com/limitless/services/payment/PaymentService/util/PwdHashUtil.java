@@ -18,7 +18,10 @@ public class PwdHashUtil {
 		
 		System.out.println(encryptedString);*/
 		
+		//Password Hash - SHA256
 		System.out.println(DigestUtils.sha256Hex("anandh$123"));
+		
+		//Encryption - Base64
 		String stringToEncrypt = "100000:8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
 		
 		byte[]   bytesEncoded = Base64.encodeBase64(stringToEncrypt.getBytes());
