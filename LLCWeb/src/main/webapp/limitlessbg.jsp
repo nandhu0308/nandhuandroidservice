@@ -11,12 +11,14 @@
 <%@page import="javax.crypto.Mac" %>   
 <%@page import="javax.crypto.spec.SecretKeySpec" %>   
 <%@page import="java.util.Random" %>  
+<%@page import="com.limitless.services.payment.PaymentService.util.RestClientUtil" %>  
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>   
 <%  
 response.setContentType("application/json");     
 String accessKey = "XWMHQPX39XYF8NRBAQSM";     
 String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";     
-String returnUrl = "http://ec2-54-186-117-110.us-west-2.compute.amazonaws.com:8080/LLCWeb/limitlessru";     
+//String returnUrl = "http://ec2-54-186-117-110.us-west-2.compute.amazonaws.com:8080/LLCWeb/limitlessru";
+String returnUrl = "https://services.beinglimitless.in/limitlessru";
 
 String amount = request.getParameter("amount");
 //TODO
@@ -24,22 +26,27 @@ String buyerName = request.getParameter("bname");
 String buyerEmail = request.getParameter("bemail");
 String buyerPhone = request.getParameter("bphone");
 String sellerId = request.getParameter("sid");
+String buyerId = request.getParameter("bid");
+String sellerName = request.getParameter("sname");
+String userString = request.getParameter("usercdn");
 
 //Make Add Txn API call
-ClientConfig clientConfig = new DefaultClientConfig();              
-clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
-Client client = Client.create(clientConfig);
+//ClientConfig clientConfig = new DefaultClientConfig();              
+//clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
+Client client = RestClientUtil.createClient();
 
-WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans");
+WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
+
 
 PaymentTxnBean bean = new PaymentTxnBean();
 bean.setSellerId(Integer.parseInt(sellerId));
 //TODO
-bean.setSellerName("Nandhana");
+bean.setEngageCustomerId(Integer.parseInt(buyerId));
+bean.setSellerName(sellerName);
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 
-TxnResponseBean txnResponse = webResource.type("application/json").post(TxnResponseBean.class, bean);
+TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization",userString).post(TxnResponseBean.class, bean);
 System.out.println("Txn Id: " + txnResponse.getTxnId());
 
 int txnId = txnResponse.getTxnId();
@@ -64,7 +71,9 @@ resBuilder.append("\"merchantTxnId\"").append(":").append("\"").append(txnId).ap
 	  .append("\"merchantAccessKey\"").append(":").append("\"").append(accessKey).append("\"")        
 	  .append(",")        
 	  .append("\"returnUrl\"").append(":").append("\"").append(returnUrl).append("\"")        
-	  .append(",")        
+	  .append(",")     
+	  .append("\"usercdn\"").append(":").append("\"").append(userString).append("\"")
+	  .append(",")
 	  .append("\"amount\"").append(":").append("{").append(amountBuilder).append("}")        
 	  .append("}");  
 	  out.print(resBuilder);   %>
