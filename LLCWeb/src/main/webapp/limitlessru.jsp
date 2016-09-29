@@ -82,12 +82,12 @@ if(respCode.equals("0")){
 	int citrusMpTxnId = Integer.parseInt(citrusMpTxnIdStr);
 	splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
 
-	WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans").path(txnIdStr).path("split");
+	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans").path(txnIdStr).path("split");
 	SplitResponseBean splitRespBean = webResource.type("application/json").accept("application/json").put(SplitResponseBean.class, splitReqbean);
 
 	System.out.println("Split Id" + splitRespBean.getSplitId());           
 } else {
-	WebResource webResource = client.resource("http://localhost:8080/LLCWeb/payment/trans");
+	WebResource webResource = client.resource("http://services.beinglimitless.in/engage/payment/trans");
 	
 	PaymentTxnBean paymentTxnBean = new PaymentTxnBean();
 	paymentTxnBean.setTxnId(Integer.parseInt(txnIdStr));

@@ -1,12 +1,15 @@
 
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.util.ArrayList;
+
 /*
  * @author veejay.developer@gmail.com
  * ©www.limitlesscircle.com 
  */
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -25,6 +28,7 @@ import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
+import com.limitless.services.payment.PaymentService.TxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
@@ -101,6 +105,31 @@ public class PaymentResource {
 			return txnResp;
 		}
 		
+		@GET
+		@Path("/trans/customer/{customerId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public List<TxnHistoryBean> getHistory(@PathParam("customerId") int customerId){
+			PaymentTxnManager manager = new PaymentTxnManager();
+			List<PaymentTxn> paymentHistory = manager.getTxnHistory(customerId);
+			List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
+			
+			for(PaymentTxn bean : paymentHistory){
+				TxnHistoryBean historyBean = new TxnHistoryBean();
+				historyBean.setTxnId(bean.getTxnId());
+				historyBean.setCustomerId(bean.getEngageCustomerId());
+				historyBean.setSellerId(bean.getSellerId());
+				historyBean.setSellerName(bean.getSellerName());
+				historyBean.setTxtAmount(bean.getTxnAmount());
+				historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
+				historyBean.setSplitId(bean.getSplitId());
+				historyBean.setTxtStatus(bean.getTxnStatus().toString());
+				historyBean.setTxnTime(bean.getTxnUpdatedTime());
+				historyBeanList.add(historyBean);
+				historyBean = null;
+			}
+			return historyBeanList;
+		}
+		
 		@PUT
 	    @Path("/trans/{id}/split")
 		@Consumes(MediaType.APPLICATION_JSON)
@@ -140,7 +169,7 @@ public class PaymentResource {
 
 				ClientResponse splitResponse = webResource.accept("application/json").
 						type("application/json")
-						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0wOS0xOFQwNzo0NjozOS4zOTJaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.ttgiY9F5_f2mM4t5fdbv2T3Oz2ZARbVH3MvlgsPfHOc")
+						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0xMC0wMVQxNToyNjo0NS42MDhaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.bneSECVDV8zC0MD8zzMm6yKA1Dlt0I4eG0r6967Gzt0")
 						.post(ClientResponse.class, splitRequest);
 				
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();

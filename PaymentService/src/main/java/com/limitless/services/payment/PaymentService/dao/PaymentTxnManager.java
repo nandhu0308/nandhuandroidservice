@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -192,6 +193,21 @@ public class PaymentTxnManager {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			throw re;
+		}
+	}
+	
+	public List<PaymentTxn> getTxnHistory(int customerId){
+		log.debug("Getting History");
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			Query query = session.createQuery("from PaymentTxn where engageCustomerId = :customerId");
+			query.setParameter("customerId", customerId);
+			List<PaymentTxn> paymentHistory = query.list();
+			return paymentHistory;
+		}
+		catch(RuntimeException re){
+			log.error("Getting History Failed", re);
 			throw re;
 		}
 	}

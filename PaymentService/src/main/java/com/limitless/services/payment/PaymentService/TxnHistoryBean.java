@@ -1,0 +1,93 @@
+package com.limitless.services.payment.PaymentService;
+
+import java.util.Date;
+
+public class TxnHistoryBean {
+	
+	private int txnId;
+	private int customerId;
+	private int sellerId;
+	private String sellerName;
+	private double txtAmount;
+	private int citrusMpTxnId;
+	private int splitId;
+	private String txtStatus;
+	private Date txnTime;
+	
+	public TxnHistoryBean(){
+		
+	}
+
+	public int getTxnId() {
+		return txnId;
+	}
+
+	public void setTxnId(int txnId) {
+		this.txnId = txnId;
+	}
+
+	public int getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(int customerId) {
+		this.customerId = customerId;
+	}
+
+	public int getSellerId() {
+		return sellerId;
+	}
+
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
+
+	public String getSellerName() {
+		return sellerName;
+	}
+
+	public void setSellerName(String sellerName) {
+		this.sellerName = sellerName;
+	}
+
+	public double getTxtAmount() {
+		return txtAmount;
+	}
+
+	public void setTxtAmount(double txtAmount) {
+		this.txtAmount = txtAmount;
+	}
+
+	public int getCitrusMpTxnId() {
+		return citrusMpTxnId;
+	}
+
+	public void setCitrusMpTxnId(int citrusMpTxnId) {
+		this.citrusMpTxnId = citrusMpTxnId;
+	}
+
+	public int getSplitId() {
+		return splitId;
+	}
+
+	public void setSplitId(int splitId) {
+		this.splitId = splitId;
+	}
+
+	public String getTxtStatus() {
+		return txtStatus;
+	}
+
+	public void setTxtStatus(String txtStatus) {
+		this.txtStatus = txtStatus;
+	}
+
+	public Date getTxnTime() {
+		return txnTime;
+	}
+
+	public void setTxnTime(Date txnTime) {
+		this.txnTime = txnTime;
+	}
+
+}
