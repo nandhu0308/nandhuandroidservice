@@ -87,7 +87,7 @@ if(respCode.equals("0")){
 
 	System.out.println("Split Id" + splitRespBean.getSplitId());           
 } else {
-	WebResource webResource = client.resource("http://services.beinglimitless.in/engage/payment/trans");
+	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
 	
 	PaymentTxnBean paymentTxnBean = new PaymentTxnBean();
 	paymentTxnBean.setTxnId(Integer.parseInt(txnIdStr));

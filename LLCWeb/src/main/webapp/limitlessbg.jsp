@@ -17,7 +17,7 @@ response.setContentType("application/json");
 String accessKey = "XWMHQPX39XYF8NRBAQSM";     
 String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";     
 //String returnUrl = "http://ec2-54-186-117-110.us-west-2.compute.amazonaws.com:8080/LLCWeb/limitlessru";
-String returnUrl = "http://services.beinglimitless.in/limitlessru";
+String returnUrl = "https://services.beinglimitless.in/limitlessru";
 
 String amount = request.getParameter("amount");
 //TODO
@@ -33,7 +33,7 @@ ClientConfig clientConfig = new DefaultClientConfig();
 clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
 Client client = Client.create(clientConfig);
 
-WebResource webResource = client.resource("http://services.beinglimitless.in/engage/payment/trans");
+WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
 
 PaymentTxnBean bean = new PaymentTxnBean();
 bean.setSellerId(Integer.parseInt(sellerId));
