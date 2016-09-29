@@ -14,6 +14,7 @@
 <%@page import="javax.crypto.spec.SecretKeySpec" %>   
 <%@page import="java.util.Enumeration" %>   
 <%@page import="java.util.HashMap" %>   
+<%@page import="com.limitless.services.payment.PaymentService.util.RestClientUtil" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>  
 <% 
 String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";   	
@@ -69,12 +70,13 @@ System.out.println("RESPONSE " + "THIS IS TEST");
 
 //Backend Payment Service Call
 
-ClientConfig clientConfig = new DefaultClientConfig();
-clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
-Client client = Client.create(clientConfig);
+//ClientConfig clientConfig = new DefaultClientConfig();
+//clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
+Client client = RestClientUtil.createClient();
 
 String respCode = request.getParameter("pgRespCode");
 String txnIdStr = request.getParameter("TxId");
+String userString = request.getParameter("usercdn");
 
 if(respCode.equals("0")){
 	SplitRequestBean splitReqbean = new SplitRequestBean();
@@ -83,7 +85,7 @@ if(respCode.equals("0")){
 	splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
 
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans").path(txnIdStr).path("split");
-	SplitResponseBean splitRespBean = webResource.type("application/json").accept("application/json").put(SplitResponseBean.class, splitReqbean);
+	SplitResponseBean splitRespBean = webResource.type("application/json").header("Authorization", userString).accept("application/json").put(SplitResponseBean.class, splitReqbean);
 
 	System.out.println("Split Id" + splitRespBean.getSplitId());           
 } else {
@@ -92,7 +94,7 @@ if(respCode.equals("0")){
 	PaymentTxnBean paymentTxnBean = new PaymentTxnBean();
 	paymentTxnBean.setTxnId(Integer.parseInt(txnIdStr));
 	paymentTxnBean.setTxnStatus(TxnStatus.PAYMENT_FAILED);
-	TxnResponseBean txnResponse = webResource.type("application/json").accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
+	TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization", userString).accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
 	System.out.println("Txn Id: " + txnResponse.getTxnId() + " Status: " + txnResponse.getMessage());
 }
 
