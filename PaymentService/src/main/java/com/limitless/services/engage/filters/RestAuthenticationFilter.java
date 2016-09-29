@@ -11,9 +11,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.limitless.services.payment.PaymentService.util.AuthenticationUtil;
 
 public class RestAuthenticationFilter implements Filter {
+	
+	final static Logger logger = Logger.getLogger(RestAuthenticationFilter.class);
+			
 	public static final String AUTHENTICATION_HEADER = "Authorization";
 
 	@Override
@@ -27,7 +32,7 @@ public class RestAuthenticationFilter implements Filter {
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
 			
-			System.out.println("Path: " + path);
+			logger.info("Path: " + path);
 			
 			boolean authenticationStatus = false;
 			

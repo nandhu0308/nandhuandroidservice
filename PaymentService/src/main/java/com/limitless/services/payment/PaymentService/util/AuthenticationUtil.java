@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.dao.EngageCustomerManager;
 
 public class AuthenticationUtil {
+	
+	final static Logger logger = Logger.getLogger(AuthenticationUtil.class);
 	
 	private static AuthenticationUtil authntil = null;
 	
@@ -41,7 +44,7 @@ public class AuthenticationUtil {
 		final int userId = Integer.parseInt(tokenizer.nextToken());
 		final String password = tokenizer.nextToken();
 		
-		System.out.println(userId + " : " + password);
+		logger.info(userId + " : " + password);
 		
 		//tbd - pass it as environment variable
 		if(isAdmin){

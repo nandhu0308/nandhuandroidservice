@@ -2,13 +2,6 @@
 package com.limitless.services.payment.PaymentService.resources;
 
 import java.util.ArrayList;
-
-/*
- * @author veejay.developer@gmail.com
- * ©www.limitlesscircle.com 
- */
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.json.JSONObject;
+import org.apache.log4j.Logger;
 
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
@@ -39,9 +32,17 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
+/*
+ * @author veejay.developer@gmail.com
+ * ©www.limitlesscircle.com 
+ */
+import java.util.HashMap;
+
 //CITRUSPAY
 @Path("/payment")
 public class PaymentResource {
+	
+		final static Logger logger = Logger.getLogger(PaymentResource.class);
 	
 		@GET
 		@Path("/getVersion")
@@ -53,17 +54,22 @@ public class PaymentResource {
 		@GET
 	    @Path("/trans/{id}")
 		@Produces(MediaType.APPLICATION_JSON)
-		public PaymentTxnBean getPaymentTxn(@PathParam("id") int id){
-			System.out.println("Id:" + id);
-			PaymentTxnManager manager = new PaymentTxnManager();
-			PaymentTxn paymentTxn = manager.findById(id);
-			
+		public PaymentTxnBean getPaymentTxn(@PathParam("id") int id) throws Exception{
 			PaymentTxnBean bean = new PaymentTxnBean();
-			bean.setTxnId(paymentTxn.getTxnId());
-			bean.setSellerId(paymentTxn.getSellerId());
-			bean.setTxnAmount(paymentTxn.getTxnAmount());
-			bean.setSellerName(paymentTxn.getSellerName());
-			
+			try {
+				logger.info("Id:" + id);
+				PaymentTxnManager manager = new PaymentTxnManager();
+				PaymentTxn paymentTxn = manager.findById(id);
+				
+				bean.setTxnId(paymentTxn.getTxnId());
+				bean.setSellerId(paymentTxn.getSellerId());
+				bean.setTxnAmount(paymentTxn.getTxnAmount());
+				bean.setSellerName(paymentTxn.getSellerName());
+				
+			} catch (Exception e) {
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
 			return bean;
 		}
 		
@@ -71,21 +77,26 @@ public class PaymentResource {
 	    @Path("/trans")
 		@Produces(MediaType.APPLICATION_JSON)
 		@Consumes(MediaType.APPLICATION_JSON)
-		public TxnResponseBean addTxn(PaymentTxnBean bean){
+		public TxnResponseBean addTxn(PaymentTxnBean bean) throws Exception{
 			TxnResponseBean txnResp = new TxnResponseBean();
 			
-			PaymentTxn paymentTxn = new PaymentTxn();
-			paymentTxn.setEngageCustomerId(bean.getEngageCustomerId());
-			paymentTxn.setSellerId(bean.getSellerId());
-			paymentTxn.setTxnAmount(bean.getTxnAmount());
-			paymentTxn.setSellerName(bean.getSellerName());
-			paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
-			
-			PaymentTxnManager manager = new PaymentTxnManager();
-			manager.persist(paymentTxn);
-			
-			txnResp.setTxnId(paymentTxn.getTxnId());
-			txnResp.setMessage("Success");
+			try {
+				PaymentTxn paymentTxn = new PaymentTxn();
+				paymentTxn.setEngageCustomerId(bean.getEngageCustomerId());
+				paymentTxn.setSellerId(bean.getSellerId());
+				paymentTxn.setTxnAmount(bean.getTxnAmount());
+				paymentTxn.setSellerName(bean.getSellerName());
+				paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
+				
+				PaymentTxnManager manager = new PaymentTxnManager();
+				manager.persist(paymentTxn);
+				
+				txnResp.setTxnId(paymentTxn.getTxnId());
+				txnResp.setMessage("Success");
+			} catch (Exception e) {
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
 			return txnResp;
 		}
 		
@@ -93,39 +104,51 @@ public class PaymentResource {
 	    @Path("/trans")
 		@Produces(MediaType.APPLICATION_JSON)
 		@Consumes(MediaType.APPLICATION_JSON)
-		public TxnResponseBean updateTxn(PaymentTxnBean paymentTxnBean){
+		public TxnResponseBean updateTxn(PaymentTxnBean paymentTxnBean) throws Exception{
 			TxnResponseBean txnResp = new TxnResponseBean();
 			
-			//TODO - currently only the Status
-			PaymentTxnManager manager = new PaymentTxnManager();
-			PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(), paymentTxnBean.getTxnStatus().toString());
-			
-			txnResp.setTxnId(paymentTxn.getTxnId());
-			txnResp.setMessage("Success");
+			try {
+				//TODO - currently only the Status
+				PaymentTxnManager manager = new PaymentTxnManager();
+				PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(), paymentTxnBean.getTxnStatus().toString());
+				
+				txnResp.setTxnId(paymentTxn.getTxnId());
+				txnResp.setMessage("Success");
+			} catch (Exception e) {
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
 			return txnResp;
 		}
 		
 		@GET
 		@Path("/trans/customer/{customerId}")
 		@Produces(MediaType.APPLICATION_JSON)
-		public List<TxnHistoryBean> getHistory(@PathParam("customerId") int customerId){
-			PaymentTxnManager manager = new PaymentTxnManager();
-			List<PaymentTxn> paymentHistory = manager.getTxnHistory(customerId);
+		public List<TxnHistoryBean> getHistory(@PathParam("customerId") int customerId) throws Exception{
 			List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
 			
-			for(PaymentTxn bean : paymentHistory){
-				TxnHistoryBean historyBean = new TxnHistoryBean();
-				historyBean.setTxnId(bean.getTxnId());
-				historyBean.setCustomerId(bean.getEngageCustomerId());
-				historyBean.setSellerId(bean.getSellerId());
-				historyBean.setSellerName(bean.getSellerName());
-				historyBean.setTxtAmount(bean.getTxnAmount());
-				historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
-				historyBean.setSplitId(bean.getSplitId());
-				historyBean.setTxtStatus(bean.getTxnStatus().toString());
-				historyBean.setTxnTime(bean.getTxnUpdatedTime());
-				historyBeanList.add(historyBean);
-				historyBean = null;
+			try {
+				PaymentTxnManager manager = new PaymentTxnManager();
+				List<PaymentTxn> paymentHistory = manager.getTxnHistory(customerId);
+				
+				
+				for(PaymentTxn bean : paymentHistory){
+					TxnHistoryBean historyBean = new TxnHistoryBean();
+					historyBean.setTxnId(bean.getTxnId());
+					historyBean.setCustomerId(bean.getEngageCustomerId());
+					historyBean.setSellerId(bean.getSellerId());
+					historyBean.setSellerName(bean.getSellerName());
+					historyBean.setTxtAmount(bean.getTxnAmount());
+					historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
+					historyBean.setSplitId(bean.getSplitId());
+					historyBean.setTxtStatus(bean.getTxnStatus().toString());
+					historyBean.setTxnTime(bean.getTxnUpdatedTime());
+					historyBeanList.add(historyBean);
+					historyBean = null;
+				}
+			} catch (Exception e) {
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
 			}
 			return historyBeanList;
 		}
@@ -134,11 +157,11 @@ public class PaymentResource {
 	    @Path("/trans/{id}/split")
 		@Consumes(MediaType.APPLICATION_JSON)
 		@Produces(MediaType.APPLICATION_JSON)
-		public SplitResponseBean splitTxn(@PathParam("id") int id, SplitRequestBean splitReq){
+		public SplitResponseBean splitTxn(@PathParam("id") int id, SplitRequestBean splitReq) throws Exception{
 			SplitResponseBean splitResp = new SplitResponseBean();
 			int citrusMpTxnId = splitReq.getCitrusMpTxnId();
 			try{
-				System.out.println("Id:" + id);
+				logger.info("Id:" + id);
 				
 				PaymentTxnManager manager = new PaymentTxnManager();
 				PaymentTxn paymentTxn = manager.findById(id);
@@ -173,7 +196,7 @@ public class PaymentResource {
 						.post(ClientResponse.class, splitRequest);
 				
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();
-				System.out.println(splitResponseStr);
+				logger.info(splitResponseStr);
 				
 				//TODO
 				/*JSONObject jsonObject = new JSONObject(splitResponseStr);
@@ -194,7 +217,8 @@ public class PaymentResource {
 				splitResp.setSplitId(paymentTxn.getSplitId());
 				splitResp.setMessage("Success");
 			} catch(Exception e){
-				e.printStackTrace();
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
 			}
 			
 			return splitResp;

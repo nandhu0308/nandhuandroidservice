@@ -8,6 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
 import com.limitless.services.engage.dao.EngageCustomer;
@@ -16,29 +18,36 @@ import com.limitless.services.engage.dao.EngageCustomerManager;
 @Path("/")
 public class EngageCustomerResource {
 	
+	final static Logger logger = Logger.getLogger(EngageCustomerResource.class);
+	
 	@POST
     @Path("/customer")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public EngageCustomerResponseBean addTxn(EngageCustomerBean bean){
+	public EngageCustomerResponseBean addTxn(EngageCustomerBean bean) throws Exception{
 		
 		EngageCustomerResponseBean customerResp = new EngageCustomerResponseBean();
 		
-		EngageCustomer customer = new EngageCustomer();
-		customer.setCustomerName(bean.getCustomerName());
-		customer.setCustomerEmail99(bean.getEmailId());
-		customer.setCustomerMobileNumber(bean.getMobileNumber());
-		customer.setCustomerEmail99(bean.getEmailId());
-		customer.setCustomerPasswd99(bean.getPasswd());
-		customer.setCustomerCountryCode(bean.getCountryCode());
-		customer.setCustomerCity(bean.getCity());
-		customer.setCustomerCountry(bean.getCountry());
-		
-		EngageCustomerManager manager = new EngageCustomerManager();
-		manager.persist(customer);
-		
-		customerResp.setCustomerId(customer.getCustomerId());
-		customerResp.setMessage("Success");
+		try {
+			EngageCustomer customer = new EngageCustomer();
+			customer.setCustomerName(bean.getCustomerName());
+			customer.setCustomerEmail99(bean.getEmailId());
+			customer.setCustomerMobileNumber(bean.getMobileNumber());
+			customer.setCustomerEmail99(bean.getEmailId());
+			customer.setCustomerPasswd99(bean.getPasswd());
+			customer.setCustomerCountryCode(bean.getCountryCode());
+			customer.setCustomerCity(bean.getCity());
+			customer.setCustomerCountry(bean.getCountry());
+			
+			EngageCustomerManager manager = new EngageCustomerManager();
+			manager.persist(customer);
+			
+			customerResp.setCustomerId(customer.getCustomerId());
+			customerResp.setMessage("Success");
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
 		return customerResp;
 	}
 	
@@ -46,6 +55,7 @@ public class EngageCustomerResource {
 	@Path("/getVersion")
 	public Response getVersion() {
 		String output = "1.0.0";
+		logger.info("Reached getVersion..");
 		return Response.status(200).entity(output).build();
 	}
 
