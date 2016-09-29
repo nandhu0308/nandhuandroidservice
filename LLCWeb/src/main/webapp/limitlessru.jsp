@@ -96,7 +96,7 @@ if(respCode.equals("0")){
 	splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
 
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans").path(txnIdStr).path("split");
-	SplitResponseBean splitRespBean = webResource.type("application/json").header("Authorization", userString).accept("application/json").put(SplitResponseBean.class, splitReqbean);
+	SplitResponseBean splitRespBean = webResource.type("application/json").header("Authorization", "Basic " + userString).accept("application/json").put(SplitResponseBean.class, splitReqbean);
 
 	logger.info("Split Id" + splitRespBean.getSplitId());           
 } else {
@@ -105,7 +105,7 @@ if(respCode.equals("0")){
 	PaymentTxnBean paymentTxnBean = new PaymentTxnBean();
 	paymentTxnBean.setTxnId(Integer.parseInt(txnIdStr));
 	paymentTxnBean.setTxnStatus(TxnStatus.PAYMENT_FAILED);
-	TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization", userString).accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
+	TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization", "Basic " + userString).accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
 	logger.info("Txn Id: " + txnResponse.getTxnId() + " Status: " + txnResponse.getMessage());
 }
 
