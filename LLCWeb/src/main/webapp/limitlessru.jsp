@@ -14,14 +14,10 @@
 <%@page import="javax.crypto.spec.SecretKeySpec" %>   
 <%@page import="java.util.Enumeration" %>   
 <%@page import="java.util.HashMap" %>   
-<%@page import="org.apache.log4j.Logger" %>
 <%@page import="com.limitless.services.payment.PaymentService.util.RestClientUtil" %>
-<%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %> 
-<%@page errorPage="error.jsp" %>  
+<%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>  
 <% 
-
-Logger logger = Logger.getLogger("returnUrl");
-
+String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";   	
 Hashtable<String, String> reqValMap = new Hashtable<String, String>(){          
 public synchronized String toString() {            
 Enumeration<String> keys = keys();            
@@ -38,13 +34,7 @@ buff = new StringBuffer(buff.toString().substring(0, buff.toString().length()-1)
 buff.append("}");              
 return buff.toString();         
 }     
-};
-
-String hmac = "";
-
-try{
-
-String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";   	
+};	      
 Enumeration<String> parameterList = request.getParameterNames();      
 while(parameterList.hasMoreElements())
 {
@@ -72,12 +62,11 @@ StringBuilder build = new StringBuilder();
 for (byte b : hmacArr) {          
 build.append(String.format("%02x", b));      
 }      
-//change
-hmac = build.toString();      
+String hmac = build.toString();      
 String reqSignature = request.getParameter("signature");      
-logger.info("txn ID : " + request.getParameter("TxId"));  	
-logger.info("RESPONSE " + reqValMap.toString());  
-logger.info("RESPONSE " + "THIS IS TEST"); 
+System.out.println("txn ID : " + request.getParameter("TxId"));  	
+System.out.println("RESPONSE " + reqValMap.toString());  
+System.out.println("RESPONSE " + "THIS IS TEST"); 
 
 //Backend Payment Service Call
 
@@ -98,7 +87,7 @@ if(respCode.equals("0")){
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans").path(txnIdStr).path("split");
 	SplitResponseBean splitRespBean = webResource.type("application/json").header("Authorization", "Basic " + userString).accept("application/json").put(SplitResponseBean.class, splitReqbean);
 
-	logger.info("Split Id" + splitRespBean.getSplitId());           
+	System.out.println("Split Id" + splitRespBean.getSplitId());           
 } else {
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
 	
@@ -106,13 +95,10 @@ if(respCode.equals("0")){
 	paymentTxnBean.setTxnId(Integer.parseInt(txnIdStr));
 	paymentTxnBean.setTxnStatus(TxnStatus.PAYMENT_FAILED);
 	TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization", "Basic " + userString).accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
-	logger.info("Txn Id: " + txnResponse.getTxnId() + " Status: " + txnResponse.getMessage());
+	System.out.println("Txn Id: " + txnResponse.getTxnId() + " Status: " + txnResponse.getMessage());
 }
 
-}catch(Exception e){
-	logger.error("API Error", e);
-	throw new Exception("Internal Server Error");
-}
+
 %>   
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" http://www.w3.org/TR/html4/loose.dtd">   
