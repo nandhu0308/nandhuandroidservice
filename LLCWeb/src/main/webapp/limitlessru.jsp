@@ -76,7 +76,7 @@ Client client = RestClientUtil.createClient();
 
 String respCode = request.getParameter("pgRespCode");
 String txnIdStr = request.getParameter("TxId");
-String userString = request.getParameter("usercdn");
+String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
 
 if(respCode.equals("0")){
 	SplitRequestBean splitReqbean = new SplitRequestBean();

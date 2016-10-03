@@ -30,7 +30,7 @@ String buyerPhone = request.getParameter("bphone");
 String sellerId = request.getParameter("sid");
 String buyerId = request.getParameter("bid");
 String sellerName = request.getParameter("sname");
-String userString = request.getParameter("usercdn");
+String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
 
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              
