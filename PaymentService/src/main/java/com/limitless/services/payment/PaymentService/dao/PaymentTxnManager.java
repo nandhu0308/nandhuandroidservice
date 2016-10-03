@@ -199,8 +199,10 @@ public class PaymentTxnManager {
 	
 	public List<PaymentTxn> getTxnHistory(int customerId){
 		log.debug("Getting History");
+		Transaction tx = null;
 		try{
 			Session session = sessionFactory.getCurrentSession();
+			tx = session.beginTransaction();
 			Query query = session.createQuery("from PaymentTxn where engageCustomerId = :customerId");
 			query.setParameter("customerId", customerId);
 			List<PaymentTxn> paymentHistory = query.list();
@@ -209,6 +211,8 @@ public class PaymentTxnManager {
 		catch(RuntimeException re){
 			log.error("Getting History Failed", re);
 			throw re;
+		} finally{
+			tx.commit();
 		}
 	}
 	

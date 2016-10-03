@@ -54,7 +54,7 @@
 		<url-pattern>/engage/*</url-pattern>
 	</filter-mapping>
 
-	<error-page>
+<!-- 	<error-page>
 		<exception-type>
 			java.lang.Exception
 		</exception-type>
@@ -69,5 +69,5 @@
 	<servlet-mapping>
 		<servlet-name>error</servlet-name>
 		<url-pattern>/error</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping> -->
 </web-app>

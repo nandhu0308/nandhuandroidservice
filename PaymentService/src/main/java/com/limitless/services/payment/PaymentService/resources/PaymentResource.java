@@ -131,6 +131,11 @@ public class PaymentResource {
 				PaymentTxnManager manager = new PaymentTxnManager();
 				List<PaymentTxn> paymentHistory = manager.getTxnHistory(customerId);
 				
+				if(paymentHistory != null){
+					System.out.println("Size : " + paymentHistory.size());
+				} else {
+					System.out.println("List Null");
+				}
 				
 				for(PaymentTxn bean : paymentHistory){
 					TxnHistoryBean historyBean = new TxnHistoryBean();

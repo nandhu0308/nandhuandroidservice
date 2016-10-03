@@ -39,10 +39,10 @@ public class RestAuthenticationFilter implements Filter {
 			//Get Version
 			if(path.contains("getVersion")){
 				authenticationStatus = true;
-			} else if(path.endsWith("customer") && httpRequest.getMethod().equals("POST") ){
+			} /*else if(path.endsWith("customer") && httpRequest.getMethod().equals("POST") ){
 				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);
-			} else {
-				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, false);
+			} */else {
+				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);
 			}
 
 			if (authenticationStatus) {

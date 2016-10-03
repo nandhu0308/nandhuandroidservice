@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
+import com.limitless.services.engage.LoginRequestBean;
+import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 
@@ -57,6 +59,28 @@ public class EngageCustomerResource {
 		String output = "1.0.0";
 		logger.info("Reached getVersion..");
 		return Response.status(200).entity(output).build();
+	}
+	
+	@POST
+    @Path("/customer/login")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public LoginResponseBean addTxn(LoginRequestBean bean) throws Exception{
+		LoginResponseBean loginRespBean = new LoginResponseBean();
+		
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			boolean isValidCredentials = manager.validateCredentials(bean.getUserId(), bean.getPasswd());
+			if(isValidCredentials){
+				loginRespBean.setLoginStatus(1);
+				loginRespBean.setMessage("Success");
+			}
+		} catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		
+		return loginRespBean;
 	}
 
 }
