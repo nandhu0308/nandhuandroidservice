@@ -197,7 +197,7 @@ public class PaymentResource {
 
 				ClientResponse splitResponse = webResource.accept("application/json").
 						type("application/json")
-						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0xMC0wMVQxNToyNjo0NS42MDhaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.bneSECVDV8zC0MD8zzMm6yKA1Dlt0I4eG0r6967Gzt0")
+						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0xMC0wOVQwMjo1OTo0Ny4zMDFaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.Uq-1Uc-QIySMKvH6OMUUjHyXD4hZDvs45MgsBV_vk3A")
 						.post(ClientResponse.class, splitRequest);
 				
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();

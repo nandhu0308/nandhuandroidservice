@@ -48,7 +48,7 @@ bean.setSellerName(sellerName);
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 
-TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization","Basic" + userString).post(TxnResponseBean.class, bean);
+TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization","Basic " + userString).post(TxnResponseBean.class, bean);
 System.out.println("Txn Id: " + txnResponse.getTxnId());
 
 int txnId = txnResponse.getTxnId();
