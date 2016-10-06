@@ -196,7 +196,8 @@ public class PaymentResource {
 				//TODO
 				double feePercent = 2.00;
 				double txnAmount = paymentTxn.getTxnAmount();
-				double feeAmount = (txnAmount * feePercent) / 100;
+				//TODO
+				double feeAmount = 0.00;//(txnAmount * feePercent) / 100;
 				double splitAmount = txnAmount - feeAmount; 
 				
 				//Make Split API call
@@ -212,7 +213,7 @@ public class PaymentResource {
 				splitRequest.put("fee_amount", feeAmount);
 				splitRequest.put("auto_payout", 1);
 				
-				WebResource webResource = client.resource("https://splitpaysbox.citruspay.com/marketplace/split");
+				WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/split");
 
 				ClientResponse splitResponse = webResource.accept("application/json").
 						type("application/json")

@@ -16,6 +16,7 @@
 <%@page import="java.util.HashMap" %>   
 <%@page import="com.limitless.services.payment.PaymentService.util.RestClientUtil" %>
 <%@page import="org.json.*" %>
+<%@page import="com.sun.jersey.api.client.ClientResponse" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>  
 <% 
 String secretKey = "bc3fb974fd550bd26083862dda1591c80cf5da8f";   	

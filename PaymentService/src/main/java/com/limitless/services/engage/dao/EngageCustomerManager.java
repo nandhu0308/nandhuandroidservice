@@ -108,10 +108,12 @@ public class EngageCustomerManager {
 
 	public EngageCustomer findById(java.lang.Integer id) {
 		log.debug("getting EngageCustomer instance with id: " + id);
+		Transaction tx = null;
 		try {
-			EngageCustomer instance = (EngageCustomer) sessionFactory
-					.getCurrentSession()
-					.get("com.limitless.services.payment.PaymentService.dao.EngageCustomer",
+			Session session = sessionFactory.getCurrentSession();
+			tx = session.beginTransaction();
+			EngageCustomer instance = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer",
 							id);
 			if (instance == null) {
 				log.debug("get successful, no instance found");
@@ -122,6 +124,8 @@ public class EngageCustomerManager {
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
 			throw re;
+		} finally{
+			tx.commit();
 		}
 	}
 	
