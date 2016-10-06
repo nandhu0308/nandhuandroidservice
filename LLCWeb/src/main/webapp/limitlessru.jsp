@@ -112,8 +112,8 @@ if(respCode.equals("0")){
 	payload.put("notification", notification);
 	payload.put("data", data);
 	
-	WebResource webResource = client.resource("https://fcm.googleapis.com/fcm/send");
-	ClientResponse clientResponse = webResource.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
+	WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+	ClientResponse clientResponse = webResource2.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
     System.out.println(clientResponse.getStatus());
     System.out.println(clientResponse.getEntity(String.class));
 	
@@ -147,8 +147,8 @@ if(respCode.equals("0")){
 	payload.put("data", data);
 	payload.put("notification", notification);
 	
-	WebResource webResource = client.resource("https://fcm.googleapis.com/fcm/send");
-	ClientResponse clientResponse = webResource.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
+	WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+	ClientResponse clientResponse = webResource2.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
     System.out.println(clientResponse.getStatus());
     System.out.println(clientResponse.getEntity(String.class));
 }
