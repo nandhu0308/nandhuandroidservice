@@ -12,7 +12,7 @@ public class TxnHistoryBean {
 	private int citrusMpTxnId;
 	private int splitId;
 	private String txtStatus;
-	private Date txnTime;
+	private String txnTime;
 	
 	public TxnHistoryBean(){
 		
@@ -82,11 +82,11 @@ public class TxnHistoryBean {
 		this.txtStatus = txtStatus;
 	}
 
-	public Date getTxnTime() {
+	public String getTxnTime() {
 		return txnTime;
 	}
 
-	public void setTxnTime(Date txnTime) {
+	public void setTxnTime(String txnTime) {
 		this.txnTime = txnTime;
 	}
 

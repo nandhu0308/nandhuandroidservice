@@ -15,9 +15,10 @@
 <%@page import="java.util.Enumeration" %>   
 <%@page import="java.util.HashMap" %>   
 <%@page import="com.limitless.services.payment.PaymentService.util.RestClientUtil" %>
+<%@page import="org.json.*" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>  
 <% 
-String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";   	
+String secretKey = "bc3fb974fd550bd26083862dda1591c80cf5da8f";   	
 Hashtable<String, String> reqValMap = new Hashtable<String, String>(){          
 public synchronized String toString() {            
 Enumeration<String> keys = keys();            
@@ -86,8 +87,36 @@ if(respCode.equals("0")){
 
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans").path(txnIdStr).path("split");
 	SplitResponseBean splitRespBean = webResource.type("application/json").header("Authorization", "Basic " + userString).accept("application/json").put(SplitResponseBean.class, splitReqbean);
-
-	System.out.println("Split Id" + splitRespBean.getSplitId());           
+	
+	System.out.println("Split Id" + splitRespBean.getSplitId());
+	
+	String sellerDeviceId = splitRespBean.getSellerDeviceId();
+	String customerName = splitRespBean.getName();
+	double amount = splitRespBean.getAmount();
+	String date = splitRespBean.getDate();
+	String msg = splitRespBean.getMessage();
+	
+	String body = "Recieved Rs. "+amount+" from "+customerName;
+	
+	JSONObject notification = new JSONObject();
+	notification.put("title", msg);
+	notification.put("body", body);
+	
+	JSONObject data = new JSONObject();
+	data.put("customerName", customerName);
+	data.put("amount", amount);
+	data.put("date", date);
+	
+	JSONObject payload = new JSONObject();
+	payload.put("to", sellerDeviceId);
+	payload.put("notification", notification);
+	payload.put("data", data);
+	
+	WebResource webResource = client.resource("https://fcm.googleapis.com/fcm/send");
+	ClientResponse clientResponse = webResource.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
+    System.out.println(clientResponse.getStatus());
+    System.out.println(clientResponse.getEntity(String.class));
+	
 } else {
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
 	
@@ -96,6 +125,32 @@ if(respCode.equals("0")){
 	paymentTxnBean.setTxnStatus(TxnStatus.PAYMENT_FAILED);
 	TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization", "Basic " + userString).accept("application/json").put(TxnResponseBean.class, paymentTxnBean);
 	System.out.println("Txn Id: " + txnResponse.getTxnId() + " Status: " + txnResponse.getMessage());
+	
+	String name = txnResponse.getName();
+	String date = txnResponse.getDate();
+	double amount = txnResponse.getAmount();
+	String sellerDeviceId = txnResponse.getSellerDeviceId();
+	
+	String body = "Failed to Recieve Rs. "+amount+" from "+name;
+	
+	JSONObject notification = new JSONObject();
+	notification.put("title", "Transaction Not Successful");
+	notification.put("body", body);
+	
+	JSONObject data = new JSONObject();
+	data.put("name", name);
+	data.put("amount", amount);
+	data.put("date", date);
+	
+	JSONObject payload = new JSONObject();
+	payload.put("to", sellerDeviceId);
+	payload.put("data", data);
+	payload.put("notification", notification);
+	
+	WebResource webResource = client.resource("https://fcm.googleapis.com/fcm/send");
+	ClientResponse clientResponse = webResource.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
+    System.out.println(clientResponse.getStatus());
+    System.out.println(clientResponse.getEntity(String.class));
 }
 
 

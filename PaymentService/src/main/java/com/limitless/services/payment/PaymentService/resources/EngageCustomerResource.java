@@ -42,10 +42,16 @@ public class EngageCustomerResource {
 			customer.setCustomerCountry(bean.getCountry());
 			
 			EngageCustomerManager manager = new EngageCustomerManager();
-			manager.persist(customer);
 			
-			customerResp.setCustomerId(customer.getCustomerId());
-			customerResp.setMessage("Success");
+			if( !(manager.checkDuplicateEmail(bean.getEmailId())) && !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
+				manager.persist(customer);
+				customerResp.setCustomerId(customer.getCustomerId());
+				customerResp.setStatus(1);
+				customerResp.setMessage("Success");
+			} else {
+				customerResp.setStatus(-1);
+				customerResp.setMessage("Failure - Duplicate Email / Mobile Number");
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -67,14 +73,9 @@ public class EngageCustomerResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public LoginResponseBean addTxn(LoginRequestBean bean) throws Exception{
 		LoginResponseBean loginRespBean = new LoginResponseBean();
-		
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
-			boolean isValidCredentials = manager.validateCredentials(bean.getUserId(), bean.getPasswd());
-			if(isValidCredentials){
-				loginRespBean.setLoginStatus(1);
-				loginRespBean.setMessage("Success");
-			}
+			loginRespBean = manager.validateUser(bean.getEmail(), bean.getPasswd());
 		} catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");

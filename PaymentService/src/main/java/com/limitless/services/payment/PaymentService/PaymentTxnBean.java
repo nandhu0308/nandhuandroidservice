@@ -11,6 +11,7 @@ public class PaymentTxnBean {
 	private int engageCustomerId;
 	private int sellerId;
 	private String sellerName;
+	private String sellerDeviceId;
 	private float txnAmount;
 	private int citrusMpTxnId;
 	private int splitId;
@@ -68,4 +69,11 @@ public class PaymentTxnBean {
 	public void setEngageCustomerId(int engageCustomerId) {
 		this.engageCustomerId = engageCustomerId;
 	}
+	public String getSellerDeviceId() {
+		return sellerDeviceId;
+	}
+	public void setSellerDeviceId(String sellerDeviceId) {
+		this.sellerDeviceId = sellerDeviceId;
+	}
+	
 }
