@@ -33,6 +33,8 @@ public class PaymentTxn implements java.io.Serializable {
 	private int sellerId;
 	@Column(name="SELLER_NAME")
 	private String sellerName;
+	@Column(name="SELLER_DEVICE_ID")
+	private String sellerDeviceId;
 	@Column(name="TXN_AMOUNT")
 	private float txnAmount;
 	@Column(name="CITRUS_MP_TXN_ID")
@@ -155,5 +157,14 @@ public class PaymentTxn implements java.io.Serializable {
 	public void setEngageCustomerId(int engageCustomerId) {
 		this.engageCustomerId = engageCustomerId;
 	}
+
+	public String getSellerDeviceId() {
+		return sellerDeviceId;
+	}
+
+	public void setSellerDeviceId(String sellerDeviceId) {
+		this.sellerDeviceId = sellerDeviceId;
+	}
+	
 	
 }

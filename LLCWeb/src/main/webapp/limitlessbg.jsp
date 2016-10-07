@@ -15,8 +15,8 @@
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>   
 <%  
 response.setContentType("application/json");     
-String accessKey = "XWMHQPX39XYF8NRBAQSM";     
-String secretKey = "3d4621078f24fd82af3fce23dc74bbc4e334cbf4";     
+String accessKey = "96K34Q4A8I8NREH7NVOZ";     
+String secretKey = "bc3fb974fd550bd26083862dda1591c80cf5da8f";     
 //String returnUrl = "http://ec2-54-186-117-110.us-west-2.compute.amazonaws.com:8080/LLCWeb/limitlessru";
 String returnUrl = "https://services.beinglimitless.in/limitlessru";
 
@@ -30,6 +30,7 @@ String buyerPhone = request.getParameter("bphone");
 String sellerId = request.getParameter("sid");
 String buyerId = request.getParameter("bid");
 String sellerName = request.getParameter("sname");
+String sellerDeviceId = request.getParameter("sdid");
 String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
 
 //Make Add Txn API call
@@ -47,6 +48,7 @@ bean.setEngageCustomerId(Integer.parseInt(buyerId));
 bean.setSellerName(sellerName);
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
+bean.setSellerDeviceId(sellerDeviceId);
 
 TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization","Basic " + userString).post(TxnResponseBean.class, bean);
 System.out.println("Txn Id: " + txnResponse.getTxnId());

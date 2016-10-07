@@ -6,12 +6,18 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.LockMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -102,10 +108,12 @@ public class EngageCustomerManager {
 
 	public EngageCustomer findById(java.lang.Integer id) {
 		log.debug("getting EngageCustomer instance with id: " + id);
+		Transaction tx = null;
 		try {
-			EngageCustomer instance = (EngageCustomer) sessionFactory
-					.getCurrentSession()
-					.get("com.limitless.services.payment.PaymentService.dao.EngageCustomer",
+			Session session = sessionFactory.getCurrentSession();
+			tx = session.beginTransaction();
+			EngageCustomer instance = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer",
 							id);
 			if (instance == null) {
 				log.debug("get successful, no instance found");
@@ -116,7 +124,74 @@ public class EngageCustomerManager {
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
 			throw re;
+		} finally{
+			tx.commit();
 		}
+	}
+	
+	public void changePassword(int customerId, String oldPassword, String newPassword){
+		log.debug("Changing password for user");
+		try{
+			Session session = sessionFactory.openSession();
+			Query query = session.createQuery("update EngageCustomer set customerPasswd99 = :newPassword where customerId = :customerId and customerPasswd99 = :oldPassword");
+			query.setParameter("newPassword", newPassword);
+			query.setParameter("oldPassword", oldPassword);
+			query.setParameter("customerId", newPassword);
+			int result = query.executeUpdate();
+			
+		}
+		catch(RuntimeException re){
+			log.error("Changing password failed");
+			throw re;
+		}
+	}
+	
+	public boolean checkDuplicateEmail(String customerEmail){
+		 log.debug("Checking Email whether already exist");
+		 Transaction transaction = null;
+		 try{
+			 boolean emailExist = false;
+			 Session session = sessionFactory.getCurrentSession();
+			 transaction = session.beginTransaction();
+			 Query query = session.createQuery("from EngageCustomer where customerEmail99 = :customerEmail");
+			 query.setParameter("customerEmail", customerEmail);
+			 List<EngageCustomer> customer = query.list();
+			 if(customer != null && customer.size() > 0){
+				 emailExist = true;
+			 }
+			 return emailExist;
+		 }
+		 catch(RuntimeException re){
+			 log.error("Checking Email failed");
+			 throw re;
+		 }
+		 finally{
+			 transaction.commit();
+		 }
+	}
+	
+	public boolean checkDuplicateMobile(String customerMobile){
+		log.debug("Checking Mobile whether already exist");
+		Transaction transaction = null;
+		try{
+			boolean mobileExist = false;
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Query query = session.createQuery("from EngageCustomer where customerMobileNumber = :customerMobile");
+			query.setParameter("customerMobile", customerMobile);
+			List<EngageCustomer> customer = query.list();
+			if(customer != null && customer.size() > 0){
+				mobileExist = true;
+			}
+			return mobileExist;
+		}
+		catch(RuntimeException re){
+			log.error("Checking mobile failed");
+			throw re;
+		}
+		finally{
+			 transaction.commit();
+		 }
 	}
 
 	public List findByExample(EngageCustomer instance) {
@@ -134,6 +209,43 @@ public class EngageCustomerManager {
 			log.error("find by example failed", re);
 			throw re;
 		}
+	}
+	
+	public LoginResponseBean validateUser(String customerEmail99, String passwd){
+		log.debug("checking login credentials");
+		LoginResponseBean loginResponseBean = new LoginResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageCustomer.class);
+			Criterion emailCriterion = Restrictions.eq("customerEmail99", customerEmail99);
+			Criterion passwdCriterion = Restrictions.eq("customerPasswd99", passwd);
+			LogicalExpression logicalExp = Restrictions.and(emailCriterion, passwdCriterion);
+			criteria.add(logicalExp);
+			List<EngageCustomer> userList = criteria.list();
+			if(userList.size() > 0 && userList.size() == 1){
+				log.debug("Size: " +userList.size());
+				for(EngageCustomer user : userList){
+					loginResponseBean.setLoginStatus(1);
+					loginResponseBean.setMessage("Success");
+					loginResponseBean.setCustomerId(user.getCustomerId());
+					loginResponseBean.setCustomerName(user.getCustomerName());
+					loginResponseBean.setCustomerMobileNumber(user.getCustomerMobileNumber());
+				}
+			}
+			else{
+				loginResponseBean.setLoginStatus(-1);
+			}
+		}
+		catch(RuntimeException re){
+			log.error("checking login credentials failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return loginResponseBean;
 	}
 	
 	public boolean validateCredentials(int customerId, String passwd) {

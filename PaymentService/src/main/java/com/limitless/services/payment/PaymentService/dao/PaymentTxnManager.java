@@ -1,5 +1,7 @@
 package com.limitless.services.payment.PaymentService.dao;
 
+import java.util.ArrayList;
+
 /*
  * @author veejay.developer@gmail.com
  * ©www.limitlesscircle.com 
@@ -9,13 +11,17 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
+import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.TxnHistoryBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -214,6 +220,50 @@ public class PaymentTxnManager {
 		} finally{
 			tx.commit();
 		}
+	}
+	
+	public SellerTxnHistoryBean getSellerTxns(int sellerId){
+		log.debug("Getting Seller Txn History");
+		Transaction transaction = null;
+		SellerTxnHistoryBean sthBean = new SellerTxnHistoryBean();
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(PaymentTxn.class);
+			criteria.add(Restrictions.eq("sellerId", sellerId));
+			List<PaymentTxn> paymentList = criteria.list();
+			if(paymentList.size() > 0){
+				log.debug("Size: "+paymentList.size());
+				sthBean.setMessage("Success");
+				List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
+				for(PaymentTxn payment : paymentList){
+					TxnHistoryBean bean = new TxnHistoryBean();
+					bean.setTxnId(payment.getTxnId());
+					bean.setCustomerId(payment.getEngageCustomerId());
+					bean.setSellerId(payment.getSellerId());
+					bean.setSellerName(payment.getSellerName());
+					bean.setTxtAmount(payment.getTxnAmount());
+					bean.setCitrusMpTxnId(payment.getCitrusMpTxnId());
+					bean.setSplitId(payment.getSplitId());
+					bean.setTxtStatus(payment.getTxnStatus());
+					bean.setTxnTime(payment.getTxnUpdatedTime().toString());
+					historyBeanList.add(bean);
+					bean = null;
+				}
+				sthBean.setHitoryBean(historyBeanList);
+			}
+			else{
+				sthBean.setMessage("No Record Found");				
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Getting History Failed", re);
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return sthBean;
 	}
 	
 	public static void main(String[] args) {

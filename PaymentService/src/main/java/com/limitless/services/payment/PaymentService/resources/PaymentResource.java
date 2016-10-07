@@ -17,8 +17,11 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.dao.EngageCustomer;
+import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
+import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
@@ -87,6 +90,7 @@ public class PaymentResource {
 				paymentTxn.setTxnAmount(bean.getTxnAmount());
 				paymentTxn.setSellerName(bean.getSellerName());
 				paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
+				paymentTxn.setSellerDeviceId(bean.getSellerDeviceId());
 				
 				PaymentTxnManager manager = new PaymentTxnManager();
 				manager.persist(paymentTxn);
@@ -112,8 +116,15 @@ public class PaymentResource {
 				PaymentTxnManager manager = new PaymentTxnManager();
 				PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(), paymentTxnBean.getTxnStatus().toString());
 				
+				EngageCustomerManager customerManager = new EngageCustomerManager();
+				EngageCustomer customer = customerManager.findById(paymentTxn.getEngageCustomerId());
+				
 				txnResp.setTxnId(paymentTxn.getTxnId());
 				txnResp.setMessage("Success");
+				txnResp.setAmount(paymentTxn.getTxnAmount());
+				txnResp.setDate(paymentTxn.getTxnUpdatedTime().toString());
+				txnResp.setName(customer.getCustomerName());
+				txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
 			} catch (Exception e) {
 				logger.error("API Error", e);
 				throw new Exception("Internal Server Error");
@@ -147,7 +158,7 @@ public class PaymentResource {
 					historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
 					historyBean.setSplitId(bean.getSplitId());
 					historyBean.setTxtStatus(bean.getTxnStatus().toString());
-					historyBean.setTxnTime(bean.getTxnUpdatedTime());
+					historyBean.setTxnTime(bean.getTxnUpdatedTime().toString());
 					historyBeanList.add(historyBean);
 					historyBean = null;
 				}
@@ -156,6 +167,22 @@ public class PaymentResource {
 				throw new Exception("Internal Server Error");
 			}
 			return historyBeanList;
+		}
+		
+		@GET
+		@Path("/trans/seller/{sellerId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public SellerTxnHistoryBean getSellerTxns(@PathParam("sellerId") int sellerId)throws Exception{
+			SellerTxnHistoryBean bean = null;
+			try{
+				PaymentTxnManager manager = new PaymentTxnManager();
+				bean = manager.getSellerTxns(sellerId);
+			}
+			catch(Exception e){
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Exception");
+			}
+			return bean;
 		}
 		
 		@PUT
@@ -173,11 +200,21 @@ public class PaymentResource {
 				
 				int txnId = paymentTxn.getTxnId();
 				int sellerId = paymentTxn.getSellerId();
+				String sellerDeviceId = paymentTxn.getSellerDeviceId();
+				int customerId = paymentTxn.getEngageCustomerId();
+				String txnDate = paymentTxn.getTxnUpdatedTime().toString();
+				
+				EngageCustomerManager customerManager = new EngageCustomerManager();
+				EngageCustomer engageCustomer = customerManager.findById(customerId);
+				
+				String customerName = engageCustomer.getCustomerName();				
+				
 				String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
 				//TODO
 				double feePercent = 2.00;
 				double txnAmount = paymentTxn.getTxnAmount();
-				double feeAmount = (txnAmount * feePercent) / 100;
+				//TODO
+				double feeAmount = 0.00;//(txnAmount * feePercent) / 100;
 				double splitAmount = txnAmount - feeAmount; 
 				
 				//Make Split API call
@@ -193,11 +230,11 @@ public class PaymentResource {
 				splitRequest.put("fee_amount", feeAmount);
 				splitRequest.put("auto_payout", 1);
 				
-				WebResource webResource = client.resource("https://splitpaysbox.citruspay.com/marketplace/split");
+				WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/split");
 
 				ClientResponse splitResponse = webResource.accept("application/json").
 						type("application/json")
-						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiWFdNSFFQWDM5WFlGOE5SQkFRU00iLCJleHBpcmVzIjoiMjAxNi0xMC0wOVQwMjo1OTo0Ny4zMDFaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.Uq-1Uc-QIySMKvH6OMUUjHyXD4hZDvs45MgsBV_vk3A")
+						.header("auth_token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMC0xMVQxMTo0MTo1MS44NTRaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.c3JEDaOW6is2xAk2uwuiHSt3LGza4Iq2XMjJEpvA8Bg")
 						.post(ClientResponse.class, splitRequest);
 				
 				String splitResponseStr = splitResponse.getEntity(Object.class).toString();
@@ -221,6 +258,11 @@ public class PaymentResource {
 				
 				splitResp.setSplitId(paymentTxn.getSplitId());
 				splitResp.setMessage("Success");
+				splitResp.setName(customerName);
+				splitResp.setAmount(txnAmount);
+				splitResp.setDate(txnDate);
+				splitResp.setSellerDeviceId(sellerDeviceId);
+				
 			} catch(Exception e){
 				logger.error("API Error", e);
 				throw new Exception("Internal Server Error");
