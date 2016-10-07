@@ -21,6 +21,7 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
+import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
@@ -166,6 +167,22 @@ public class PaymentResource {
 				throw new Exception("Internal Server Error");
 			}
 			return historyBeanList;
+		}
+		
+		@GET
+		@Path("/trans/seller/{sellerId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public SellerTxnHistoryBean getSellerTxns(@PathParam("sellerId") int sellerId)throws Exception{
+			SellerTxnHistoryBean bean = null;
+			try{
+				PaymentTxnManager manager = new PaymentTxnManager();
+				bean = manager.getSellerTxns(sellerId);
+			}
+			catch(Exception e){
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Exception");
+			}
+			return bean;
 		}
 		
 		@PUT
