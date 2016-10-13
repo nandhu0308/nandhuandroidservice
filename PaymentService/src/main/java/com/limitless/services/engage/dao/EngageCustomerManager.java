@@ -18,6 +18,7 @@ import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.LoginResponseBean;
+import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -129,21 +130,37 @@ public class EngageCustomerManager {
 		}
 	}
 	
-	public void changePassword(int customerId, String oldPassword, String newPassword){
+	public PasswdResponseBean changePassword(int customerId, String oldPassword, String newPassword){
 		log.debug("Changing password for user");
+		PasswdResponseBean bean = new PasswdResponseBean();
+		Transaction transaction = null;
 		try{
-			Session session = sessionFactory.openSession();
-			Query query = session.createQuery("update EngageCustomer set customerPasswd99 = :newPassword where customerId = :customerId and customerPasswd99 = :oldPassword");
-			query.setParameter("newPassword", newPassword);
-			query.setParameter("oldPassword", oldPassword);
-			query.setParameter("customerId", newPassword);
-			int result = query.executeUpdate();
-			
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			EngageCustomer instance = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			if(instance != null){
+				instance.setCustomerPasswd99(newPassword);
+				session.update(instance);
+				EngageCustomer customer = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+				bean.setCustomerId(customerId);
+				bean.setPasswd(customer.getCustomerPasswd99());
+				bean.setMessage("Success");
+			}
+			else{
+				bean.setMessage("Failed");
+				bean.setCustomerId(customerId);
+			}
 		}
 		catch(RuntimeException re){
 			log.error("Changing password failed");
 			throw re;
 		}
+		finally{
+			transaction.commit();
+		}
+		return bean;
 	}
 	
 	public boolean checkDuplicateEmail(String customerEmail){

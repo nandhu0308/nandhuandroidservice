@@ -3,7 +3,9 @@ package com.limitless.services.payment.PaymentService.resources;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -14,6 +16,8 @@ import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
 import com.limitless.services.engage.LoginResponseBean;
+import com.limitless.services.engage.PasswdRequestBean;
+import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 
@@ -80,8 +84,24 @@ public class EngageCustomerResource {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
-		
 		return loginRespBean;
+	}
+	
+	@PUT
+	@Path("/customer/cpwd/{customerId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public PasswdResponseBean changePwd(@PathParam("customerId") int  customerId, PasswdRequestBean reqBean) throws Exception{
+		PasswdResponseBean resBean = new PasswdResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			resBean = manager.changePassword(customerId, reqBean.getOldPasswd(), reqBean.getNewPasswd());
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return resBean;
 	}
 
 }
