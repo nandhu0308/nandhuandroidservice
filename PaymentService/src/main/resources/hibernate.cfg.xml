@@ -15,5 +15,6 @@
   <!-- <property name="hibernate.current_session_context_class">org.springframework.orm.hibernate4.SpringSessionContext</property> -->
   <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentTxn"/>
   <mapping class="com.limitless.services.engage.dao.EngageCustomer"/>
+  <mapping class="com.limitless.services.engage.dao.EngageSeller"/>
  </session-factory>
 </hibernate-configuration>
