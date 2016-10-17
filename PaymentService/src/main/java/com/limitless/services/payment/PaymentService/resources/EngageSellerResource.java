@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
+import com.limitless.services.engage.SellerLoginRequestBean;
+import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 
@@ -72,6 +74,23 @@ public class EngageSellerResource {
 		String output = "1.0.0";
 		logger.info("Reached getVersion..");
 		return Response.status(200).entity(output).build();
+	}
+	
+	@POST
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerLoginResponseBean loginSeller(SellerLoginRequestBean reqBean) throws Exception{
+		SellerLoginResponseBean respBean = new SellerLoginResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			respBean = manager.sellerLogin(reqBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return respBean;
 	}
 	
 }

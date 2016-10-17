@@ -6,13 +6,19 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.SellerLoginRequestBean;
+import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -183,6 +189,44 @@ public class EngageSellerManager {
 		finally{
 			 transaction.commit();
 		 }
+	}
+	
+	public SellerLoginResponseBean sellerLogin(SellerLoginRequestBean reqBean){
+		log.debug("Logging in seller");
+		SellerLoginResponseBean respBean = new SellerLoginResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			Criterion emailCriterion = Restrictions.eq("sellerEmail99", reqBean.getEmailId());
+			Criterion passwdCriterion = Restrictions.eq("sellerPasswd99", reqBean.getPasswd());
+			LogicalExpression logExp = Restrictions.and(emailCriterion, passwdCriterion);
+			criteria.add(logExp);
+			List<EngageSeller> sellerList = criteria.list();
+			log.debug("Size: "+sellerList.size());
+			if( sellerList != null && sellerList.size() == 1){
+				for(EngageSeller seller : sellerList){
+					respBean.setSellerId(seller.getSellerId());
+					respBean.setSellerName(seller.getSellerName());
+					respBean.setMobileNumber(seller.getSellerMobileNumber());
+					respBean.setMessage("Success");
+					respBean.setStatus(1);
+				}
+			}
+			else{
+				respBean.setMessage("Login Failed");
+				respBean.setStatus(-1);
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Login failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return respBean;
 	}
 	
 	/*public static void main(String[] args) {
