@@ -1,8 +1,12 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -10,10 +14,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
+import com.limitless.services.engage.SellerPasswdRequestBean;
+import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 
@@ -91,6 +98,39 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return respBean;
+	}
+	
+	@PUT
+	@Path("/cpwd")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerPasswdResponseBean changePasswd(SellerPasswdRequestBean reqBean)throws Exception{
+		SellerPasswdResponseBean respBean = new SellerPasswdResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			respBean = manager.changeSellerPasswd(reqBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return respBean;
+	}
+	
+	@GET
+	@Path("/coordinates")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<CoordinatesResponseBean> sellerCoordibates()throws Exception{
+		List<CoordinatesResponseBean> coords = new ArrayList<CoordinatesResponseBean>();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			coords = manager.sellerCoordinates();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return coords;
 	}
 	
 }

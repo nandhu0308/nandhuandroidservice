@@ -1,5 +1,9 @@
 package com.limitless.services.engage.dao;
 
+
+
+import java.util.ArrayList;
+
 // Generated Oct 14, 2016 12:16:27 AM by Hibernate Tools 3.4.0.CR1
 
 import java.util.List;
@@ -17,8 +21,11 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
+import com.limitless.services.engage.SellerPasswdRequestBean;
+import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -227,6 +234,69 @@ public class EngageSellerManager {
 			transaction.commit();
 		}
 		return respBean;
+	}
+	
+	public SellerPasswdResponseBean changeSellerPasswd(SellerPasswdRequestBean reqBean){
+		log.debug("Changing seller passwd");
+		SellerPasswdResponseBean respBean = new SellerPasswdResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			int sellerId = reqBean.getSellerId();
+			EngageSeller instance = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			if(instance !=null){
+				instance.setSellerPasswd99(reqBean.getNewPasswd());
+				session.update(instance);
+				EngageSeller newInstance = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+				respBean.setSellerId(sellerId);
+				respBean.setPasswd(newInstance.getSellerPasswd99());
+				respBean.setMessage("Success");
+				respBean.setStatus(1);
+			}
+			else{
+				respBean.setMessage("Failed");
+				respBean.setStatus(-1);
+				respBean.setSellerId(sellerId);
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Passwd change failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return respBean;
+	}
+	
+	public List<CoordinatesResponseBean> sellerCoordinates(){
+		log.debug("Getting seller coordinates");
+		Transaction transaction = null;
+		List<CoordinatesResponseBean> coords = new ArrayList<CoordinatesResponseBean>();
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Query query = session.createQuery("from EngageSeller ES");
+			List<EngageSeller> sellers = query.list();
+			for(EngageSeller seller : sellers){
+				CoordinatesResponseBean bean = new CoordinatesResponseBean();
+				bean.setSellerId(seller.getSellerId());
+				bean.setSellerName(seller.getSellerName());
+				bean.setLatitude(seller.getSellerLocationLatitude());
+				bean.setLongitude(seller.getSellerLocationLongitude());
+				coords.add(bean);
+				bean = null;
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Passwd change failed");
+			throw re;
+		}
+		finally {
+			transaction.commit();
+		}
+		return coords;
 	}
 	
 	/*public static void main(String[] args) {
