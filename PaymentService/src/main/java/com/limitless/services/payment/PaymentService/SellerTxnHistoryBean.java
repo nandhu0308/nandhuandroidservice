@@ -4,7 +4,7 @@ import java.util.List;
 
 public class SellerTxnHistoryBean {
 	private String message;
-	private List<TxnHistoryBean> hitoryBean;
+	private List<TxnHistoryBean> historyBean;
 	
 	public String getMessage() {
 		return message;
@@ -12,11 +12,11 @@ public class SellerTxnHistoryBean {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public List<TxnHistoryBean> getHitoryBean() {
-		return hitoryBean;
+	public List<TxnHistoryBean> getHistoryBean() {
+		return historyBean;
 	}
-	public void setHitoryBean(List<TxnHistoryBean> hitoryBean) {
-		this.hitoryBean = hitoryBean;
+	public void setHistoryBean(List<TxnHistoryBean> hitoryBean) {
+		this.historyBean = hitoryBean;
 	}
 	
 }
