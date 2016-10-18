@@ -217,6 +217,8 @@ public class EngageSellerManager {
 					respBean.setSellerId(seller.getSellerId());
 					respBean.setSellerName(seller.getSellerName());
 					respBean.setMobileNumber(seller.getSellerMobileNumber());
+					respBean.setSellerAddress(seller.getSellerAddress());
+					respBean.setSellerCity(seller.getSellerCity());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 				}

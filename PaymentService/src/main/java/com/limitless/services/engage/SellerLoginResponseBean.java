@@ -7,6 +7,8 @@ public class SellerLoginResponseBean {
 	private String mobileNumber;
 	private String message;
 	private int status;
+	private String sellerAddress;
+	private String sellerCity;
 	public String getSellerName() {
 		return sellerName;
 	}
@@ -36,6 +38,18 @@ public class SellerLoginResponseBean {
 	}
 	public void setStatus(int status) {
 		this.status = status;
+	}
+	public String getSellerAddress() {
+		return sellerAddress;
+	}
+	public void setSellerAddress(String sellerAddress) {
+		this.sellerAddress = sellerAddress;
+	}
+	public String getSellerCity() {
+		return sellerCity;
+	}
+	public void setSellerCity(String sellerCity) {
+		this.sellerCity = sellerCity;
 	}
 
 }
