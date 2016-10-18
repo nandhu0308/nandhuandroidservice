@@ -250,9 +250,10 @@ public class PaymentTxnManager {
 					historyBeanList.add(bean);
 					bean = null;
 				}
-				sthBean.setHitoryBean(historyBeanList);
+				sthBean.setHistoryBean(historyBeanList);
 			}
 			else{
+				log.debug("Size: "+paymentList.size());
 				sthBean.setMessage("No Record Found");				
 			}
 		}
