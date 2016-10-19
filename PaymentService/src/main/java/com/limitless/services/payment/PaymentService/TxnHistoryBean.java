@@ -6,6 +6,7 @@ public class TxnHistoryBean {
 	
 	private int txnId;
 	private int customerId;
+	private String customerName;
 	private int sellerId;
 	private String sellerName;
 	private double txtAmount;
@@ -88,6 +89,14 @@ public class TxnHistoryBean {
 
 	public void setTxnTime(String txnTime) {
 		this.txnTime = txnTime;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
 	}
 
 }
