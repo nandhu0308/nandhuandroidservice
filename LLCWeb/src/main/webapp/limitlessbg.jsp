@@ -1,3 +1,5 @@
+<%@page import="com.limitless.services.payment.PaymentService.CreditRespBean"%>
+<%@page import="com.limitless.services.payment.PaymentService.CreditBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus"%>
 <%@page import="com.limitless.services.payment.PaymentService.TxnResponseBean"%>
 <%@page import="com.sun.jersey.api.client.ClientResponse"%>
@@ -33,6 +35,9 @@ String sellerName = request.getParameter("sname");
 String sellerDeviceId = request.getParameter("sdid");
 String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
 
+String creditAmountStr = request.getParameter("credamt");
+String debitAmountStr = request.getParameter("debamt");
+
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              
 //clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
@@ -54,6 +59,31 @@ TxnResponseBean txnResponse = webResource.type("application/json").header("Autho
 System.out.println("Txn Id: " + txnResponse.getTxnId());
 
 int txnId = txnResponse.getTxnId();
+
+//Credit Call
+if(creditAmountStr != null || debitAmountStr != null){
+	float creditAmount = 0;
+	float debitAmount = 0;
+	if(creditAmountStr != null){
+		creditAmount = Float.parseFloat(creditAmountStr);
+	}
+	if(debitAmountStr != null){
+		debitAmount = Float.parseFloat(debitAmountStr);
+	}
+	
+	if(creditAmount > 0 || debitAmount > 0){
+		WebResource creditResource = client.resource("https://services.beinglimitless.in/engage/payment/credit");
+
+		CreditBean creditBean = new CreditBean();
+		creditBean.setTxnId(txnId);
+		creditBean.setCreditAmount(creditAmount);
+		creditBean.setDebitAmount(debitAmount);
+		
+		CreditRespBean creditResponse = creditResource.type("application/json").header("Authorization","Basic " + userString).post(CreditRespBean.class, creditBean);
+		System.out.println("Credit Id: " + creditResponse.getCreditId());
+	}
+}
+//End of Credit Call
 
 String dataString = "merchantAccessKey=" + accessKey + "&transactionId=" + txnId + "&amount=" + amount;    
 SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HmacSHA1");    
