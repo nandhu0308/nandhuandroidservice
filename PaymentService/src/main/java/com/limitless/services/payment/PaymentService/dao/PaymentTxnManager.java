@@ -19,6 +19,8 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.dao.EngageCustomer;
+import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
@@ -240,6 +242,9 @@ public class PaymentTxnManager {
 					TxnHistoryBean bean = new TxnHistoryBean();
 					bean.setTxnId(payment.getTxnId());
 					bean.setCustomerId(payment.getEngageCustomerId());
+					int customerId = payment.getEngageCustomerId();
+					EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+					bean.setCustomerName(customer.getCustomerName());
 					bean.setSellerId(payment.getSellerId());
 					bean.setSellerName(payment.getSellerName());
 					bean.setTxtAmount(payment.getTxnAmount());
