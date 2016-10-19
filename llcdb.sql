@@ -73,3 +73,14 @@ seller_kyc_doc_value varchar(40),
 seller_created_time TIMESTAMP DEFAULT now(),
 seller_updated_time TIMESTAMP DEFAULT now() on update now() 
 );
+
+create table IF NOT EXISTS payment_credit (
+credit_id INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+txn_id INT UNSIGNED NOT NULL,
+credit_amount FLOAT NOT NULL DEFAULT 0,
+debit_amount FLOAT NOT NULL DEFAULT 0,
+credit_created_time TIMESTAMP DEFAULT now(),
+credit_updated_time TIMESTAMP DEFAULT now() on update now() 
+);
+
+ALTER TABLE payment_credit AUTO_INCREMENT = 1000000;

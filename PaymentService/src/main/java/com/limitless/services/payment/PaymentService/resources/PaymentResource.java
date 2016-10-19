@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
+import com.limitless.services.payment.PaymentService.CreditBean;
+import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
@@ -26,6 +28,8 @@ import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
+import com.limitless.services.payment.PaymentService.dao.PaymentCredit;
+import com.limitless.services.payment.PaymentService.dao.PaymentCreditManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
 import com.sun.jersey.api.client.Client;
@@ -34,6 +38,10 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
+
+
+
+
 
 /*
  * @author veejay.developer@gmail.com
@@ -269,6 +277,31 @@ public class PaymentResource {
 			}
 			
 			return splitResp;
+		}
+		
+		@POST
+	    @Path("/credit")
+		@Produces(MediaType.APPLICATION_JSON)
+		@Consumes(MediaType.APPLICATION_JSON)
+		public CreditRespBean addCredit(CreditBean bean) throws Exception{
+			CreditRespBean creditResp = new CreditRespBean();
+			
+			try {
+				PaymentCredit paymentCredit = new PaymentCredit();
+				paymentCredit.setTxnId(bean.getTxnId());
+				paymentCredit.setCreditAmount(bean.getCreditAmount());
+				paymentCredit.setDebitAmount(bean.getDebitAmount());
+				
+				PaymentCreditManager manager = new PaymentCreditManager();
+				manager.persist(paymentCredit);
+				
+				creditResp.setCreditId(paymentCredit.getCreditId());
+				creditResp.setMessage("Success");
+			} catch (Exception e) {
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
+			return creditResp;
 		}
 		
 }
