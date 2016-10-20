@@ -4,6 +4,8 @@ public class CreditBean {
 	
 	private int creditId;
 	private int txnId;
+	private int sellerId;
+	private int customerId;
 	private float creditAmount;
 	private float debitAmount;
 	public int getCreditId() {
@@ -29,6 +31,18 @@ public class CreditBean {
 	}
 	public void setDebitAmount(float debitAmount) {
 		this.debitAmount = debitAmount;
+	}
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
+	public int getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(int customerId) {
+		this.customerId = customerId;
 	}
 	
 }

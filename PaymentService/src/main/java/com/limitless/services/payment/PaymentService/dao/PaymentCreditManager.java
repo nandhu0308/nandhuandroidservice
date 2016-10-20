@@ -1,5 +1,7 @@
 package com.limitless.services.payment.PaymentService.dao;
 
+import java.util.ArrayList;
+
 // Generated Oct 19, 2016 7:49:46 PM by Hibernate Tools 3.4.0.CR1
 
 import java.util.List;
@@ -8,12 +10,19 @@ import javax.naming.InitialContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.LockMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.dao.EngageCustomer;
+import com.limitless.services.payment.PaymentService.SellerCreditsResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -132,5 +141,47 @@ public class PaymentCreditManager {
 			log.error("find by example failed", re);
 			throw re;
 		}
+	}
+	
+	public List<SellerCreditsResponseBean> sellerCreditsList (int sellerId){
+		log.debug("Getting Total credits for seller"+ sellerId);
+		List<SellerCreditsResponseBean> creditsList = new ArrayList<SellerCreditsResponseBean>();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(PaymentCredit.class);
+			criteria.add(Restrictions.eq("sellerId", sellerId)).setProjection(Projections.distinct(Projections.property("customerId")));
+			List<Integer> credits = criteria.list();
+			log.debug("Credits size:"+credits.size());
+			if( credits != null && credits.size()>0){
+				for(Integer credit : credits){
+					int custId = (Integer) credit;
+					Query query = session.createQuery("select sum(PC.creditAmount) from PaymentCredit PC where PC.customerId = :customerId");
+					query.setParameter("customerId", custId);
+					List amountList = query.list();
+					log.debug("Amount :"+amountList.toString());
+					double creditAmt = (Double) amountList.get(0);
+					EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer", custId);
+					String customerName = customer.getCustomerName();
+					String customerPhone = customer.getCustomerMobileNumber();
+					SellerCreditsResponseBean bean = new SellerCreditsResponseBean();
+					bean.setCustomerId(custId);
+					bean.setCustomerName(customerName);
+					bean.setCustomerPhone(customerPhone);
+					bean.setTotalCredits(creditAmt);
+					creditsList.add(bean);
+					bean = null;
+				}
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Getting sellers credits failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return creditsList;
 	}
 }

@@ -23,6 +23,7 @@ import com.limitless.services.payment.PaymentService.CreditBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
+import com.limitless.services.payment.PaymentService.SellerCreditsResponseBean;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
@@ -291,6 +292,8 @@ public class PaymentResource {
 				paymentCredit.setTxnId(bean.getTxnId());
 				paymentCredit.setCreditAmount(bean.getCreditAmount());
 				paymentCredit.setDebitAmount(bean.getDebitAmount());
+				paymentCredit.setSellerId(bean.getSellerId());
+				paymentCredit.setCustomerId(bean.getCustomerId());
 				
 				PaymentCreditManager manager = new PaymentCreditManager();
 				manager.persist(paymentCredit);
@@ -302,6 +305,23 @@ public class PaymentResource {
 				throw new Exception("Internal Server Error");
 			}
 			return creditResp;
+		}
+		
+		@GET
+		@Path("/credit/seller/{sellerId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		@Consumes(MediaType.APPLICATION_JSON)
+		public List<SellerCreditsResponseBean> sellerCredits(@PathParam("sellerId") int sellerId) throws Exception{
+			List<SellerCreditsResponseBean> responseBean = new ArrayList<SellerCreditsResponseBean>();
+			try{
+				PaymentCreditManager manager = new PaymentCreditManager();
+				responseBean = manager.sellerCreditsList(sellerId);
+			}
+			catch(Exception e){
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
+			return responseBean;
 		}
 		
 }
