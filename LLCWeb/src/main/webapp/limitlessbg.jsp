@@ -73,11 +73,13 @@ if(creditAmountStr != null || debitAmountStr != null){
 	
 	if(creditAmount > 0 || debitAmount > 0){
 		WebResource creditResource = client.resource("https://services.beinglimitless.in/engage/payment/credit");
-
+		
 		CreditBean creditBean = new CreditBean();
 		creditBean.setTxnId(txnId);
 		creditBean.setCreditAmount(creditAmount);
 		creditBean.setDebitAmount(debitAmount);
+		creditBean.setSellerId(Integer.parseInt(sellerId));
+		creditBean.setCustomerId(Integer.parseInt(buyerId));
 		
 		CreditRespBean creditResponse = creditResource.type("application/json").header("Authorization","Basic " + userString).post(CreditRespBean.class, creditBean);
 		System.out.println("Credit Id: " + creditResponse.getCreditId());
