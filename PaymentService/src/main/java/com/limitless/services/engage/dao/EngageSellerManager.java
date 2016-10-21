@@ -133,6 +133,9 @@ public class EngageSellerManager {
 			log.error("get failed", re);
 			throw re;
 		}
+		finally{
+			tx.commit();
+		}
 	}
 
 	public List findByExample(EngageSeller instance) {
@@ -305,6 +308,26 @@ public class EngageSellerManager {
 			transaction.commit();
 		}
 		return coords;
+	}
+	
+	public String findSellerDeviceId(int sellerId){
+		log.debug("Getting seller deviceId");
+		Transaction transaction = null;
+		String sellerDeviceId = "";
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			sellerDeviceId = seller.getSellerDeviceId();
+		}
+		catch(RuntimeException re){
+			log.error("Finding deviceId failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return sellerDeviceId;
 	}
 	
 	/*public static void main(String[] args) {
