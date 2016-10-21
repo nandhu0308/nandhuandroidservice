@@ -21,6 +21,7 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.CreditBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
+import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
 import com.limitless.services.payment.PaymentService.NotificationResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -347,6 +348,22 @@ public class PaymentResource {
 		}
 
 		return response;
+	}
+	
+	@GET
+	@Path("/credit/customer/{customerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public List<CustomerCreditResponseBean> customerCredits(@PathParam("customerId") int customerId) throws Exception {
+		List<CustomerCreditResponseBean> responseBean = new ArrayList<CustomerCreditResponseBean>();
+		try {
+			PaymentCreditManager manager = new PaymentCreditManager();
+			responseBean = manager.customerCreditsList(customerId);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 
 }
