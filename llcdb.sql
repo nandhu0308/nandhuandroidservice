@@ -84,3 +84,9 @@ credit_updated_time TIMESTAMP DEFAULT now() on update now()
 );
 
 ALTER TABLE payment_credit AUTO_INCREMENT = 1000000;
+
+alter table engage_seller add column citrus_seller_id INT UNSIGNED NOT NULL after seller_id;
+
+alter table engage_seller change seller_id seller_id INT UNSIGNED NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE engage_seller AUTO_INCREMENT = 5000000;

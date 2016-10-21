@@ -39,7 +39,7 @@ public class EngageSellerResource {
 		
 		try {
 			EngageSeller seller = new EngageSeller();
-			seller.setSellerId(bean.getSellerId());
+			seller.setCitrusSellerId(bean.getCitrusSellerId());
 			seller.setSellerName(bean.getSellerName());
 			seller.setSellerEmail99(bean.getEmailId());
 			seller.setSellerMobileNumber(bean.getMobileNumber());

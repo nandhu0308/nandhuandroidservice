@@ -2,7 +2,7 @@ package com.limitless.services.engage;
 
 public class EngageSellerBean {
 	
-	private int sellerId;
+	private int citrusSellerId;
 	private String sellerName;
 	private String emailId;
 	private String passwd;
@@ -19,11 +19,11 @@ public class EngageSellerBean {
 	private String kycDocType; 
 	private String kycDocValue;
 	
-	public int getSellerId() {
-		return sellerId;
+	public int getCitrusSellerId() {
+		return citrusSellerId;
 	}
-	public void setSellerId(int sellerId) {
-		this.sellerId = sellerId;
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
 	}
 	public String getSellerName() {
 		return sellerName;

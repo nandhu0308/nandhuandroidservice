@@ -6,6 +6,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -19,9 +20,11 @@ import javax.persistence.Version;
 @Table(name = "engage_seller", catalog = "llcdb")
 public class EngageSeller implements java.io.Serializable {
 	
-	@Id
+	@Id @GeneratedValue
 	@Column(name="SELLER_ID")
 	private int sellerId;
+	@Column(name="CITRUS_SELLER_ID")
+	private int citrusSellerId;
 	@Column(name="SELLER_NAME")
 	private String sellerName;
 	@Column(name="SELLER_EMAIL99")
@@ -58,12 +61,12 @@ public class EngageSeller implements java.io.Serializable {
 	public EngageSeller() {
 	}
 
-	public EngageSeller(int sellerId, String sellerName, String sellerEmail99,
+	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99,
 			String sellerPasswd99, String sellerCountryCode,
 			String sellerMobileNumber, String sellerCountry, String sellerCity,
 			String sellerAddress, float sellerSplitPercent,
 			Date sellerCreatedTime, Date sellerUpdatedTime) {
-		this.sellerId = sellerId;
+		this.citrusSellerId = citrusSellerId;
 		this.sellerName = sellerName;
 		this.sellerEmail99 = sellerEmail99;
 		this.sellerPasswd99 = sellerPasswd99;
@@ -77,14 +80,14 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerUpdatedTime = sellerUpdatedTime;
 	}
 
-	public EngageSeller(int sellerId, String sellerName, String sellerEmail99,
+	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99,
 			String sellerPasswd99, String sellerCountryCode,
 			String sellerMobileNumber, String sellerCountry, String sellerCity,
 			String sellerAddress, Float sellerLocationLatitude,
 			Float sellerLocationLongitude, float sellerSplitPercent,
 			String sellerKycDocType, String sellerKycDocValue,
 			Date sellerCreatedTime, Date sellerUpdatedTime) {
-		this.sellerId = sellerId;
+		this.citrusSellerId = citrusSellerId;
 		this.sellerName = sellerName;
 		this.sellerEmail99 = sellerEmail99;
 		this.sellerPasswd99 = sellerPasswd99;
@@ -230,4 +233,12 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerUpdatedTime = sellerUpdatedTime;
 	}
 
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
+	}
+	
 }
