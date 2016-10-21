@@ -213,15 +213,21 @@ public class EngageSellerManager {
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Size: "+sellerList.size());
 			if( sellerList != null && sellerList.size() == 1){
+				int sellerId = 0;
 				for(EngageSeller seller : sellerList){
 					respBean.setSellerId(seller.getSellerId());
+					sellerId = seller.getSellerId();
 					respBean.setSellerName(seller.getSellerName());
 					respBean.setMobileNumber(seller.getSellerMobileNumber());
 					respBean.setSellerAddress(seller.getSellerAddress());
 					respBean.setSellerCity(seller.getSellerCity());
+					respBean.setCitrusSellerId(seller.getCitrusSellerId());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 				}
+				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+				seller.setSellerDeviceId(reqBean.getSellerDeviceId());
+				session.update(seller);
 			}
 			else{
 				respBean.setMessage("Login Failed");
