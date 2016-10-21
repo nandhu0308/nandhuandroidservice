@@ -31,6 +31,8 @@ public class PaymentTxn implements java.io.Serializable {
 	private int engageCustomerId;
 	@Column(name="SELLER_ID")
 	private int sellerId;
+	@Column(name="CITRUS_SELLER_ID")
+	private int citrusSellerId;
 	@Column(name="SELLER_NAME")
 	private String sellerName;
 	@Column(name="SELLER_DEVICE_ID")
@@ -54,21 +56,23 @@ public class PaymentTxn implements java.io.Serializable {
 	public PaymentTxn() {
 	}
 
-	public PaymentTxn(int engageCustomerId, int sellerId, String sellerName, float txnAmount,
+	public PaymentTxn(int engageCustomerId, int sellerId, int citrusSellerId, String sellerName, float txnAmount,
 			Date txnCreatedTime, Date txnUpdatedTime) {
 		this.engageCustomerId = engageCustomerId;
 		this.sellerId = sellerId;
+		this.citrusSellerId = citrusSellerId;
 		this.sellerName = sellerName;
 		this.txnAmount = txnAmount;
 		this.txnCreatedTime = txnCreatedTime;
 		this.txnUpdatedTime = txnUpdatedTime;
 	}
 
-	public PaymentTxn(int engageCustomerId, int sellerId, String sellerName, float txnAmount,
+	public PaymentTxn(int engageCustomerId, int sellerId, int citrusSellerId, String sellerName, float txnAmount,
 			int citrusMpTxnId, int splitId, String txnStatus,
 			Date txnCreatedTime, Date txnUpdatedTime) {
 		this.engageCustomerId = engageCustomerId;
 		this.sellerId = sellerId;
+		this.citrusSellerId = citrusSellerId;
 		this.sellerName = sellerName;
 		this.txnAmount = txnAmount;
 		this.citrusMpTxnId = citrusMpTxnId;
@@ -165,6 +169,13 @@ public class PaymentTxn implements java.io.Serializable {
 	public void setSellerDeviceId(String sellerDeviceId) {
 		this.sellerDeviceId = sellerDeviceId;
 	}
-	
+
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
+	}
 	
 }

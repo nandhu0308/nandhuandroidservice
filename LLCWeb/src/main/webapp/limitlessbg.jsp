@@ -1,3 +1,4 @@
+<%@page import="com.limitless.services.engage.SellerDeviceIdRespBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.CreditRespBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.CreditBean"%>
 <%@page import="com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus"%>
@@ -30,9 +31,10 @@ String buyerName = request.getParameter("bname");
 String buyerEmail = request.getParameter("bemail");
 String buyerPhone = request.getParameter("bphone");
 String sellerId = request.getParameter("sid");
+String citrusSellerId = request.getParameter("csid");
 String buyerId = request.getParameter("bid");
 String sellerName = request.getParameter("sname");
-String sellerDeviceId = request.getParameter("sdid");
+//String sellerDeviceId = request.getParameter("sdid");
 String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
 
 String creditAmountStr = request.getParameter("credamt");
@@ -43,11 +45,17 @@ String debitAmountStr = request.getParameter("debamt");
 //clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
 Client client = RestClientUtil.createClient();
 
+//Retrieve Seller Device ID from Engage Seller Table
+WebResource sellerResource = client.resource("https://services.beinglimitless.in/engage/merchant/seller/" + sellerId + "/deviceid");
+SellerDeviceIdRespBean sellerDeviceIdRespBean = sellerResource.accept("application/json").header("Authorization","Basic " + userString).get(SellerDeviceIdRespBean.class);
+String sellerDeviceId = sellerDeviceIdRespBean.getSellerDeviceId();
+
 WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
 
 
 PaymentTxnBean bean = new PaymentTxnBean();
 bean.setSellerId(Integer.parseInt(sellerId));
+bean.setCitrusSellerId(Integer.parseInt(citrusSellerId));
 //TODO
 bean.setEngageCustomerId(Integer.parseInt(buyerId));
 bean.setSellerName(sellerName);

@@ -90,3 +90,7 @@ alter table engage_seller add column citrus_seller_id INT UNSIGNED NOT NULL afte
 alter table engage_seller change seller_id seller_id INT UNSIGNED NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE engage_seller AUTO_INCREMENT = 5000000;
+
+alter table payment_txn add column citrus_seller_id INT UNSIGNED NOT NULL after seller_id;
+
+alter table engage_seller add column seller_device_id varchar(300) after seller_address;

@@ -10,6 +10,7 @@ public class EngageSellerBean {
 	private String country;
 	private String city;
 	private String address;
+	private String sellerDeviceId;
 	private String mobileNumber;
 	
 	private float latitude;
@@ -102,6 +103,12 @@ public class EngageSellerBean {
 	}
 	public void setKycDocValue(String kycDocValue) {
 		this.kycDocValue = kycDocValue;
+	}
+	public String getSellerDeviceId() {
+		return sellerDeviceId;
+	}
+	public void setSellerDeviceId(String sellerDeviceId) {
+		this.sellerDeviceId = sellerDeviceId;
 	}
 	
 }

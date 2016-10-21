@@ -8,6 +8,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -17,12 +18,14 @@ import org.apache.log4j.Logger;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
+import com.limitless.services.engage.SellerDeviceIdRespBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 
 @Path("/merchant")
 public class EngageSellerResource {
@@ -47,6 +50,7 @@ public class EngageSellerResource {
 			seller.setSellerCountryCode(bean.getCountryCode());
 			seller.setSellerCity(bean.getCity());
 			seller.setSellerAddress(bean.getAddress());
+			seller.setSellerDeviceId(bean.getSellerDeviceId());
 			seller.setSellerCountry(bean.getCountry());
 			
 			seller.setSellerKycDocType(bean.getKycDocType());
@@ -73,6 +77,19 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return sellerResp;
+	}
+	
+	@GET
+	@Path("/seller/{id}/deviceid")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerDeviceIdRespBean getSellerDeviceId(@PathParam("id") int id) throws Exception {
+		EngageSellerManager manager = new EngageSellerManager();
+		EngageSeller engageSeller = manager.findById(id);
+		
+		SellerDeviceIdRespBean bean = new SellerDeviceIdRespBean();
+		bean.setSellerDeviceId(engageSeller.getSellerDeviceId());
+		
+		return bean;
 	}
 	
 	@GET

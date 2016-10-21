@@ -10,6 +10,7 @@ public class PaymentTxnBean {
 	private int txnId;
 	private int engageCustomerId;
 	private int sellerId;
+	private int citrusSellerId;
 	private String sellerName;
 	private String sellerDeviceId;
 	private float txnAmount;
@@ -74,6 +75,12 @@ public class PaymentTxnBean {
 	}
 	public void setSellerDeviceId(String sellerDeviceId) {
 		this.sellerDeviceId = sellerDeviceId;
+	}
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
 	}
 	
 }

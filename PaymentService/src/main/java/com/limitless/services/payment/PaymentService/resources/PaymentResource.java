@@ -76,6 +76,7 @@ public class PaymentResource {
 
 			bean.setTxnId(paymentTxn.getTxnId());
 			bean.setSellerId(paymentTxn.getSellerId());
+			bean.setCitrusSellerId(paymentTxn.getCitrusSellerId());
 			bean.setTxnAmount(paymentTxn.getTxnAmount());
 			bean.setSellerName(paymentTxn.getSellerName());
 
@@ -97,6 +98,7 @@ public class PaymentResource {
 			PaymentTxn paymentTxn = new PaymentTxn();
 			paymentTxn.setEngageCustomerId(bean.getEngageCustomerId());
 			paymentTxn.setSellerId(bean.getSellerId());
+			paymentTxn.setCitrusSellerId(bean.getCitrusSellerId());
 			paymentTxn.setTxnAmount(bean.getTxnAmount());
 			paymentTxn.setSellerName(bean.getSellerName());
 			paymentTxn.setTxnStatus(bean.getTxnStatus().toString());

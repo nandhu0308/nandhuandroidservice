@@ -41,6 +41,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerCity;
 	@Column(name="SELLER_ADDRESS")
 	private String sellerAddress;
+	@Column(name="SELLER_DEVICE_ID")
+	private String sellerDeviceId;
 	@Column(name="SELLER_LOCATION_LATITUDE")
 	private Float sellerLocationLatitude;
 	@Column(name="SELLER_LOCATION_LONGITUDE")
@@ -83,7 +85,7 @@ public class EngageSeller implements java.io.Serializable {
 	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99,
 			String sellerPasswd99, String sellerCountryCode,
 			String sellerMobileNumber, String sellerCountry, String sellerCity,
-			String sellerAddress, Float sellerLocationLatitude,
+			String sellerAddress, String sellerDeviceId, Float sellerLocationLatitude,
 			Float sellerLocationLongitude, float sellerSplitPercent,
 			String sellerKycDocType, String sellerKycDocValue,
 			Date sellerCreatedTime, Date sellerUpdatedTime) {
@@ -96,6 +98,7 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerCountry = sellerCountry;
 		this.sellerCity = sellerCity;
 		this.sellerAddress = sellerAddress;
+		this.sellerDeviceId = sellerDeviceId;
 		this.sellerLocationLatitude = sellerLocationLatitude;
 		this.sellerLocationLongitude = sellerLocationLongitude;
 		this.sellerSplitPercent = sellerSplitPercent;
@@ -240,5 +243,14 @@ public class EngageSeller implements java.io.Serializable {
 	public void setCitrusSellerId(int citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
 	}
+
+	public String getSellerDeviceId() {
+		return sellerDeviceId;
+	}
+
+	public void setSellerDeviceId(String sellerDeviceId) {
+		this.sellerDeviceId = sellerDeviceId;
+	}
+	
 	
 }
