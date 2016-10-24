@@ -17,6 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
@@ -211,7 +212,7 @@ public class PaymentTxnManager {
 		try{
 			Session session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
-			Query query = session.createQuery("from PaymentTxn where engageCustomerId = :customerId");
+			Query query = session.createQuery("from PaymentTxn where engageCustomerId = :customerId order by txnId desc");
 			query.setParameter("customerId", customerId);
 			List<PaymentTxn> paymentHistory = query.list();
 			return paymentHistory;
@@ -233,6 +234,7 @@ public class PaymentTxnManager {
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(PaymentTxn.class);
 			criteria.add(Restrictions.eq("sellerId", sellerId));
+			criteria.addOrder(Order.desc("txnUpdatedTime"));
 			List<PaymentTxn> paymentList = criteria.list();
 			if(paymentList.size() > 0){
 				log.debug("Size: "+paymentList.size());
