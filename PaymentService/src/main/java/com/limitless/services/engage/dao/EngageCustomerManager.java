@@ -17,8 +17,11 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
+import com.limitless.services.engage.ProfileChangeRequestBean;
+import com.limitless.services.engage.ProfileChangeResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -290,4 +293,54 @@ public class EngageCustomerManager {
 			tx.commit();
 		}
 	}
+	
+	public ProfileChangeResponseBean updateCustomerProfile(ProfileChangeRequestBean requestBean){
+		log.debug("Changing/updating customer details");
+		ProfileChangeResponseBean responseBean = new ProfileChangeResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			int customerId = requestBean.getCustomerId();
+			String key = requestBean.getCustomerKey();
+			String value = requestBean.getCustomerValue();
+			
+			EngageCustomer instance = (EngageCustomer)session.get("com.limitless.services.engage.dao.EngageCustomer",
+					customerId);
+			
+			if(instance!=null){
+				if(key.equals("name")){
+					String customerName = value;
+					instance.setCustomerName(customerName);
+					session.update(instance);
+				}
+				else if(key.equals("mobile")){
+					String customerMobile = value;
+					instance.setCustomerMobileNumber(customerMobile);
+					session.update(instance);
+				}
+				else if(key.equals("email")){
+					String customerEmailId = value;
+					instance.setCustomerEmail99(customerEmailId);
+					session.update(instance);
+				}
+				responseBean.setMessage("Success");
+				responseBean.setCustomerId(customerId);
+			}
+			else{
+				responseBean.setMessage("Failed");
+				responseBean.setCustomerId(customerId);
+			}
+			
+		}
+		catch(RuntimeException re){
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return responseBean;
+	}
+	
 }

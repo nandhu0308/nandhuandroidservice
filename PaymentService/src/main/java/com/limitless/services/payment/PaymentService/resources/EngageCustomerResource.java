@@ -12,12 +12,16 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.CheckEmailRequestBean;
+import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
 import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.PasswdRequestBean;
 import com.limitless.services.engage.PasswdResponseBean;
+import com.limitless.services.engage.ProfileChangeRequestBean;
+import com.limitless.services.engage.ProfileChangeResponseBean;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 
@@ -102,6 +106,48 @@ public class EngageCustomerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return resBean;
+	}
+	
+	@PUT
+	@Path("/customer/proupdate/{customerId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProfileChangeResponseBean updateProfile(ProfileChangeRequestBean requestBean) throws Exception{
+		ProfileChangeResponseBean responseBean = new ProfileChangeResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.updateCustomerProfile(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/check/mail")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CheckEmailResponseBean checkEmail(CheckEmailRequestBean requestBean) throws Exception{
+		CheckEmailResponseBean responseBean = new CheckEmailResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			boolean emailExists = manager.checkDuplicateEmail(requestBean.getEmailId());
+			if(emailExists){
+				responseBean.setEmailId(requestBean.getEmailId());
+				responseBean.setMessage("Email Exist");
+			}
+			else{
+				responseBean.setEmailId(requestBean.getEmailId());
+				responseBean.setMessage("Email Not Exist");
+			}
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 
 }
