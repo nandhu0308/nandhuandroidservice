@@ -94,3 +94,14 @@ ALTER TABLE engage_seller AUTO_INCREMENT = 5000000;
 alter table payment_txn add column citrus_seller_id INT UNSIGNED NOT NULL after seller_id;
 
 alter table engage_seller add column seller_device_id varchar(300) after seller_address;
+
+create table IF NOT EXISTS upi_order (
+upi_order_id INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+customer_id INT UNSIGNED NOT NULL,
+order_amount FLOAT NOT NULL DEFAULT 0,
+order_status ENUM('PAYMENT_INITIATED', 'PAYMENT_SUCCESSFUL', 'PAYMENT_FAILED', 'FUND_RELEASED', 'REFUND_INITIATED', 'REFUND_PROCESSED'),
+order_created_time TIMESTAMP DEFAULT now(),
+order_updated_time TIMESTAMP DEFAULT now() on update now() 
+);
+
+ALTER TABLE upi_order AUTO_INCREMENT = 20000;
