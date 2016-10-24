@@ -19,8 +19,12 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
+import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.payment.PaymentService.CreditBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
+import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
+import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
 import com.limitless.services.payment.PaymentService.NotificationResponseBean;
@@ -246,7 +250,7 @@ public class PaymentResource {
 
 			ClientResponse splitResponse = webResource.accept("application/json").type("application/json")
 					.header("auth_token",
-							"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMC0yM1QwOToyNDowMi43OTFaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0._qQK2SBaac6ze4ZMt0-_68TZoLhzkbmNsGpevOYoywM")
+							"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMC0yOVQxMjo1NTo1OC4yOTVaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.urz4SfFZ7uCzWU5vPzYeN1TAgon36YhgH6DDjEeuCzU")
 					.post(ClientResponse.class, splitRequest);
 
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
@@ -336,6 +340,11 @@ public class PaymentResource {
 	public NotificationResponseBean sendNotification(NotificationRequestBean request) throws Exception {
 		NotificationResponseBean response = new NotificationResponseBean();
 		try {
+			EngageSellerManager sellerManager = new EngageSellerManager();
+			EngageSeller seller = sellerManager.findById(Integer.parseInt(request.getTo()));
+			
+			request.setTo(seller.getSellerDeviceId());
+			
 			WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
 			ClientResponse clientResponse = webResource2.type("application/json")
 					.header("Authorization", "key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos")
@@ -362,6 +371,49 @@ public class PaymentResource {
 			PaymentCreditManager manager = new PaymentCreditManager();
 			responseBean = manager.customerCreditsList(customerId);
 		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/trans/credit")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CreditTransResponseBean creditTrans(CreditTransRequestBean requestBean) throws Exception{
+		CreditTransResponseBean responseBean = new CreditTransResponseBean();
+		try{
+			
+			EngageSellerManager sellerManager = new EngageSellerManager();
+			EngageSeller seller = sellerManager.findById(requestBean.getSellerId());
+			
+			PaymentTxn trans = new PaymentTxn();
+			trans.setEngageCustomerId(requestBean.getCustomerId());
+			trans.setSellerId(requestBean.getSellerId());
+			trans.setCitrusSellerId(seller.getCitrusSellerId());
+			trans.setSellerName(requestBean.getSellerName());
+			trans.setSellerDeviceId(seller.getSellerDeviceId());
+			trans.setTxnStatus(requestBean.getStatus());
+			trans.setTxnAmount(requestBean.getTransAmount());
+			
+			PaymentTxnManager txnManager = new PaymentTxnManager();
+			txnManager.persist(trans);
+			
+			PaymentCredit credits = new PaymentCredit();
+			credits.setCreditAmount(requestBean.getCreditAmount());
+			credits.setSellerId(seller.getCitrusSellerId());
+			credits.setTxnId(trans.getTxnId());
+			credits.setCustomerId(requestBean.getCustomerId());
+			
+			PaymentCreditManager creditsManager = new PaymentCreditManager();
+			creditsManager.persist(credits);
+			
+			responseBean.setCreditId(credits.getCreditId());
+			responseBean.setTransactionId(trans.getTxnId());
+			responseBean.setMessage("Success");
+		}
+		catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}

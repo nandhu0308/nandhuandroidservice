@@ -206,8 +206,10 @@ public class PaymentCreditManager {
 					List amountList = query.list();
 					log.debug("Amount :" + amountList.toString());
 					double creditAmt = (Double) amountList.get(0);
-					EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
-							sellerId);
+					Criteria criteria2 = session.createCriteria(EngageSeller.class);
+					criteria2.add(Restrictions.eq("citrusSellerId", sellerId));
+					List<EngageSeller> sellerList = criteria2.list();
+					EngageSeller seller = sellerList.get(0);
 					String sellerName = seller.getSellerName();
 					String sellerPhone = seller.getSellerMobileNumber();
 					CustomerCreditResponseBean bean = new CustomerCreditResponseBean();

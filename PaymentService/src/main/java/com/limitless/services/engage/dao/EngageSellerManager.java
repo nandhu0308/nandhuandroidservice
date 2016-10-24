@@ -133,6 +133,9 @@ public class EngageSellerManager {
 			log.error("get failed", re);
 			throw re;
 		}
+		finally{
+			tx.commit();
+		}
 	}
 
 	public List findByExample(EngageSeller instance) {
@@ -213,15 +216,21 @@ public class EngageSellerManager {
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Size: "+sellerList.size());
 			if( sellerList != null && sellerList.size() == 1){
+				int sellerId = 0;
 				for(EngageSeller seller : sellerList){
 					respBean.setSellerId(seller.getSellerId());
+					sellerId = seller.getSellerId();
 					respBean.setSellerName(seller.getSellerName());
 					respBean.setMobileNumber(seller.getSellerMobileNumber());
 					respBean.setSellerAddress(seller.getSellerAddress());
 					respBean.setSellerCity(seller.getSellerCity());
+					respBean.setCitrusSellerId(seller.getCitrusSellerId());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 				}
+				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+				seller.setSellerDeviceId(reqBean.getSellerDeviceId());
+				session.update(seller);
 			}
 			else{
 				respBean.setMessage("Login Failed");
@@ -299,6 +308,26 @@ public class EngageSellerManager {
 			transaction.commit();
 		}
 		return coords;
+	}
+	
+	public String findSellerDeviceId(int sellerId){
+		log.debug("Getting seller deviceId");
+		Transaction transaction = null;
+		String sellerDeviceId = "";
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			sellerDeviceId = seller.getSellerDeviceId();
+		}
+		catch(RuntimeException re){
+			log.error("Finding deviceId failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return sellerDeviceId;
 	}
 	
 	/*public static void main(String[] args) {

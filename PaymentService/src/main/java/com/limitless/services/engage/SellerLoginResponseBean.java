@@ -4,6 +4,7 @@ public class SellerLoginResponseBean {
 	
 	private String sellerName;
 	private int sellerId;
+	private int citrusSellerId;
 	private String mobileNumber;
 	private String message;
 	private int status;
@@ -51,5 +52,10 @@ public class SellerLoginResponseBean {
 	public void setSellerCity(String sellerCity) {
 		this.sellerCity = sellerCity;
 	}
-
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
+	}
 }
