@@ -109,7 +109,7 @@ public class EngageCustomerResource {
 	}
 	
 	@PUT
-	@Path("/customer/proupdate/{customerId}")
+	@Path("/customer/proupdate")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ProfileChangeResponseBean updateProfile(ProfileChangeRequestBean requestBean) throws Exception{
