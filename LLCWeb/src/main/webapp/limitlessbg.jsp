@@ -86,7 +86,7 @@ if(creditAmountStr != null || debitAmountStr != null){
 		creditBean.setTxnId(txnId);
 		creditBean.setCreditAmount(creditAmount);
 		creditBean.setDebitAmount(debitAmount);
-		creditBean.setSellerId(Integer.parseInt(sellerId));
+		creditBean.setSellerId(Integer.parseInt(citrusSellerId));
 		creditBean.setCustomerId(Integer.parseInt(buyerId));
 		
 		CreditRespBean creditResponse = creditResource.type("application/json").header("Authorization","Basic " + userString).post(CreditRespBean.class, creditBean);
