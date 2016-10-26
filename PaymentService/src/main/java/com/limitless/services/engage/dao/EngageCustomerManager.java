@@ -19,6 +19,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
+import com.limitless.services.engage.MobileResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
@@ -332,6 +333,37 @@ public class EngageCustomerManager {
 				responseBean.setCustomerId(customerId);
 			}
 			
+		}
+		catch(RuntimeException re){
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return responseBean;
+	}
+	
+	public MobileResponseBean getCustomerMobileNumber(String customerEmail){
+		log.debug("getting customer mobile");
+		MobileResponseBean responseBean = new MobileResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageCustomer.class);
+			criteria.add(Restrictions.eq("customerEmail99", customerEmail));
+			List<EngageCustomer> customerList = criteria.list();
+			if(customerList!=null && customerList.size()>0){
+				for(EngageCustomer customer : customerList){
+					responseBean.setCustomerMobile(customer.getCustomerMobileNumber());
+					responseBean.setCustomerId(customer.getCustomerId());
+				}
+				responseBean.setMessage("Success");
+			}
+			else{
+				responseBean.setMessage("EmailId Not Found");
+			}
 		}
 		catch(RuntimeException re){
 			log.error("Changing/updating customer details failed", re);

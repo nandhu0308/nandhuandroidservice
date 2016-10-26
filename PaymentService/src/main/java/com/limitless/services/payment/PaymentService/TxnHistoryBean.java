@@ -10,6 +10,7 @@ public class TxnHistoryBean {
 	private int sellerId;
 	private String sellerName;
 	private double txtAmount;
+	private double creditAmount;
 	private int citrusMpTxnId;
 	private int splitId;
 	private String txtStatus;
@@ -18,6 +19,16 @@ public class TxnHistoryBean {
 	public TxnHistoryBean(){
 		
 	}
+
+	public double getCreditAmount() {
+		return creditAmount;
+	}
+
+
+	public void setCreditAmount(double creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
 
 	public int getTxnId() {
 		return txnId;

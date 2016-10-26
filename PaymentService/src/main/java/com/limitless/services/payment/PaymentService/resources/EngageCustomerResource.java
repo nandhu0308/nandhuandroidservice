@@ -18,6 +18,7 @@ import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
 import com.limitless.services.engage.LoginResponseBean;
+import com.limitless.services.engage.MobileResponseBean;
 import com.limitless.services.engage.PasswdRequestBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
@@ -116,7 +117,29 @@ public class EngageCustomerResource {
 		ProfileChangeResponseBean responseBean = new ProfileChangeResponseBean();
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
-			responseBean = manager.updateCustomerProfile(requestBean);
+			if(requestBean.getCustomerKey().equals("email")){
+				if(manager.checkDuplicateEmail(requestBean.getCustomerValue())){
+					responseBean.setCustomerId(requestBean.getCustomerId());
+					responseBean.setMessage("Email Exist");
+					System.out.println("Email Exist");
+				}
+				else{
+					responseBean = manager.updateCustomerProfile(requestBean);
+				}
+			}
+			else if(requestBean.getCustomerKey().equals("mobile")){
+				if(manager.checkDuplicateMobile(requestBean.getCustomerValue())){
+					responseBean.setCustomerId(requestBean.getCustomerId());
+					responseBean.setMessage("Mobile Exist");
+					System.out.println("Mobile Exist");
+				}
+				else{
+					responseBean = manager.updateCustomerProfile(requestBean);
+				}
+			}
+			else if(requestBean.getCustomerKey().equals("name")){
+				responseBean = manager.updateCustomerProfile(requestBean);
+			}
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
@@ -157,6 +180,22 @@ public class EngageCustomerResource {
 				responseBean.setMobileNumber(requestBean.getMobileNumber());
 				responseBean.setMessage("Email/Mobile Not Exist");
 			}
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/customer/get/{emailId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public MobileResponseBean getMobileNumber(@PathParam("emailId") String customerEmail) throws Exception{
+		MobileResponseBean responseBean = new MobileResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.getCustomerMobileNumber(customerEmail);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
