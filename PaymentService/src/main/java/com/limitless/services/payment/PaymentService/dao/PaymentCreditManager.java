@@ -161,6 +161,13 @@ public class PaymentCreditManager {
 					List amountList = query.list();
 					log.debug("Amount :" + amountList.toString());
 					double creditAmt = (Double) amountList.get(0);
+					Query query2 = session
+							.createQuery("select sum(PC.debitAmount) from PaymentCredit PC where PC.customerId = :customerId");
+					query2.setParameter("customerId", custId);
+					List amountList2 = query2.list();
+					log.debug("Amount :" + amountList2.toString());
+					double debitAmt = (Double) amountList2.get(0);
+					double netCredit = creditAmt - debitAmt;
 					EngageCustomer customer = (EngageCustomer) session
 							.get("com.limitless.services.engage.dao.EngageCustomer", custId);
 					String customerName = customer.getCustomerName();
@@ -169,7 +176,7 @@ public class PaymentCreditManager {
 					bean.setCustomerId(custId);
 					bean.setCustomerName(customerName);
 					bean.setCustomerPhone(customerPhone);
-					bean.setTotalCredits(creditAmt);
+					bean.setTotalCredits(netCredit);
 					creditsList.add(bean);
 					bean = null;
 				}
@@ -206,17 +213,27 @@ public class PaymentCreditManager {
 					List amountList = query.list();
 					log.debug("Amount :" + amountList.toString());
 					double creditAmt = (Double) amountList.get(0);
+					Query query2 = session
+							.createQuery("select sum(PC.debitAmount) from PaymentCredit PC where PC.sellerId = :sellerId and PC.customerId = :customerId");
+					query2.setParameter("sellerId", sellerId);
+					query2.setParameter("customerId", customerId);
+					List amountList2 = query2.list();
+					log.debug("Amount :" + amountList2.toString());
+					double debitAmt = (Double) amountList2.get(0);
+					double netCredit = creditAmt - debitAmt;
 					Criteria criteria2 = session.createCriteria(EngageSeller.class);
 					criteria2.add(Restrictions.eq("citrusSellerId", sellerId));
 					List<EngageSeller> sellerList = criteria2.list();
 					EngageSeller seller = sellerList.get(0);
 					String sellerName = seller.getSellerName();
 					String sellerPhone = seller.getSellerMobileNumber();
+					int merchantId = seller.getSellerId();
 					CustomerCreditResponseBean bean = new CustomerCreditResponseBean();
 					bean.setSellerId(sellerId);
 					bean.setSellerName(sellerName);
 					bean.setSellerPhone(sellerPhone);
-					bean.setTotalCredits(creditAmt);
+					bean.setTotalCredits(netCredit);
+					bean.setMerchantId(merchantId);
 					creditsList.add(bean);
 					bean = null;
 				}

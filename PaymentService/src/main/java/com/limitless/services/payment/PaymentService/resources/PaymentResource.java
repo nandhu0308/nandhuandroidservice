@@ -329,7 +329,7 @@ public class PaymentResource {
 					.post(ClientResponse.class, splitRequest);
 
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
-			logger.info(splitResponseStr);
+			logger.info("Slipt Response"+splitResponseStr);
 
 			// TODO
 			/*
@@ -379,6 +379,7 @@ public class PaymentResource {
 			paymentCredit.setDebitAmount(bean.getDebitAmount());
 			paymentCredit.setSellerId(bean.getSellerId());
 			paymentCredit.setCustomerId(bean.getCustomerId());
+			paymentCredit.setMerchantId(bean.getMerchantId());
 
 			PaymentCreditManager manager = new PaymentCreditManager();
 			manager.persist(paymentCredit);
@@ -476,6 +477,7 @@ public class PaymentResource {
 			txnManager.persist(trans);
 			
 			PaymentCredit credits = new PaymentCredit();
+			credits.setMerchantId(requestBean.getSellerId());
 			credits.setCreditAmount(requestBean.getCreditAmount());
 			credits.setSellerId(seller.getCitrusSellerId());
 			credits.setTxnId(trans.getTxnId());

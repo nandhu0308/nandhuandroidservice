@@ -25,6 +25,8 @@ public class PaymentCredit implements java.io.Serializable {
 	private Integer creditId;
 	@Column(name="TXN_ID")
 	private Integer txnId;
+	@Column(name="MERCHANT_ID")
+	private Integer merchantId;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
 	@Column(name="CUSTOMER_ID")
@@ -51,6 +53,14 @@ public class PaymentCredit implements java.io.Serializable {
 		this.debitAmount = debitAmount;
 		this.creditCreatedTime = creditCreatedTime;
 		this.creditUpdatedTime = creditUpdatedTime;
+	}
+
+	public Integer getMerchantId() {
+		return merchantId;
+	}
+
+	public void setMerchantId(Integer merchantId) {
+		this.merchantId = merchantId;
 	}
 
 	public Integer getTxnId() {
