@@ -305,7 +305,7 @@ public class PaymentResource {
 			double feePercent = 2.00;
 			double txnAmount = paymentTxn.getTxnAmount();
 			// TODO
-			double feeAmount = 0.00;// (txnAmount * feePercent) / 100;
+			double feeAmount = (txnAmount * feePercent) / 100; //0.00;//
 			double splitAmount = txnAmount - feeAmount;
 
 			// Make Split API call
