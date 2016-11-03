@@ -407,7 +407,7 @@ public class PaymentTxnManager {
 			}
 			else{
 				log.debug("Size: "+paymentList.size());
-				sthBean.setMessage("No Record Found");				
+				sthBean.setMessage("No More Records Found");				
 			}
 		}
 		catch(RuntimeException re){

@@ -29,6 +29,7 @@ import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
 import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
+import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
 import com.limitless.services.payment.PaymentService.NotificationResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -155,17 +156,19 @@ public class PaymentResource {
 	@GET
 	@Path("/trans/customer/{customerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<TxnHistoryBean> getHistory(@PathParam("customerId") int customerId) throws Exception {
+	public CustomerTxnHistoryBean getHistory(@PathParam("customerId") int customerId) throws Exception {
 		List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
-
+		CustomerTxnHistoryBean respBean = new CustomerTxnHistoryBean();
 		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			List<PaymentTxn> paymentHistory = manager.getTxnHistory(customerId);
 
-			if (paymentHistory != null) {
+			if (paymentHistory.size()>0) {
 				System.out.println("Size : " + paymentHistory.size());
+				respBean.setMessage("Success");
 			} else {
 				System.out.println("List Null");
+				respBean.setMessage("No Record Found");
 			}
 
 			for (PaymentTxn bean : paymentHistory) {
@@ -191,27 +194,30 @@ public class PaymentResource {
 				historyBeanList.add(historyBean);
 				historyBean = null;
 			}
+			respBean.setHistoryBean(historyBeanList);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
-		return historyBeanList;
+		return respBean;
 	}
 	
 	@GET
 	@Path("/trans/customer/{customerId}/{firstTxnId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<TxnHistoryBean> getHistoryPangination(@PathParam("customerId") int customerId, @PathParam("firstTxnId") int firstTxnId) throws Exception {
+	public CustomerTxnHistoryBean getHistoryPangination(@PathParam("customerId") int customerId, @PathParam("firstTxnId") int firstTxnId) throws Exception {
 		List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
-
+		CustomerTxnHistoryBean respBean = new CustomerTxnHistoryBean();
 		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			List<PaymentTxn> paymentHistory = manager.getTxnHistoryPagination(customerId, firstTxnId);
 
-			if (paymentHistory != null) {
+			if (paymentHistory.size()>0) {
 				System.out.println("Size : " + paymentHistory.size());
+				respBean.setMessage("Success");
 			} else {
 				System.out.println("List Null");
+				respBean.setMessage("No More Records Found");
 			}
 
 			for (PaymentTxn bean : paymentHistory) {
@@ -237,11 +243,12 @@ public class PaymentResource {
 				historyBeanList.add(historyBean);
 				historyBean = null;
 			}
+			respBean.setHistoryBean(historyBeanList);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
-		return historyBeanList;
+		return respBean;
 	}
 
 
@@ -329,7 +336,7 @@ public class PaymentResource {
 					.post(ClientResponse.class, splitRequest);
 
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
-			logger.info("Slipt Response"+splitResponseStr);
+			System.out.println("Slipt Response: "+splitResponseStr);
 
 			// TODO
 			/*
