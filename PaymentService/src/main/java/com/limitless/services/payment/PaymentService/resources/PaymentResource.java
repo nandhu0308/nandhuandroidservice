@@ -290,7 +290,7 @@ public class PaymentResource {
 			PaymentTxn paymentTxn = manager.findById(id);
 
 			int txnId = paymentTxn.getTxnId();
-			int sellerId = paymentTxn.getSellerId();
+			int sellerId = paymentTxn.getCitrusSellerId();
 			String sellerDeviceId = paymentTxn.getSellerDeviceId();
 			int customerId = paymentTxn.getEngageCustomerId();
 			String txnDate = paymentTxn.getTxnUpdatedTime().toString();
