@@ -232,7 +232,7 @@ public class EngageCustomerManager {
 		}
 	}
 	
-	public LoginResponseBean validateUser(String customerEmail99, String passwd){
+	public LoginResponseBean validateUser(String customerMobile, String passwd){
 		log.debug("checking login credentials");
 		LoginResponseBean loginResponseBean = new LoginResponseBean();
 		Transaction transaction = null;
@@ -240,7 +240,7 @@ public class EngageCustomerManager {
 			Session session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageCustomer.class);
-			Criterion emailCriterion = Restrictions.eq("customerEmail99", customerEmail99);
+			Criterion emailCriterion = Restrictions.eq("customerMobileNumber", customerMobile);
 			Criterion passwdCriterion = Restrictions.eq("customerPasswd99", passwd);
 			LogicalExpression logicalExp = Restrictions.and(emailCriterion, passwdCriterion);
 			criteria.add(logicalExp);
@@ -252,7 +252,7 @@ public class EngageCustomerManager {
 					loginResponseBean.setMessage("Success");
 					loginResponseBean.setCustomerId(user.getCustomerId());
 					loginResponseBean.setCustomerName(user.getCustomerName());
-					loginResponseBean.setCustomerMobileNumber(user.getCustomerMobileNumber());
+					loginResponseBean.setCustomerEmail(user.getCustomerEmail99());;
 				}
 			}
 			else{

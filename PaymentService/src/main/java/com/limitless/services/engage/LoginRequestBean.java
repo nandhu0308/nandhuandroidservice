@@ -2,22 +2,17 @@ package com.limitless.services.engage;
 
 public class LoginRequestBean {
 	
-	private String email;
-	
+	private String phone;
 	private String passwd;
-
-	public String getEmail() {
-		return email;
+	public String getPhone() {
+		return phone;
 	}
-
-	public void setEmail(String email) {
-		this.email = email;
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
-
 	public String getPasswd() {
 		return passwd;
 	}
-
 	public void setPasswd(String passwd) {
 		this.passwd = passwd;
 	}

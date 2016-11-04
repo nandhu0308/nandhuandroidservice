@@ -52,14 +52,14 @@ public class EngageCustomerResource {
 			
 			EngageCustomerManager manager = new EngageCustomerManager();
 			
-			if( !(manager.checkDuplicateEmail(bean.getEmailId())) && !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
+			if( !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
 				manager.persist(customer);
 				customerResp.setCustomerId(customer.getCustomerId());
 				customerResp.setStatus(1);
 				customerResp.setMessage("Success");
 			} else {
 				customerResp.setStatus(-1);
-				customerResp.setMessage("Failure - Duplicate Email / Mobile Number");
+				customerResp.setMessage("Failure - Duplicate Mobile Number");
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -84,7 +84,7 @@ public class EngageCustomerResource {
 		LoginResponseBean loginRespBean = new LoginResponseBean();
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
-			loginRespBean = manager.validateUser(bean.getEmail(), bean.getPasswd());
+			loginRespBean = manager.validateUser(bean.getPhone(), bean.getPasswd());
 		} catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
