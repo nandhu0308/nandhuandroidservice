@@ -1,5 +1,11 @@
 package com.limitless.services.engage.dao;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 // Generated Sep 25, 2016 10:49:31 PM by Hibernate Tools 3.4.0.CR1
 
 import java.util.List;
@@ -17,7 +23,8 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
-import com.limitless.services.engage.CheckEmailResponseBean;
+import com.limitless.services.engage.InviteRequestBean;
+import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.MobileResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
@@ -370,6 +377,60 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally{
+			transaction.commit();
+		}
+		return responseBean;
+	}
+	
+	public InviteResponseBean sendInvite(InviteRequestBean requestBean) throws Exception{
+		log.debug("Sending invite");
+		InviteResponseBean responseBean = new InviteResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			String senderName = "";
+			if(requestBean.getKey().equals("merchant")){
+				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+				senderName = seller.getSellerName();
+			}
+			else if(requestBean.getKey().equals("customer")){
+				EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+				senderName = customer.getCustomerName();
+			}
+			String message = "LETS GO CASHLESS! "+senderName + " has invited you to join LimitlessCircle. Download the app: goo.gl/ejZrmv";
+			String encoded_message = URLEncoder.encode(message);
+			String authkey = "129194Aa6NwGoQsVt580d9a57";
+			String mobiles = requestBean.getMobileNumbers();
+			String senderId = "LLCINV";
+			String route = "4";
+			String mainUrl="http://api.msg91.com/api/sendhttp.php?";
+			StringBuilder sbPostData= new StringBuilder(mainUrl);
+            sbPostData.append("authkey="+authkey);
+            sbPostData.append("&mobiles="+mobiles);
+            sbPostData.append("&message="+encoded_message);
+            sbPostData.append("&route="+route);
+            sbPostData.append("&sender="+senderId);
+            mainUrl = sbPostData.toString();
+            URL msgUrl = new URL(mainUrl);
+            URLConnection con = msgUrl.openConnection();
+            con.connect();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String response = "";
+            while((response = reader.readLine())!=null){
+            	System.out.println(response);
+            }
+            responseBean.setCustomerId(requestBean.getCustomerId());
+            responseBean.setMerchantId(requestBean.getSellerId());
+            responseBean.setMessage("Success");
+            responseBean.setResponse(response);
+            reader.close();
+		}
+		catch(RuntimeException re){
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally {
 			transaction.commit();
 		}
 		return responseBean;

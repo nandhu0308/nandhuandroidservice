@@ -16,6 +16,8 @@ import com.limitless.services.engage.CheckEmailRequestBean;
 import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
+import com.limitless.services.engage.InviteRequestBean;
+import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
 import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.MobileResponseBean;
@@ -158,16 +160,18 @@ public class EngageCustomerResource {
 			EngageCustomerManager manager = new EngageCustomerManager();
 			boolean emailExists = manager.checkDuplicateEmail(requestBean.getEmailId());
 			boolean mobileExists = manager.checkDuplicateMobile(requestBean.getMobileNumber());
-			if(emailExists){
-				if(mobileExists){
-					responseBean.setEmailId(requestBean.getEmailId());
-					responseBean.setMobileNumber(requestBean.getMobileNumber());
-					responseBean.setMessage("Email/Mobile Exist");
-				}
-				else{
-					responseBean.setEmailId(requestBean.getEmailId());
-					responseBean.setMobileNumber(requestBean.getMobileNumber());
-					responseBean.setMessage("Email Exist");
+			if(!requestBean.getEmailId().equals("")){
+				if(emailExists){
+					if(mobileExists){
+						responseBean.setEmailId(requestBean.getEmailId());
+						responseBean.setMobileNumber(requestBean.getMobileNumber());
+						responseBean.setMessage("Email/Mobile Exist");
+					}
+					else{
+						responseBean.setEmailId(requestBean.getEmailId());
+						responseBean.setMobileNumber(requestBean.getMobileNumber());
+						responseBean.setMessage("Email Exist");
+					}
 				}
 			}
 			else if(mobileExists){
@@ -196,6 +200,23 @@ public class EngageCustomerResource {
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.getCustomerMobileNumber(customerMobile);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/invite")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public InviteResponseBean inviteCustomers(InviteRequestBean requestBean) throws Exception{
+		InviteResponseBean responseBean = new InviteResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.sendInvite(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
