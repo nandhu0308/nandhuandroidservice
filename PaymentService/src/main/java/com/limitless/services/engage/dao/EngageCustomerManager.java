@@ -344,7 +344,7 @@ public class EngageCustomerManager {
 		return responseBean;
 	}
 	
-	public MobileResponseBean getCustomerMobileNumber(String customerEmail){
+	public MobileResponseBean getCustomerMobileNumber(String customerMobile){
 		log.debug("getting customer mobile");
 		MobileResponseBean responseBean = new MobileResponseBean();
 		Transaction transaction = null;
@@ -352,7 +352,7 @@ public class EngageCustomerManager {
 			Session session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageCustomer.class);
-			criteria.add(Restrictions.eq("customerEmail99", customerEmail));
+			criteria.add(Restrictions.eq("customerMobileNumber", customerMobile));
 			List<EngageCustomer> customerList = criteria.list();
 			if(customerList!=null && customerList.size()>0){
 				for(EngageCustomer customer : customerList){
@@ -362,7 +362,7 @@ public class EngageCustomerManager {
 				responseBean.setMessage("Success");
 			}
 			else{
-				responseBean.setMessage("EmailId Not Found");
+				responseBean.setMessage("Mobile Not Found");
 			}
 		}
 		catch(RuntimeException re){

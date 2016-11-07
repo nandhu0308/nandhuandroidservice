@@ -189,13 +189,13 @@ public class EngageCustomerResource {
 	}
 	
 	@GET
-	@Path("/customer/get/{emailId}")
+	@Path("/customer/get/{phone}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MobileResponseBean getMobileNumber(@PathParam("emailId") String customerEmail) throws Exception{
+	public MobileResponseBean getMobileNumber(@PathParam("phone") String customerMobile) throws Exception{
 		MobileResponseBean responseBean = new MobileResponseBean();
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
-			responseBean = manager.getCustomerMobileNumber(customerEmail);
+			responseBean = manager.getCustomerMobileNumber(customerMobile);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
