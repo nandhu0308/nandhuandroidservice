@@ -20,5 +20,8 @@ public class CheckEmailRequestBean {
 	public void setEmailId(String emailId) {
 		this.emailId = emailId;
 	}
-
+	@Override
+	public String toString() {
+		return "CheckEmailRequestBean [emailId=" + emailId + ", mobileNumber=" + mobileNumber + "]";
+	}
 }

@@ -179,13 +179,17 @@ public class EngageCustomerManager {
 		 Transaction transaction = null;
 		 try{
 			 boolean emailExist = false;
+			 System.out.println("Email--->"+customerEmail);
 			 Session session = sessionFactory.getCurrentSession();
 			 transaction = session.beginTransaction();
-			 Query query = session.createQuery("from EngageCustomer where customerEmail99 = :customerEmail");
-			 query.setParameter("customerEmail", customerEmail);
-			 List<EngageCustomer> customer = query.list();
-			 if(customer != null && customer.size() > 0){
-				 emailExist = true;
+			 if(!customerEmail.equals("")){
+				 Query query = session.createQuery("from EngageCustomer where customerEmail99 = :customerEmail");
+				 query.setParameter("customerEmail", customerEmail);
+				 List<EngageCustomer> customer = query.list();
+				 log.debug("User:-->"+customer);
+				 if(customer != null && customer.size() > 0){
+					 emailExist = true;
+				 }
 			 }
 			 return emailExist;
 		 }
@@ -203,11 +207,13 @@ public class EngageCustomerManager {
 		Transaction transaction = null;
 		try{
 			boolean mobileExist = false;
+			System.out.println("Mobile--->"+customerMobile);
 			Session session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Query query = session.createQuery("from EngageCustomer where customerMobileNumber = :customerMobile");
 			query.setParameter("customerMobile", customerMobile);
 			List<EngageCustomer> customer = query.list();
+			log.debug("User:-->"+customer);
 			if(customer != null && customer.size() > 0){
 				mobileExist = true;
 			}
@@ -365,6 +371,7 @@ public class EngageCustomerManager {
 				for(EngageCustomer customer : customerList){
 					responseBean.setCustomerMobile(customer.getCustomerMobileNumber());
 					responseBean.setCustomerId(customer.getCustomerId());
+					responseBean.setCustomerEmail(customer.getCustomerEmail99());
 				}
 				responseBean.setMessage("Success");
 			}

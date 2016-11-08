@@ -5,6 +5,7 @@ public class MobileResponseBean {
 	private int customerId;
 	private String customerMobile;
 	private String message;
+	private String customerEmail;
 	public int getCustomerId() {
 		return customerId;
 	}
@@ -23,5 +24,10 @@ public class MobileResponseBean {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-
+	public String getCustomerEmail() {
+		return customerEmail;
+	}
+	public void setCustomerEmail(String customerEmail) {
+		this.customerEmail = customerEmail;
+	}
 }

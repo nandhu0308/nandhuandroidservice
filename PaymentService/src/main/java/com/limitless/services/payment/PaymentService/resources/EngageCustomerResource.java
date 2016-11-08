@@ -160,18 +160,16 @@ public class EngageCustomerResource {
 			EngageCustomerManager manager = new EngageCustomerManager();
 			boolean emailExists = manager.checkDuplicateEmail(requestBean.getEmailId());
 			boolean mobileExists = manager.checkDuplicateMobile(requestBean.getMobileNumber());
-			if(!requestBean.getEmailId().equals("")){
-				if(emailExists){
-					if(mobileExists){
-						responseBean.setEmailId(requestBean.getEmailId());
-						responseBean.setMobileNumber(requestBean.getMobileNumber());
-						responseBean.setMessage("Email/Mobile Exist");
-					}
-					else{
-						responseBean.setEmailId(requestBean.getEmailId());
-						responseBean.setMobileNumber(requestBean.getMobileNumber());
-						responseBean.setMessage("Email Exist");
-					}
+			if(emailExists){
+				if(mobileExists){
+					responseBean.setEmailId(requestBean.getEmailId());
+					responseBean.setMobileNumber(requestBean.getMobileNumber());
+					responseBean.setMessage("Email/Mobile Exist");
+				}
+				else{
+					responseBean.setEmailId(requestBean.getEmailId());
+					responseBean.setMobileNumber(requestBean.getMobileNumber());
+					responseBean.setMessage("Email Exist");
 				}
 			}
 			else if(mobileExists){
