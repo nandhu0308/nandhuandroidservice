@@ -26,6 +26,7 @@
   <mapping class="com.limitless.services.engage.dao.EngageSeller"/>
   <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentCredit"/>
   <mapping class="com.limitless.services.engage.upi.dao.UpiOrder"/>
+  <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentSettlement"/>
   
 
   
