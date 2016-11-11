@@ -35,6 +35,7 @@ public class PaymentSettlement implements java.io.Serializable {
 	private String errorDescriptionRelease;
 	@Column(name="SETTLEMENT_TIME")
 	@Temporal(TemporalType.TIMESTAMP)
+	@Version
 	private Date settlementTime;
 	public int getPsId() {
 		return psId;

@@ -1,0 +1,5 @@
+package com.limitless.services.payment.PaymentService.util;
+
+public class PaymentConstants {
+	public static final String AUTH_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMS0xMlQwMzo0Nzo0NS44NjlaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.1fVKxJzM-CUZ4yNl0KbFX_7yU2SnrpWfZ_j65H3RJJI";
+}

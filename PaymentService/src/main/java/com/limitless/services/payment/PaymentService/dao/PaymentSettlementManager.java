@@ -25,6 +25,7 @@ import com.limitless.services.payment.PaymentService.ReleaseFundsResponseBean;
 import com.limitless.services.payment.PaymentService.SettlementRequestBean;
 import com.limitless.services.payment.PaymentService.SettlementResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
+import com.limitless.services.payment.PaymentService.util.PaymentConstants;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -129,8 +130,8 @@ public class PaymentSettlementManager {
 						settlement.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
 						settlement.setTxnId(txn.getTxnId());
 					}
-
-					settlement.setSettlementTime(txn.getTxnUpdatedTime());
+					
+					//settlement.setSettlementTime(txn.getTxnUpdatedTime());
 
 					session.persist(settlement);
 
@@ -160,7 +161,7 @@ public class PaymentSettlementManager {
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/pgsettlement/");
 			ClientResponse clientResponse = webResource.type("application/json")
 					.accept("application/json")
-					.header("auth_token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMS0xMlQwMzo0Nzo0NS44NjlaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.1fVKxJzM-CUZ4yNl0KbFX_7yU2SnrpWfZ_j65H3RJJI")
+					.header("auth_token", PaymentConstants.AUTH_TOKEN)
 					.post(ClientResponse.class, requestBean);
 			String settlementResponse = clientResponse.getEntity(String.class);
 			log.debug("Settlement Response: "+ settlementResponse);
@@ -202,7 +203,7 @@ public class PaymentSettlementManager {
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/funds/release/");
 			ClientResponse clientResponse = webResource.type("application/json")
 					.accept("application/json")
-					.header("auth_token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMS0xMlQwMzo0Nzo0NS44NjlaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.1fVKxJzM-CUZ4yNl0KbFX_7yU2SnrpWfZ_j65H3RJJI")
+					.header("auth_token", PaymentConstants.AUTH_TOKEN)
 					.post(ClientResponse.class, requestBean);
 			String fundsResponse = clientResponse.getEntity(String.class);
 			log.debug("Release Funds Response: "+ fundsResponse);
