@@ -480,6 +480,7 @@ public class PaymentResource {
 			PaymentCredit credits = new PaymentCredit();
 			credits.setMerchantId(requestBean.getSellerId());
 			credits.setCreditAmount(requestBean.getCreditAmount());
+			credits.setDebitAmount(requestBean.getDebitAmount());
 			credits.setSellerId(seller.getCitrusSellerId());
 			credits.setTxnId(trans.getTxnId());
 			credits.setCustomerId(requestBean.getCustomerId());
