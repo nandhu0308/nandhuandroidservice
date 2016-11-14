@@ -24,13 +24,18 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.TxnDayWiseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
+import com.limitless.services.payment.PaymentService.TxnMonthWiseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -292,7 +297,7 @@ public class PaymentTxnManager {
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(PaymentTxn.class);
 			criteria.add(Restrictions.eq("citrusSellerId", citrusSellerId));
-			criteria.addOrder(Order.desc("txnUpdatedTime"));
+			criteria.addOrder(Order.desc("txnId"));
 			criteria.setMaxResults(10);
 			List<PaymentTxn> paymentList = criteria.list();
 			if(paymentList.size() > 0){
@@ -362,7 +367,7 @@ public class PaymentTxnManager {
 			Criterion csidCriterion = Restrictions.eq("citrusSellerId", citrusSellerId);
 			LogicalExpression logicalExpression = Restrictions.and(txnIdCriterion, csidCriterion);
 			criteria.add(logicalExpression);
-			criteria.addOrder(Order.desc("txnUpdatedTime"));
+			criteria.addOrder(Order.desc("txnId"));
 			criteria.setMaxResults(10);
 			List<PaymentTxn> paymentList = criteria.list();
 			if(paymentList.size() > 0){
@@ -418,6 +423,132 @@ public class PaymentTxnManager {
 			transaction.commit();
 		}
 		return sthBean;
+	}
+	
+	public SellerTxnHistoryBean getDayTxns(int citrusSellerId) throws Exception{
+		log.debug("Getting Daywise Txns");
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat txnSdf = new SimpleDateFormat("dd-MM-yyyy");
+			
+			Date now = new Date();
+			Calendar calendar = Calendar.getInstance();
+			
+			List<TxnDayWiseBean> dayBeanList = new ArrayList<TxnDayWiseBean>();
+			
+			for(int i=0;i<30;i++){
+				TxnDayWiseBean dayBean = new TxnDayWiseBean();
+				calendar.setTime(now);
+				calendar.add(Calendar.DATE, -i);
+				String date = txnSdf.format(calendar.getTime());
+				String txnDateStart = sdf.format(calendar.getTime()) + " 00:00:00";
+				String txnDateEnd = sdf.format(calendar.getTime()) + " 23:59:59";
+				log.debug("String Date : "+ txnDateStart);
+				log.debug("End Time : " + txnDateEnd);
+				SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				Date dateStart = sdf2.parse(txnDateStart);
+				Date dateEnd = sdf2.parse(txnDateEnd);
+				log.debug("DateStart : "+ dateStart);
+				log.debug("EndDate : "+ dateEnd);
+				
+				Criteria criteria = session.createCriteria(PaymentTxn.class);
+				Criterion csidCriterion = Restrictions.eq("citrusSellerId", citrusSellerId);
+				Criterion dateCriterion = Restrictions.between("txnUpdatedTime", dateStart, dateEnd);
+				LogicalExpression logicalExp = Restrictions.and(csidCriterion, dateCriterion);
+				criteria.add(logicalExp);
+				List<PaymentTxn> txns = criteria.list();
+				log.debug("Txns Size: "+txns.size());
+				
+				if(txns.size()>0){
+					double totalAmount = 0;
+					for(PaymentTxn txn : txns){
+						totalAmount = totalAmount + txn.getTxnAmount();
+					}
+					
+					dayBean.setTotalAmount(totalAmount);
+					dayBean.setDate(date);
+					dayBeanList.add(dayBean);
+					historyBean.setDayHistory(dayBeanList);
+					historyBean.setMessage("Success");
+				}
+				dayBean = null;
+			}
+			
+		}
+		catch(RuntimeException re){
+			log.error("Getting Daywise Txns Failed", re);
+			throw re;
+		}
+		finally {
+			transaction.commit();
+		}
+		return historyBean;
+	}
+	
+	public SellerTxnHistoryBean getMonthTxns(int citrusSellerId) throws Exception{
+		log.debug("Getting Monthly Txns");
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("MMM yyyy");
+			Date now = new Date();
+			Calendar calendar = Calendar.getInstance();
+			
+			List<TxnMonthWiseBean> monthBeanList = new ArrayList<TxnMonthWiseBean>();
+			
+			for(int i=0;i<12;i++){
+				TxnMonthWiseBean monthBean = new TxnMonthWiseBean();
+				 calendar.setTime(now);
+				 calendar.add(Calendar.MONTH, -i);
+				 String txnMonth = sdf2.format(calendar.getTime());
+				 String txnMonthStart = sdf1.format(calendar.getTime())+"-01 00:00:00";
+				 String txnMonthEnd = sdf1.format(calendar.getTime())+"-31 23:59:59";
+				 log.debug("Start : "+txnMonthStart);
+				 log.debug("End : " + txnMonthEnd );
+				 SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				 Date startDate = sdf3.parse(txnMonthStart);
+				 Date endDate = sdf3.parse(txnMonthEnd);
+				 
+				 Criteria criteria = session.createCriteria(PaymentTxn.class);
+				 Criterion csidCriterion = Restrictions.eq("citrusSellerId", citrusSellerId);
+				 Criterion dateCriterion = Restrictions.between("txnUpdatedTime", startDate, endDate);
+				 LogicalExpression logicalExp = Restrictions.and(csidCriterion, dateCriterion);
+				 criteria.add(logicalExp);
+			     List<PaymentTxn> txns = criteria.list();
+				 log.debug("Txns Size: "+txns.size());
+				 
+				 if(txns.size()>0){
+						double totalAmount = 0;
+						for(PaymentTxn txn : txns){
+							totalAmount = totalAmount + txn.getTxnAmount();
+						}
+						
+						monthBean.setTotalAmount(totalAmount);
+						monthBean.setMonth(txnMonth);
+						monthBeanList.add(monthBean);
+						historyBean.setMonthHistory(monthBeanList);
+						historyBean.setMessage("Success");
+					}
+					monthBean = null;
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Getting Monthly Txns Failed", re);
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return historyBean;
 	}
 	
 	public static void main(String[] args) {

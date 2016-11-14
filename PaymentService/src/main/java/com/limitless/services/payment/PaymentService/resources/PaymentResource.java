@@ -497,5 +497,37 @@ public class PaymentResource {
 		}
 		return responseBean;
 	}
+	
+	@GET
+	@Path("/trans/day/{citrusSellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean transDays(@PathParam("citrusSellerId") int citrusSellerId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getDayTxns(citrusSellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/trans/month/{citrusSellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean transMonths(@PathParam("citrusSellerId") int citrusSellerId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getMonthTxns(citrusSellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
 
 }
