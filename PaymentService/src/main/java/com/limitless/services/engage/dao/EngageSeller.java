@@ -59,6 +59,8 @@ public class EngageSeller implements java.io.Serializable {
 	@Column(name="SELLER_UPDATED_TIME")
 	@Version
 	private Date sellerUpdatedTime;
+	@Column(name="SELLER_TYPE")
+	private String sellerType;
 
 	public EngageSeller() {
 	}
@@ -251,6 +253,13 @@ public class EngageSeller implements java.io.Serializable {
 	public void setSellerDeviceId(String sellerDeviceId) {
 		this.sellerDeviceId = sellerDeviceId;
 	}
-	
-	
+
+	public String getSellerType() {
+		return sellerType;
+	}
+
+	public void setSellerType(String sellerType) {
+		this.sellerType = sellerType;
+	}
+
 }
