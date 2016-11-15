@@ -15,6 +15,7 @@ public class TxnHistoryBean {
 	private int splitId;
 	private String txtStatus;
 	private String txnTime;
+	private PaymentsSettlementResponseBean settlement;
 	
 	public TxnHistoryBean(){
 		
@@ -108,6 +109,14 @@ public class TxnHistoryBean {
 
 	public void setCustomerName(String customerName) {
 		this.customerName = customerName;
+	}
+
+	public PaymentsSettlementResponseBean getSettlement() {
+		return settlement;
+	}
+
+	public void setSettlement(PaymentsSettlementResponseBean settlement) {
+		this.settlement = settlement;
 	}
 
 }

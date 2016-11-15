@@ -5,6 +5,11 @@ public class PaymentsSettlementResponseBean {
 	private int settlementId;
 	private int releasefundRefId;
 	private String message;
+	private double settlementAmount;
+	private String errorIdSettle;
+	private String errorDescriptionSettle;
+	private String errorIdRelease;
+	private String errorDescriptionRelease;
 	public int getPsId() {
 		return psId;
 	}
@@ -28,5 +33,35 @@ public class PaymentsSettlementResponseBean {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public double getSettlementAmount() {
+		return settlementAmount;
+	}
+	public void setSettlementAmount(double settlementAmount) {
+		this.settlementAmount = settlementAmount;
+	}
+	public String getErrorIdSettle() {
+		return errorIdSettle;
+	}
+	public void setErrorIdSettle(String errorIdSettle) {
+		this.errorIdSettle = errorIdSettle;
+	}
+	public String getErrorDescriptionSettle() {
+		return errorDescriptionSettle;
+	}
+	public void setErrorDescriptionSettle(String errorDescriptionSettle) {
+		this.errorDescriptionSettle = errorDescriptionSettle;
+	}
+	public String getErrorIdRelease() {
+		return errorIdRelease;
+	}
+	public void setErrorIdRelease(String errorIdRelease) {
+		this.errorIdRelease = errorIdRelease;
+	}
+	public String getErrorDescriptionRelease() {
+		return errorDescriptionRelease;
+	}
+	public void setErrorDescriptionRelease(String errorDescriptionRelease) {
+		this.errorDescriptionRelease = errorDescriptionRelease;
 	}
 }

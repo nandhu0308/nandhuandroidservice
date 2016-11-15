@@ -32,6 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
+import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnDayWiseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
@@ -335,6 +336,21 @@ public class PaymentTxnManager {
 					calendar.add(Calendar.MINUTE, 30);
 					String localTime = sdf.format(calendar.getTime());
 					bean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", payment.getTxnId()));
+					List<PaymentSettlement> settlements = criteria3.list();
+					for(PaymentSettlement settlement : settlements){
+						PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+						responseBean.setPsId(settlement.getPsId());
+						responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+						responseBean.setSettlementId(settlement.getSettlementId());
+						responseBean.setSettlementAmount(settlement.getSettlementAmount());
+						responseBean.setErrorIdSettle(settlement.getErrorIdSettle());
+						responseBean.setErrorDescriptionSettle(settlement.getErrorDescriptionSettle());
+						responseBean.setErrorIdRelease(settlement.getErrorIdRelease());
+						responseBean.setErrorDescriptionRelease(settlement.getErrorDescriptionRelease());
+						bean.setSettlement(responseBean);
+					}
 					historyBeanList.add(bean);
 					bean = null;
 				}
@@ -405,6 +421,17 @@ public class PaymentTxnManager {
 					calendar.add(Calendar.MINUTE, 30);
 					String localTime = sdf.format(calendar.getTime());
 					bean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", payment.getTxnId()));
+					List<PaymentSettlement> settlements = criteria3.list();
+					for(PaymentSettlement settlement : settlements){
+						PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+						responseBean.setPsId(settlement.getPsId());
+						responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+						responseBean.setSettlementId(settlement.getSettlementId());
+						responseBean.setSettlementAmount(settlement.getSettlementAmount());
+						bean.setSettlement(responseBean);
+					}
 					historyBeanList.add(bean);
 					bean = null;
 				}

@@ -16,6 +16,7 @@ import javax.persistence.Version;
 public class PaymentSettlement implements java.io.Serializable {
 	@Id
 	@GeneratedValue
+	@Column(name="PS_ID")
 	private int psId;
 	@Column(name="TXN_ID")
 	private int txnId;

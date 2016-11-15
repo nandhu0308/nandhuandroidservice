@@ -1,7 +1,5 @@
 package com.limitless.services.payment.PaymentService;
 
-import java.util.Date;
-
 public class SettlementRequestBean {
 	private int trans_id;
 	private String settlement_ref;

@@ -37,7 +37,7 @@ public class PaymentSettlementManager {
 	private static final Log log = LogFactory.getLog(PaymentTxnManager.class);
 	Client client = RestClientUtil.createClient();
 	
-	public List<PaymentsSettlementResponseBean> doSettlement() throws Exception{
+	public List<PaymentsSettlementResponseBean> doSettlement(int days) throws Exception{
 		log.debug("Transaction settlement");
 		List<PaymentsSettlementResponseBean> respBeanList = new ArrayList<PaymentsSettlementResponseBean>();
 		Transaction transaction = null;
@@ -46,9 +46,9 @@ public class PaymentSettlementManager {
 			Date now = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(now);
-			calendar.add(Calendar.DATE, -1);
+			calendar.add(Calendar.DATE, -days);
 			String txnDateStart = sdf.format(calendar.getTime())+" 00:00:00";
-			calendar.add(Calendar.DATE, 1);
+			calendar.add(Calendar.DATE, days);
 			String txnDateEnd = sdf.format(calendar.getTime())+" 00:00:00";
 			log.debug("StartTime" + txnDateStart);
 			log.debug("EndTime" + txnDateEnd);

@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -20,21 +21,43 @@ public class PaymentSettlementResource {
 	final static Logger logger = Logger.getLogger(PaymentResource.class);
 	
 	@GET
-	@Path("/payments")
+	@Path("/payments/{days}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<PaymentsSettlementResponseBean> settlePaymenets() throws Exception{
+	public List<PaymentsSettlementResponseBean> settlePaymenets(@PathParam("days") int days) throws Exception{
 		List<PaymentsSettlementResponseBean> respBeanList = new ArrayList<PaymentsSettlementResponseBean>();
 		try{
 			PaymentsSettlementResponseBean bean = new PaymentsSettlementResponseBean();
-			Calendar calendar = Calendar.getInstance();
-			int hour = calendar.get(Calendar.HOUR_OF_DAY);
-			int minute = calendar.get(Calendar.MINUTE);
-			if(hour == 12 && (minute >= 45 && minute <=59)){
+			if(days == 0){
+//				Calendar calendar = Calendar.getInstance();
+//				int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//				int minute = calendar.get(Calendar.MINUTE);
+//				if(hour == 12 && (minute >= 45 && minute <=59)){
+					PaymentSettlementManager manager = new PaymentSettlementManager();
+					respBeanList = manager.doSettlement(1);
+//				}
+//				else{
+//					bean.setMessage("API call not allowed at this time");
+//					respBeanList.add(bean);
+//				}
+			}
+			else if(days == 1){
 				PaymentSettlementManager manager = new PaymentSettlementManager();
-				respBeanList = manager.doSettlement();
+				respBeanList = manager.doSettlement(2);
+			}
+			else if(days == 2){
+				PaymentSettlementManager manager = new PaymentSettlementManager();
+				respBeanList = manager.doSettlement(3);
+			}
+			else if(days == 3){
+				PaymentSettlementManager manager = new PaymentSettlementManager();
+				respBeanList = manager.doSettlement(4);
+			}
+			else if(days == 4){
+				PaymentSettlementManager manager = new PaymentSettlementManager();
+				respBeanList = manager.doSettlement(4);
 			}
 			else{
-				bean.setMessage("API call not allowed at this time");
+				bean.setMessage("Not more than 4 days allowed!");
 				respBeanList.add(bean);
 			}
 		}
