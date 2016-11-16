@@ -10,6 +10,7 @@ public class SellerLoginResponseBean {
 	private int status;
 	private String sellerAddress;
 	private String sellerCity;
+	private String sellerType;
 	public String getSellerName() {
 		return sellerName;
 	}
@@ -57,5 +58,11 @@ public class SellerLoginResponseBean {
 	}
 	public void setCitrusSellerId(int citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
+	}
+	public String getSellerType() {
+		return sellerType;
+	}
+	public void setSellerType(String sellerType) {
+		this.sellerType = sellerType;
 	}
 }
