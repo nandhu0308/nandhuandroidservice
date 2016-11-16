@@ -151,4 +151,20 @@ public class EngageSellerResource {
 		return coords;
 	}
 	
+	@GET
+	@Path("/get/{sellerMobileNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
+		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.getSellerByMobile(sellerMobileNumber);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
 }

@@ -331,6 +331,40 @@ public class EngageSellerManager {
 		return sellerDeviceId;
 	}
 	
+	public SellerLoginResponseBean getSellerByMobile(String sellerMobileNumber){
+		log.debug("Getting seller details by mobile");
+		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.eq("sellerMobileNumber", sellerMobileNumber));
+			List<EngageSeller> sellerList = criteria.list();
+			log.debug("Size : " + sellerList.size());
+			if(sellerList.size()>0){
+				for(EngageSeller seller : sellerList){
+					responseBean.setSellerId(seller.getSellerId());
+					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
+					responseBean.setSellerName(seller.getSellerName());
+					responseBean.setSellerType(seller.getSellerType());
+					responseBean.setMessage("Success");
+				}
+			}
+			else{
+				responseBean.setMessage("Mobile Number Not Registered");
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Getting seller details by mobile failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return responseBean;
+	}
+	
 	/*public static void main(String[] args) {
 		EngageSellerManager manager = new EngageSellerManager();
 		manager.findById(325);
