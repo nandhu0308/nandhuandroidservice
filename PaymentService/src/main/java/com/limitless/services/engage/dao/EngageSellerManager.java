@@ -220,7 +220,7 @@ public class EngageSellerManager {
 				for(EngageSeller seller : sellerList){
 					respBean.setSellerId(seller.getSellerId());
 					sellerId = seller.getSellerId();
-					respBean.setSellerName(seller.getSellerName());
+					respBean.setSellerName(seller.getSellerShopName());
 					respBean.setMobileNumber(seller.getSellerMobileNumber());
 					respBean.setSellerAddress(seller.getSellerAddress());
 					respBean.setSellerCity(seller.getSellerCity());
