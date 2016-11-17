@@ -503,6 +503,9 @@ public class PaymentTxnManager {
 					historyBean.setDayHistory(dayBeanList);
 					historyBean.setMessage("Success");
 				}
+				else{
+					historyBean.setMessage("No Record Found");
+				}
 				dayBean = null;
 			}
 			
@@ -564,6 +567,9 @@ public class PaymentTxnManager {
 						monthBeanList.add(monthBean);
 						historyBean.setMonthHistory(monthBeanList);
 						historyBean.setMessage("Success");
+					}
+				 else{
+						historyBean.setMessage("No Record Found");
 					}
 					monthBean = null;
 			}
