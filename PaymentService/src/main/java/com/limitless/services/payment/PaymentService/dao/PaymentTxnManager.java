@@ -461,7 +461,7 @@ public class PaymentTxnManager {
 			transaction = session.beginTransaction();
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat txnSdf = new SimpleDateFormat("dd-MM-yyyy");
+			SimpleDateFormat txnSdf = new SimpleDateFormat("dd MMM yyyy");
 			
 			Date now = new Date();
 			Calendar calendar = Calendar.getInstance();
@@ -501,12 +501,15 @@ public class PaymentTxnManager {
 					dayBean.setDate(date);
 					dayBeanList.add(dayBean);
 					historyBean.setDayHistory(dayBeanList);
-					historyBean.setMessage("Success");
-				}
-				else{
-					historyBean.setMessage("No Record Found");
+					
 				}
 				dayBean = null;
+			}
+			if(dayBeanList.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			else if(dayBeanList.size()>0){
+				historyBean.setMessage("Success");
 			}
 			
 		}
@@ -566,12 +569,16 @@ public class PaymentTxnManager {
 						monthBean.setMonth(txnMonth);
 						monthBeanList.add(monthBean);
 						historyBean.setMonthHistory(monthBeanList);
-						historyBean.setMessage("Success");
+						
 					}
-				 else{
-						historyBean.setMessage("No Record Found");
-					}
+				
 					monthBean = null;
+			}
+			if(monthBeanList.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			else if(monthBeanList.size()>0){
+				historyBean.setMessage("Success");
 			}
 		}
 		catch(RuntimeException re){

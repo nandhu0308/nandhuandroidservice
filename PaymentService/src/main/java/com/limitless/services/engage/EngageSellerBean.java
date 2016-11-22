@@ -4,6 +4,7 @@ public class EngageSellerBean {
 	
 	private int citrusSellerId;
 	private String sellerName;
+	private String sellerShopName;
 	private String emailId;
 	private String passwd;
 	private String countryCode;
@@ -116,5 +117,11 @@ public class EngageSellerBean {
 	}
 	public void setSellerType(String sellerType) {
 		this.sellerType = sellerType;
+	}
+	public String getSellerShopName() {
+		return sellerShopName;
+	}
+	public void setSellerShopName(String sellerShopName) {
+		this.sellerShopName = sellerShopName;
 	}
 }

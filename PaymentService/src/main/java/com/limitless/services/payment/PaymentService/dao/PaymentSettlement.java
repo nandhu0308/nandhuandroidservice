@@ -38,6 +38,8 @@ public class PaymentSettlement implements java.io.Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	private Date settlementTime;
+	@Column(name="SETTLEMENT_STATUS")
+	private String settlementStatus;
 	public int getPsId() {
 		return psId;
 	}
@@ -97,5 +99,11 @@ public class PaymentSettlement implements java.io.Serializable {
 	}
 	public void setSettlementAmount(double settlementAmount) {
 		this.settlementAmount = settlementAmount;
+	}
+	public String getSettlementStatus() {
+		return settlementStatus;
+	}
+	public void setSettlementStatus(String settlementStatus) {
+		this.settlementStatus = settlementStatus;
 	}
 }

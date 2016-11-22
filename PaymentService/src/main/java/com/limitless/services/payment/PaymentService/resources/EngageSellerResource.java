@@ -53,6 +53,7 @@ public class EngageSellerResource {
 			seller.setSellerDeviceId(bean.getSellerDeviceId());
 			seller.setSellerCountry(bean.getCountry());
 			seller.setSellerType(bean.getSellerType());
+			seller.setSellerShopName(bean.getSellerShopName());
 			
 			seller.setSellerKycDocType(bean.getKycDocType());
 			seller.setSellerKycDocValue(bean.getKycDocValue());
