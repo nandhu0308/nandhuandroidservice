@@ -40,6 +40,10 @@ String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQ
 String creditAmountStr = request.getParameter("credamt");
 String debitAmountStr = request.getParameter("debamt");
 String txnNotes = request.getParameter("notes");
+if(txnNotes==null)
+{
+	txnNotes="NA";
+}
 
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              

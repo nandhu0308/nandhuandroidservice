@@ -226,6 +226,7 @@ public class EngageSellerManager {
 					respBean.setSellerCity(seller.getSellerCity());
 					respBean.setCitrusSellerId(seller.getCitrusSellerId());
 					respBean.setSellerType(seller.getSellerType());
+					respBean.setSellerRole(seller.getSellerRole());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 				}

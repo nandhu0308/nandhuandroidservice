@@ -14,6 +14,7 @@ public class EngageSellerBean {
 	private String sellerDeviceId;
 	private String mobileNumber;
 	private String sellerType;
+	private String sellerRole;
 	
 	private float latitude;
 	private float longitude;
@@ -123,5 +124,11 @@ public class EngageSellerBean {
 	}
 	public void setSellerShopName(String sellerShopName) {
 		this.sellerShopName = sellerShopName;
+	}
+	public String getSellerRole() {
+		return sellerRole;
+	}
+	public void setSellerRole(String sellerRole) {
+		this.sellerRole = sellerRole;
 	}
 }

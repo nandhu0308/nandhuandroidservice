@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
+import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
@@ -319,7 +320,8 @@ public class PaymentTxnManager {
 					}
 					bean.setCustomerId(payment.getEngageCustomerId());
 					int customerId = payment.getEngageCustomerId();
-					EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
 					bean.setCustomerName(customer.getCustomerName());
 					bean.setSellerId(payment.getSellerId());
 					bean.setSellerName(payment.getSellerName());
@@ -404,7 +406,8 @@ public class PaymentTxnManager {
 					}
 					bean.setCustomerId(payment.getEngageCustomerId());
 					int customerId = payment.getEngageCustomerId();
-					EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
 					bean.setCustomerName(customer.getCustomerName());
 					bean.setSellerId(payment.getSellerId());
 					bean.setSellerName(payment.getSellerName());
@@ -589,6 +592,167 @@ public class PaymentTxnManager {
 			transaction.commit();
 		}
 		return historyBean;
+	}
+	
+	public GeneralSellerTxnHistoryBean getGenSellerTxns(int merchantId) throws Exception{
+		log.debug("Getting seller Txn History");
+		GeneralSellerTxnHistoryBean genHistoryBean = new GeneralSellerTxnHistoryBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(PaymentTxn.class);
+			criteria.add(Restrictions.eq("sellerId", merchantId));
+			criteria.addOrder(Order.desc("txnId"));
+			criteria.setMaxResults(10);
+			List<PaymentTxn> txnList = criteria.list();
+			log.debug("Txns Size : "+ txnList.size());
+			if(txnList.size()>0){
+				List<TxnHistoryBean> historyList = new ArrayList<TxnHistoryBean>();
+				for(PaymentTxn txn : txnList){
+					TxnHistoryBean historyBean = new TxnHistoryBean();
+					int txnId = txn.getTxnId();
+					historyBean.setTxnId(txnId);
+					Criteria criteria2 = session.createCriteria(PaymentCredit.class);
+					criteria2.add(Restrictions.eq("txnId", txnId));
+					List<PaymentCredit> credits = criteria2.list();
+					log.debug("Credits Size: "+ credits.size());
+					if(credits.size()>0){
+						for(PaymentCredit credit : credits){
+							historyBean.setCreditAmount(credit.getCreditAmount());
+						}
+					}
+					int customerId = txn.getEngageCustomerId();
+					historyBean.setCustomerId(customerId);
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+					historyBean.setCustomerName(customer.getCustomerName());
+					historyBean.setTxtAmount(txn.getTxnAmount());
+					historyBean.setSellerId(txn.getSellerId());
+					historyBean.setSellerName(txn.getSellerName());
+					String gmtTime = txn.getTxnUpdatedTime().toString();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date date = sdf.parse(gmtTime);
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(date);
+					calendar.add(Calendar.HOUR, 5);
+					calendar.add(Calendar.MINUTE, 30);
+					String localTime = sdf.format(calendar.getTime());
+					historyBean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", txnId));
+					List<PaymentSettlement> settlementList = criteria3.list();
+					log.debug("Settlement List : "+ settlementList.size());
+					if(settlementList.size()>0){
+						for(PaymentSettlement settlement : settlementList){
+							PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+							responseBean.setPsId(settlement.getPsId());
+							responseBean.setSettlementId(settlement.getSettlementId());
+							responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+							responseBean.setSettlementAmount(settlement.getSettlementAmount());
+							historyBean.setSettlement(responseBean);
+						}
+					}
+					historyList.add(historyBean);
+					historyBean = null;
+				}
+				genHistoryBean.setTxnHistory(historyList);
+				genHistoryBean.setMessage("Success");
+			}
+			else{
+				genHistoryBean.setMessage("No Record Found");
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Getting seller Txn History failed");
+			throw re;
+		}
+		finally{
+			transaction.commit();
+		}
+		return genHistoryBean;
+	}
+	
+	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(int merchantId, int firstTxnId) throws Exception{
+		log.debug("Getting Seller Txn History Pagination");
+		GeneralSellerTxnHistoryBean genHistoryBean = new GeneralSellerTxnHistoryBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(PaymentTxn.class);
+			Criterion txnIdCriterion = Restrictions.lt("txnId", firstTxnId);
+			Criterion merchantCriterion = Restrictions.eq("sellerId", merchantId);
+			LogicalExpression logExp = Restrictions.and(txnIdCriterion, merchantCriterion);
+			criteria.add(logExp);
+			criteria.addOrder(Order.desc("txnId"));
+			criteria.setMaxResults(10);
+			List<PaymentTxn> txnList = criteria.list();
+			log.debug("Txns Size : "+ txnList.size());
+			if(txnList.size()>0){
+				List<TxnHistoryBean> historyList = new ArrayList<TxnHistoryBean>();
+				for(PaymentTxn txn : txnList){
+					TxnHistoryBean historyBean = new TxnHistoryBean();
+					int txnId = txn.getTxnId();
+					historyBean.setTxnId(txnId);
+					Criteria criteria2 = session.createCriteria(PaymentCredit.class);
+					criteria2.add(Restrictions.eq("txnId", txnId));
+					List<PaymentCredit> credits = criteria2.list();
+					log.debug("Credits Size: "+ credits.size());
+					if(credits.size()>0){
+						for(PaymentCredit credit : credits){
+							historyBean.setCreditAmount(credit.getCreditAmount());
+						}
+					}
+					int customerId = txn.getEngageCustomerId();
+					historyBean.setCustomerId(customerId);
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+					historyBean.setCustomerName(customer.getCustomerName());
+					historyBean.setTxtAmount(txn.getTxnAmount());
+					historyBean.setSellerId(txn.getSellerId());
+					historyBean.setSellerName(txn.getSellerName());
+					String gmtTime = txn.getTxnUpdatedTime().toString();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date date = sdf.parse(gmtTime);
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(date);
+					calendar.add(Calendar.HOUR, 5);
+					calendar.add(Calendar.MINUTE, 30);
+					String localTime = sdf.format(calendar.getTime());
+					historyBean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", txnId));
+					List<PaymentSettlement> settlementList = criteria3.list();
+					log.debug("Settlement List : "+ settlementList.size());
+					if(settlementList.size()>0){
+						for(PaymentSettlement settlement : settlementList){
+							PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+							responseBean.setPsId(settlement.getPsId());
+							responseBean.setSettlementId(settlement.getSettlementId());
+							responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+							responseBean.setSettlementAmount(settlement.getSettlementAmount());
+							historyBean.setSettlement(responseBean);
+						}
+					}
+					historyList.add(historyBean);
+					historyBean = null;
+				}
+				genHistoryBean.setTxnHistory(historyList);
+				genHistoryBean.setMessage("Success");
+			}
+			else{
+				genHistoryBean.setMessage("No Record Found");
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Getting seller Txn History failed");
+			throw re;
+		}
+		finally {
+			transaction.commit();
+		}
+		return genHistoryBean;
 	}
 	
 	public static void main(String[] args) {

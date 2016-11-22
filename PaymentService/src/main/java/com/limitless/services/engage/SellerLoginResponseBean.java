@@ -11,6 +11,7 @@ public class SellerLoginResponseBean {
 	private String sellerAddress;
 	private String sellerCity;
 	private String sellerType;
+	private String sellerRole;
 	public String getSellerName() {
 		return sellerName;
 	}
@@ -64,5 +65,11 @@ public class SellerLoginResponseBean {
 	}
 	public void setSellerType(String sellerType) {
 		this.sellerType = sellerType;
+	}
+	public String getSellerRole() {
+		return sellerRole;
+	}
+	public void setSellerRole(String sellerRole) {
+		this.sellerRole = sellerRole;
 	}
 }

@@ -30,6 +30,7 @@ import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
 import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
 import com.limitless.services.payment.PaymentService.NotificationResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -524,6 +525,38 @@ public class PaymentResource {
 		try{
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getMonthTxns(citrusSellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("trans/gen/{merchantId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralSellerTxnHistoryBean getGenSellerTxns(@PathParam("merchantId") int merchantId) throws Exception{
+		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenSellerTxns(merchantId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/trans/gen/{merchantId}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(@PathParam("merchantId") int merchantId, @PathParam("firstTxnId") int firstTxnId) throws Exception{
+		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenSellerTxnsPagination(merchantId, firstTxnId);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

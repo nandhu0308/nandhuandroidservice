@@ -63,6 +63,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerType;
 	@Column(name="SELLER_SHOP_NAME")
 	private String sellerShopName;
+	@Column(name="SELLER_ROLE")
+	private String sellerRole;
 
 	public EngageSeller() {
 	}
@@ -271,4 +273,13 @@ public class EngageSeller implements java.io.Serializable {
 	public void setSellerShopName(String sellerShopName) {
 		this.sellerShopName = sellerShopName;
 	}
+
+	public String getSellerRole() {
+		return sellerRole;
+	}
+
+	public void setSellerRole(String sellerRole) {
+		this.sellerRole = sellerRole;
+	}
+	
 }
