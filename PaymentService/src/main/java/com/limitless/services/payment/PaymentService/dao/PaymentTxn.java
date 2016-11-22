@@ -52,6 +52,8 @@ public class PaymentTxn implements java.io.Serializable {
 	@Column(name="TXN_UPDATED_TIME")
 	@Version
 	private Date txnUpdatedTime;
+	@Column(name="TXN_NOTES")
+	private String txnNotes;
 
 	public PaymentTxn() {
 	}
@@ -176,6 +178,14 @@ public class PaymentTxn implements java.io.Serializable {
 
 	public void setCitrusSellerId(int citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
+	}
+
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
 	}
 	
 }

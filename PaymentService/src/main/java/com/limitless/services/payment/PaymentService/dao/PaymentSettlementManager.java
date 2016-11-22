@@ -155,7 +155,21 @@ public class PaymentSettlementManager {
 								instance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
 							}
 							else if(instance.getSettlementStatus().equals("SETTLE_INITIATED")){
-								
+								if(instance.getSettlementId()==0){
+									instance.setSettlementId(settlementResponseBean.getSettlementId());
+								}
+								else{
+									instance.setErrorIdSettle(settlementResponseBean.getErrorId());
+									instance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
+								}
+								if(instance.getReleasefundRefId()==0){
+									instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
+									instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+								}
+								else{
+									instance.setErrorIdRelease(fundsResponseBean.getErrorId());
+									instance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
+								}
 							}
 							
 							

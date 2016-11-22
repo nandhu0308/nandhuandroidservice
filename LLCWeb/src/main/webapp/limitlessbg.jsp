@@ -39,6 +39,7 @@ String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQ
 
 String creditAmountStr = request.getParameter("credamt");
 String debitAmountStr = request.getParameter("debamt");
+String txnNotes = request.getParameter("notes");
 
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              
@@ -62,6 +63,12 @@ bean.setSellerName(sellerName);
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 bean.setSellerDeviceId(sellerDeviceId);
+if(txnNotes.equals("NA")){
+	bean.setTxnNotes("NA");
+}
+else{
+	bean.setTxnNotes(txnNotes);
+}
 
 TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization","Basic " + userString).post(TxnResponseBean.class, bean);
 System.out.println("Txn Id: " + txnResponse.getTxnId());

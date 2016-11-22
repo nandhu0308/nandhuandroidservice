@@ -112,6 +112,7 @@ public class PaymentResource {
 			paymentTxn.setSellerName(bean.getSellerName());
 			paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
 			paymentTxn.setSellerDeviceId(bean.getSellerDeviceId());
+			paymentTxn.setTxnNotes(bean.getTxnNotes());
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			manager.persist(paymentTxn);
@@ -473,6 +474,7 @@ public class PaymentResource {
 			trans.setSellerDeviceId(seller.getSellerDeviceId());
 			trans.setTxnStatus(requestBean.getStatus());
 			trans.setTxnAmount(requestBean.getTransAmount());
+			trans.setTxnNotes(requestBean.getTxnNotes());
 
 			PaymentTxnManager txnManager = new PaymentTxnManager();
 			txnManager.persist(trans);
