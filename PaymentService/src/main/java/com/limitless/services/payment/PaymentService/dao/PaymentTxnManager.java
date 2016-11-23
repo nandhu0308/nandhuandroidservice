@@ -755,6 +755,77 @@ public class PaymentTxnManager {
 		return genHistoryBean;
 	}
 	
+	public SellerTxnHistoryBean getGenDayWiseTxn(int merchantId) throws Exception{
+		log.debug("Getting day wise txns");
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat txnSdf = new SimpleDateFormat("dd MMM yyyy");
+			
+			Date now = new Date();
+			Calendar calendar = Calendar.getInstance();
+			
+			List<TxnDayWiseBean> dayBeanList = new ArrayList<TxnDayWiseBean>();
+			
+			for(int i=0;i<30;i++){
+				TxnDayWiseBean dayBean = new TxnDayWiseBean();
+				calendar.setTime(now);
+				calendar.add(Calendar.DATE, -i);
+				String date = txnSdf.format(calendar.getTime());
+				String txnDateStart = sdf.format(calendar.getTime()) + " 00:00:00";
+				String txnDateEnd = sdf.format(calendar.getTime()) + " 23:59:59";
+				log.debug("String Date : "+ txnDateStart);
+				log.debug("End Time : " + txnDateEnd);
+				SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				Date dateStart = sdf2.parse(txnDateStart);
+				Date dateEnd = sdf2.parse(txnDateEnd);
+				log.debug("DateStart : "+ dateStart);
+				log.debug("EndDate : "+ dateEnd);
+				
+				Criteria criteria = session.createCriteria(PaymentTxn.class);
+				Criterion csidCriterion = Restrictions.eq("sellerId", merchantId);
+				Criterion dateCriterion = Restrictions.between("txnUpdatedTime", dateStart, dateEnd);
+				LogicalExpression logicalExp = Restrictions.and(csidCriterion, dateCriterion);
+				criteria.add(logicalExp);
+				List<PaymentTxn> txns = criteria.list();
+				log.debug("Txns Size: "+txns.size());
+				
+				if(txns.size()>0){
+					double totalAmount = 0;
+					for(PaymentTxn txn : txns){
+						totalAmount = totalAmount + txn.getTxnAmount();
+					}
+					
+					dayBean.setTotalAmount(totalAmount);
+					dayBean.setDate(date);
+					dayBeanList.add(dayBean);
+					historyBean.setDayHistory(dayBeanList);
+					
+				}
+				dayBean = null;
+			}
+			if(dayBeanList.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			else if(dayBeanList.size()>0){
+				historyBean.setMessage("Success");
+			}
+			
+		}
+		catch(RuntimeException re){
+			log.error("Getting seller Txn History failed");
+			throw re;
+		}
+		finally {
+			
+		}
+		return historyBean;
+	}
+	
 	public static void main(String[] args) {
 		PaymentTxnManager manager = new PaymentTxnManager();
 		//manager.updateSplitId(946706, 28698, 31747, TxnStatus.PAYMENT_SUCCESSFUL.toString());

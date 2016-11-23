@@ -574,5 +574,21 @@ public class PaymentResource {
 		}
 		return historyBean;
 	}
+	
+	@GET
+	@Path("/trans/gen/day/{merchantId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean genDayTxns(@PathParam("merchantId") int merchantId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenDayWiseTxn(merchantId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
 
 }
