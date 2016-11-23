@@ -23,6 +23,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.SellerCreditsResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
@@ -245,6 +246,38 @@ public class PaymentCreditManager {
 			transaction.commit();
 		}
 		return creditsList;
+	}
+	
+	public CreditRespBean updateCreditDebitTrans(int txnId){
+		log.debug("Updating Credit/Debit Trans");
+		CreditRespBean respBean = new CreditRespBean();
+		Transaction transaction = null;
+		try{
+			Session session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(PaymentCredit.class);
+			criteria.add(Restrictions.eq("txnId", txnId));
+			List<PaymentCredit> credits = criteria.list();
+			log.debug("Credits Size: "+ credits.size());
+			if(credits.size()>0){
+				for(PaymentCredit credit : credits){
+					credit.setCreditAmount(credit.getCreditTemp());
+					credit.setDebitAmount(credit.getDebitTemp());
+					respBean.setCreditId(credit.getCreditId());
+					respBean.setMessage("Success");
+				}
+			}
+			else if(credits.isEmpty()){
+				respBean.setMessage("Failed");
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Updating Credit/Debit Trans failed" + re);
+		}
+		finally{
+			transaction.commit();
+		}
+		return respBean;
 	}
 
 }

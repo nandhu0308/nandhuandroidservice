@@ -95,8 +95,8 @@ if(creditAmountStr != null || debitAmountStr != null){
 		
 		CreditBean creditBean = new CreditBean();
 		creditBean.setTxnId(txnId);
-		creditBean.setCreditAmount(creditAmount);
-		creditBean.setDebitAmount(debitAmount);
+		creditBean.setCreditTemp(creditAmount);
+		creditBean.setDebitTemp(debitAmount);
 		creditBean.setSellerId(Integer.parseInt(citrusSellerId));
 		creditBean.setCustomerId(Integer.parseInt(buyerId));
 		creditBean.setMerchantId(Integer.parseInt(sellerId));

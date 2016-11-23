@@ -299,6 +299,16 @@ public class PaymentResource {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.findById(id);
 			EngageSellerManager sellerMgr = new EngageSellerManager();
+			
+			PaymentCreditManager creditManager = new PaymentCreditManager();
+			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
+			
+			if(respBean.getMessage().equals("Success")){
+				System.out.println("Credit/Debit Trans Success");
+			}
+			else if(respBean.getMessage().equals("Failed")){
+				System.out.println("Not Credit/Debit Trans");
+			}
 
 			int txnId = paymentTxn.getTxnId();
 			int citrusSellerId = paymentTxn.getCitrusSellerId();
@@ -378,8 +388,8 @@ public class PaymentResource {
 		try {
 			PaymentCredit paymentCredit = new PaymentCredit();
 			paymentCredit.setTxnId(bean.getTxnId());
-			paymentCredit.setCreditAmount(bean.getCreditAmount());
-			paymentCredit.setDebitAmount(bean.getDebitAmount());
+			paymentCredit.setCreditTemp(bean.getCreditTemp());
+			paymentCredit.setDebitTemp(bean.getDebitTemp());
 			paymentCredit.setSellerId(bean.getSellerId());
 			paymentCredit.setCustomerId(bean.getCustomerId());
 			paymentCredit.setMerchantId(bean.getMerchantId());

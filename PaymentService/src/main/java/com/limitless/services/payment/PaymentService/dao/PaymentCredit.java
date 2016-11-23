@@ -42,6 +42,10 @@ public class PaymentCredit implements java.io.Serializable {
 	@Column(name="CREDIT_UPDATED_TIME")
 	@Version
 	private Date creditUpdatedTime;
+	@Column(name="CREDIT_TEMP")
+	private float creditTemp;
+	@Column(name="DEBIT_TEMP")
+	private float debitTemp;
 
 	public PaymentCredit() {
 	}
@@ -125,6 +129,22 @@ public class PaymentCredit implements java.io.Serializable {
 
 	public void setCreditUpdatedTime(Date creditUpdatedTime) {
 		this.creditUpdatedTime = creditUpdatedTime;
+	}
+
+	public float getCreditTemp() {
+		return creditTemp;
+	}
+
+	public void setCreditTemp(float creditTemp) {
+		this.creditTemp = creditTemp;
+	}
+
+	public float getDebitTemp() {
+		return debitTemp;
+	}
+
+	public void setDebitTemp(float debitTemp) {
+		this.debitTemp = debitTemp;
 	}
 
 }

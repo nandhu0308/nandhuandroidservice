@@ -9,6 +9,8 @@ public class CreditBean {
 	private float creditAmount;
 	private float debitAmount;
 	private int merchantId;
+	private float creditTemp;
+	private float debitTemp;
 	public int getMerchantId() {
 		return merchantId;
 	}
@@ -51,5 +53,16 @@ public class CreditBean {
 	public void setCustomerId(int customerId) {
 		this.customerId = customerId;
 	}
-	
+	public float getCreditTemp() {
+		return creditTemp;
+	}
+	public void setCreditTemp(float creditTemp) {
+		this.creditTemp = creditTemp;
+	}
+	public float getDebitTemp() {
+		return debitTemp;
+	}
+	public void setDebitTemp(float debitTemp) {
+		this.debitTemp = debitTemp;
+	}
 }
