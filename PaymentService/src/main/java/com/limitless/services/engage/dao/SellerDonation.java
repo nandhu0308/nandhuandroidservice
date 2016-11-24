@@ -4,11 +4,18 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "seller_donation", catalog = "llcdb")
 public class SellerDonation implements Serializable {
+	
+	@Id
+	@GeneratedValue
+	@Column(name="SD_ID")
+	private Integer sdId;
 
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
@@ -31,7 +38,13 @@ public class SellerDonation implements Serializable {
 	public void setDonationId(Integer donationId) {
 		this.donationId = donationId;
 	}
-	
-	
+
+	public Integer getSdId() {
+		return sdId;
+	}
+
+	public void setSdId(Integer sdId) {
+		this.sdId = sdId;
+	}
 	
 }
