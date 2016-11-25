@@ -59,7 +59,9 @@ public class DonationManager {
 			throw re;
 		}
 		finally {
-			session.close();
+			if (session != null) {
+				session.close();
+			}
 		}
 		return responseBean;
 	}
