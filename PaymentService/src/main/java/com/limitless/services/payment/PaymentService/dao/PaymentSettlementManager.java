@@ -32,119 +32,120 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 public class PaymentSettlementManager {
-	
+
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 	private static final Log log = LogFactory.getLog(PaymentTxnManager.class);
 	Client client = RestClientUtil.createClient();
-	
-	public List<PaymentsSettlementResponseBean> doSettlement(int days) throws Exception{
+
+	public List<PaymentsSettlementResponseBean> doSettlement(int days) throws Exception {
 		log.debug("Transaction settlement");
 		List<PaymentsSettlementResponseBean> respBeanList = new ArrayList<PaymentsSettlementResponseBean>();
 		Transaction transaction = null;
-		try{
+		Session session = null;
+		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date now = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(now);
 			calendar.add(Calendar.DATE, -days);
-			String txnDateStart = sdf.format(calendar.getTime())+" 00:00:00";
+			String txnDateStart = sdf.format(calendar.getTime()) + " 00:00:00";
 			calendar.add(Calendar.DATE, days);
-			String txnDateEnd = sdf.format(calendar.getTime())+" 00:00:00";
+			String txnDateEnd = sdf.format(calendar.getTime()) + " 00:00:00";
 			log.debug("StartTime" + txnDateStart);
 			log.debug("EndTime" + txnDateEnd);
 			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date startTime = sdf2.parse(txnDateStart);
 			Date endTime = sdf2.parse(txnDateEnd);
-			
-			Session session = sessionFactory.getCurrentSession();
+
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(PaymentTxn.class);
 			Criterion stCriterion = Restrictions.ge("txnUpdatedTime", startTime);
 			Criterion etCriterion = Restrictions.lt("txnUpdatedTime", endTime);
 			LogicalExpression timeExp = Restrictions.and(stCriterion, etCriterion);
 			criteria.add(timeExp);
 			List<PaymentTxn> txns = criteria.list();
-			log.debug("Txns Size: "+ txns.size());
-			
-			for(PaymentTxn txn : txns){
+			log.debug("Txns Size: " + txns.size());
+
+			for (PaymentTxn txn : txns) {
 				PaymentsSettlementResponseBean bean = new PaymentsSettlementResponseBean();
 				SettlementRequestBean requestBean = new SettlementRequestBean();
-				if(txn.getCitrusMpTxnId()!=0 && txn.getSplitId()!=0 && txn.getTxnAmount()!=0 && txn.getTxnStatus().equals("PAYMENT_SUCCESSFUL")){
+				if (txn.getCitrusMpTxnId() != 0 && txn.getSplitId() != 0 && txn.getTxnAmount() != 0
+						&& txn.getTxnStatus().equals("PAYMENT_SUCCESSFUL")) {
 					requestBean.setTrans_id(txn.getCitrusMpTxnId());
 					requestBean.setSettlement_ref("LimitlessCircle Pay");
 					requestBean.setTrans_source("CITRUS");
 					double txnAmount = txn.getTxnAmount();
 					int citrusSellerId = txn.getCitrusSellerId();
 
-					//Getting seller split percent
+					// Getting seller split percent
 					Criteria criteria2 = session.createCriteria(EngageSeller.class);
 					criteria2.add(Restrictions.eq("citrusSellerId", citrusSellerId));
 					List<EngageSeller> sellerList = criteria2.list();
 					double feePercent = 0;
-					if(sellerList.size() > 0){
-						for(EngageSeller seller : sellerList){
+					if (sellerList.size() > 0) {
+						for (EngageSeller seller : sellerList) {
 							feePercent = seller.getSellerSplitPercent();
 						}
 					}
 
-					//Calculating settlement amount and split amount
+					// Calculating settlement amount and split amount
 					double feeAmount = txnAmount * (feePercent / 100);
 					// round off to 2 decimal
 					feeAmount = Math.round(feeAmount * 100) / 100D;
 
 					double settlementAmount = txnAmount - feeAmount;
-					log.debug("Settlement Amount: "+settlementAmount);
+					log.debug("Settlement Amount: " + settlementAmount);
 					requestBean.setSettlement_amount(settlementAmount);
 					requestBean.setFee_amount(feeAmount);
 					requestBean.setSettlement_date_time(txn.getTxnUpdatedTime().toString());
 
 					PaymentSettlement settlement = new PaymentSettlement();
 
-					//Doing settlement
+					// Doing settlement
 					SettlementResponseBean settlementResponseBean = callSettlementApi(requestBean);
 
-					if(settlementResponseBean.getMessage().equals("Success")){
+					if (settlementResponseBean.getMessage().equals("Success")) {
 						settlement.setSettlementId(settlementResponseBean.getSettlementId());
 						settlement.setTxnId(txn.getTxnId());
 						settlement.setSettlementStatus("SETTLE_INITIATED");
-					}
-					else if(settlementResponseBean.getMessage().equals("Failed")){
+					} else if (settlementResponseBean.getMessage().equals("Failed")) {
 						settlement.setErrorIdSettle(settlementResponseBean.getErrorId());
 						settlement.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
 						settlement.setTxnId(txn.getTxnId());
 						settlement.setSettlementStatus("SETTLE_INITIATED");
 					}
 
-					//Doing release funds
+					// Doing release funds
 					ReleaseFundsRequestBean fundsRequestBean = new ReleaseFundsRequestBean();
 					fundsRequestBean.setSplit_id(txn.getSplitId());
 
 					ReleaseFundsResponseBean fundsResponseBean = callReleaseFundsApi(fundsRequestBean);
 
-					if(fundsResponseBean.getMessage().equals("Success")){
+					if (fundsResponseBean.getMessage().equals("Success")) {
 						settlement.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
 						settlement.setSettlementAmount(fundsResponseBean.getSettlementAmount());
 						settlement.setTxnId(txn.getTxnId());
 						settlement.setSettlementStatus("SETTLE_SUCCESS");
-					}
-					else if(fundsResponseBean.getMessage().equals("Failed")){
+					} else if (fundsResponseBean.getMessage().equals("Failed")) {
 						settlement.setErrorIdRelease(fundsResponseBean.getErrorId());
 						settlement.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
 						settlement.setTxnId(txn.getTxnId());
 						settlement.setSettlementStatus("SETTLE_INITIATED");
 					}
-					
-					//settlement.setSettlementTime(txn.getTxnUpdatedTime());
+
+					// settlement.setSettlementTime(txn.getTxnUpdatedTime());
 					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
 					criteria3.add(Restrictions.eq("txnId", txn.getTxnId()));
 					List<PaymentSettlement> settlementList = criteria3.list();
 					log.debug("Settlement List : " + settlementList);
 					log.debug("Settlement Size : " + settlementList.size());
-					if(settlementList.size()==1){
-						for(PaymentSettlement settle : settlementList){
-							PaymentSettlement instance = (PaymentSettlement) session
-									.get("com.limitless.services.payment.PaymentService.dao.PaymentSettlement", settle.getPsId());
+					if (settlementList.size() == 1) {
+						for (PaymentSettlement settle : settlementList) {
+							PaymentSettlement instance = (PaymentSettlement) session.get(
+									"com.limitless.services.payment.PaymentService.dao.PaymentSettlement",
+									settle.getPsId());
 							if (instance.getSettlementStatus().equals("SETTLE_SUCCESS")) {
 								instance.setSettlementId(instance.getSettlementId());
 								instance.setReleasefundRefId(instance.getReleasefundRefId());
@@ -153,28 +154,24 @@ public class PaymentSettlementManager {
 								instance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
 								instance.setErrorIdRelease(fundsResponseBean.getErrorId());
 								instance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
-							}
-							else if(instance.getSettlementStatus().equals("SETTLE_INITIATED")){
-								if(instance.getSettlementId()==0){
+							} else if (instance.getSettlementStatus().equals("SETTLE_INITIATED")) {
+								if (instance.getSettlementId() == 0) {
 									instance.setSettlementId(settlementResponseBean.getSettlementId());
-								}
-								else{
+								} else {
 									instance.setErrorIdSettle(settlementResponseBean.getErrorId());
 									instance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
 								}
-								if(instance.getReleasefundRefId()==0){
+								if (instance.getReleasefundRefId() == 0) {
 									instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
 									instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
-								}
-								else{
+								} else {
 									instance.setErrorIdRelease(fundsResponseBean.getErrorId());
 									instance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
 								}
 							}
-							
-							
+
 							session.update(instance);
-							
+
 							bean.setPsId(instance.getPsId());
 							bean.setSettlementId(instance.getSettlementId());
 							bean.setReleasefundRefId(instance.getReleasefundRefId());
@@ -183,100 +180,94 @@ public class PaymentSettlementManager {
 							bean.setErrorDescriptionSettle(instance.getErrorDescriptionSettle());
 							bean.setErrorIdRelease(instance.getErrorIdRelease());
 							bean.setErrorDescriptionRelease(instance.getErrorDescriptionRelease());
-							
+
 						}
-					}
-					else if(settlementList.isEmpty()){
+					} else if (settlementList.isEmpty()) {
 						session.persist(settlement);
 						bean.setPsId(settlement.getPsId());
 						bean.setReleasefundRefId(settlement.getReleasefundRefId());
 						bean.setSettlementId(settlement.getSettlementId());
 					}
-										
+
 					respBeanList.add(bean);
 					bean = null;
 				}
 			}
+			transaction.commit();
 
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			log.error("Transaction settlement failed", re);
 			throw re;
-		}
-		finally {
-			transaction.commit();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
 		}
 		return respBeanList;
 	}
-	
-	public SettlementResponseBean callSettlementApi(SettlementRequestBean requestBean){
+
+	public SettlementResponseBean callSettlementApi(SettlementRequestBean requestBean) {
 		SettlementResponseBean responseBean = new SettlementResponseBean();
-		try{
+		try {
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/pgsettlement/");
-			ClientResponse clientResponse = webResource.type("application/json")
-					.accept("application/json")
-					.header("auth_token", PaymentConstants.AUTH_TOKEN)
-					.post(ClientResponse.class, requestBean);
+			ClientResponse clientResponse = webResource.type("application/json").accept("application/json")
+					.header("auth_token", PaymentConstants.AUTH_TOKEN).post(ClientResponse.class, requestBean);
 			String settlementResponse = clientResponse.getEntity(String.class);
-			log.debug("Settlement Response: "+ settlementResponse);
-			
-			//JSON conversion
-			try{
+			log.debug("Settlement Response: " + settlementResponse);
+
+			// JSON conversion
+			try {
 				JSONObject srJson = new JSONObject(settlementResponse);
 
-				if(srJson.has("settlement_id")){
+				if (srJson.has("settlement_id")) {
 					responseBean.setSettlementId(srJson.getInt("settlement_id"));
 					responseBean.setMessage("Success");
-				}
-				else if (srJson.has("error_id")){
+				} else if (srJson.has("error_id")) {
 					responseBean.setErrorId(srJson.getString("error_id"));
 					responseBean.setErrorDescription(srJson.getString("error_description"));
 					responseBean.setMessage("Failed");
 				}
-			}
-			catch(Exception e){
+			} catch (Exception e) {
 				JSONArray errJsonArray = new JSONArray(settlementResponse);
-				for(int i=0; i<errJsonArray.length(); i++){
+				for (int i = 0; i < errJsonArray.length(); i++) {
 					JSONObject errJson = errJsonArray.getJSONObject(i);
 					responseBean.setErrorDescription(errJson.getString("message"));
 					responseBean.setMessage("Failed");
 					continue;
 				}
 			}
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			log.error("Settlement API failed", re);
 			throw re;
 		}
 		return responseBean;
 	}
-	
-	public ReleaseFundsResponseBean callReleaseFundsApi(ReleaseFundsRequestBean requestBean){
+
+	public ReleaseFundsResponseBean callReleaseFundsApi(ReleaseFundsRequestBean requestBean) {
 		ReleaseFundsResponseBean responseBean = new ReleaseFundsResponseBean();
-		try{
+		try {
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/funds/release/");
-			ClientResponse clientResponse = webResource.type("application/json")
-					.accept("application/json")
-					.header("auth_token", PaymentConstants.AUTH_TOKEN)
-					.post(ClientResponse.class, requestBean);
+			ClientResponse clientResponse = webResource.type("application/json").accept("application/json")
+					.header("auth_token", PaymentConstants.AUTH_TOKEN).post(ClientResponse.class, requestBean);
 			String fundsResponse = clientResponse.getEntity(String.class);
-			log.debug("Release Funds Response: "+ fundsResponse);
-			
-			//JSON Conversion
+			log.debug("Release Funds Response: " + fundsResponse);
+
+			// JSON Conversion
 			JSONObject fundsJson = new JSONObject(fundsResponse);
-			
-			if(fundsJson.has("releasefund_ref")){
+
+			if (fundsJson.has("releasefund_ref")) {
 				responseBean.setReleaseFundsRefId(fundsJson.getInt("releasefund_ref"));
 				responseBean.setSettlementAmount(fundsJson.getDouble("amount"));
 				responseBean.setMessage("Success");
-			}
-			else if(fundsJson.has("error_id")){
+			} else if (fundsJson.has("error_id")) {
 				responseBean.setErrorId(fundsJson.getString("error_id"));
 				responseBean.setErrorDescription(fundsJson.getString("error_description"));
 				responseBean.setMessage("Failed");
 			}
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			log.error("ReleaseFunds API failed", re);
 			throw re;
 		}
