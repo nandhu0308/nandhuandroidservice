@@ -59,16 +59,23 @@ public class EngageCustomerManager {
 	public void persist(EngageCustomer transientInstance) {
 		log.debug("persisting EngageCustomer instance");
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			session.persist(transientInstance);
 			log.debug("persist successful");
+			tx.commit();
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("persist failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 
@@ -121,8 +128,9 @@ public class EngageCustomerManager {
 	public EngageCustomer findById(java.lang.Integer id) {
 		log.debug("getting EngageCustomer instance with id: " + id);
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			EngageCustomer instance = (EngageCustomer) session
 					.get("com.limitless.services.engage.dao.EngageCustomer",
@@ -132,12 +140,18 @@ public class EngageCustomerManager {
 			} else {
 				log.debug("get successful, instance found");
 			}
+			tx.commit();
 			return instance;
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 	
@@ -145,8 +159,9 @@ public class EngageCustomerManager {
 		log.debug("Changing password for user");
 		PasswdResponseBean bean = new PasswdResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			EngageCustomer instance = (EngageCustomer) session
 					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
@@ -163,13 +178,19 @@ public class EngageCustomerManager {
 				bean.setMessage("Failed");
 				bean.setCustomerId(customerId);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Changing password failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return bean;
 	}
@@ -177,10 +198,11 @@ public class EngageCustomerManager {
 	public boolean checkDuplicateEmail(String customerEmail){
 		 log.debug("Checking Email whether already exist");
 		 Transaction transaction = null;
+		 Session session = null;
 		 try{
 			 boolean emailExist = false;
 			 System.out.println("Email--->"+customerEmail);
-			 Session session = sessionFactory.getCurrentSession();
+			 session = sessionFactory.getCurrentSession();
 			 transaction = session.beginTransaction();
 			 if(!customerEmail.equals("")){
 				 Query query = session.createQuery("from EngageCustomer where customerEmail99 = :customerEmail");
@@ -191,24 +213,31 @@ public class EngageCustomerManager {
 					 emailExist = true;
 				 }
 			 }
+			 transaction.commit();
 			 return emailExist;
 		 }
 		 catch(RuntimeException re){
+			 if(transaction!=null){
+					transaction.rollback();
+				}
 			 log.error("Checking Email failed");
 			 throw re;
 		 }
 		 finally{
-			 transaction.commit();
+			 if(session!=null){
+					session.close();
+				}
 		 }
 	}
 	
 	public boolean checkDuplicateMobile(String customerMobile){
 		log.debug("Checking Mobile whether already exist");
 		Transaction transaction = null;
+		Session session = null;
 		try{
 			boolean mobileExist = false;
 			System.out.println("Mobile--->"+customerMobile);
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Query query = session.createQuery("from EngageCustomer where customerMobileNumber = :customerMobile");
 			query.setParameter("customerMobile", customerMobile);
@@ -217,14 +246,20 @@ public class EngageCustomerManager {
 			if(customer != null && customer.size() > 0){
 				mobileExist = true;
 			}
+			transaction.commit();
 			return mobileExist;
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Checking mobile failed");
 			throw re;
 		}
 		finally{
-			 transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		 }
 	}
 
@@ -249,8 +284,9 @@ public class EngageCustomerManager {
 		log.debug("checking login credentials");
 		LoginResponseBean loginResponseBean = new LoginResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageCustomer.class);
 			Criterion emailCriterion = Restrictions.eq("customerMobileNumber", customerMobile);
@@ -271,13 +307,19 @@ public class EngageCustomerManager {
 			else{
 				loginResponseBean.setLoginStatus(-1);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("checking login credentials failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return loginResponseBean;
 	}
@@ -286,8 +328,9 @@ public class EngageCustomerManager {
 		log.debug("getting EngageCustomer instance with id: " + customerId);
 		boolean isValidCredentials = false;
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			EngageCustomer instance = (EngageCustomer)session.get("com.limitless.services.engage.dao.EngageCustomer",
 					customerId);
@@ -299,12 +342,18 @@ public class EngageCustomerManager {
 					isValidCredentials = true;
 				}
 			}
+			tx.commit();
 			return isValidCredentials;
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 	
@@ -312,8 +361,9 @@ public class EngageCustomerManager {
 		log.debug("Changing/updating customer details");
 		ProfileChangeResponseBean responseBean = new ProfileChangeResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			int customerId = requestBean.getCustomerId();
 			String key = requestBean.getCustomerKey();
@@ -345,14 +395,19 @@ public class EngageCustomerManager {
 				responseBean.setMessage("Failed");
 				responseBean.setCustomerId(customerId);
 			}
-			
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Changing/updating customer details failed", re);
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return responseBean;
 	}
@@ -361,8 +416,9 @@ public class EngageCustomerManager {
 		log.debug("getting customer mobile");
 		MobileResponseBean responseBean = new MobileResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageCustomer.class);
 			criteria.add(Restrictions.eq("customerMobileNumber", customerMobile));
@@ -378,13 +434,19 @@ public class EngageCustomerManager {
 			else{
 				responseBean.setMessage("Mobile Not Found");
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Changing/updating customer details failed", re);
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return responseBean;
 	}
@@ -393,8 +455,9 @@ public class EngageCustomerManager {
 		log.debug("Sending invite");
 		InviteResponseBean responseBean = new InviteResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			String senderName = "";
 			if(requestBean.getKey().equals("merchant")){
@@ -432,13 +495,19 @@ public class EngageCustomerManager {
             responseBean.setMessage("Success");
             responseBean.setResponse(response);
             reader.close();
+            transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Changing/updating customer details failed", re);
 			throw re;
 		}
 		finally {
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return responseBean;
 	}

@@ -55,16 +55,23 @@ public class EngageSellerManager {
 	public void persist(EngageSeller transientInstance) {
 		log.debug("persisting EngageSeller instance");
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			session.persist(transientInstance);
 			log.debug("persist successful");
+			tx.commit();			
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("persist failed", re);
 			throw re;
 		} finally {
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 
@@ -117,8 +124,9 @@ public class EngageSellerManager {
 	public EngageSeller findById(int id) {
 		log.debug("getting EngageSeller instance with id: " + id);
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			EngageSeller instance = (EngageSeller) session
 					.get("com.limitless.services.engage.dao.EngageSeller",
@@ -128,13 +136,19 @@ public class EngageSellerManager {
 			} else {
 				log.debug("get successful, instance found");
 			}
+			tx.commit();
 			return instance;
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("get failed", re);
 			throw re;
 		}
 		finally{
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 
@@ -156,9 +170,10 @@ public class EngageSellerManager {
 	public boolean checkDuplicateEmail(String sellerEmail){
 		 log.debug("Checking Email whether already exist");
 		 Transaction transaction = null;
+		 Session session = null;
 		 try{
 			 boolean emailExist = false;
-			 Session session = sessionFactory.getCurrentSession();
+			 session = sessionFactory.getCurrentSession();
 			 transaction = session.beginTransaction();
 			 Query query = session.createQuery("from EngageSeller where sellerEmail99 = :sellerEmail");
 			 query.setParameter("sellerEmail", sellerEmail);
@@ -166,23 +181,30 @@ public class EngageSellerManager {
 			 if(seller != null && seller.size() > 0){
 				 emailExist = true;
 			 }
+			 transaction.commit();
 			 return emailExist;
 		 }
 		 catch(RuntimeException re){
+			 if(transaction!=null){
+				 transaction.rollback();
+			 }
 			 log.error("Checking Email failed");
 			 throw re;
 		 }
 		 finally{
-			 transaction.commit();
+			 if(session!=null){
+				 session.close();
+			 }
 		 }
 	}
 	
 	public boolean checkDuplicateMobile(String sellerMobile){
 		log.debug("Checking Mobile whether already exist");
 		Transaction transaction = null;
+		Session session = null;
 		try{
 			boolean mobileExist = false;
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Query query = session.createQuery("from EngageSeller where sellerMobileNumber = :sellerMobile");
 			query.setParameter("sellerMobile", sellerMobile);
@@ -190,14 +212,20 @@ public class EngageSellerManager {
 			if(seller != null && seller.size() > 0){
 				mobileExist = true;
 			}
+			transaction.commit();
 			return mobileExist;
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Checking mobile failed");
 			throw re;
 		}
 		finally{
-			 transaction.commit();
+			 if(session!=null){
+				 session.close();
+			 }
 		 }
 	}
 	
@@ -205,8 +233,9 @@ public class EngageSellerManager {
 		log.debug("Logging in seller");
 		SellerLoginResponseBean respBean = new SellerLoginResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			Criterion emailCriterion = Restrictions.eq("sellerEmail99", reqBean.getEmailId());
@@ -238,13 +267,19 @@ public class EngageSellerManager {
 				respBean.setMessage("Login Failed");
 				respBean.setStatus(-1);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Login failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return respBean;
 	}
@@ -253,8 +288,9 @@ public class EngageSellerManager {
 		log.debug("Changing seller passwd");
 		SellerPasswdResponseBean respBean = new SellerPasswdResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			int sellerId = reqBean.getSellerId();
 			EngageSeller instance = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
@@ -272,13 +308,19 @@ public class EngageSellerManager {
 				respBean.setStatus(-1);
 				respBean.setSellerId(sellerId);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Passwd change failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return respBean;
 	}
@@ -286,9 +328,10 @@ public class EngageSellerManager {
 	public List<CoordinatesResponseBean> sellerCoordinates(){
 		log.debug("Getting seller coordinates");
 		Transaction transaction = null;
+		Session session = null;
 		List<CoordinatesResponseBean> coords = new ArrayList<CoordinatesResponseBean>();
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Query query = session.createQuery("from EngageSeller ES");
 			List<EngageSeller> sellers = query.list();
@@ -301,13 +344,19 @@ public class EngageSellerManager {
 				coords.add(bean);
 				bean = null;
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Passwd change failed");
 			throw re;
 		}
 		finally {
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return coords;
 	}
@@ -315,19 +364,26 @@ public class EngageSellerManager {
 	public String findSellerDeviceId(int sellerId){
 		log.debug("Getting seller deviceId");
 		Transaction transaction = null;
+		Session session = null;
 		String sellerDeviceId = "";
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
 			sellerDeviceId = seller.getSellerDeviceId();
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Finding deviceId failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return sellerDeviceId;
 	}
@@ -336,8 +392,9 @@ public class EngageSellerManager {
 		log.debug("Getting seller details by mobile");
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			criteria.add(Restrictions.eq("sellerMobileNumber", sellerMobileNumber));
@@ -355,13 +412,19 @@ public class EngageSellerManager {
 			else{
 				responseBean.setMessage("Mobile Number Not Registered");
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Getting seller details by mobile failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 		return responseBean;
 	}

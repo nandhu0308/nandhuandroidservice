@@ -28,15 +28,22 @@ public class UpiOrderManager {
 	public void persist(UpiOrder transientInstance) {
 		log.debug("persisting UpiOrder instance");
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			session.persist(transientInstance);
+			tx.commit();
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("persist failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 
@@ -89,8 +96,9 @@ public class UpiOrderManager {
 	public UpiOrder findById(java.lang.Integer id) {
 		log.debug("getting UpiOrder instance with id: " + id);
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			UpiOrder instance = (UpiOrder)session.get("com.limitless.services.engage.upi.dao.UpiOrder", id);
 			if (instance == null) {
@@ -98,12 +106,18 @@ public class UpiOrderManager {
 			} else {
 				log.debug("get successful, instance found");
 			}
+			tx.commit();
 			return instance;
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session!=null){
+				session.close();
+			}
 		}
 	}
 
