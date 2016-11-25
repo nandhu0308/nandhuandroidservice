@@ -23,8 +23,9 @@ public class DonationManager {
 		log.debug("Getting merchant donations");
 		DonationResponseBean responseBean = new DonationResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(SellerDonation.class);
 			criteria.add(Restrictions.eq("sellerId", merchantId));
@@ -48,13 +49,17 @@ public class DonationManager {
 			else if(sellerDonationsList.isEmpty()){
 				responseBean.setMessage("No Doantions List Found");
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Getting merchant donations failed", re);
 			throw re;
 		}
 		finally {
-			transaction.commit();
+			session.close();
 		}
 		return responseBean;
 	}
