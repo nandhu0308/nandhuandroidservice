@@ -73,7 +73,7 @@ public class EngageCustomerManager {
 			log.error("persist failed", re);
 			throw re;
 		} finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -149,7 +149,7 @@ public class EngageCustomerManager {
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -188,7 +188,7 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -224,7 +224,7 @@ public class EngageCustomerManager {
 			 throw re;
 		 }
 		 finally{
-			 if(session!=null){
+			 if(session != null && session.isOpen()){
 					session.close();
 				}
 		 }
@@ -257,7 +257,7 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		 }
@@ -317,7 +317,7 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -351,7 +351,7 @@ public class EngageCustomerManager {
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -405,7 +405,7 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -444,7 +444,7 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally{
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}
@@ -505,7 +505,7 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally {
-			if(session!=null){
+			if(session != null && session.isOpen()){
 				session.close();
 			}
 		}

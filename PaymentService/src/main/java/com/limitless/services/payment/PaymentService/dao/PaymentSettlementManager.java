@@ -202,7 +202,7 @@ public class PaymentSettlementManager {
 			log.error("Transaction settlement failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}

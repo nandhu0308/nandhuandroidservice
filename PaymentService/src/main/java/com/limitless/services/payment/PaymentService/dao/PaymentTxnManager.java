@@ -77,7 +77,7 @@ public class PaymentTxnManager {
 			log.error("persist failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -150,7 +150,7 @@ public class PaymentTxnManager {
 			log.error("merge failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -183,7 +183,7 @@ public class PaymentTxnManager {
 			log.error("merge failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -212,7 +212,7 @@ public class PaymentTxnManager {
 			log.error("get failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -253,7 +253,7 @@ public class PaymentTxnManager {
 			log.error("Getting History Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -283,7 +283,7 @@ public class PaymentTxnManager {
 			log.error("Getting History Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -313,7 +313,7 @@ public class PaymentTxnManager {
 			log.error("Getting credit amount Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -400,7 +400,7 @@ public class PaymentTxnManager {
 			log.error("Getting History Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -486,7 +486,7 @@ public class PaymentTxnManager {
 			log.error("Getting History Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -561,7 +561,7 @@ public class PaymentTxnManager {
 			log.error("Getting Daywise Txns Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -633,7 +633,7 @@ public class PaymentTxnManager {
 			log.error("Getting Monthly Txns Failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -717,7 +717,7 @@ public class PaymentTxnManager {
 			log.error("Getting seller Txn History failed");
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -804,7 +804,7 @@ public class PaymentTxnManager {
 			log.error("Getting seller Txn History failed");
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -879,7 +879,7 @@ public class PaymentTxnManager {
 			log.error("Getting seller Txn History failed");
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -951,7 +951,7 @@ public class PaymentTxnManager {
 			log.error("Getting seller Txn History failed");
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}

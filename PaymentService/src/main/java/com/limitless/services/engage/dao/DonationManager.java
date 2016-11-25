@@ -18,25 +18,25 @@ import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 public class DonationManager {
 	private static final Log log = LogFactory.getLog(EngageCustomerManager.class);
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-	
-	public DonationResponseBean getDonations(int merchantId){
+
+	public DonationResponseBean getDonations(int merchantId) {
 		log.debug("Getting merchant donations");
 		DonationResponseBean responseBean = new DonationResponseBean();
 		Transaction transaction = null;
 		Session session = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(SellerDonation.class);
 			criteria.add(Restrictions.eq("sellerId", merchantId));
 			List<SellerDonation> sellerDonationsList = criteria.list();
-			log.debug("Size: "+ sellerDonationsList.size());
-			if(sellerDonationsList.size()>0){
+			log.debug("Size: " + sellerDonationsList.size());
+			if (sellerDonationsList.size() > 0) {
 				responseBean.setMessage("Success");
 				List<DonationsBean> donationsList = new ArrayList<DonationsBean>();
-				for(SellerDonation sellers : sellerDonationsList){
-					Donation donation = (Donation) session
-							.get("com.limitless.services.engage.dao.Donation", sellers.getDonationId());
+				for (SellerDonation sellers : sellerDonationsList) {
+					Donation donation = (Donation) session.get("com.limitless.services.engage.dao.Donation",
+							sellers.getDonationId());
 					DonationsBean bean = new DonationsBean();
 					bean.setDonationId(donation.getDinationId());
 					bean.setDonationName(donation.getDonationName());
@@ -45,21 +45,18 @@ public class DonationManager {
 					bean = null;
 				}
 				responseBean.setDonationsList(donationsList);
-			}
-			else if(sellerDonationsList.isEmpty()){
+			} else if (sellerDonationsList.isEmpty()) {
 				responseBean.setMessage("No Doantions List Found");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Getting merchant donations failed", re);
 			throw re;
-		}
-		finally {
-			if (session != null) {
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}

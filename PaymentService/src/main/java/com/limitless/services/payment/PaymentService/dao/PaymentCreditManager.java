@@ -67,7 +67,7 @@ public class PaymentCreditManager {
 			log.error("persist failed", re);
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -198,7 +198,7 @@ public class PaymentCreditManager {
 			log.error("Getting sellers credits failed");
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -262,7 +262,7 @@ public class PaymentCreditManager {
 			log.error("Getting customer credits failed");
 			throw re;
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
@@ -298,7 +298,7 @@ public class PaymentCreditManager {
 			}
 			log.error("Updating Credit/Debit Trans failed" + re);
 		} finally {
-			if (session != null) {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
