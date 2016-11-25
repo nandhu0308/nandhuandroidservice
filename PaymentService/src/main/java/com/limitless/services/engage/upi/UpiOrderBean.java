@@ -5,7 +5,9 @@ public class UpiOrderBean {
 	
 	private int orderId;
 	private int customerId;
-	
+	private int sellerId;
+	private String txnNotes;
+	private String sellerName;
 	private float orderAmount;
 	
 	public static enum OrderStatus {
@@ -36,5 +38,22 @@ public class UpiOrderBean {
 	public void setOrderAmount(float orderAmount) {
 		this.orderAmount = orderAmount;
 	}
-	
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
+	}
+	public String getSellerName() {
+		return sellerName;
+	}
+	public void setSellerName(String sellerName) {
+		this.sellerName = sellerName;
+	}
 }

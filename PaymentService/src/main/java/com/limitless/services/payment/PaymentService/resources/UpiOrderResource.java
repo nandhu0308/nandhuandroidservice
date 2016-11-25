@@ -1,6 +1,7 @@
 package com.limitless.services.payment.PaymentService.resources;
 
 import java.io.StringReader;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
@@ -105,6 +107,13 @@ public class UpiOrderResource {
 				SAXReader reader = new SAXReader();
 				Document document = reader.read(new InputSource(new StringReader(output)));
 				Element rootElement = document.getRootElement();
+				List<Node> nodeList = document.selectNodes("MB/RS");
+				if(nodeList.size()==1){
+					for(Node node : nodeList){
+						upiOrderResp.setOrderId(orderId);
+						upiOrderResp.setMessage("Success");
+					}
+				}
 				
 			} catch (Exception e) {
 				logger.error("API Error", e);
