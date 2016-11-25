@@ -101,7 +101,7 @@ public class UpiOrderResource {
 				
 				String output = response.getEntity(String.class).toString();
 				
-				System.out.println(output);
+				System.out.println("Output : "+output);
 				
 				//Response XML Parsing
 				SAXReader reader = new SAXReader();
