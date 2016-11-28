@@ -7,8 +7,8 @@ public class UpiOrderBean {
 	private int customerId;
 	private int sellerId;
 	private String txnNotes;
-	private String sellerName;
 	private float orderAmount;
+	private String txnType;
 	
 	public static enum OrderStatus {
 		PAYMENT_INITIATED, PAYMENT_SUCCESSFUL, PAYMENT_FAILED;
@@ -49,11 +49,5 @@ public class UpiOrderBean {
 	}
 	public void setTxnNotes(String txnNotes) {
 		this.txnNotes = txnNotes;
-	}
-	public String getSellerName() {
-		return sellerName;
-	}
-	public void setSellerName(String sellerName) {
-		this.sellerName = sellerName;
 	}
 }

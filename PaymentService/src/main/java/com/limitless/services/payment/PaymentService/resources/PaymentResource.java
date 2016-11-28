@@ -356,12 +356,14 @@ public class PaymentResource {
 			splitRequest.put("split_amount", txnAmount);
 			splitRequest.put("fee_amount", feeAmount);
 			splitRequest.put("auto_payout", 1);
+			
+			PaymentConstants constants = PaymentConstants.getInstance();
 
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/split");
 
 			ClientResponse splitResponse = webResource.accept("application/json").type("application/json")
 					.header("auth_token",
-							PaymentConstants.AUTH_TOKEN)
+							constants.getAuth_Token())
 					.post(ClientResponse.class, splitRequest);
 
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
