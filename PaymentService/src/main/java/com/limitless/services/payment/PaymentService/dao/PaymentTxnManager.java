@@ -1,5 +1,11 @@
 package com.limitless.services.payment.PaymentService.dao;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +37,10 @@ import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
+import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.MessageBean;
+import com.limitless.services.payment.PaymentService.MessageResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean.TxnStatus;
 import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
@@ -536,7 +545,9 @@ public class PaymentTxnManager {
 				if (txns.size() > 0) {
 					double totalAmount = 0;
 					for (PaymentTxn txn : txns) {
-						totalAmount = totalAmount + txn.getTxnAmount();
+						if(txn.getTxnStatus().equals("PAYMENT_SUCCESSFUL")){
+							totalAmount = totalAmount + txn.getTxnAmount();
+						}
 					}
 
 					dayBean.setTotalAmount(totalAmount);
@@ -608,7 +619,9 @@ public class PaymentTxnManager {
 				if (txns.size() > 0) {
 					double totalAmount = 0;
 					for (PaymentTxn txn : txns) {
-						totalAmount = totalAmount + txn.getTxnAmount();
+						if(txn.getTxnStatus().equals("PAYMENT_SUCCESSFUL")){
+							totalAmount = totalAmount + txn.getTxnAmount();
+						}
 					}
 
 					monthBean.setTotalAmount(totalAmount);
@@ -854,7 +867,9 @@ public class PaymentTxnManager {
 				if (txns.size() > 0) {
 					double totalAmount = 0;
 					for (PaymentTxn txn : txns) {
-						totalAmount = totalAmount + txn.getTxnAmount();
+						if(txn.getTxnStatus().equals("PAYMENT_SUCCESSFUL")){
+							totalAmount = totalAmount + txn.getTxnAmount();
+						}
 					}
 
 					dayBean.setTotalAmount(totalAmount);
@@ -926,7 +941,9 @@ public class PaymentTxnManager {
 				if (txns.size() > 0) {
 					double totalAmount = 0;
 					for (PaymentTxn txn : txns) {
-						totalAmount = totalAmount + txn.getTxnAmount();
+						if(txn.getTxnStatus().equals("PAYMENT_SUCCESSFUL")){
+							totalAmount = totalAmount + txn.getTxnAmount();
+						}
 					}
 
 					monthBean.setTotalAmount(totalAmount);
@@ -956,6 +973,138 @@ public class PaymentTxnManager {
 			}
 		}
 		return historyBean;
+	}
+	
+	public MessageResponseBean sendMessage(MessageBean requestBean) throws Exception{
+		log.debug("Sending message for Txn Id :" + requestBean.getTxnId());
+		MessageResponseBean responseBean = new MessageResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+			String customerMobile = customer.getCustomerMobileNumber();
+			String customerName = customer.getCustomerName();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			String sellerShopName = seller.getSellerShopName();
+			String sellerMobile = seller.getSellerMobileNumber();
+			
+			PaymentTxn txn = (PaymentTxn) session
+					.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn", requestBean.getTxnId());
+			String txnStatus = txn.getTxnStatus();
+			double txnAmount = txn.getTxnAmount();
+			
+			if(txnStatus.equals("PAYMENT_SUCCESSFUL")){
+				String authkey = "129194Aa6NwGoQsVt580d9a57";
+				String senderId = "LLCTXN";
+				String route = "4";
+				String mainUrl="http://api.msg91.com/api/sendhttp.php?";
+				
+				//Sending SMS to customer
+				String messageToCustomer = "Successfully paid Rs." + txnAmount + " to "+ sellerShopName + ". Transaction Ref Id: " + txn.getTxnId();
+				String encodedCustomerMessage = URLEncoder.encode(messageToCustomer);
+				StringBuilder sbPostDate1= new StringBuilder(mainUrl);
+	            sbPostDate1.append("authkey="+authkey);
+	            sbPostDate1.append("&mobiles="+customerMobile);
+	            sbPostDate1.append("&message="+encodedCustomerMessage);
+	            sbPostDate1.append("&route="+route);
+	            sbPostDate1.append("&sender="+senderId);
+	            mainUrl = sbPostDate1.toString();
+	            URL msgUrl1 = new URL(mainUrl);
+	            URLConnection con1 = msgUrl1.openConnection();
+	            con1.connect();
+	            BufferedReader reader1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
+	            String response1 = "";
+	            while((response1 = reader1.readLine())!=null){
+	            	System.out.println(response1);
+	            }
+	            
+	            //Sending SMS to seller
+	            String messageToSeller = "Successfully received Rs." + txnAmount + " from " + customerName + ". Transaction Ref Id: " + txn.getTxnId();
+	            String encodedSellerMessage = URLEncoder.encode(messageToSeller);
+	            StringBuilder sbPostData2= new StringBuilder(mainUrl);
+	            sbPostData2.append("authkey="+authkey);
+	            sbPostData2.append("&mobiles="+sellerMobile);
+	            sbPostData2.append("&message="+encodedSellerMessage);
+	            sbPostData2.append("&route="+route);
+	            sbPostData2.append("&sender="+senderId);
+	            mainUrl = sbPostData2.toString();
+	            URL msgUrl2 = new URL(mainUrl);
+	            URLConnection con2 = msgUrl2.openConnection();
+	            con2.connect();
+	            BufferedReader reader2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+	            String response2 = "";
+	            while((response2 = reader2.readLine())!=null){
+	            	System.out.println(response2);
+	            }
+	            responseBean.setMessage("Success");
+	            responseBean.setTxnId(txn.getTxnId());
+			}
+			else if(txnStatus.equals("PAYMENT_FAILED")){
+				String authkey = "129194Aa6NwGoQsVt580d9a57";
+				String senderId = "LLCTXN";
+				String route = "4";
+				String mainUrl="http://api.msg91.com/api/sendhttp.php?";
+				
+				//Sending SMS to customer
+				String messageToCustomer = "Failed to pay Rs." + txnAmount + " to "+ sellerShopName + ". Transaction Ref Id: " + txn.getTxnId();
+				String encodedCustomerMessage = URLEncoder.encode(messageToCustomer);
+				StringBuilder sbPostDate1= new StringBuilder(mainUrl);
+	            sbPostDate1.append("authkey="+authkey);
+	            sbPostDate1.append("&mobiles="+customerMobile);
+	            sbPostDate1.append("&message="+encodedCustomerMessage);
+	            sbPostDate1.append("&route="+route);
+	            sbPostDate1.append("&sender="+senderId);
+	            mainUrl = sbPostDate1.toString();
+	            URL msgUrl1 = new URL(mainUrl);
+	            URLConnection con1 = msgUrl1.openConnection();
+	            con1.connect();
+	            BufferedReader reader1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
+	            String response1 = "";
+	            while((response1 = reader1.readLine())!=null){
+	            	System.out.println(response1);
+	            }
+	            
+	            //Sending SMS to seller
+	            String messageToSeller = "Failed to receive Rs." + txnAmount + " from " + customerName + ". Transaction Ref Id: " + txn.getTxnId();
+	            String encodedSellerMessage = URLEncoder.encode(messageToSeller);
+	            StringBuilder sbPostData2= new StringBuilder(mainUrl);
+	            sbPostData2.append("authkey="+authkey);
+	            sbPostData2.append("&mobiles="+sellerMobile);
+	            sbPostData2.append("&message="+encodedSellerMessage);
+	            sbPostData2.append("&route="+route);
+	            sbPostData2.append("&sender="+senderId);
+	            mainUrl = sbPostData2.toString();
+	            URL msgUrl2 = new URL(mainUrl);
+	            URLConnection con2 = msgUrl2.openConnection();
+	            con2.connect();
+	            BufferedReader reader2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+	            String response2 = "";
+	            while((response2 = reader2.readLine())!=null){
+	            	System.out.println(response2);
+	            }
+	            responseBean.setMessage("Success");
+	            responseBean.setTxnId(txn.getTxnId());
+			}
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Sending message failed" + re);
+			
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 	public static void main(String[] args) {

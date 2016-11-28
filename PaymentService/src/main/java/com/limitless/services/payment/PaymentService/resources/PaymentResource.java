@@ -31,6 +31,8 @@ import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.MessageBean;
+import com.limitless.services.payment.PaymentService.MessageResponseBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
 import com.limitless.services.payment.PaymentService.NotificationResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -139,6 +141,7 @@ public class PaymentResource {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(),
 					paymentTxnBean.getTxnStatus().toString());
+			
 
 			EngageCustomerManager customerManager = new EngageCustomerManager();
 			EngageCustomer customer = customerManager.findById(paymentTxn.getEngageCustomerId());
@@ -149,6 +152,17 @@ public class PaymentResource {
 			txnResp.setDate(paymentTxn.getTxnUpdatedTime().toString());
 			txnResp.setName(customer.getCustomerName());
 			txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
+			
+			MessageBean messageBean = new MessageBean();
+			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			messageBean.setSellerCitrusId(paymentTxn.getCitrusSellerId());
+			messageBean.setSellerId(paymentTxn.getSellerId());
+			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
+			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
+			messageBean.setTxnId(paymentTxn.getTxnId());
+			
+			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
+			
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -369,6 +383,16 @@ public class PaymentResource {
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
 			splitResp.setSellerDeviceId(sellerDeviceId);
+			
+			MessageBean messageBean = new MessageBean();
+			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			messageBean.setSellerCitrusId(paymentTxn.getCitrusSellerId());
+			messageBean.setSellerId(paymentTxn.getSellerId());
+			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
+			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
+			messageBean.setTxnId(paymentTxn.getTxnId());
+			
+			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
 
 		} catch (Exception e) {
 			logger.error("API Error", e);
