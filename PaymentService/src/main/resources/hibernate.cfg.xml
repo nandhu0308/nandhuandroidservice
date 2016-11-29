@@ -30,6 +30,7 @@
   <mapping class="com.limitless.services.engage.dao.SellerDonation"/>
   <mapping class="com.limitless.services.engage.dao.Donation"/>
   <mapping class="com.limitless.services.payment.PaymentService.dao.CitrusAuthToken"/>
+  <mapping class="com.limitless.services.engage.sellers.dao.CitrusSeller"/>
 
   
  </session-factory>

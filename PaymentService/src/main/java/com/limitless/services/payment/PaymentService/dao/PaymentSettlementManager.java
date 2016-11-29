@@ -39,6 +39,7 @@ public class PaymentSettlementManager {
 
 	public List<PaymentsSettlementResponseBean> doSettlement(int days) throws Exception {
 		log.debug("Transaction settlement");
+		String authToken = "";
 		List<PaymentsSettlementResponseBean> respBeanList = new ArrayList<PaymentsSettlementResponseBean>();
 		Transaction transaction = null;
 		Session session = null;
@@ -59,7 +60,11 @@ public class PaymentSettlementManager {
 
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-
+			
+			CitrusAuthToken token = (CitrusAuthToken) session
+					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
+			authToken = token.getAuthToken();
+			
 			Criteria criteria = session.createCriteria(PaymentTxn.class);
 			Criterion stCriterion = Restrictions.ge("txnUpdatedTime", startTime);
 			Criterion etCriterion = Restrictions.lt("txnUpdatedTime", endTime);
@@ -104,7 +109,7 @@ public class PaymentSettlementManager {
 					PaymentSettlement settlement = new PaymentSettlement();
 
 					// Doing settlement
-					SettlementResponseBean settlementResponseBean = callSettlementApi(requestBean);
+					SettlementResponseBean settlementResponseBean = callSettlementApi(requestBean, authToken);
 
 					if (settlementResponseBean.getMessage().equals("Success")) {
 						settlement.setSettlementId(settlementResponseBean.getSettlementId());
@@ -121,7 +126,7 @@ public class PaymentSettlementManager {
 					ReleaseFundsRequestBean fundsRequestBean = new ReleaseFundsRequestBean();
 					fundsRequestBean.setSplit_id(txn.getSplitId());
 
-					ReleaseFundsResponseBean fundsResponseBean = callReleaseFundsApi(fundsRequestBean);
+					ReleaseFundsResponseBean fundsResponseBean = callReleaseFundsApi(fundsRequestBean, authToken);
 
 					if (fundsResponseBean.getMessage().equals("Success")) {
 						settlement.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
@@ -157,6 +162,7 @@ public class PaymentSettlementManager {
 							} else if (instance.getSettlementStatus().equals("SETTLE_INITIATED")) {
 								if (instance.getSettlementId() == 0) {
 									instance.setSettlementId(settlementResponseBean.getSettlementId());
+									instance.setSettlementStatus("SETTLE_SUCCESS");
 								} else {
 									instance.setErrorIdSettle(settlementResponseBean.getErrorId());
 									instance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
@@ -164,6 +170,7 @@ public class PaymentSettlementManager {
 								if (instance.getReleasefundRefId() == 0) {
 									instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
 									instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+									instance.setSettlementStatus("SETTLE_SUCCESS");
 								} else {
 									instance.setErrorIdRelease(fundsResponseBean.getErrorId());
 									instance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
@@ -209,11 +216,9 @@ public class PaymentSettlementManager {
 		return respBeanList;
 	}
 
-	public SettlementResponseBean callSettlementApi(SettlementRequestBean requestBean) {
+	public SettlementResponseBean callSettlementApi(SettlementRequestBean requestBean, String authToken) {
 		SettlementResponseBean responseBean = new SettlementResponseBean();
 		try {
-			PaymentConstants constants = PaymentConstants.getInstance();
-			String authToken = constants.getAuth_Token();
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/pgsettlement/");
 			ClientResponse clientResponse = webResource.type("application/json").accept("application/json")
 					.header("auth_token", authToken).post(ClientResponse.class, requestBean);
@@ -248,11 +253,9 @@ public class PaymentSettlementManager {
 		return responseBean;
 	}
 
-	public ReleaseFundsResponseBean callReleaseFundsApi(ReleaseFundsRequestBean requestBean) {
+	public ReleaseFundsResponseBean callReleaseFundsApi(ReleaseFundsRequestBean requestBean, String authToken) {
 		ReleaseFundsResponseBean responseBean = new ReleaseFundsResponseBean();
 		try {
-			PaymentConstants constants = PaymentConstants.getInstance();
-			String authToken = constants.getAuth_Token();
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/funds/release/");
 			ClientResponse clientResponse = webResource.type("application/json").accept("application/json")
 					.header("auth_token", authToken).post(ClientResponse.class, requestBean);

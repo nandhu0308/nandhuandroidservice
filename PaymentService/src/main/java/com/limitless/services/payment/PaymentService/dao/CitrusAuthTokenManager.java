@@ -48,7 +48,7 @@ public class CitrusAuthTokenManager {
 					authToken = responseJson.getString("auth_token");
 				}
 				else{
-					
+					log.debug("Citrus Response : " + citrusResponse);
 				}
 			}
 			catch(Exception e){

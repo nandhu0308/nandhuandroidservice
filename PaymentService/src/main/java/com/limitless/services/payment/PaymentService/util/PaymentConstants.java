@@ -44,7 +44,9 @@ public class PaymentConstants {
 				log.error("Getting auth token failed " + re);
 			}
 			finally {
-				session.close();
+				if(session!=null && session.isOpen()){
+					session.close();
+				}
 			}
 		}
 		return AUTH_TOKEN;
