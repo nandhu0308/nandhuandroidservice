@@ -632,5 +632,21 @@ public class PaymentResource {
 		}
 		return historyBean;
 	}
+	
+	@GET
+	@Path("/trans/date/{citrusSellerId}/{txnDate}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getDateTxns(@PathParam("citrusSellerId") int citrusSellerId, @PathParam("txnDate") String txnDate) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getTxnsByDate(citrusSellerId, txnDate);
+		}
+		catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
 
 }
