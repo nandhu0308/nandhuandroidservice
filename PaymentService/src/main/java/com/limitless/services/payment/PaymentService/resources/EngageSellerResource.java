@@ -66,7 +66,7 @@ public class EngageSellerResource {
 			
 			EngageSellerManager manager = new EngageSellerManager();
 			
-			if( !(manager.checkDuplicateEmail(bean.getEmailId())) && !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
+			if( !manager.checkDuplicateEmail(bean.getEmailId()) ){
 				manager.persist(seller);
 				sellerResp.setSellerId(seller.getSellerId());
 				sellerResp.setStatus(1);

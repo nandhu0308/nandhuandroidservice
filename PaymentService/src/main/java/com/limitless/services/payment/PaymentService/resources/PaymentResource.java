@@ -588,7 +588,8 @@ public class PaymentResource {
 	@GET
 	@Path("/trans/gen/{merchantId}/{firstTxnId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(@PathParam("merchantId") int merchantId, @PathParam("firstTxnId") int firstTxnId) throws Exception{
+	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(@PathParam("merchantId") int merchantId, 
+			@PathParam("firstTxnId") int firstTxnId) throws Exception{
 		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
 		try{
 			PaymentTxnManager manager = new PaymentTxnManager();
@@ -634,15 +635,68 @@ public class PaymentResource {
 	}
 	
 	@GET
-	@Path("/trans/date/{citrusSellerId}/{txnDate}")
+	@Path("/date/{citrusSellerId}/{txnDate}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean getDateTxns(@PathParam("citrusSellerId") int citrusSellerId, @PathParam("txnDate") String txnDate) throws Exception{
+	public SellerTxnHistoryBean getDateTxns(@PathParam("citrusSellerId") int citrusSellerId, 
+			@PathParam("txnDate") String txnDate) throws Exception{
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
 		try{
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getTxnsByDate(citrusSellerId, txnDate);
 		}
 		catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/{citrusSellerId}/{txnDate}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getDateTxnsPagination(@PathParam("citrusSellerId") int citrusSellerId, 
+			@PathParam("txnDate") String txnDate, 
+			@PathParam("firstTxnId") int firstTxnId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getDateWiseTxnsPagination(citrusSellerId, txnDate, firstTxnId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/gen/{merchantId}/{txnDate}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getGeneralDateTxn(@PathParam("merchantId") int merchantId,
+			@PathParam("txnDate") String txnDate) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGeneralDateTxns(merchantId, txnDate);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/gen/{merchantId}/{txnDate}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getGeneralDateTxnPagintion(@PathParam("merchantId") int merchantId,
+			@PathParam("txnDate") String txnDate, int firstTxnId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGeneralDateWiseTxnsPagination(merchantId, txnDate, firstTxnId);
+		}
+		catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}

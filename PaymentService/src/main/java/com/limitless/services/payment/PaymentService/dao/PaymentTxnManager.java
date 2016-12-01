@@ -28,6 +28,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
@@ -1091,6 +1092,7 @@ public class PaymentTxnManager {
 	            responseBean.setMessage("Success");
 	            responseBean.setTxnId(txn.getTxnId());
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
 			if (transaction != null) {
@@ -1134,6 +1136,8 @@ public class PaymentTxnManager {
 			Criterion dateCriterion = Restrictions.between("txnUpdatedTime", startTime, endTime);
 			LogicalExpression logExp = Restrictions.and(csidCriterion, dateCriterion);
 			criteria.add(logExp);
+			criteria.addOrder(Order.desc("txnId"));
+			criteria.setMaxResults(10);
 			List<PaymentTxn> txns = criteria.list();
 			log.debug("Txns Size : " + txns.size());
 			if(txns.size()>0){
@@ -1188,12 +1192,312 @@ public class PaymentTxnManager {
 			else if(txns.isEmpty()){
 				historyBean.setMessage("No Record Found");
 			}
+			transaction.commit();
 		}
 		catch (RuntimeException re) {
 			if(transaction!=null){
 				transaction.rollback();
 			}
-			log.error("Sending message failed" + re);
+			log.error("Getting Txns By Date failed" + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return historyBean;
+	}
+	
+	public SellerTxnHistoryBean getDateWiseTxnsPagination(int citrusSellerId, String txnDate, int firstTxnId) throws Exception{
+		log.debug("Getting Txns By Date");
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		List<TxnHistoryBean> txnsList = new ArrayList<TxnHistoryBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = sdf1.parse(txnDate);
+			
+			String startTimeString = sdf1.format(date)+ " 00:00:00";
+			String endTimeString = sdf1.format(date)+ " 23:59:59";
+			
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date startTime = sdf2.parse(startTimeString);
+			Date endTime = sdf2.parse(endTimeString);
+			
+			log.debug("StartTime : "+ startTime + "&& EndTime : "+ endTime);
+			
+			Criteria criteria = session.createCriteria(PaymentTxn.class);
+			Junction junctionGroup = Restrictions.conjunction()
+					.add(Restrictions.between("txnUpdatedTime", startTime, endTime))
+					.add(Restrictions.eq("citrusSellerId", citrusSellerId))
+					.add(Restrictions.lt("txnId", firstTxnId));
+			criteria.add(junctionGroup);
+			criteria.addOrder(Order.desc("txnId"));
+			criteria.setMaxResults(10);
+			
+			List<PaymentTxn> txns = criteria.list();
+			log.debug("Txns Size : " + txns.size());
+			if(txns.size()>0){
+				for(PaymentTxn txn : txns){
+					TxnHistoryBean bean = new TxnHistoryBean();
+					bean.setTxnId(txn.getTxnId());
+					Criteria criteria2 = session.createCriteria(PaymentCredit.class);
+					criteria2.add(Restrictions.eq("txnId", txn.getTxnId()));
+					List<PaymentCredit> credits = criteria2.list();
+					log.debug("Credits Size: " + credits.size());
+					if (credits.size() > 0) {
+						for (PaymentCredit credit : credits) {
+							bean.setCreditAmount(credit.getCreditAmount());
+						}
+					}
+					bean.setCustomerId(txn.getEngageCustomerId());
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", txn.getEngageCustomerId());
+					bean.setCustomerName(customer.getCustomerName());
+					bean.setSellerId(txn.getSellerId());
+					bean.setSellerName(txn.getSellerName());
+					bean.setTxtAmount(txn.getTxnAmount());
+					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
+					bean.setSplitId(txn.getSplitId());
+					bean.setTxtStatus(txn.getTxnStatus());
+					String gmtTime = txn.getTxnUpdatedTime().toString();
+					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date dateTxn = sdf3.parse(gmtTime);
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(dateTxn);
+					calendar.add(Calendar.HOUR, 5);
+					calendar.add(Calendar.MINUTE, 30);
+					String localTime = sdf3.format(calendar.getTime());
+					bean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", txn.getTxnId()));
+					List<PaymentSettlement> settlements = criteria3.list();
+					for (PaymentSettlement settlement : settlements) {
+						PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+						responseBean.setPsId(settlement.getPsId());
+						responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+						responseBean.setSettlementId(settlement.getSettlementId());
+						responseBean.setSettlementAmount(settlement.getSettlementAmount());
+						bean.setSettlement(responseBean);
+					}
+					txnsList.add(bean);
+					bean = null;
+				}
+				historyBean.setHistoryBean(txnsList);
+				historyBean.setMessage("Success");
+			}
+			else if(txns.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Getting Txns By Date failed" + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return historyBean;
+	}
+	
+	public SellerTxnHistoryBean getGeneralDateTxns(int merchantId, String txnDate) throws Exception{
+		log.debug("Getting txns by date");
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		List<TxnHistoryBean> txnsList = new ArrayList<TxnHistoryBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = sdf1.parse(txnDate);
+			
+			String startTimeString = sdf1.format(date)+ " 00:00:00";
+			String endTimeString = sdf1.format(date)+ " 23:59:59";
+			
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date startTime = sdf2.parse(startTimeString);
+			Date endTime = sdf2.parse(endTimeString);
+			
+			log.debug("StartTime : "+ startTime + "&& EndTime : "+ endTime);
+			
+			Criteria  criteria = session.createCriteria(PaymentTxn.class);
+			Criterion csidCriterion = Restrictions.eq("sellerId", merchantId);
+			Criterion dateCriterion = Restrictions.between("txnUpdatedTime", startTime, endTime);
+			LogicalExpression logExp = Restrictions.and(csidCriterion, dateCriterion);
+			criteria.add(logExp);
+			criteria.addOrder(Order.desc("txnId"));
+			criteria.setMaxResults(10);
+			List<PaymentTxn> txns = criteria.list();
+			log.debug("Txns Size : " + txns.size());
+			if(txns.size()>0){
+				for(PaymentTxn txn : txns){
+					TxnHistoryBean bean = new TxnHistoryBean();
+					bean.setTxnId(txn.getTxnId());
+					Criteria criteria2 = session.createCriteria(PaymentCredit.class);
+					criteria2.add(Restrictions.eq("txnId", txn.getTxnId()));
+					List<PaymentCredit> credits = criteria2.list();
+					log.debug("Credits Size: " + credits.size());
+					if (credits.size() > 0) {
+						for (PaymentCredit credit : credits) {
+							bean.setCreditAmount(credit.getCreditAmount());
+						}
+					}
+					bean.setCustomerId(txn.getEngageCustomerId());
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", txn.getEngageCustomerId());
+					bean.setCustomerName(customer.getCustomerName());
+					bean.setSellerId(txn.getSellerId());
+					bean.setSellerName(txn.getSellerName());
+					bean.setTxtAmount(txn.getTxnAmount());
+					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
+					bean.setSplitId(txn.getSplitId());
+					bean.setTxtStatus(txn.getTxnStatus());
+					String gmtTime = txn.getTxnUpdatedTime().toString();
+					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date dateTxn = sdf3.parse(gmtTime);
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(dateTxn);
+					calendar.add(Calendar.HOUR, 5);
+					calendar.add(Calendar.MINUTE, 30);
+					String localTime = sdf3.format(calendar.getTime());
+					bean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", txn.getTxnId()));
+					List<PaymentSettlement> settlements = criteria3.list();
+					for (PaymentSettlement settlement : settlements) {
+						PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+						responseBean.setPsId(settlement.getPsId());
+						responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+						responseBean.setSettlementId(settlement.getSettlementId());
+						responseBean.setSettlementAmount(settlement.getSettlementAmount());
+						bean.setSettlement(responseBean);
+					}
+					txnsList.add(bean);
+					bean = null;
+				}
+				historyBean.setHistoryBean(txnsList);
+				historyBean.setMessage("Success");
+			}
+			else if(txns.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Getting Txns By Date failed" + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return historyBean;
+	}
+	
+	public SellerTxnHistoryBean getGeneralDateWiseTxnsPagination(int sellerId, String txnDate, int firstTxnId) throws Exception{
+		log.debug("Getting Txns By Date");
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		List<TxnHistoryBean> txnsList = new ArrayList<TxnHistoryBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = sdf1.parse(txnDate);
+			
+			String startTimeString = sdf1.format(date)+ " 00:00:00";
+			String endTimeString = sdf1.format(date)+ " 23:59:59";
+			
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date startTime = sdf2.parse(startTimeString);
+			Date endTime = sdf2.parse(endTimeString);
+			
+			log.debug("StartTime : "+ startTime + "&& EndTime : "+ endTime);
+			
+			Criteria criteria = session.createCriteria(PaymentTxn.class);
+			Junction junctionGroup = Restrictions.conjunction()
+					.add(Restrictions.between("txnUpdatedTime", startTime, endTime))
+					.add(Restrictions.eq("sellerId", sellerId))
+					.add(Restrictions.lt("txnId", firstTxnId));
+			criteria.add(junctionGroup);
+			criteria.addOrder(Order.desc("txnId"));
+			criteria.setMaxResults(10);
+			
+			List<PaymentTxn> txns = criteria.list();
+			log.debug("Txns Size : " + txns.size());
+			if(txns.size()>0){
+				for(PaymentTxn txn : txns){
+					TxnHistoryBean bean = new TxnHistoryBean();
+					bean.setTxnId(txn.getTxnId());
+					Criteria criteria2 = session.createCriteria(PaymentCredit.class);
+					criteria2.add(Restrictions.eq("txnId", txn.getTxnId()));
+					List<PaymentCredit> credits = criteria2.list();
+					log.debug("Credits Size: " + credits.size());
+					if (credits.size() > 0) {
+						for (PaymentCredit credit : credits) {
+							bean.setCreditAmount(credit.getCreditAmount());
+						}
+					}
+					bean.setCustomerId(txn.getEngageCustomerId());
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", txn.getEngageCustomerId());
+					bean.setCustomerName(customer.getCustomerName());
+					bean.setSellerId(txn.getSellerId());
+					bean.setSellerName(txn.getSellerName());
+					bean.setTxtAmount(txn.getTxnAmount());
+					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
+					bean.setSplitId(txn.getSplitId());
+					bean.setTxtStatus(txn.getTxnStatus());
+					String gmtTime = txn.getTxnUpdatedTime().toString();
+					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date dateTxn = sdf3.parse(gmtTime);
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(dateTxn);
+					calendar.add(Calendar.HOUR, 5);
+					calendar.add(Calendar.MINUTE, 30);
+					String localTime = sdf3.format(calendar.getTime());
+					bean.setTxnTime(localTime);
+					Criteria criteria3 = session.createCriteria(PaymentSettlement.class);
+					criteria3.add(Restrictions.eq("txnId", txn.getTxnId()));
+					List<PaymentSettlement> settlements = criteria3.list();
+					for (PaymentSettlement settlement : settlements) {
+						PaymentsSettlementResponseBean responseBean = new PaymentsSettlementResponseBean();
+						responseBean.setPsId(settlement.getPsId());
+						responseBean.setReleasefundRefId(settlement.getReleasefundRefId());
+						responseBean.setSettlementId(settlement.getSettlementId());
+						responseBean.setSettlementAmount(settlement.getSettlementAmount());
+						bean.setSettlement(responseBean);
+					}
+					txnsList.add(bean);
+					bean = null;
+				}
+				historyBean.setHistoryBean(txnsList);
+				historyBean.setMessage("Success");
+			}
+			else if(txns.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Getting Txns By Date failed" + re);
 		}
 		finally {
 			if(session!=null && session.isOpen()){

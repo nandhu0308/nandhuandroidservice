@@ -187,5 +187,13 @@ public class PaymentTxn implements java.io.Serializable {
 	public void setTxnNotes(String txnNotes) {
 		this.txnNotes = txnNotes;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "PaymentTxn [txnId=" + txnId + ", engageCustomerId=" + engageCustomerId + ", sellerId=" + sellerId
+				+ ", citrusSellerId=" + citrusSellerId + ", sellerName=" + sellerName + ", sellerDeviceId="
+				+ sellerDeviceId + ", txnAmount=" + txnAmount + ", citrusMpTxnId=" + citrusMpTxnId + ", splitId="
+				+ splitId + ", txnStatus=" + txnStatus + ", txnCreatedTime=" + txnCreatedTime + ", txnUpdatedTime="
+				+ txnUpdatedTime + ", txnNotes=" + txnNotes + "]";
+	}
 }
