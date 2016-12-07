@@ -59,4 +59,13 @@ public class PaymentConstants {
 	public String getSecret_key(){
 		return SECRET_KEY;
 	}
+	
+	public void setAuthToken(String authToken)
+	{
+		if(authToken !=null && !authToken.isEmpty())
+		{
+			AUTH_TOKEN = authToken;
+		}
+	
+	}
 }
