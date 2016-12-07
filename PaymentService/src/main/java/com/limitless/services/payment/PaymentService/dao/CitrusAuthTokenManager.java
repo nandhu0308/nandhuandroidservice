@@ -20,62 +20,59 @@ public class CitrusAuthTokenManager {
 	private static final Log log = LogFactory.getLog(CitrusAuthTokenManager.class);
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 	Client client = RestClientUtil.createClient();
-	
-	public AuthTokenResponseBean getAuthToken(){
+
+	public AuthTokenResponseBean getAuthToken() {
 		log.debug("Getting Citrus Auth Token");
 		AuthTokenResponseBean responseBean = new AuthTokenResponseBean();
 		Session session = null;
 		Transaction transaction = null;
 		String authToken = "";
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			AuthTokenRequestBean requestBean = new AuthTokenRequestBean();
 			PaymentConstants constants = PaymentConstants.getInstance();
 			requestBean.setAccess_key(constants.getAccess_Key());
 			requestBean.setSecret_key(constants.getSecret_key());
-			
+
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/auth/");
-			ClientResponse clientResponse = webResource.type("application/json")
-					.accept("application/json")
+			ClientResponse clientResponse = webResource.type("application/json").accept("application/json")
 					.post(ClientResponse.class, requestBean);
 			String citrusResponse = clientResponse.getEntity(String.class);
-			
-			try{
+
+			try {
 				JSONObject responseJson = new JSONObject(citrusResponse);
-				if(responseJson.has("auth_token")){
+				if (responseJson.has("auth_token")) {
 					authToken = responseJson.getString("auth_token");
-				}
-				else{
+					constants.setAuthToken(authToken);
+				} else {
 					log.debug("Citrus Response : " + citrusResponse);
 				}
-			}
-			catch(Exception e){
+			} catch (Exception e) {
 				log.error("Getting auth token failed :" + e);
 			}
-			
+
 			CitrusAuthToken token = (CitrusAuthToken) session
 					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
 			token.setAuthToken(authToken);
-			
+
 			session.update(token);
-			
+
 			CitrusAuthToken updatedToken = (CitrusAuthToken) session
 					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
-			
+
 			responseBean.setMessage("Success");
 			responseBean.setUpdatedTime(updatedToken.getUpdatedTime().toString());
-			
-			transaction.commit();
-		}
-		catch(RuntimeException re){
+
+			transaction.commit();			
+
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Getting auth token failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
