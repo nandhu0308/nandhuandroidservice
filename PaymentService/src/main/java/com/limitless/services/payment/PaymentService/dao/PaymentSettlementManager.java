@@ -107,6 +107,7 @@ public class PaymentSettlementManager {
 				SettlementResponseBean settlementResponseBean = null;
 				ReleaseFundsRequestBean fundsRequestBean = new ReleaseFundsRequestBean();
 				ReleaseFundsResponseBean fundsResponseBean = null;
+				
 				Criteria criteria2 = session.createCriteria(PaymentSettlement.class);
 				criteria2.add(Restrictions.eq("txnId", txn.getTxnId()));
 				List<PaymentSettlement> settleList = criteria2.list();

@@ -1,5 +1,11 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -215,6 +221,45 @@ public class EngageCustomerResource {
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.sendInvite(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/customer/selfinvite/{customerMobileNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public InviteResponseBean inviteSelf(@PathParam("customerMobileNumber") String customerMobileNumber) throws Exception{
+		InviteResponseBean responseBean = new InviteResponseBean();
+		try{
+			String message = "LETS GO CASHLESS! Download the app: goo.gl/ejZrmv";
+			String encoded_message = URLEncoder.encode(message);
+			String authkey = "129194Aa6NwGoQsVt580d9a57";
+			String mobiles = customerMobileNumber;
+			String senderId = "LLCINV";
+			String route = "4";
+			String mainUrl="http://api.msg91.com/api/sendhttp.php?";
+			StringBuilder sbPostData= new StringBuilder(mainUrl);
+            sbPostData.append("authkey="+authkey);
+            sbPostData.append("&mobiles="+mobiles);
+            sbPostData.append("&message="+encoded_message);
+            sbPostData.append("&route="+route);
+            sbPostData.append("&sender="+senderId);
+            mainUrl = sbPostData.toString();
+            URL msgUrl = new URL(mainUrl);
+            URLConnection con = msgUrl.openConnection();
+            con.connect();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String response = "";
+            while((response = reader.readLine())!=null){
+            	System.out.println(response);
+            }
+            responseBean.setMessage("Success");
+            responseBean.setResponse(response);
+            reader.close();
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
