@@ -30,6 +30,7 @@ import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
 import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.DataBean;
 import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.MessageBean;
 import com.limitless.services.payment.PaymentService.MessageResponseBean;
@@ -459,6 +460,18 @@ public class PaymentResource {
 			EngageSeller seller = sellerManager.findById(Integer.parseInt(request.getTo()));
 
 			request.setTo(seller.getSellerDeviceId());
+			
+			DataBean data = new DataBean();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date date = new Date();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.add(Calendar.HOUR, 5);
+			calendar.add(Calendar.MINUTE, 30);
+			String localTime = sdf.format(calendar.getTime());
+			date = sdf.parse(localTime);
+			
+			data.setTime(date);
 
 			WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
 			ClientResponse clientResponse = webResource2.type("application/json")
