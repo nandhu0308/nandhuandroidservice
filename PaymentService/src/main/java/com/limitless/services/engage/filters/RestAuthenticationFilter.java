@@ -37,7 +37,7 @@ public class RestAuthenticationFilter implements Filter {
 			boolean authenticationStatus = false;
 			
 			//Get Version
-			if(path.contains("getVersion")){
+			if(path.contains("getVersion") || path.contains("selfinvite")){
 				authenticationStatus = true;
 			} /*else if(path.endsWith("customer") && httpRequest.getMethod().equals("POST") ){
 				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);

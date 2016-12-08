@@ -230,10 +230,9 @@ public class EngageCustomerResource {
 	}
 	
 	@GET
-	@Path("/customer/selfinvite/{customerMobileNumber}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public InviteResponseBean inviteSelf(@PathParam("customerMobileNumber") String customerMobileNumber) throws Exception{
-		InviteResponseBean responseBean = new InviteResponseBean();
+	@Path("/selfinvite/{customerMobileNumber}")
+	public String inviteSelf(@PathParam("customerMobileNumber") String customerMobileNumber) throws Exception{
+		String response = "";
 		try{
 			String message = "LETS GO CASHLESS! Download the app: goo.gl/ejZrmv";
 			String encoded_message = URLEncoder.encode(message);
@@ -253,19 +252,16 @@ public class EngageCustomerResource {
             URLConnection con = msgUrl.openConnection();
             con.connect();
             BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String response = "";
             while((response = reader.readLine())!=null){
             	System.out.println(response);
             }
-            responseBean.setMessage("Success");
-            responseBean.setResponse(response);
             reader.close();
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
-		return responseBean;
+		return response;
 	}
 
 }
