@@ -61,18 +61,16 @@ public class PaymentSettlementManager {
 
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			CitrusAuthToken token = (CitrusAuthToken) session
 					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
 			authToken = token.getAuthToken();
-			
+
 			Criteria criteria = session.createCriteria(PaymentTxn.class);
 			Junction conditionGroup = Restrictions.conjunction()
 					.add(Restrictions.between("txnUpdatedTime", startTime, endTime))
-					.add(Restrictions.ne("citrusMpTxnId", 0))
-					.add(Restrictions.ne("splitId", 0))
-					.add(Restrictions.ne("txnAmount", 0F))
-					.add(Restrictions.eq("txnStatus", "PAYMENT_SUCCESSFUL"));
+					.add(Restrictions.ne("citrusMpTxnId", 0)).add(Restrictions.ne("splitId", 0))
+					.add(Restrictions.ne("txnAmount", 0F)).add(Restrictions.eq("txnStatus", "PAYMENT_SUCCESSFUL"));
 			criteria.add(conditionGroup);
 			List<PaymentTxn> txns = criteria.list();
 			log.debug("Txns Size: " + txns.size() + "Txns : " + txns.toString());
@@ -87,10 +85,10 @@ public class PaymentSettlementManager {
 				int sellerId = txn.getSellerId();
 
 				// Getting seller split percent
-				EngageSeller seller = (EngageSeller) session
-						.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+						sellerId);
 				double feePercent = seller.getSellerSplitPercent();
-				
+
 				// Calculating settlement amount and split amount
 				double feeAmount = txnAmount * (feePercent / 100);
 				// round off to 2 decimal
@@ -102,43 +100,47 @@ public class PaymentSettlementManager {
 				requestBean.setFee_amount(feeAmount);
 				requestBean.setSettlement_date_time(txn.getTxnUpdatedTime().toString());
 
-				PaymentSettlement settlement = new PaymentSettlement();
-
 				SettlementResponseBean settlementResponseBean = null;
 				ReleaseFundsRequestBean fundsRequestBean = new ReleaseFundsRequestBean();
 				ReleaseFundsResponseBean fundsResponseBean = null;
-				
+
 				Criteria criteria2 = session.createCriteria(PaymentSettlement.class);
 				criteria2.add(Restrictions.eq("txnId", txn.getTxnId()));
 				List<PaymentSettlement> settleList = criteria2.list();
 				log.debug("settlePrevList Size : " + settleList.size());
 
-				if(settleList.size()>0){
-					for(PaymentSettlement settle1 : settleList){
+				if (settleList.size() > 0) {
+					for (PaymentSettlement settle1 : settleList) {
 						// Doing settlement
-						PaymentSettlement instance = (PaymentSettlement) session
-								.get("com.limitless.services.payment.PaymentService.dao.PaymentSettlement", settle1.getPsId());
-						try{
-							if(instance.getSettlementId()==0){
+						PaymentSettlement instance = (PaymentSettlement) session.get(
+								"com.limitless.services.payment.PaymentService.dao.PaymentSettlement",
+								settle1.getPsId());
+						try {
+							if (instance.getSettlementId() == 0) {
 								settlementResponseBean = callSettlementApi(requestBean, authToken);
 							}
-						}
-						catch(Exception e){
+						} catch (Exception e) {
 							continue;
 						}
 
-						if (settlementResponseBean.getMessage().equals("Success")) {
-							instance.setSettlementId(settlementResponseBean.getSettlementId());
+						boolean isSettlementAlreadyPerformed = (settlementResponseBean.getErrorId() != null
+								&& settlementResponseBean.getErrorId().equals("343"));
+						if (settlementResponseBean.getMessage().equals("Success") || isSettlementAlreadyPerformed) {
+							if (!isSettlementAlreadyPerformed) {
+								instance.setSettlementId(settlementResponseBean.getSettlementId());
+							} else {
+								instance.setErrorIdSettle(settlementResponseBean.getErrorId());
+							}
 							instance.setTxnId(txn.getTxnId());
 							instance.setSettlementStatus("SETTLE_SUCCESS");
 							session.update(instance);
 							bean.setPsId(instance.getPsId());
 							bean.setSettlementId(instance.getSettlementId());
-						} else if (settlementResponseBean.getMessage().equals("Failed") && (!(settlementResponseBean.getErrorId().equals("343")) || settlementResponseBean.getErrorId()==null)) {
-							if(settlementResponseBean.getErrorId()==null){
+						} else if (settlementResponseBean.getMessage().equals("Failed")
+								|| settlementResponseBean.getErrorId() == null) {
+							if (settlementResponseBean.getErrorId() == null) {
 								instance.setErrorIdSettle("NA");
-							}
-							else{
+							} else {
 								instance.setErrorIdSettle(settlementResponseBean.getErrorId());
 							}
 							instance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
@@ -151,15 +153,24 @@ public class PaymentSettlementManager {
 						}
 
 						// Doing release funds
-						if(instance.getSettlementId()>0 || instance.getErrorIdSettle().equals("343")){
-							if(instance.getReleasefundRefId()==0){
+						if (instance.getSettlementId() > 0 || instance.getErrorIdSettle().equals("343")) {
+							if (instance.getReleasefundRefId() == 0) {
 
 								fundsRequestBean.setSplit_id(txn.getSplitId());
 								fundsResponseBean = callReleaseFundsApi(fundsRequestBean, authToken);
 
-								if (fundsResponseBean.getMessage().equals("Success")) {
-									instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
-									instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+								boolean isFundsReleasedAlready = (fundsResponseBean.getErrorId() != null
+										&& fundsResponseBean.getErrorId().equals("361"));
+
+								if (fundsResponseBean.getMessage().equals("Success") || isFundsReleasedAlready) {
+									if (isFundsReleasedAlready) {
+										instance.setErrorIdRelease(fundsResponseBean.getErrorId());
+									} else {
+										instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
+									}
+									if (fundsResponseBean.getSettlementAmount() > 0) {
+										instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+									}
 									instance.setTxnId(txn.getTxnId());
 									instance.setSettlementStatus("RELEASE_SUCCESS");
 									session.update(instance);
@@ -179,31 +190,48 @@ public class PaymentSettlementManager {
 							}
 						}
 					}
-				}
-				else if(settleList.isEmpty()){
-					try{
-							settlementResponseBean = callSettlementApi(requestBean, authToken);
-					}
-					catch(Exception e){
+				} else if (settleList.isEmpty()) {
+					PaymentSettlement settlement = new PaymentSettlement();
+					try {
+						settlementResponseBean = callSettlementApi(requestBean, authToken);
+					} catch (Exception e) {
 						continue;
 					}
-					if (settlementResponseBean.getMessage().equals("Success")) {
-						settlement.setSettlementId(settlementResponseBean.getSettlementId());
+
+					boolean isSettlementAlreadyPerformed = (settlementResponseBean.getErrorId() != null
+							&& settlementResponseBean.getErrorId().equals("343"));
+
+					if (settlementResponseBean.getMessage().equals("Success") || isSettlementAlreadyPerformed) {
+
+						if (!isSettlementAlreadyPerformed) {
+							settlement.setSettlementId(settlementResponseBean.getSettlementId());
+						} else {
+							settlement.setErrorIdSettle(settlementResponseBean.getErrorId());
+						}
+
 						settlement.setTxnId(txn.getTxnId());
 						settlement.setSettlementStatus("SETTLE_SUCCESS");
 						session.persist(settlement);
-						
+
 						fundsRequestBean.setSplit_id(txn.getSplitId());
 						fundsResponseBean = callReleaseFundsApi(fundsRequestBean, authToken);
-						
+						boolean isFundsReleasedAlready = (fundsResponseBean.getErrorId() != null
+								&& fundsResponseBean.getErrorId().equals("361"));
 						int settleId = settlement.getPsId();
-						if(fundsResponseBean.getMessage().equals("Success")){
-							PaymentSettlement instance = (PaymentSettlement) session
-									.get("com.limitless.services.payment.PaymentService.dao.PaymentSettlement", settleId);
-							instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
-							instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+						if (fundsResponseBean.getMessage().equals("Success") || isFundsReleasedAlready) {
+							PaymentSettlement instance = (PaymentSettlement) session.get(
+									"com.limitless.services.payment.PaymentService.dao.PaymentSettlement", settleId);
+
+							if (isFundsReleasedAlready) {
+								instance.setErrorIdRelease(fundsResponseBean.getErrorId());
+							} else {
+								instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
+							}
+							if (fundsResponseBean.getSettlementAmount() > 0) {
+								instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+							}
 							instance.setSettlementStatus("RELEASE_SUCCESS");
-							
+
 							bean.setPsId(settleId);
 							bean.setSettlementId(instance.getSettlementId());
 							bean.setReleasefundRefId(instance.getReleasefundRefId());
