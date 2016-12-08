@@ -11,6 +11,7 @@ import org.hibernate.Transaction;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.limitless.services.engage.sellers.CitrusSellerBean;
 import com.limitless.services.engage.sellers.CitrusSellerRequestBean;
 import com.limitless.services.engage.sellers.CitrusSellerResponseBean;
 import com.limitless.services.engage.sellers.CitrusSellersBean;
@@ -162,5 +163,41 @@ public class CitrusSellerManager {
 			log.error("Getting sellers from citrus failed : " + re);
 		}
 		return requestBeanList;
+	}
+	
+	public CitrusSellerBean getSellerById(int citrusSellerId){
+		log.debug("Getting citrus seller");
+		CitrusSellerBean sellerBean = new CitrusSellerBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			CitrusSeller seller = (CitrusSeller) session
+					.get("com.limitless.services.engage.sellers.dao.CitrusSeller", citrusSellerId);
+			if(seller != null){
+				sellerBean.setMessage("Success");
+				sellerBean.setCitrusSellerId(seller.getCitrusId());
+				sellerBean.setSellerName(seller.getSellerName());
+				sellerBean.setSellerBankAccountNumber(seller.getSellerAccNumber());
+				sellerBean.setSellerBankIfsc(seller.getSellerIfsc());
+				sellerBean.setSellerActive(seller.getSellerActive());
+			}
+			else{
+				sellerBean.setMessage("Information Will Be Available Shortly...");
+			}
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Getting sellers from citrus failed : " + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return sellerBean;
 	}
 }

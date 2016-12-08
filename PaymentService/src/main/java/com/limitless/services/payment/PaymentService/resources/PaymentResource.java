@@ -461,7 +461,7 @@ public class PaymentResource {
 
 			request.setTo(seller.getSellerDeviceId());
 			
-			DataBean data = new DataBean();
+			DataBean data = request.getData();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date date = new Date();
 			Calendar calendar = Calendar.getInstance();
