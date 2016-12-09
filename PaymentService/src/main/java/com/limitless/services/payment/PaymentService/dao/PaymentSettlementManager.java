@@ -112,11 +112,11 @@ public class PaymentSettlementManager {
 				if (settleList.size() > 0) {
 					for (PaymentSettlement settle1 : settleList) {
 						// Doing settlement
-						PaymentSettlement instance = (PaymentSettlement) session.get(
+						PaymentSettlement settleInstance = (PaymentSettlement) session.get(
 								"com.limitless.services.payment.PaymentService.dao.PaymentSettlement",
 								settle1.getPsId());
 						try {
-							if (instance.getSettlementId() == 0) {
+							if (settleInstance.getSettlementId() == 0) {
 								settlementResponseBean = callSettlementApi(requestBean, authToken);
 							}
 						} catch (Exception e) {
@@ -127,34 +127,38 @@ public class PaymentSettlementManager {
 								&& settlementResponseBean.getErrorId().equals("343"));
 						if (settlementResponseBean.getMessage().equals("Success") || isSettlementAlreadyPerformed) {
 							if (!isSettlementAlreadyPerformed) {
-								instance.setSettlementId(settlementResponseBean.getSettlementId());
+								settleInstance.setSettlementId(settlementResponseBean.getSettlementId());
 							} else {
-								instance.setErrorIdSettle(settlementResponseBean.getErrorId());
+								settleInstance.setErrorIdSettle(settlementResponseBean.getErrorId());
 							}
-							instance.setTxnId(txn.getTxnId());
-							instance.setSettlementStatus("SETTLE_SUCCESS");
-							session.update(instance);
-							bean.setPsId(instance.getPsId());
-							bean.setSettlementId(instance.getSettlementId());
+							settleInstance.setTxnId(txn.getTxnId());
+							settleInstance.setSettlementStatus("SETTLE_SUCCESS");
+							session.update(settleInstance);
+							bean.setPsId(settleInstance.getPsId());
+							bean.setSettlementId(settleInstance.getSettlementId());
 						} else if (settlementResponseBean.getMessage().equals("Failed")
 								|| settlementResponseBean.getErrorId() == null) {
 							if (settlementResponseBean.getErrorId() == null) {
-								instance.setErrorIdSettle("NA");
+								settleInstance.setErrorIdSettle("NA");
 							} else {
-								instance.setErrorIdSettle(settlementResponseBean.getErrorId());
+								settleInstance.setErrorIdSettle(settlementResponseBean.getErrorId());
 							}
-							instance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
-							instance.setTxnId(txn.getTxnId());
-							instance.setSettlementStatus("SETTLE_FAILED");
-							session.update(instance);
-							bean.setPsId(instance.getPsId());
-							bean.setErrorIdSettle(instance.getErrorIdSettle());
-							bean.setErrorDescriptionSettle(instance.getErrorDescriptionSettle());
+							settleInstance.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
+							settleInstance.setTxnId(txn.getTxnId());
+							settleInstance.setSettlementStatus("SETTLE_FAILED");
+							session.update(settleInstance);
+							bean.setPsId(settleInstance.getPsId());
+							bean.setErrorIdSettle(settleInstance.getErrorIdSettle());
+							bean.setErrorDescriptionSettle(settleInstance.getErrorDescriptionSettle());
 						}
 
+						
+						PaymentSettlement releaseInstance = (PaymentSettlement) session.get(
+								"com.limitless.services.payment.PaymentService.dao.PaymentSettlement",
+								settle1.getPsId());
 						// Doing release funds
-						if (instance.getSettlementId() > 0 || instance.getErrorIdSettle().equals("343")) {
-							if (instance.getReleasefundRefId() == 0) {
+						if (releaseInstance.getSettlementId() > 0 || releaseInstance.getErrorIdSettle().equals("343")) {
+							if (releaseInstance.getReleasefundRefId() == 0) {
 
 								fundsRequestBean.setSplit_id(txn.getSplitId());
 								fundsResponseBean = callReleaseFundsApi(fundsRequestBean, authToken);
@@ -164,28 +168,28 @@ public class PaymentSettlementManager {
 
 								if (fundsResponseBean.getMessage().equals("Success") || isFundsReleasedAlready) {
 									if (isFundsReleasedAlready) {
-										instance.setErrorIdRelease(fundsResponseBean.getErrorId());
+										releaseInstance.setErrorIdRelease(fundsResponseBean.getErrorId());
 									} else {
-										instance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
+										releaseInstance.setReleasefundRefId(fundsResponseBean.getReleaseFundsRefId());
 									}
 									if (fundsResponseBean.getSettlementAmount() > 0) {
-										instance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
+										releaseInstance.setSettlementAmount(fundsResponseBean.getSettlementAmount());
 									}
-									instance.setTxnId(txn.getTxnId());
-									instance.setSettlementStatus("RELEASE_SUCCESS");
-									session.update(instance);
-									bean.setPsId(instance.getPsId());
-									bean.setReleasefundRefId(instance.getReleasefundRefId());
-									bean.setSettlementAmount(instance.getSettlementAmount());
+									releaseInstance.setTxnId(txn.getTxnId());
+									releaseInstance.setSettlementStatus("RELEASE_SUCCESS");
+									session.update(releaseInstance);
+									bean.setPsId(releaseInstance.getPsId());
+									bean.setReleasefundRefId(releaseInstance.getReleasefundRefId());
+									bean.setSettlementAmount(releaseInstance.getSettlementAmount());
 								} else if (fundsResponseBean.getMessage().equals("Failed")) {
-									instance.setErrorIdRelease(fundsResponseBean.getErrorId());
-									instance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
-									instance.setTxnId(txn.getTxnId());
-									instance.setSettlementStatus("RELEASE_FAILED");
-									session.update(instance);
-									bean.setPsId(instance.getPsId());
-									bean.setErrorIdRelease(instance.getErrorIdRelease());
-									bean.setErrorDescriptionRelease(instance.getErrorDescriptionRelease());
+									releaseInstance.setErrorIdRelease(fundsResponseBean.getErrorId());
+									releaseInstance.setErrorDescriptionRelease(fundsResponseBean.getErrorDescription());
+									releaseInstance.setTxnId(txn.getTxnId());
+									releaseInstance.setSettlementStatus("RELEASE_FAILED");
+									session.update(releaseInstance);
+									bean.setPsId(releaseInstance.getPsId());
+									bean.setErrorIdRelease(releaseInstance.getErrorIdRelease());
+									bean.setErrorDescriptionRelease(releaseInstance.getErrorDescriptionRelease());
 								}
 							}
 						}
