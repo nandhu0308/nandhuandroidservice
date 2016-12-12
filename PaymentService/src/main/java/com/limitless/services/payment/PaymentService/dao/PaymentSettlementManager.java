@@ -118,7 +118,13 @@ public class PaymentSettlementManager {
 						try {
 							if (settleInstance.getSettlementId() == 0) {
 								settlementResponseBean = callSettlementApi(requestBean, authToken);
+							} else {
+								settlementResponseBean = new SettlementResponseBean();
+								settlementResponseBean.setSettlementId(settleInstance.getSettlementId());
+								settlementResponseBean.setErrorId(settleInstance.getErrorIdSettle());
+								settlementResponseBean.setMessage("Success");
 							}
+
 						} catch (Exception e) {
 							continue;
 						}
@@ -190,9 +196,7 @@ public class PaymentSettlementManager {
 									bean.setErrorIdRelease(releaseInstance.getErrorIdRelease());
 									bean.setErrorDescriptionRelease(releaseInstance.getErrorDescriptionRelease());
 								}
-							}
-							else
-							{
+							} else {
 								releaseInstance.setSettlementStatus("RELEASE_SUCCESS");
 								session.update(releaseInstance);
 							}
@@ -218,7 +222,7 @@ public class PaymentSettlementManager {
 						}
 
 						settlement.setTxnId(txn.getTxnId());
-						settlement.setSettlementStatus("SETTLE_SUCCESS");						
+						settlement.setSettlementStatus("SETTLE_SUCCESS");
 
 						fundsRequestBean.setSplit_id(txn.getSplitId());
 						fundsResponseBean = callReleaseFundsApi(fundsRequestBean, authToken);
@@ -235,7 +239,7 @@ public class PaymentSettlementManager {
 							if (fundsResponseBean.getSettlementAmount() > 0) {
 								settlement.setSettlementAmount(fundsResponseBean.getSettlementAmount());
 							}
-							settlement.setSettlementStatus("RELEASE_SUCCESS");							
+							settlement.setSettlementStatus("RELEASE_SUCCESS");
 							bean.setPsId(settleId);
 							bean.setSettlementId(settlement.getSettlementId());
 							bean.setReleasefundRefId(settlement.getReleasefundRefId());
@@ -246,13 +250,13 @@ public class PaymentSettlementManager {
 						settlement.setErrorIdSettle(settlementResponseBean.getErrorId());
 						settlement.setErrorDescriptionSettle(settlementResponseBean.getErrorDescription());
 						settlement.setTxnId(txn.getTxnId());
-						settlement.setSettlementStatus("SETTLE_FAILED");					
+						settlement.setSettlementStatus("SETTLE_FAILED");
 						bean.setPsId(settlement.getPsId());
 						bean.setErrorIdSettle(settlement.getErrorIdSettle());
 						bean.setErrorDescriptionSettle(settlement.getErrorDescriptionSettle());
 					}
 					session.persist(settlement);
-					
+
 				}
 				settlement = null;
 				respBeanList.add(bean);
