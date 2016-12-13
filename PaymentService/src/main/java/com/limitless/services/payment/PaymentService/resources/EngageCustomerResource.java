@@ -60,14 +60,14 @@ public class EngageCustomerResource {
 			
 			EngageCustomerManager manager = new EngageCustomerManager();
 			
-			if( !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
+			if( !(manager.checkDuplicateMobile(bean.getMobileNumber())) && !(manager.checkDuplicateEmail(bean.getEmailId())) ){
 				manager.persist(customer);
 				customerResp.setCustomerId(customer.getCustomerId());
 				customerResp.setStatus(1);
 				customerResp.setMessage("Success");
 			} else {
 				customerResp.setStatus(-1);
-				customerResp.setMessage("Failure - Duplicate Mobile Number");
+				customerResp.setMessage("Failure - Duplicate Mobile Number or Email");
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);

@@ -25,6 +25,7 @@ import com.limitless.services.payment.PaymentService.ReleaseFundsRequestBean;
 import com.limitless.services.payment.PaymentService.ReleaseFundsResponseBean;
 import com.limitless.services.payment.PaymentService.SettlementRequestBean;
 import com.limitless.services.payment.PaymentService.SettlementResponseBean;
+import com.limitless.services.payment.PaymentService.TxnSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.PaymentConstants;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
@@ -338,6 +339,36 @@ public class PaymentSettlementManager {
 		} catch (RuntimeException re) {
 			log.error("ReleaseFunds API failed", re);
 			throw re;
+		}
+		return responseBean;
+	}
+	
+	public TxnSettlementResponseBean settleTxnById(int txnId){
+		log.debug("Settling and releasing funds bt TxnId");
+		TxnSettlementResponseBean responseBean = new TxnSettlementResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			//Getting Txn details
+			PaymentTxn txn = (PaymentTxn) session
+					.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn", txnId);
+			SettlementRequestBean requestBean = new SettlementRequestBean();
+			
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Transaction settlement failed", re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
 		return responseBean;
 	}

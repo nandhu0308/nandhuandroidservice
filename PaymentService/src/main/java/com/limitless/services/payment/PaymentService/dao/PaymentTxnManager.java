@@ -12,12 +12,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Transport;
+import javax.mail.internet.*;
+
 /*
  * @author veejay.developer@gmail.com
  * ©www.limitlesscircle.com 
  */
 
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,8 +53,11 @@ import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseB
 import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnDayWiseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
+import com.limitless.services.payment.PaymentService.TxnMailRequestBean;
+import com.limitless.services.payment.PaymentService.TxnMailResponseBean;
 import com.limitless.services.payment.PaymentService.TxnMonthWiseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
+import com.sun.jersey.api.MessageException;
 
 /**
  * Home object for domain model class PaymentTxn.
@@ -370,6 +379,7 @@ public class PaymentTxnManager {
 					bean.setCitrusMpTxnId(payment.getCitrusMpTxnId());
 					bean.setSplitId(payment.getSplitId());
 					bean.setTxtStatus(payment.getTxnStatus());
+					bean.setTxnNotes(payment.getTxnNotes());
 					String gmtTime = payment.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date date = sdf.parse(gmtTime);
@@ -460,6 +470,7 @@ public class PaymentTxnManager {
 					bean.setCitrusMpTxnId(payment.getCitrusMpTxnId());
 					bean.setSplitId(payment.getSplitId());
 					bean.setTxtStatus(payment.getTxnStatus());
+					bean.setTxnNotes(payment.getTxnNotes());
 					String gmtTime = payment.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date date = sdf.parse(gmtTime);
@@ -692,6 +703,7 @@ public class PaymentTxnManager {
 					historyBean.setSellerId(txn.getSellerId());
 					historyBean.setSellerName(txn.getSellerName());
 					historyBean.setTxtStatus(txn.getTxnStatus());
+					historyBean.setTxnNotes(txn.getTxnNotes());
 					String gmtTime = txn.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date date = sdf.parse(gmtTime);
@@ -779,6 +791,7 @@ public class PaymentTxnManager {
 					historyBean.setSellerId(txn.getSellerId());
 					historyBean.setSellerName(txn.getSellerName());
 					historyBean.setTxtStatus(txn.getTxnStatus());
+					historyBean.setTxnNotes(txn.getTxnNotes());
 					String gmtTime = txn.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date date = sdf.parse(gmtTime);
@@ -1163,6 +1176,7 @@ public class PaymentTxnManager {
 					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
 					bean.setSplitId(txn.getSplitId());
 					bean.setTxtStatus(txn.getTxnStatus());
+					bean.setTxnNotes(txn.getTxnNotes());
 					String gmtTime = txn.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date dateTxn = sdf3.parse(gmtTime);
@@ -1263,6 +1277,7 @@ public class PaymentTxnManager {
 					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
 					bean.setSplitId(txn.getSplitId());
 					bean.setTxtStatus(txn.getTxnStatus());
+					bean.setTxnNotes(txn.getTxnNotes());
 					String gmtTime = txn.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date dateTxn = sdf3.parse(gmtTime);
@@ -1362,6 +1377,7 @@ public class PaymentTxnManager {
 					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
 					bean.setSplitId(txn.getSplitId());
 					bean.setTxtStatus(txn.getTxnStatus());
+					bean.setTxnNotes(txn.getTxnNotes());
 					String gmtTime = txn.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date dateTxn = sdf3.parse(gmtTime);
@@ -1462,6 +1478,7 @@ public class PaymentTxnManager {
 					bean.setCitrusMpTxnId(txn.getCitrusMpTxnId());
 					bean.setSplitId(txn.getSplitId());
 					bean.setTxtStatus(txn.getTxnStatus());
+					bean.setTxnNotes(txn.getTxnNotes());
 					String gmtTime = txn.getTxnUpdatedTime().toString();
 					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date dateTxn = sdf3.parse(gmtTime);
@@ -1506,7 +1523,95 @@ public class PaymentTxnManager {
 		}
 		return historyBean;
 	}
-
+	
+	public TxnMailResponseBean sendMail(TxnMailRequestBean requestBean){
+		log.debug("sending mail");
+		TxnMailResponseBean responseBean = new TxnMailResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			int txnId = requestBean.getTxnId();
+			int customerId = requestBean.getCustomerId();
+			int sellerId = requestBean.getSellerId();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			String customerName = customer.getCustomerName();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			String sellerShopName = seller.getSellerShopName();
+			
+			PaymentTxn txn = (PaymentTxn) session
+					.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn", txnId);
+			float txnAmount = txn.getTxnAmount();
+			String txnStatus = txn.getTxnStatus();
+			
+			final String username = "transactions@limitlesscircle.com";
+			final String password = "Engage@12E";
+			
+			Properties properties = new Properties();
+			properties.put("mail.smtp.host", "smtp.zoho.com");
+			properties.put("mail.smtp.socketFactory.port", "465");
+			properties.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+			properties.put("mail.smtp.auth", "true");
+			properties.put("mail.smtp.port", "465");
+			
+			javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(properties,
+					new javax.mail.Authenticator() {
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(username, password);
+				}
+			  });
+			
+			try{
+				javax.mail.Message message = new MimeMessage(mailSession);
+				message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
+				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ram@limitlesscircle.com"));
+				
+				if(txnStatus.equals("PAYMENT_FAILED")){
+					String messageSubject = "Transaction - " + txnId + " Failed";
+					String messageBody = "TxnId: "+txnId+
+							"\nCustomer: "+customerId+"_"+customerName+
+							"\nSeller: "+sellerId+"_"+sellerShopName+
+							"\nAmount: "+txnAmount;
+					message.setSubject(messageSubject);
+					message.setText(messageBody);
+				}
+				else if(txnStatus.equals("PAYMENT_SUCCESSFUL")){
+					String messageSubject = "Transaction - " + txnId + " Success";
+					String messageBody = "TxnId: "+txnId+
+							"\nCustomer: "+customerId+"_"+customerName+
+							"\nSeller: "+sellerId+"_"+sellerShopName+
+							"\nAmount: "+txnAmount;
+					message.setSubject(messageSubject);
+					message.setText(messageBody);
+				}
+				
+				Transport.send(message);
+				
+				responseBean.setMessage("Success");
+			}
+			catch(Exception e){
+				log.debug("Email Exception : " + e);
+			}
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending mail failed" + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
 	public static void main(String[] args) {
 		PaymentTxnManager manager = new PaymentTxnManager();
 		// manager.updateSplitId(946706, 28698, 31747,
