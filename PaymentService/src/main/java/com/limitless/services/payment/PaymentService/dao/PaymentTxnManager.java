@@ -1569,25 +1569,27 @@ public class PaymentTxnManager {
 			try{
 				javax.mail.Message message = new MimeMessage(mailSession);
 				message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
-				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ram@limitlesscircle.com"));
+				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("payments@limitlesscircle.com"));
 				
 				if(txnStatus.equals("PAYMENT_FAILED")){
 					String messageSubject = "Transaction - " + txnId + " Failed";
-					String messageBody = "TxnId: "+txnId+
-							"\nCustomer: "+customerId+"_"+customerName+
-							"\nSeller: "+sellerId+"_"+sellerShopName+
-							"\nAmount: "+txnAmount;
+					String messageBody = "<table><tr><td>TxnId</td><td>:</td><td>"+txnId+
+										 "</td></tr><tr><td>Customer</td><td>:</td><td>"+customerId+"_"+customerName+
+										 "</td></tr><tr><td>Seller</td><td>:</td><td>"+sellerId+"_"+sellerShopName+
+										 "</td></tr><tr><td>Amount</td><td>:</td><td>"+txnAmount+
+										 "</td></tr><tr><td>Status</td><td>:</td><td>"+txnStatus+"</td></tr></table>";
 					message.setSubject(messageSubject);
-					message.setText(messageBody);
+					message.setContent(messageBody, "text/html");
 				}
 				else if(txnStatus.equals("PAYMENT_SUCCESSFUL")){
 					String messageSubject = "Transaction - " + txnId + " Success";
-					String messageBody = "TxnId: "+txnId+
-							"\nCustomer: "+customerId+"_"+customerName+
-							"\nSeller: "+sellerId+"_"+sellerShopName+
-							"\nAmount: "+txnAmount;
+					String messageBody = "<table><tr><td>TxnId</td><td>:</td><td>"+txnId+
+							 "</td></tr><tr><td>Customer</td><td>:</td><td>"+customerId+"_"+customerName+
+							 "</td></tr><tr><td>Seller</td><td>:</td><td>"+sellerId+"_"+sellerShopName+
+							 "</td></tr><tr><td>Amount</td><td>:</td><td>"+txnAmount+
+							 "</td></tr><tr><td>Status</td><td>:</td><td>"+txnStatus+"</td></tr></table>";
 					message.setSubject(messageSubject);
-					message.setText(messageBody);
+					message.setContent(messageBody, "text/html");
 				}
 				
 				Transport.send(message);
@@ -1597,6 +1599,7 @@ public class PaymentTxnManager {
 			catch(Exception e){
 				log.debug("Email Exception : " + e);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
 			if(transaction!=null){
