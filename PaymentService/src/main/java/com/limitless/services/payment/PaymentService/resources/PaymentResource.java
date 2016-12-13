@@ -43,6 +43,8 @@ import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
+import com.limitless.services.payment.PaymentService.TxnMailRequestBean;
+import com.limitless.services.payment.PaymentService.TxnMailResponseBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentCredit;
 import com.limitless.services.payment.PaymentService.dao.PaymentCreditManager;
@@ -164,6 +166,14 @@ public class PaymentResource {
 			
 			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
 			
+			TxnMailRequestBean mailBean = new TxnMailRequestBean();
+			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			mailBean.setSellerId(paymentTxn.getSellerId());
+			mailBean.setTxnId(paymentTxn.getTxnId());
+			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
+			
+			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
+			
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -200,6 +210,7 @@ public class PaymentResource {
 				historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
 				historyBean.setSplitId(bean.getSplitId());
 				historyBean.setTxtStatus(bean.getTxnStatus().toString());
+				historyBean.setTxnNotes(bean.getTxnNotes());
 				String gmtTime = bean.getTxnUpdatedTime().toString();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date date = sdf.parse(gmtTime);
@@ -250,6 +261,7 @@ public class PaymentResource {
 				historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
 				historyBean.setSplitId(bean.getSplitId());
 				historyBean.setTxtStatus(bean.getTxnStatus().toString());
+				historyBean.setTxnNotes(bean.getTxnNotes());
 				String gmtTime = bean.getTxnUpdatedTime().toString();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date date = sdf.parse(gmtTime);
@@ -396,6 +408,14 @@ public class PaymentResource {
 			messageBean.setTxnId(paymentTxn.getTxnId());
 			
 			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
+			
+			TxnMailRequestBean mailBean = new TxnMailRequestBean();
+			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			mailBean.setSellerId(paymentTxn.getSellerId());
+			mailBean.setTxnId(paymentTxn.getTxnId());
+			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
+			
+			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
 
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -714,6 +734,23 @@ public class PaymentResource {
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
+	}
+	
+	@POST
+	@Path("/trans/mail")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TxnMailResponseBean txnMail(TxnMailRequestBean requestBean) throws Exception{
+		TxnMailResponseBean responseBean = new TxnMailResponseBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			responseBean = manager.sendMail(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 
 }

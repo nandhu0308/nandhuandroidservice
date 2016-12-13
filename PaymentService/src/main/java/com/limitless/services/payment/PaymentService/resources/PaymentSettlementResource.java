@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseBean;
+import com.limitless.services.payment.PaymentService.TxnSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentSettlementManager;
 
 @Path("/settle")
@@ -66,5 +67,20 @@ public class PaymentSettlementResource {
 			throw new Exception("Internal Server Error");
 		}
 		return respBeanList;
+	}
+	
+	@GET
+	@Path("/txn/{txnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public TxnSettlementResponseBean settleTxn(@PathParam("txnId") int txnId) throws Exception{
+		TxnSettlementResponseBean responseBean = new TxnSettlementResponseBean();
+		try{
+			
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 }

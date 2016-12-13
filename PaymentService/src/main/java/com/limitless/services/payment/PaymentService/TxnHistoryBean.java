@@ -15,6 +15,7 @@ public class TxnHistoryBean {
 	private int splitId;
 	private String txtStatus;
 	private String txnTime;
+	private String txnNotes;
 	private PaymentsSettlementResponseBean settlement;
 	
 	public TxnHistoryBean(){
@@ -117,6 +118,14 @@ public class TxnHistoryBean {
 
 	public void setSettlement(PaymentsSettlementResponseBean settlement) {
 		this.settlement = settlement;
+	}
+
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
 	}
 
 }
