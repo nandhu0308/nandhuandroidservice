@@ -23,6 +23,8 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.AddAccountRequestBean;
+import com.limitless.services.engage.AddAccountResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
 import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
@@ -511,5 +513,9 @@ public class EngageCustomerManager {
 		}
 		return responseBean;
 	}
+	
+	public AddAccountResponseBean AddBankAccount(AddAccountRequestBean requestBean) throws Exception{
+		log.info("Adding Bank Account");
+		
 	
 }
