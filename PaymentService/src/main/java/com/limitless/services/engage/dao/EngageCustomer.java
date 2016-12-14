@@ -23,6 +23,8 @@ public class EngageCustomer implements java.io.Serializable {
 	@Id @GeneratedValue
 	@Column(name="CUSTOMER_ID")
 	private Integer customerId;
+	@Column(name="CITRUS_SELLER_ID")
+	private Integer citrusSellerId;
 	@Column(name="CUSTOMER_NAME")
 	private String customerName;
 	@Column(name="CUSTOMER_EMAIL99")
@@ -143,4 +145,12 @@ public class EngageCustomer implements java.io.Serializable {
 		this.customerUpdatedTime = customerUpdatedTime;
 	}
 
+	public Integer getCitrusSellerId() {
+		return citrusSellerId;
+	}
+
+	public void setCitrusSellerId(Integer citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
+	}
+	
 }

@@ -409,6 +409,24 @@ public class EngageSellerManager {
 					responseBean.setMessage("Success");
 				}
 			}
+			else if(sellerList.isEmpty()){
+				Criteria criteria2 = session.createCriteria(EngageCustomer.class);
+				criteria2.add(Restrictions.eq("customerMobileNumber", sellerMobileNumber));
+				List<EngageCustomer> customerList = criteria2.list();
+				log.debug("Size : " + customerList.size());
+				if(customerList.size()>0){
+					for(EngageCustomer customer : customerList){
+						responseBean.setCitrusSellerId(customer.getCitrusSellerId());
+						responseBean.setSellerName(customer.getCustomerName());
+						responseBean.setSellerId(customer.getCustomerId());
+						responseBean.setMobileNumber(customer.getCustomerMobileNumber());
+						responseBean.setMessage("Success");
+					}
+				}
+				else{
+					responseBean.setMessage("Mobile Number Not Registered");
+				}
+			}
 			else{
 				responseBean.setMessage("Mobile Number Not Registered");
 			}

@@ -66,7 +66,7 @@ public class EngageSellerResource {
 			
 			EngageSellerManager manager = new EngageSellerManager();
 			
-			if( !manager.checkDuplicateEmail(bean.getEmailId()) ){
+			if( !manager.checkDuplicateEmail(bean.getEmailId()) && !manager.checkDuplicateMobile(bean.getMobileNumber()) ){
 				manager.persist(seller);
 				sellerResp.setSellerId(seller.getSellerId());
 				sellerResp.setStatus(1);
@@ -90,7 +90,12 @@ public class EngageSellerResource {
 		EngageSeller engageSeller = manager.findById(id);
 		
 		SellerDeviceIdRespBean bean = new SellerDeviceIdRespBean();
-		bean.setSellerDeviceId(engageSeller.getSellerDeviceId());
+		if(engageSeller == null){
+			bean.setSellerDeviceId("NA");
+		}
+		else{
+			bean.setSellerDeviceId(engageSeller.getSellerDeviceId());
+		}
 		
 		return bean;
 	}

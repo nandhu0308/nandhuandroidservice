@@ -18,6 +18,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.AddAccountRequestBean;
+import com.limitless.services.engage.AddAccountResponseBean;
 import com.limitless.services.engage.CheckEmailRequestBean;
 import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
@@ -27,6 +29,8 @@ import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
 import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.MobileResponseBean;
+import com.limitless.services.engage.P2PCustomerVerificationRequestBean;
+import com.limitless.services.engage.P2PCustomerVerificationResponseBean;
 import com.limitless.services.engage.PasswdRequestBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
@@ -57,6 +61,7 @@ public class EngageCustomerResource {
 			customer.setCustomerCountryCode(bean.getCountryCode());
 			customer.setCustomerCity(bean.getCity());
 			customer.setCustomerCountry(bean.getCountry());
+			customer.setCitrusSellerId(0);
 			
 			EngageCustomerManager manager = new EngageCustomerManager();
 			
@@ -262,6 +267,40 @@ public class EngageCustomerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return response;
+	}
+	
+	@PUT
+	@Path("/p2p/verify")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public P2PCustomerVerificationResponseBean checkCustomer(P2PCustomerVerificationRequestBean requestBean) throws Exception{
+		P2PCustomerVerificationResponseBean verificationResponseBean = new P2PCustomerVerificationResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			verificationResponseBean = manager.p2pCustomerVerification(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return verificationResponseBean;
+	}
+	
+	@POST
+	@Path("/customer/p2p/register")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public AddAccountResponseBean registerP2p(AddAccountRequestBean requestBean) throws Exception{
+		AddAccountResponseBean responseBean = new AddAccountResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.moneyTransferRegister(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 
 }

@@ -20,19 +20,35 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.limitless.services.engage.AddAccountRequestBean;
 import com.limitless.services.engage.AddAccountResponseBean;
+import com.limitless.services.engage.CitrusRegistrationRequestBean;
+import com.limitless.services.engage.CitrusRegistrationResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
 import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
 import com.limitless.services.engage.MobileResponseBean;
+import com.limitless.services.engage.P2PCustomerVerificationRequestBean;
+import com.limitless.services.engage.P2PCustomerVerificationResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
+import com.limitless.services.engage.sellers.CitrusSellerResponseBean;
+import com.limitless.services.engage.sellers.dao.CitrusSeller;
+import com.limitless.services.engage.sellers.dao.CitrusSellerManager;
+import com.limitless.services.payment.PaymentService.dao.CitrusAuthToken;
+import com.limitless.services.payment.PaymentService.resources.CitrusSellerResource;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
+import com.limitless.services.payment.PaymentService.util.RestClientUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * Home object for domain model class EngageCustomer.
@@ -42,6 +58,7 @@ import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 public class EngageCustomerManager {
 
 	private static final Log log = LogFactory.getLog(EngageCustomerManager.class);
+	Client client = RestClientUtil.createClient();
 
 	/*private final SessionFactory sessionFactory = getSessionFactory();
 
@@ -514,8 +531,178 @@ public class EngageCustomerManager {
 		return responseBean;
 	}
 	
-	public AddAccountResponseBean AddBankAccount(AddAccountRequestBean requestBean) throws Exception{
-		log.info("Adding Bank Account");
+	public AddAccountResponseBean moneyTransferRegister(AddAccountRequestBean requestBean){
+		log.debug("Registering for P2p");
+		AddAccountResponseBean responseBean = new AddAccountResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(CitrusSeller.class);
+			Junction conditions = Restrictions.conjunction()
+					.add(Restrictions.eq("sellerAccNumber", requestBean.getAccountNumber()))
+					.add(Restrictions.eq("sellerIfsc", requestBean.getIfscCode()))
+					.add(Restrictions.eq("sellerName", requestBean.getAccountName()));
+			criteria.add(conditions);
+			List<CitrusSeller> citrusSellerList = criteria.list();
+			log.debug("Citrus Sellers Size: " + citrusSellerList.size());
+			
+			CitrusSellerManager csManager = new CitrusSellerManager();
+			CitrusSellerResponseBean csResponseBean= csManager.getCitrusSellers(session,transaction);
+			
+			if(citrusSellerList.isEmpty()){
+				EngageCustomer oldInstance = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+				CitrusRegistrationRequestBean citrusRequestBean = new CitrusRegistrationRequestBean();
+				citrusRequestBean.setSeller_name(requestBean.getAccountName());
+				citrusRequestBean.setSeller_add1("Bangalore");
+				citrusRequestBean.setSeller_city("Bangalore");
+				citrusRequestBean.setSeller_state("KA");
+				citrusRequestBean.setSeller_country("India");
+				citrusRequestBean.setZip("560071");
+				citrusRequestBean.setSeller_mobile(oldInstance.getCustomerMobileNumber());
+				citrusRequestBean.setSeller_ifsc_code(requestBean.getIfscCode());
+				citrusRequestBean.setSeller_acc_num(requestBean.getAccountNumber());
+				citrusRequestBean.setActive(1);
+				citrusRequestBean.setPayoutmode("NEFT");
+				citrusRequestBean.setSelleremail(oldInstance.getCustomerEmail99());
+
+				CitrusAuthToken token = (CitrusAuthToken) session
+						.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
+				String authToken = token.getAuthToken();
+
+				CitrusRegistrationResponseBean citrusResponseBean = citrsuRegistration(citrusRequestBean, authToken);
+				if(citrusResponseBean.getMessage().equals("Success")){
+					EngageCustomer newInstance = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+					newInstance.setCitrusSellerId(citrusResponseBean.getCitrusSellerId());
+					session.update(newInstance);
+					responseBean.setCitrusSellerId(citrusResponseBean.getCitrusSellerId());
+					responseBean.setMessage("Success");
+					csResponseBean= csManager.getCitrusSellers(session,transaction);
+				}
+				else{
+					responseBean.setMessage(citrusResponseBean.getMessage());
+				}
+			}
+			else if(citrusSellerList.size()>0){
+				int citrus_csid = 0;
+				for(CitrusSeller citrusSeller : citrusSellerList){
+					citrus_csid = citrusSeller.getCitrusId();
+				}
+
+				EngageCustomer newInstance = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+				newInstance.setCitrusSellerId(citrus_csid);
+				session.update(newInstance);
+				responseBean.setCitrusSellerId(citrus_csid);
+				responseBean.setMessage("Success");
+
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
 		
+	public CitrusRegistrationResponseBean citrsuRegistration(CitrusRegistrationRequestBean requestBean, String authToken){
+		log.debug("Registering at citrus");
+		CitrusRegistrationResponseBean responseBean = new CitrusRegistrationResponseBean();
+		try{
+			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/seller/");
+			ClientResponse clientResponse = webResource.accept("application/json")
+					.type("application/json").header("auth_token", authToken).post(ClientResponse.class, requestBean);
+			String citrusResponse = clientResponse.getEntity(String.class);
+			log.debug("Citrus Response : " + citrusResponse);
+			
+			try{
+				JSONObject responseJson = new JSONObject(citrusResponse);
+				if(responseJson.has("sellerid")){
+					responseBean.setCitrusSellerId(responseJson.getInt("sellerid"));
+					responseBean.setMessage("Success");
+				}
+			}
+			catch(Exception e){
+				JSONArray responseArray = new JSONArray(citrusResponse);
+				for(int i=0;i<responseArray.length();i++){
+					JSONObject expJson = (JSONObject) responseArray.get(0);
+					responseBean.setMessage(expJson.getString("stack"));
+				}
+			}
+		}
+		catch (Exception e) {
+			log.debug("Registering at citrus failed :" + e);
+		}
+		return responseBean;
+	}
 	
+	public P2PCustomerVerificationResponseBean p2pCustomerVerification(P2PCustomerVerificationRequestBean requestBean){
+		log.debug("Verifiying and updating customers for p2p");
+		P2PCustomerVerificationResponseBean responseBean = new P2PCustomerVerificationResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.eq("sellerMobileNumber", requestBean.getCustomerMobileNumber()));
+			List<EngageSeller> sellerList = criteria.list();
+			log.debug("Seller size : " + sellerList.size());
+			if(sellerList.size()>0){
+				for(EngageSeller seller:sellerList){
+					int citrusSellerId = seller.getCitrusSellerId();
+					
+					CitrusSeller cseller = (CitrusSeller) session
+							.get("com.limitless.services.engage.sellers.dao.CitrusSeller", citrusSellerId);
+					
+					if(cseller!=null){
+						responseBean.setAccountName(cseller.getSellerName());
+						responseBean.setAccountNumber(cseller.getSellerAccNumber());
+						responseBean.setIfsc(cseller.getSellerIfsc());
+						responseBean.setCitrusSellerId(citrusSellerId);
+						responseBean.setMessage("Success");
+						
+						EngageCustomer customerInstance = (EngageCustomer) session
+								.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+						customerInstance.setCitrusSellerId(cseller.getCitrusId());
+						session.update(customerInstance);
+					}
+				}
+			}
+			else if(sellerList.isEmpty()){
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("P2P verification failed failed", re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
 }

@@ -320,6 +320,9 @@ public class PaymentResource {
 	public SplitResponseBean splitTxn(@PathParam("id") int id, SplitRequestBean splitReq) throws Exception {
 		SplitResponseBean splitResp = new SplitResponseBean();
 		int citrusMpTxnId = splitReq.getCitrusMpTxnId();
+		double feePercent = 0;
+		double txnAmount = 0;
+		double feeAmount = 0;
 		try {
 			logger.info("Id:" + id);
 
@@ -351,11 +354,17 @@ public class PaymentResource {
 
 			String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
 
-			double feePercent = seller.getSellerSplitPercent();
-			double txnAmount = paymentTxn.getTxnAmount();
-			double feeAmount = txnAmount * (feePercent / 100);
-			// round off to 2 decimal
-			feeAmount = Math.round(feeAmount * 100) / 100D;
+			if(seller != null){
+				feePercent = seller.getSellerSplitPercent();
+				txnAmount = paymentTxn.getTxnAmount();
+				feeAmount = txnAmount * (feePercent / 100);
+				// round off to 2 decimal
+				feeAmount = Math.round(feeAmount * 100) / 100D;
+			}
+			else{
+				txnAmount = paymentTxn.getTxnAmount();
+				feeAmount = 0;
+			}
 
 			// Make Split API call
 			ClientConfig clientConfig = new DefaultClientConfig();

@@ -121,6 +121,87 @@ public class CitrusSellerManager {
 		return responseBean;
 	}
 	
+	public CitrusSellerResponseBean getCitrusSellers(Session session, Transaction transaction){
+		log.debug("Getting and updting sellers from citrus");
+		CitrusSellerResponseBean responseBean = new CitrusSellerResponseBean();
+		String authToken = "";
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			CitrusAuthToken token = (CitrusAuthToken) session
+					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
+			authToken = token.getAuthToken();
+			List<CitrusSellersBean> sellersList = new ArrayList<CitrusSellersBean>();
+			List<CitrusSellerRequestBean> requestBeans = getSellerFromCitrus(authToken);
+			log.debug("Request Beans Size : " + requestBeans.size());
+			if(requestBeans.size()>0){
+				for(CitrusSellerRequestBean bean : requestBeans){
+					CitrusSellersBean sellersBean = new CitrusSellersBean();
+					
+					CitrusSeller instance = (CitrusSeller) session
+							.get("com.limitless.services.engage.sellers.dao.CitrusSeller", bean.getCitrusId());
+					
+					if(instance == null){
+						CitrusSeller seller = new CitrusSeller();
+						seller.setCitrusId(bean.getCitrusId());
+						seller.setSellerName(bean.getSellerName());
+						seller.setSellerAddress1(bean.getSellerAddress1());
+						seller.setSellerAddress2(bean.getSellerAddress2());
+						seller.setSellerCity(bean.getSellerCity());
+						seller.setSellerState(bean.getSellerState());
+						seller.setSellerCountry(bean.getSellerCountry());
+						seller.setSellerZip(bean.getSellerZip());
+						seller.setSellerBurl(bean.getSellerBurl());
+						seller.setSellerMail(bean.getSellerMail());
+						seller.setSellerIfsc(bean.getSellerIfsc());
+						seller.setSellerAccNumber(bean.getSellerAccNumber());
+						seller.setSellerPayoutmode(bean.getSellerPayoutmode());
+						seller.setSellerAccountId(bean.getSellerAccountId());
+						seller.setSellerActive(bean.getSellerActive());
+						
+						session.persist(seller);
+						sellersBean.setAccountId(seller.getSellerAccountId());
+						sellersBean.setCitrusId(seller.getCitrusId());
+						sellersList.add(sellersBean);
+						sellersBean = null;
+					}
+					else if(instance != null){
+						CitrusSeller seller = (CitrusSeller) session
+								.get("com.limitless.services.engage.sellers.dao.CitrusSeller", bean.getCitrusId());
+						seller.setCitrusId(bean.getCitrusId());
+						seller.setSellerName(bean.getSellerName());
+						seller.setSellerAddress1(bean.getSellerAddress1());
+						seller.setSellerAddress2(bean.getSellerAddress2());
+						seller.setSellerCity(bean.getSellerCity());
+						seller.setSellerState(bean.getSellerState());
+						seller.setSellerCountry(bean.getSellerCountry());
+						seller.setSellerZip(bean.getSellerZip());
+						seller.setSellerBurl(bean.getSellerBurl());
+						seller.setSellerMail(bean.getSellerMail());
+						seller.setSellerIfsc(bean.getSellerIfsc());
+						seller.setSellerAccNumber(bean.getSellerAccNumber());
+						seller.setSellerPayoutmode(bean.getSellerPayoutmode());
+						seller.setSellerAccountId(bean.getSellerAccountId());
+						seller.setSellerActive(bean.getSellerActive());
+						
+						session.update(seller);
+						sellersBean.setAccountId(instance.getSellerAccountId());
+						sellersBean.setCitrusId(instance.getCitrusId());
+						sellersList.add(sellersBean);
+						sellersBean = null;
+					}
+				}
+			}
+			responseBean.setMessage("Success");
+			responseBean.setSellersList(sellersList);
+		}
+		catch(RuntimeException re){
+			log.error("Getting and updting sellers from citrus failed : " + re);
+		}
+		
+		return responseBean;
+	}
+	
 	public List<CitrusSellerRequestBean> getSellerFromCitrus(String authToken){
 		List<CitrusSellerRequestBean> requestBeanList = new ArrayList<CitrusSellerRequestBean>();
 		try{

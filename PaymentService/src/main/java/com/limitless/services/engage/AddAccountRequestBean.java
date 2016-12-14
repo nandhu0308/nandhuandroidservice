@@ -6,6 +6,7 @@ public class AddAccountRequestBean {
 	private String accountNumber;
 	private String ifscCode;
 	private String accountName;
+	private String mobileNumber;
 
 	public int getCustomerId() {
 		return customerId;
@@ -37,6 +38,14 @@ public class AddAccountRequestBean {
 
 	public void setAccountName(String accountName) {
 		this.accountName = accountName;
+	}
+
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
 	}
 
 }
