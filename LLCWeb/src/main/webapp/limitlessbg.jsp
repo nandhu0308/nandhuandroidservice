@@ -35,7 +35,7 @@ String citrusSellerId = request.getParameter("csid");
 String buyerId = request.getParameter("bid");
 String sellerName = request.getParameter("sname");
 //String sellerDeviceId = request.getParameter("sdid");
-String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
+String userString = System.getProperty("AUTH_STRING");
 
 String creditAmountStr = request.getParameter("credamt");
 String debitAmountStr = request.getParameter("debamt");

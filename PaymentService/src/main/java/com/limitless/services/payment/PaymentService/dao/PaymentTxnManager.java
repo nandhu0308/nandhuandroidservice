@@ -989,7 +989,7 @@ public class PaymentTxnManager {
 		return historyBean;
 	}
 	
-	public MessageResponseBean sendMessage(MessageBean requestBean) throws Exception{
+	public MessageResponseBean sendMessage(MessageBean requestBean){
 		log.debug("Sending message for Txn Id :" + requestBean.getTxnId());
 		MessageResponseBean responseBean = new MessageResponseBean();
 		Session session = null;
@@ -1029,13 +1029,18 @@ public class PaymentTxnManager {
 	            sbPostDate1.append("&route="+route);
 	            sbPostDate1.append("&sender="+senderId);
 	            mainUrl = sbPostDate1.toString();
-	            URL msgUrl1 = new URL(mainUrl);
-	            URLConnection con1 = msgUrl1.openConnection();
-	            con1.connect();
-	            BufferedReader reader1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
-	            String response1 = "";
-	            while((response1 = reader1.readLine())!=null){
-	            	System.out.println(response1);
+	            try{
+	            	URL msgUrl1 = new URL(mainUrl);
+	            	URLConnection con1 = msgUrl1.openConnection();
+	            	con1.connect();
+	            	BufferedReader reader1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
+	            	String response1 = "";
+	            	while((response1 = reader1.readLine())!=null){
+	            		System.out.println(response1);
+	            	}
+	            }
+	            catch(Exception e){
+	            	log.debug("error in sendin sms:" + e);
 	            }
 	            
 	            //Sending SMS to seller
@@ -1048,13 +1053,18 @@ public class PaymentTxnManager {
 	            sbPostData2.append("&route="+route);
 	            sbPostData2.append("&sender="+senderId);
 	            mainUrl = sbPostData2.toString();
-	            URL msgUrl2 = new URL(mainUrl);
-	            URLConnection con2 = msgUrl2.openConnection();
-	            con2.connect();
-	            BufferedReader reader2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
-	            String response2 = "";
-	            while((response2 = reader2.readLine())!=null){
-	            	System.out.println(response2);
+	            try{
+	            	URL msgUrl2 = new URL(mainUrl);
+	            	URLConnection con2 = msgUrl2.openConnection();
+	            	con2.connect();
+	            	BufferedReader reader2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+	            	String response2 = "";
+	            	while((response2 = reader2.readLine())!=null){
+	            		System.out.println(response2);
+	            	}
+	            }
+	            catch(Exception e){
+	            	log.debug("error in sending sms:" +e);
 	            }
 	            responseBean.setMessage("Success");
 	            responseBean.setTxnId(txn.getTxnId());
@@ -1075,13 +1085,18 @@ public class PaymentTxnManager {
 	            sbPostDate1.append("&route="+route);
 	            sbPostDate1.append("&sender="+senderId);
 	            mainUrl = sbPostDate1.toString();
-	            URL msgUrl1 = new URL(mainUrl);
-	            URLConnection con1 = msgUrl1.openConnection();
-	            con1.connect();
-	            BufferedReader reader1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
-	            String response1 = "";
-	            while((response1 = reader1.readLine())!=null){
-	            	System.out.println(response1);
+	            try{
+	            	URL msgUrl1 = new URL(mainUrl);
+	            	URLConnection con1 = msgUrl1.openConnection();
+	            	con1.connect();
+	            	BufferedReader reader1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
+	            	String response1 = "";
+	            	while((response1 = reader1.readLine())!=null){
+	            		System.out.println(response1);
+	            	}
+	            }
+	            catch(Exception e){
+	            	log.debug("error in sending sms:"+e);
 	            }
 	            
 	            //Sending SMS to seller
@@ -1094,13 +1109,18 @@ public class PaymentTxnManager {
 	            sbPostData2.append("&route="+route);
 	            sbPostData2.append("&sender="+senderId);
 	            mainUrl = sbPostData2.toString();
-	            URL msgUrl2 = new URL(mainUrl);
-	            URLConnection con2 = msgUrl2.openConnection();
-	            con2.connect();
-	            BufferedReader reader2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
-	            String response2 = "";
-	            while((response2 = reader2.readLine())!=null){
-	            	System.out.println(response2);
+	            try{
+	            	URL msgUrl2 = new URL(mainUrl);
+	            	URLConnection con2 = msgUrl2.openConnection();
+	            	con2.connect();
+	            	BufferedReader reader2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+	            	String response2 = "";
+	            	while((response2 = reader2.readLine())!=null){
+	            		System.out.println(response2);
+	            	}
+	            }
+	            catch(Exception e){
+	            	log.debug("error in sending sms: "+e);
 	            }
 	            responseBean.setMessage("Success");
 	            responseBean.setTxnId(txn.getTxnId());
