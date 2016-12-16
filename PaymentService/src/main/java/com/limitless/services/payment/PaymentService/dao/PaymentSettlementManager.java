@@ -88,7 +88,10 @@ public class PaymentSettlementManager {
 				// Getting seller split percent
 				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 						sellerId);
-				double feePercent = seller.getSellerSplitPercent();
+				double feePercent = 0.0;
+				if (seller != null) {
+					feePercent = seller.getSellerSplitPercent();
+				}
 
 				// Calculating settlement amount and split amount
 				double feeAmount = txnAmount * (feePercent / 100);
@@ -342,30 +345,28 @@ public class PaymentSettlementManager {
 		}
 		return responseBean;
 	}
-	
-	public TxnSettlementResponseBean settleTxnById(int txnId){
+
+	public TxnSettlementResponseBean settleTxnById(int txnId) {
 		log.debug("Settling and releasing funds bt TxnId");
 		TxnSettlementResponseBean responseBean = new TxnSettlementResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			//Getting Txn details
-			PaymentTxn txn = (PaymentTxn) session
-					.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn", txnId);
+
+			// Getting Txn details
+			PaymentTxn txn = (PaymentTxn) session.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn",
+					txnId);
 			SettlementRequestBean requestBean = new SettlementRequestBean();
-			
-		}
-		catch(RuntimeException re){
+
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Transaction settlement failed", re);
 			throw re;
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
