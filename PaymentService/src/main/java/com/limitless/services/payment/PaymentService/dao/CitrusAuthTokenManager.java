@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.json.JSONObject;
 
+import com.limitless.services.payment.PaymentService.AuthTokenBean;
 import com.limitless.services.payment.PaymentService.AuthTokenRequestBean;
 import com.limitless.services.payment.PaymentService.AuthTokenResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
@@ -78,5 +79,38 @@ public class CitrusAuthTokenManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public AuthTokenBean getToken(){
+		log.debug("Getting auth Token");
+		AuthTokenBean bean = new AuthTokenBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			CitrusAuthToken token = (CitrusAuthToken) session
+					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
+			if(token!=null){
+				bean.setMessage("Success");
+				bean.setAuthToken(token.getAuthToken());
+			}
+			else{
+				bean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Getting auth token failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return bean;
 	}
 }
