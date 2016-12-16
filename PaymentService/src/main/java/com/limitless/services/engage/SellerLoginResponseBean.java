@@ -1,5 +1,9 @@
 package com.limitless.services.engage;
 
+import java.util.List;
+
+import com.limitless.services.engage.sellers.product.dao.Product;
+
 public class SellerLoginResponseBean {
 	
 	private String sellerName;
@@ -12,6 +16,14 @@ public class SellerLoginResponseBean {
 	private String sellerCity;
 	private String sellerType;
 	private String sellerRole;
+	private List<Product> products;
+	
+	public List<Product> getProducts() {
+		return products;
+	}
+	public void setProducts(List<Product> products) {
+		this.products = products;
+	}
 	public String getSellerName() {
 		return sellerName;
 	}

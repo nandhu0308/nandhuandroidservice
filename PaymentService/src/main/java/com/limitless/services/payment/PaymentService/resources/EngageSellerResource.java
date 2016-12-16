@@ -25,6 +25,8 @@ import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.sellers.product.dao.Product;
+import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 
 @Path("/merchant")
@@ -166,6 +168,10 @@ public class EngageSellerResource {
 		try{
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerByMobile(sellerMobileNumber);
+			
+			ProductManager productManager = new ProductManager();
+			List<Product> products =  productManager.getAllProducts(responseBean.getSellerId());
+			responseBean.setProducts(products);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
