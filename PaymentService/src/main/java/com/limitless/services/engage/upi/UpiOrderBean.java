@@ -5,8 +5,10 @@ public class UpiOrderBean {
 	
 	private int orderId;
 	private int customerId;
-	
+	private int sellerId;
+	private String txnNotes;
 	private float orderAmount;
+	private String txnType;
 	
 	public static enum OrderStatus {
 		PAYMENT_INITIATED, PAYMENT_SUCCESSFUL, PAYMENT_FAILED;
@@ -36,5 +38,16 @@ public class UpiOrderBean {
 	public void setOrderAmount(float orderAmount) {
 		this.orderAmount = orderAmount;
 	}
-	
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
+	}
 }

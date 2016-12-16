@@ -4,7 +4,7 @@
 <hibernate-configuration>
  <session-factory>
   <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-  <property name="hibernate.connection.password">limitless</property>
+  <property name="hibernate.connection.password">pmt11cd3</property>
   <property name="hibernate.connection.url">jdbc:mysql://limitless-engage.cchjaguu68a3.us-west-2.rds.amazonaws.com:3306/llcdb?autoReconnect=true</property>
   <property name="hibernate.connection.username">root</property>
   <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
@@ -14,9 +14,9 @@
   <property name="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext</property>
   
   <!-- C3p0 -->
-  <property name="hibernate.c3p0.min_size">2</property>
-  <property name="hibernate.c3p0.max_size">5</property>
-  <property name="hibernate.c3p0.timeout">3600</property>
+  <property name="hibernate.c3p0.min_size">5</property>
+  <property name="hibernate.c3p0.max_size">50</property>
+  <property name="hibernate.c3p0.timeout">300</property>
   <property name="hibernate.c3p0.max_statements">10</property>
   
   
@@ -26,7 +26,11 @@
   <mapping class="com.limitless.services.engage.dao.EngageSeller"/>
   <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentCredit"/>
   <mapping class="com.limitless.services.engage.upi.dao.UpiOrder"/>
-  
+  <mapping class="com.limitless.services.payment.PaymentService.dao.PaymentSettlement"/>
+  <mapping class="com.limitless.services.engage.dao.SellerDonation"/>
+  <mapping class="com.limitless.services.engage.dao.Donation"/>
+  <mapping class="com.limitless.services.payment.PaymentService.dao.CitrusAuthToken"/>
+  <mapping class="com.limitless.services.engage.sellers.dao.CitrusSeller"/>
 
   
  </session-factory>

@@ -1,5 +1,11 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,12 +18,19 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.AddAccountRequestBean;
+import com.limitless.services.engage.AddAccountResponseBean;
 import com.limitless.services.engage.CheckEmailRequestBean;
 import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
+import com.limitless.services.engage.InviteRequestBean;
+import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
 import com.limitless.services.engage.LoginResponseBean;
+import com.limitless.services.engage.MobileResponseBean;
+import com.limitless.services.engage.P2PCustomerVerificationRequestBean;
+import com.limitless.services.engage.P2PCustomerVerificationResponseBean;
 import com.limitless.services.engage.PasswdRequestBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
@@ -48,17 +61,18 @@ public class EngageCustomerResource {
 			customer.setCustomerCountryCode(bean.getCountryCode());
 			customer.setCustomerCity(bean.getCity());
 			customer.setCustomerCountry(bean.getCountry());
+			customer.setCitrusSellerId(0);
 			
 			EngageCustomerManager manager = new EngageCustomerManager();
 			
-			if( !(manager.checkDuplicateEmail(bean.getEmailId())) && !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
+			if( !(manager.checkDuplicateMobile(bean.getMobileNumber())) && !(manager.checkDuplicateEmail(bean.getEmailId())) ){
 				manager.persist(customer);
 				customerResp.setCustomerId(customer.getCustomerId());
 				customerResp.setStatus(1);
 				customerResp.setMessage("Success");
 			} else {
 				customerResp.setStatus(-1);
-				customerResp.setMessage("Failure - Duplicate Email / Mobile Number");
+				customerResp.setMessage("Failure - Duplicate Mobile Number or Email");
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -83,7 +97,7 @@ public class EngageCustomerResource {
 		LoginResponseBean loginRespBean = new LoginResponseBean();
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
-			loginRespBean = manager.validateUser(bean.getEmail(), bean.getPasswd());
+			loginRespBean = manager.validateUser(bean.getPhone(), bean.getPasswd());
 		} catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -109,14 +123,36 @@ public class EngageCustomerResource {
 	}
 	
 	@PUT
-	@Path("/customer/proupdate/{customerId}")
+	@Path("/customer/proupdate")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ProfileChangeResponseBean updateProfile(ProfileChangeRequestBean requestBean) throws Exception{
 		ProfileChangeResponseBean responseBean = new ProfileChangeResponseBean();
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
-			responseBean = manager.updateCustomerProfile(requestBean);
+			if(requestBean.getCustomerKey().equals("email")){
+				if(manager.checkDuplicateEmail(requestBean.getCustomerValue())){
+					responseBean.setCustomerId(requestBean.getCustomerId());
+					responseBean.setMessage("Email Exist");
+					System.out.println("Email Exist");
+				}
+				else{
+					responseBean = manager.updateCustomerProfile(requestBean);
+				}
+			}
+			else if(requestBean.getCustomerKey().equals("mobile")){
+				if(manager.checkDuplicateMobile(requestBean.getCustomerValue())){
+					responseBean.setCustomerId(requestBean.getCustomerId());
+					responseBean.setMessage("Mobile Exist");
+					System.out.println("Mobile Exist");
+				}
+				else{
+					responseBean = manager.updateCustomerProfile(requestBean);
+				}
+			}
+			else if(requestBean.getCustomerKey().equals("name")){
+				responseBean = manager.updateCustomerProfile(requestBean);
+			}
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
@@ -157,6 +193,108 @@ public class EngageCustomerResource {
 				responseBean.setMobileNumber(requestBean.getMobileNumber());
 				responseBean.setMessage("Email/Mobile Not Exist");
 			}
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/customer/get/{phone}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public MobileResponseBean getMobileNumber(@PathParam("phone") String customerMobile) throws Exception{
+		MobileResponseBean responseBean = new MobileResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.getCustomerMobileNumber(customerMobile);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/invite")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public InviteResponseBean inviteCustomers(InviteRequestBean requestBean) throws Exception{
+		InviteResponseBean responseBean = new InviteResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.sendInvite(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/selfinvite/{customerMobileNumber}")
+	public String inviteSelf(@PathParam("customerMobileNumber") String customerMobileNumber) throws Exception{
+		String response = "";
+		try{
+			String message = "LETS GO CASHLESS! Download the app: goo.gl/ejZrmv";
+			String encoded_message = URLEncoder.encode(message);
+			String authkey = "129194Aa6NwGoQsVt580d9a57";
+			String mobiles = customerMobileNumber;
+			String senderId = "LLCINV";
+			String route = "4";
+			String mainUrl="http://api.msg91.com/api/sendhttp.php?";
+			StringBuilder sbPostData= new StringBuilder(mainUrl);
+            sbPostData.append("authkey="+authkey);
+            sbPostData.append("&mobiles="+mobiles);
+            sbPostData.append("&message="+encoded_message);
+            sbPostData.append("&route="+route);
+            sbPostData.append("&sender="+senderId);
+            mainUrl = sbPostData.toString();
+            URL msgUrl = new URL(mainUrl);
+            URLConnection con = msgUrl.openConnection();
+            con.connect();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            while((response = reader.readLine())!=null){
+            	System.out.println(response);
+            }
+            reader.close();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return response;
+	}
+	
+	@PUT
+	@Path("/p2p/verify")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public P2PCustomerVerificationResponseBean checkCustomer(P2PCustomerVerificationRequestBean requestBean) throws Exception{
+		P2PCustomerVerificationResponseBean verificationResponseBean = new P2PCustomerVerificationResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			verificationResponseBean = manager.p2pCustomerVerification(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return verificationResponseBean;
+	}
+	
+	@POST
+	@Path("/customer/p2p/register")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public AddAccountResponseBean registerP2p(AddAccountRequestBean requestBean) throws Exception{
+		AddAccountResponseBean responseBean = new AddAccountResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.moneyTransferRegister(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

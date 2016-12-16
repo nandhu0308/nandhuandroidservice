@@ -8,7 +8,8 @@ public class LoginResponseBean {
 	
 	private int customerId;
 	private String customerName;
-	private String customerMobileNumber;
+	private String customerEmail;
+	
 	
 	public int getLoginStatus() {
 		return loginStatus;
@@ -42,12 +43,13 @@ public class LoginResponseBean {
 		this.customerName = customerName;
 	}
 
-	public String getCustomerMobileNumber() {
-		return customerMobileNumber;
+	public String getCustomerEmail() {
+		return customerEmail;
 	}
 
-	public void setCustomerMobileNumber(String customerMobileNumber) {
-		this.customerMobileNumber = customerMobileNumber;
+	public void setCustomerEmail(String customerEmail) {
+		this.customerEmail = customerEmail;
 	}
+	
 
 }

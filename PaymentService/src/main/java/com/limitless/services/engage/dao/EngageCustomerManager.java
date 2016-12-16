@@ -1,5 +1,11 @@
 package com.limitless.services.engage.dao;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 // Generated Sep 25, 2016 10:49:31 PM by Hibernate Tools 3.4.0.CR1
 
 import java.util.List;
@@ -14,15 +20,35 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import com.limitless.services.engage.CheckEmailResponseBean;
+import com.limitless.services.engage.AddAccountRequestBean;
+import com.limitless.services.engage.AddAccountResponseBean;
+import com.limitless.services.engage.CitrusRegistrationRequestBean;
+import com.limitless.services.engage.CitrusRegistrationResponseBean;
+import com.limitless.services.engage.InviteRequestBean;
+import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
+import com.limitless.services.engage.MobileResponseBean;
+import com.limitless.services.engage.P2PCustomerVerificationRequestBean;
+import com.limitless.services.engage.P2PCustomerVerificationResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
+import com.limitless.services.engage.sellers.CitrusSellerResponseBean;
+import com.limitless.services.engage.sellers.dao.CitrusSeller;
+import com.limitless.services.engage.sellers.dao.CitrusSellerManager;
+import com.limitless.services.payment.PaymentService.dao.CitrusAuthToken;
+import com.limitless.services.payment.PaymentService.resources.CitrusSellerResource;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
+import com.limitless.services.payment.PaymentService.util.RestClientUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * Home object for domain model class EngageCustomer.
@@ -32,6 +58,7 @@ import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 public class EngageCustomerManager {
 
 	private static final Log log = LogFactory.getLog(EngageCustomerManager.class);
+	Client client = RestClientUtil.createClient();
 
 	/*private final SessionFactory sessionFactory = getSessionFactory();
 
@@ -51,16 +78,23 @@ public class EngageCustomerManager {
 	public void persist(EngageCustomer transientInstance) {
 		log.debug("persisting EngageCustomer instance");
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			session.persist(transientInstance);
 			log.debug("persist successful");
+			tx.commit();
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("persist failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		}
 	}
 
@@ -113,8 +147,9 @@ public class EngageCustomerManager {
 	public EngageCustomer findById(java.lang.Integer id) {
 		log.debug("getting EngageCustomer instance with id: " + id);
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			EngageCustomer instance = (EngageCustomer) session
 					.get("com.limitless.services.engage.dao.EngageCustomer",
@@ -124,12 +159,18 @@ public class EngageCustomerManager {
 			} else {
 				log.debug("get successful, instance found");
 			}
+			tx.commit();
 			return instance;
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		}
 	}
 	
@@ -137,8 +178,9 @@ public class EngageCustomerManager {
 		log.debug("Changing password for user");
 		PasswdResponseBean bean = new PasswdResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			EngageCustomer instance = (EngageCustomer) session
 					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
@@ -155,13 +197,19 @@ public class EngageCustomerManager {
 				bean.setMessage("Failed");
 				bean.setCustomerId(customerId);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Changing password failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		}
 		return bean;
 	}
@@ -169,48 +217,68 @@ public class EngageCustomerManager {
 	public boolean checkDuplicateEmail(String customerEmail){
 		 log.debug("Checking Email whether already exist");
 		 Transaction transaction = null;
+		 Session session = null;
 		 try{
 			 boolean emailExist = false;
-			 Session session = sessionFactory.getCurrentSession();
+			 System.out.println("Email--->"+customerEmail);
+			 session = sessionFactory.getCurrentSession();
 			 transaction = session.beginTransaction();
-			 Query query = session.createQuery("from EngageCustomer where customerEmail99 = :customerEmail");
-			 query.setParameter("customerEmail", customerEmail);
-			 List<EngageCustomer> customer = query.list();
-			 if(customer != null && customer.size() > 0){
-				 emailExist = true;
+			 if(!customerEmail.equals("")){
+				 Query query = session.createQuery("from EngageCustomer where customerEmail99 = :customerEmail");
+				 query.setParameter("customerEmail", customerEmail);
+				 List<EngageCustomer> customer = query.list();
+				 log.debug("User:-->"+customer);
+				 if(customer != null && customer.size() > 0){
+					 emailExist = true;
+				 }
 			 }
+			 transaction.commit();
 			 return emailExist;
 		 }
 		 catch(RuntimeException re){
+			 if(transaction!=null){
+					transaction.rollback();
+				}
 			 log.error("Checking Email failed");
 			 throw re;
 		 }
 		 finally{
-			 transaction.commit();
+			 if(session != null && session.isOpen()){
+					session.close();
+				}
 		 }
 	}
 	
 	public boolean checkDuplicateMobile(String customerMobile){
 		log.debug("Checking Mobile whether already exist");
 		Transaction transaction = null;
+		Session session = null;
 		try{
 			boolean mobileExist = false;
-			Session session = sessionFactory.getCurrentSession();
+			System.out.println("Mobile--->"+customerMobile);
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Query query = session.createQuery("from EngageCustomer where customerMobileNumber = :customerMobile");
 			query.setParameter("customerMobile", customerMobile);
 			List<EngageCustomer> customer = query.list();
+			log.debug("User:-->"+customer);
 			if(customer != null && customer.size() > 0){
 				mobileExist = true;
 			}
+			transaction.commit();
 			return mobileExist;
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Checking mobile failed");
 			throw re;
 		}
 		finally{
-			 transaction.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		 }
 	}
 
@@ -231,15 +299,16 @@ public class EngageCustomerManager {
 		}
 	}
 	
-	public LoginResponseBean validateUser(String customerEmail99, String passwd){
+	public LoginResponseBean validateUser(String customerMobile, String passwd){
 		log.debug("checking login credentials");
 		LoginResponseBean loginResponseBean = new LoginResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageCustomer.class);
-			Criterion emailCriterion = Restrictions.eq("customerEmail99", customerEmail99);
+			Criterion emailCriterion = Restrictions.eq("customerMobileNumber", customerMobile);
 			Criterion passwdCriterion = Restrictions.eq("customerPasswd99", passwd);
 			LogicalExpression logicalExp = Restrictions.and(emailCriterion, passwdCriterion);
 			criteria.add(logicalExp);
@@ -251,19 +320,25 @@ public class EngageCustomerManager {
 					loginResponseBean.setMessage("Success");
 					loginResponseBean.setCustomerId(user.getCustomerId());
 					loginResponseBean.setCustomerName(user.getCustomerName());
-					loginResponseBean.setCustomerMobileNumber(user.getCustomerMobileNumber());
+					loginResponseBean.setCustomerEmail(user.getCustomerEmail99());;
 				}
 			}
 			else{
 				loginResponseBean.setLoginStatus(-1);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("checking login credentials failed");
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		}
 		return loginResponseBean;
 	}
@@ -272,8 +347,9 @@ public class EngageCustomerManager {
 		log.debug("getting EngageCustomer instance with id: " + customerId);
 		boolean isValidCredentials = false;
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			EngageCustomer instance = (EngageCustomer)session.get("com.limitless.services.engage.dao.EngageCustomer",
 					customerId);
@@ -285,12 +361,18 @@ public class EngageCustomerManager {
 					isValidCredentials = true;
 				}
 			}
+			tx.commit();
 			return isValidCredentials;
 		} catch (RuntimeException re) {
+			if(tx!=null){
+				tx.rollback();
+			}
 			log.error("get failed", re);
 			throw re;
 		} finally{
-			tx.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		}
 	}
 	
@@ -298,8 +380,9 @@ public class EngageCustomerManager {
 		log.debug("Changing/updating customer details");
 		ProfileChangeResponseBean responseBean = new ProfileChangeResponseBean();
 		Transaction transaction = null;
+		Session session = null;
 		try{
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			int customerId = requestBean.getCustomerId();
 			String key = requestBean.getCustomerKey();
@@ -331,16 +414,295 @@ public class EngageCustomerManager {
 				responseBean.setMessage("Failed");
 				responseBean.setCustomerId(customerId);
 			}
-			
+			transaction.commit();
 		}
 		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
 			log.error("Changing/updating customer details failed", re);
 			throw re;
 		}
 		finally{
-			transaction.commit();
+			if(session != null && session.isOpen()){
+				session.close();
+			}
 		}
 		return responseBean;
 	}
 	
+	public MobileResponseBean getCustomerMobileNumber(String customerMobile){
+		log.debug("getting customer mobile");
+		MobileResponseBean responseBean = new MobileResponseBean();
+		Transaction transaction = null;
+		Session session = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageCustomer.class);
+			criteria.add(Restrictions.eq("customerMobileNumber", customerMobile));
+			List<EngageCustomer> customerList = criteria.list();
+			if(customerList!=null && customerList.size()>0){
+				for(EngageCustomer customer : customerList){
+					responseBean.setCustomerMobile(customer.getCustomerMobileNumber());
+					responseBean.setCustomerId(customer.getCustomerId());
+					responseBean.setCustomerEmail(customer.getCustomerEmail99());
+				}
+				responseBean.setMessage("Success");
+			}
+			else{
+				responseBean.setMessage("Mobile Not Found");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally{
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public InviteResponseBean sendInvite(InviteRequestBean requestBean) throws Exception{
+		log.debug("Sending invite");
+		InviteResponseBean responseBean = new InviteResponseBean();
+		Transaction transaction = null;
+		Session session = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			String senderName = "";
+			if(requestBean.getKey().equals("merchant")){
+				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+				senderName = seller.getSellerName();
+			}
+			else if(requestBean.getKey().equals("customer")){
+				EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+				senderName = customer.getCustomerName();
+			}
+			String message = "LETS GO CASHLESS! "+senderName + " has invited you to join LimitlessCircle. Download the app: goo.gl/ejZrmv";
+			String encoded_message = URLEncoder.encode(message);
+			String authkey = "129194Aa6NwGoQsVt580d9a57";
+			String mobiles = requestBean.getMobileNumbers();
+			String senderId = "LLCINV";
+			String route = "4";
+			String mainUrl="http://api.msg91.com/api/sendhttp.php?";
+			StringBuilder sbPostData= new StringBuilder(mainUrl);
+            sbPostData.append("authkey="+authkey);
+            sbPostData.append("&mobiles="+mobiles);
+            sbPostData.append("&message="+encoded_message);
+            sbPostData.append("&route="+route);
+            sbPostData.append("&sender="+senderId);
+            mainUrl = sbPostData.toString();
+            URL msgUrl = new URL(mainUrl);
+            URLConnection con = msgUrl.openConnection();
+            con.connect();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String response = "";
+            while((response = reader.readLine())!=null){
+            	System.out.println(response);
+            }
+            responseBean.setCustomerId(requestBean.getCustomerId());
+            responseBean.setMerchantId(requestBean.getSellerId());
+            responseBean.setMessage("Success");
+            responseBean.setResponse(response);
+            reader.close();
+            transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public AddAccountResponseBean moneyTransferRegister(AddAccountRequestBean requestBean){
+		log.debug("Registering for P2p");
+		AddAccountResponseBean responseBean = new AddAccountResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(CitrusSeller.class);
+			Junction conditions = Restrictions.conjunction()
+					.add(Restrictions.eq("sellerAccNumber", requestBean.getAccountNumber()))
+					.add(Restrictions.eq("sellerIfsc", requestBean.getIfscCode()))
+					.add(Restrictions.eq("sellerName", requestBean.getAccountName()));
+			criteria.add(conditions);
+			List<CitrusSeller> citrusSellerList = criteria.list();
+			log.debug("Citrus Sellers Size: " + citrusSellerList.size());
+			
+			CitrusSellerManager csManager = new CitrusSellerManager();
+			CitrusSellerResponseBean csResponseBean= csManager.getCitrusSellers(session,transaction);
+			
+			if(citrusSellerList.isEmpty()){
+				EngageCustomer oldInstance = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+				CitrusRegistrationRequestBean citrusRequestBean = new CitrusRegistrationRequestBean();
+				citrusRequestBean.setSeller_name(requestBean.getAccountName());
+				citrusRequestBean.setSeller_add1("Bangalore");
+				citrusRequestBean.setSeller_city("Bangalore");
+				citrusRequestBean.setSeller_state("KA");
+				citrusRequestBean.setSeller_country("India");
+				citrusRequestBean.setZip("560071");
+				citrusRequestBean.setSeller_mobile(oldInstance.getCustomerMobileNumber());
+				citrusRequestBean.setSeller_ifsc_code(requestBean.getIfscCode());
+				citrusRequestBean.setSeller_acc_num(requestBean.getAccountNumber());
+				citrusRequestBean.setActive(1);
+				citrusRequestBean.setPayoutmode("NEFT");
+				citrusRequestBean.setSelleremail(oldInstance.getCustomerEmail99());
+
+				CitrusAuthToken token = (CitrusAuthToken) session
+						.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
+				String authToken = token.getAuthToken();
+
+				CitrusRegistrationResponseBean citrusResponseBean = citrsuRegistration(citrusRequestBean, authToken);
+				if(citrusResponseBean.getMessage().equals("Success")){
+					EngageCustomer newInstance = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+					newInstance.setCitrusSellerId(citrusResponseBean.getCitrusSellerId());
+					session.update(newInstance);
+					responseBean.setCitrusSellerId(citrusResponseBean.getCitrusSellerId());
+					responseBean.setMessage("Success");
+					csResponseBean= csManager.getCitrusSellers(session,transaction);
+				}
+				else{
+					responseBean.setMessage(citrusResponseBean.getMessage());
+				}
+			}
+			else if(citrusSellerList.size()>0){
+				int citrus_csid = 0;
+				for(CitrusSeller citrusSeller : citrusSellerList){
+					citrus_csid = citrusSeller.getCitrusId();
+				}
+
+				EngageCustomer newInstance = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+				newInstance.setCitrusSellerId(citrus_csid);
+				session.update(newInstance);
+				responseBean.setCitrusSellerId(citrus_csid);
+				responseBean.setMessage("Success");
+
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Changing/updating customer details failed", re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+		
+	public CitrusRegistrationResponseBean citrsuRegistration(CitrusRegistrationRequestBean requestBean, String authToken){
+		log.debug("Registering at citrus");
+		CitrusRegistrationResponseBean responseBean = new CitrusRegistrationResponseBean();
+		try{
+			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/seller/");
+			ClientResponse clientResponse = webResource.accept("application/json")
+					.type("application/json").header("auth_token", authToken).post(ClientResponse.class, requestBean);
+			String citrusResponse = clientResponse.getEntity(String.class);
+			log.debug("Citrus Response : " + citrusResponse);
+			
+			try{
+				JSONObject responseJson = new JSONObject(citrusResponse);
+				if(responseJson.has("sellerid")){
+					responseBean.setCitrusSellerId(responseJson.getInt("sellerid"));
+					responseBean.setMessage("Success");
+				}
+			}
+			catch(Exception e){
+				JSONArray responseArray = new JSONArray(citrusResponse);
+				for(int i=0;i<responseArray.length();i++){
+					JSONObject expJson = (JSONObject) responseArray.get(0);
+					responseBean.setMessage(expJson.getString("stack"));
+				}
+			}
+		}
+		catch (Exception e) {
+			log.debug("Registering at citrus failed :" + e);
+		}
+		return responseBean;
+	}
+	
+	public P2PCustomerVerificationResponseBean p2pCustomerVerification(P2PCustomerVerificationRequestBean requestBean){
+		log.debug("Verifiying and updating customers for p2p");
+		P2PCustomerVerificationResponseBean responseBean = new P2PCustomerVerificationResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.eq("sellerMobileNumber", requestBean.getCustomerMobileNumber()));
+			List<EngageSeller> sellerList = criteria.list();
+			log.debug("Seller size : " + sellerList.size());
+			if(sellerList.size()>0){
+				for(EngageSeller seller:sellerList){
+					int citrusSellerId = seller.getCitrusSellerId();
+					
+					CitrusSeller cseller = (CitrusSeller) session
+							.get("com.limitless.services.engage.sellers.dao.CitrusSeller", citrusSellerId);
+					
+					if(cseller!=null){
+						responseBean.setAccountName(cseller.getSellerName());
+						responseBean.setAccountNumber(cseller.getSellerAccNumber());
+						responseBean.setIfsc(cseller.getSellerIfsc());
+						responseBean.setCitrusSellerId(citrusSellerId);
+						responseBean.setMessage("Success");
+						
+						EngageCustomer customerInstance = (EngageCustomer) session
+								.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+						customerInstance.setCitrusSellerId(cseller.getCitrusId());
+						session.update(customerInstance);
+					}
+				}
+			}
+			else if(sellerList.isEmpty()){
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("P2P verification failed failed", re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
 }

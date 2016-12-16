@@ -52,6 +52,9 @@ public class EngageSellerResource {
 			seller.setSellerAddress(bean.getAddress());
 			seller.setSellerDeviceId(bean.getSellerDeviceId());
 			seller.setSellerCountry(bean.getCountry());
+			seller.setSellerType(bean.getSellerType());
+			seller.setSellerShopName(bean.getSellerShopName());
+			seller.setSellerRole(bean.getSellerRole());
 			
 			seller.setSellerKycDocType(bean.getKycDocType());
 			seller.setSellerKycDocValue(bean.getKycDocValue());
@@ -63,7 +66,7 @@ public class EngageSellerResource {
 			
 			EngageSellerManager manager = new EngageSellerManager();
 			
-			if( !(manager.checkDuplicateEmail(bean.getEmailId())) && !(manager.checkDuplicateMobile(bean.getMobileNumber())) ){
+			if( !manager.checkDuplicateEmail(bean.getEmailId()) && !manager.checkDuplicateMobile(bean.getMobileNumber()) ){
 				manager.persist(seller);
 				sellerResp.setSellerId(seller.getSellerId());
 				sellerResp.setStatus(1);
@@ -87,7 +90,12 @@ public class EngageSellerResource {
 		EngageSeller engageSeller = manager.findById(id);
 		
 		SellerDeviceIdRespBean bean = new SellerDeviceIdRespBean();
-		bean.setSellerDeviceId(engageSeller.getSellerDeviceId());
+		if(engageSeller == null){
+			bean.setSellerDeviceId("NA");
+		}
+		else{
+			bean.setSellerDeviceId(engageSeller.getSellerDeviceId());
+		}
 		
 		return bean;
 	}
@@ -148,6 +156,22 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return coords;
+	}
+	
+	@GET
+	@Path("/get/{sellerMobileNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
+		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.getSellerByMobile(sellerMobileNumber);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 	
 }

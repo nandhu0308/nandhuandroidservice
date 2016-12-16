@@ -35,10 +35,15 @@ String citrusSellerId = request.getParameter("csid");
 String buyerId = request.getParameter("bid");
 String sellerName = request.getParameter("sname");
 //String sellerDeviceId = request.getParameter("sdid");
-String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
+String userString = System.getProperty("AUTH_STRING");
 
 String creditAmountStr = request.getParameter("credamt");
 String debitAmountStr = request.getParameter("debamt");
+String txnNotes = request.getParameter("notes");
+if(txnNotes==null)
+{
+	txnNotes="NA";
+}
 
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              
@@ -62,6 +67,12 @@ bean.setSellerName(sellerName);
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 bean.setSellerDeviceId(sellerDeviceId);
+if(txnNotes.equals("NA")){
+	bean.setTxnNotes("NA");
+}
+else{
+	bean.setTxnNotes(txnNotes);
+}
 
 TxnResponseBean txnResponse = webResource.type("application/json").header("Authorization","Basic " + userString).post(TxnResponseBean.class, bean);
 System.out.println("Txn Id: " + txnResponse.getTxnId());
@@ -84,10 +95,11 @@ if(creditAmountStr != null || debitAmountStr != null){
 		
 		CreditBean creditBean = new CreditBean();
 		creditBean.setTxnId(txnId);
-		creditBean.setCreditAmount(creditAmount);
-		creditBean.setDebitAmount(debitAmount);
-		creditBean.setSellerId(Integer.parseInt(sellerId));
+		creditBean.setCreditTemp(creditAmount);
+		creditBean.setDebitTemp(debitAmount);
+		creditBean.setSellerId(Integer.parseInt(citrusSellerId));
 		creditBean.setCustomerId(Integer.parseInt(buyerId));
+		creditBean.setMerchantId(Integer.parseInt(sellerId));
 		
 		CreditRespBean creditResponse = creditResource.type("application/json").header("Authorization","Basic " + userString).post(CreditRespBean.class, creditBean);
 		System.out.println("Credit Id: " + creditResponse.getCreditId());

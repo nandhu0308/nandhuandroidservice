@@ -1,7 +1,10 @@
 
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +29,11 @@ import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
 import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
+import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.DataBean;
+import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.MessageBean;
+import com.limitless.services.payment.PaymentService.MessageResponseBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
 import com.limitless.services.payment.PaymentService.NotificationResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -35,11 +43,14 @@ import com.limitless.services.payment.PaymentService.SellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.SplitRequestBean;
 import com.limitless.services.payment.PaymentService.SplitResponseBean;
 import com.limitless.services.payment.PaymentService.TxnHistoryBean;
+import com.limitless.services.payment.PaymentService.TxnMailRequestBean;
+import com.limitless.services.payment.PaymentService.TxnMailResponseBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentCredit;
 import com.limitless.services.payment.PaymentService.dao.PaymentCreditManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
+import com.limitless.services.payment.PaymentService.util.PaymentConstants;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -107,6 +118,7 @@ public class PaymentResource {
 			paymentTxn.setSellerName(bean.getSellerName());
 			paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
 			paymentTxn.setSellerDeviceId(bean.getSellerDeviceId());
+			paymentTxn.setTxnNotes(bean.getTxnNotes());
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			manager.persist(paymentTxn);
@@ -132,6 +144,7 @@ public class PaymentResource {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(),
 					paymentTxnBean.getTxnStatus().toString());
+			
 
 			EngageCustomerManager customerManager = new EngageCustomerManager();
 			EngageCustomer customer = customerManager.findById(paymentTxn.getEngageCustomerId());
@@ -142,6 +155,25 @@ public class PaymentResource {
 			txnResp.setDate(paymentTxn.getTxnUpdatedTime().toString());
 			txnResp.setName(customer.getCustomerName());
 			txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
+			
+			MessageBean messageBean = new MessageBean();
+			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			messageBean.setSellerCitrusId(paymentTxn.getCitrusSellerId());
+			messageBean.setSellerId(paymentTxn.getSellerId());
+			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
+			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
+			messageBean.setTxnId(paymentTxn.getTxnId());
+			
+			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
+			
+			TxnMailRequestBean mailBean = new TxnMailRequestBean();
+			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			mailBean.setSellerId(paymentTxn.getSellerId());
+			mailBean.setTxnId(paymentTxn.getTxnId());
+			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
+			
+			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
+			
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -152,17 +184,19 @@ public class PaymentResource {
 	@GET
 	@Path("/trans/customer/{customerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<TxnHistoryBean> getHistory(@PathParam("customerId") int customerId) throws Exception {
+	public CustomerTxnHistoryBean getHistory(@PathParam("customerId") int customerId) throws Exception {
 		List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
-
+		CustomerTxnHistoryBean respBean = new CustomerTxnHistoryBean();
 		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			List<PaymentTxn> paymentHistory = manager.getTxnHistory(customerId);
 
-			if (paymentHistory != null) {
+			if (paymentHistory.size() > 0) {
 				System.out.println("Size : " + paymentHistory.size());
+				respBean.setMessage("Success");
 			} else {
 				System.out.println("List Null");
+				respBean.setMessage("No Record Found");
 			}
 
 			for (PaymentTxn bean : paymentHistory) {
@@ -172,28 +206,106 @@ public class PaymentResource {
 				historyBean.setSellerId(bean.getSellerId());
 				historyBean.setSellerName(bean.getSellerName());
 				historyBean.setTxtAmount(bean.getTxnAmount());
+				historyBean.setCreditAmount(manager.getCreditAmount(bean.getTxnId()));
 				historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
 				historyBean.setSplitId(bean.getSplitId());
 				historyBean.setTxtStatus(bean.getTxnStatus().toString());
-				historyBean.setTxnTime(bean.getTxnUpdatedTime().toString());
+				historyBean.setTxnNotes(bean.getTxnNotes());
+				String gmtTime = bean.getTxnUpdatedTime().toString();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Date date = sdf.parse(gmtTime);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(date);
+				calendar.add(Calendar.HOUR, 5);
+				calendar.add(Calendar.MINUTE, 30);
+				String localTime = sdf.format(calendar.getTime());
+				historyBean.setTxnTime(localTime);
 				historyBeanList.add(historyBean);
 				historyBean = null;
 			}
+			respBean.setHistoryBean(historyBeanList);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
-		return historyBeanList;
+		return respBean;
 	}
 
 	@GET
-	@Path("/trans/seller/{sellerId}")
+	@Path("/trans/customer/{customerId}/{firstTxnId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean getSellerTxns(@PathParam("sellerId") int sellerId) throws Exception {
+	public CustomerTxnHistoryBean getHistoryPangination(@PathParam("customerId") int customerId,
+			@PathParam("firstTxnId") int firstTxnId) throws Exception {
+		List<TxnHistoryBean> historyBeanList = new ArrayList<TxnHistoryBean>();
+		CustomerTxnHistoryBean respBean = new CustomerTxnHistoryBean();
+		try {
+			PaymentTxnManager manager = new PaymentTxnManager();
+			List<PaymentTxn> paymentHistory = manager.getTxnHistoryPagination(customerId, firstTxnId);
+
+			if (paymentHistory.size() > 0) {
+				System.out.println("Size : " + paymentHistory.size());
+				respBean.setMessage("Success");
+			} else {
+				System.out.println("List Null");
+				respBean.setMessage("No More Records Found");
+			}
+
+			for (PaymentTxn bean : paymentHistory) {
+				TxnHistoryBean historyBean = new TxnHistoryBean();
+				historyBean.setTxnId(bean.getTxnId());
+				historyBean.setCustomerId(bean.getEngageCustomerId());
+				historyBean.setSellerId(bean.getSellerId());
+				historyBean.setSellerName(bean.getSellerName());
+				historyBean.setTxtAmount(bean.getTxnAmount());
+				historyBean.setCreditAmount(manager.getCreditAmount(bean.getTxnId()));
+				historyBean.setCitrusMpTxnId(bean.getCitrusMpTxnId());
+				historyBean.setSplitId(bean.getSplitId());
+				historyBean.setTxtStatus(bean.getTxnStatus().toString());
+				historyBean.setTxnNotes(bean.getTxnNotes());
+				String gmtTime = bean.getTxnUpdatedTime().toString();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Date date = sdf.parse(gmtTime);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(date);
+				calendar.add(Calendar.HOUR, 5);
+				calendar.add(Calendar.MINUTE, 30);
+				String localTime = sdf.format(calendar.getTime());
+				historyBean.setTxnTime(localTime);
+				historyBeanList.add(historyBean);
+				historyBean = null;
+			}
+			respBean.setHistoryBean(historyBeanList);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return respBean;
+	}
+
+	@GET
+	@Path("/trans/seller/{citrusSellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getSellerTxns(@PathParam("citrusSellerId") int citrusSellerId) throws Exception {
 		SellerTxnHistoryBean bean = null;
 		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
-			bean = manager.getSellerTxns(sellerId);
+			bean = manager.getSellerTxns(citrusSellerId);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Exception");
+		}
+		return bean;
+	}
+
+	@GET
+	@Path("/trans/seller/{citrusSellerId}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getSellerTxnsPagination(@PathParam("citrusSellerId") int citrusSellerId,
+			@PathParam("firstTxnId") int firstTxnId) throws Exception {
+		SellerTxnHistoryBean bean = new SellerTxnHistoryBean();
+		try {
+			PaymentTxnManager manager = new PaymentTxnManager();
+			bean = manager.sellerTxnHistoryPagination(citrusSellerId, firstTxnId);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Exception");
@@ -208,14 +320,29 @@ public class PaymentResource {
 	public SplitResponseBean splitTxn(@PathParam("id") int id, SplitRequestBean splitReq) throws Exception {
 		SplitResponseBean splitResp = new SplitResponseBean();
 		int citrusMpTxnId = splitReq.getCitrusMpTxnId();
+		double feePercent = 0;
+		double txnAmount = 0;
+		double feeAmount = 0;
 		try {
 			logger.info("Id:" + id);
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.findById(id);
+			EngageSellerManager sellerMgr = new EngageSellerManager();
+			
+			PaymentCreditManager creditManager = new PaymentCreditManager();
+			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
+			
+			if(respBean.getMessage().equals("Success")){
+				System.out.println("Credit/Debit Trans Success");
+			}
+			else if(respBean.getMessage().equals("Failed")){
+				System.out.println("Not Credit/Debit Trans");
+			}
 
 			int txnId = paymentTxn.getTxnId();
-			int sellerId = paymentTxn.getSellerId();
+			int citrusSellerId = paymentTxn.getCitrusSellerId();
+			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
 			String sellerDeviceId = paymentTxn.getSellerDeviceId();
 			int customerId = paymentTxn.getEngageCustomerId();
 			String txnDate = paymentTxn.getTxnUpdatedTime().toString();
@@ -226,12 +353,18 @@ public class PaymentResource {
 			String customerName = engageCustomer.getCustomerName();
 
 			String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
-			// TODO
-			double feePercent = 2.00;
-			double txnAmount = paymentTxn.getTxnAmount();
-			// TODO
-			double feeAmount = 0.00;// (txnAmount * feePercent) / 100;
-			double splitAmount = txnAmount - feeAmount;
+
+			if(seller != null){
+				feePercent = seller.getSellerSplitPercent();
+				txnAmount = paymentTxn.getTxnAmount();
+				feeAmount = txnAmount * (feePercent / 100);
+				// round off to 2 decimal
+				feeAmount = Math.round(feeAmount * 100) / 100D;
+			}
+			else{
+				txnAmount = paymentTxn.getTxnAmount();
+				feeAmount = 0;
+			}
 
 			// Make Split API call
 			ClientConfig clientConfig = new DefaultClientConfig();
@@ -240,30 +373,24 @@ public class PaymentResource {
 
 			Map<String, Object> splitRequest = new HashMap<String, Object>();
 			splitRequest.put("trans_id", citrusMpTxnId);
-			splitRequest.put("seller_id", sellerId);
+			splitRequest.put("seller_id", citrusSellerId);
 			splitRequest.put("merchant_split_ref", merchantSplitRef);
-			splitRequest.put("split_amount", splitAmount);
+			splitRequest.put("split_amount", txnAmount);
 			splitRequest.put("fee_amount", feeAmount);
 			splitRequest.put("auto_payout", 1);
+			
+			PaymentConstants constants = PaymentConstants.getInstance();
 
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/split");
 
 			ClientResponse splitResponse = webResource.accept("application/json").type("application/json")
 					.header("auth_token",
-							"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3Nfa2V5IjoiOTZLMzRRNEE4SThOUkVIN05WT1oiLCJleHBpcmVzIjoiMjAxNi0xMC0yOVQxMjo1NTo1OC4yOTVaIiwiY2FuX3RyYW5zYWN0IjoxLCJhZG1pbiI6MH0.urz4SfFZ7uCzWU5vPzYeN1TAgon36YhgH6DDjEeuCzU")
+							constants.getAuth_Token())
 					.post(ClientResponse.class, splitRequest);
 
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
-			logger.info(splitResponseStr);
+			System.out.println("Slipt Response: " + splitResponseStr);
 
-			// TODO
-			/*
-			 * JSONObject jsonObject = new JSONObject(splitResponseStr); int
-			 * splitId =
-			 * Integer.parseInt(jsonObject.get("split_id").toString());
-			 */
-
-			// TODO
 			splitResponseStr = splitResponseStr.substring(1, splitResponseStr.length() - 2);
 			splitResponseStr = splitResponseStr.split(",")[0];
 			String[] splitArr = splitResponseStr.split("=");
@@ -272,7 +399,6 @@ public class PaymentResource {
 				splitId = Integer.parseInt(splitArr[1]);
 			}
 
-			// TODO
 			paymentTxn = manager.updateSplitId(txnId, citrusMpTxnId, splitId, TxnStatus.PAYMENT_SUCCESSFUL.toString());
 
 			splitResp.setSplitId(paymentTxn.getSplitId());
@@ -281,6 +407,24 @@ public class PaymentResource {
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
 			splitResp.setSellerDeviceId(sellerDeviceId);
+			
+			MessageBean messageBean = new MessageBean();
+			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			messageBean.setSellerCitrusId(paymentTxn.getCitrusSellerId());
+			messageBean.setSellerId(paymentTxn.getSellerId());
+			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
+			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
+			messageBean.setTxnId(paymentTxn.getTxnId());
+			
+			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
+			
+			TxnMailRequestBean mailBean = new TxnMailRequestBean();
+			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			mailBean.setSellerId(paymentTxn.getSellerId());
+			mailBean.setTxnId(paymentTxn.getTxnId());
+			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
+			
+			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
 
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -300,10 +444,11 @@ public class PaymentResource {
 		try {
 			PaymentCredit paymentCredit = new PaymentCredit();
 			paymentCredit.setTxnId(bean.getTxnId());
-			paymentCredit.setCreditAmount(bean.getCreditAmount());
-			paymentCredit.setDebitAmount(bean.getDebitAmount());
+			paymentCredit.setCreditTemp(bean.getCreditTemp());
+			paymentCredit.setDebitTemp(bean.getDebitTemp());
 			paymentCredit.setSellerId(bean.getSellerId());
 			paymentCredit.setCustomerId(bean.getCustomerId());
+			paymentCredit.setMerchantId(bean.getMerchantId());
 
 			PaymentCreditManager manager = new PaymentCreditManager();
 			manager.persist(paymentCredit);
@@ -342,9 +487,21 @@ public class PaymentResource {
 		try {
 			EngageSellerManager sellerManager = new EngageSellerManager();
 			EngageSeller seller = sellerManager.findById(Integer.parseInt(request.getTo()));
-			
+
 			request.setTo(seller.getSellerDeviceId());
 			
+			DataBean data = request.getData();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date date = new Date();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.add(Calendar.HOUR, 5);
+			calendar.add(Calendar.MINUTE, 30);
+			String localTime = sdf.format(calendar.getTime());
+			date = sdf.parse(localTime);
+			
+			data.setTime(date);
+
 			WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
 			ClientResponse clientResponse = webResource2.type("application/json")
 					.header("Authorization", "key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos")
@@ -360,7 +517,7 @@ public class PaymentResource {
 
 		return response;
 	}
-	
+
 	@GET
 	@Path("/credit/customer/{customerId}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -376,18 +533,18 @@ public class PaymentResource {
 		}
 		return responseBean;
 	}
-	
+
 	@POST
 	@Path("/trans/credit")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public CreditTransResponseBean creditTrans(CreditTransRequestBean requestBean) throws Exception{
+	public CreditTransResponseBean creditTrans(CreditTransRequestBean requestBean) throws Exception {
 		CreditTransResponseBean responseBean = new CreditTransResponseBean();
-		try{
-			
+		try {
+
 			EngageSellerManager sellerManager = new EngageSellerManager();
 			EngageSeller seller = sellerManager.findById(requestBean.getSellerId());
-			
+
 			PaymentTxn trans = new PaymentTxn();
 			trans.setEngageCustomerId(requestBean.getCustomerId());
 			trans.setSellerId(requestBean.getSellerId());
@@ -396,22 +553,207 @@ public class PaymentResource {
 			trans.setSellerDeviceId(seller.getSellerDeviceId());
 			trans.setTxnStatus(requestBean.getStatus());
 			trans.setTxnAmount(requestBean.getTransAmount());
-			
+			trans.setTxnNotes(requestBean.getTxnNotes());
+
 			PaymentTxnManager txnManager = new PaymentTxnManager();
 			txnManager.persist(trans);
-			
+
 			PaymentCredit credits = new PaymentCredit();
+			credits.setMerchantId(requestBean.getSellerId());
 			credits.setCreditAmount(requestBean.getCreditAmount());
+			credits.setDebitAmount(requestBean.getDebitAmount());
 			credits.setSellerId(seller.getCitrusSellerId());
 			credits.setTxnId(trans.getTxnId());
 			credits.setCustomerId(requestBean.getCustomerId());
-			
+
 			PaymentCreditManager creditsManager = new PaymentCreditManager();
 			creditsManager.persist(credits);
-			
+
 			responseBean.setCreditId(credits.getCreditId());
 			responseBean.setTransactionId(trans.getTxnId());
 			responseBean.setMessage("Success");
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/trans/day/{citrusSellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean transDays(@PathParam("citrusSellerId") int citrusSellerId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getDayTxns(citrusSellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/trans/month/{citrusSellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean transMonths(@PathParam("citrusSellerId") int citrusSellerId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getMonthTxns(citrusSellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("trans/gen/{merchantId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralSellerTxnHistoryBean getGenSellerTxns(@PathParam("merchantId") int merchantId) throws Exception{
+		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenSellerTxns(merchantId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/trans/gen/{merchantId}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(@PathParam("merchantId") int merchantId, 
+			@PathParam("firstTxnId") int firstTxnId) throws Exception{
+		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenSellerTxnsPagination(merchantId, firstTxnId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/trans/gen/day/{merchantId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean genDayTxns(@PathParam("merchantId") int merchantId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenDayWiseTxn(merchantId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/trans/gen/month/{merchantId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean genMonthTxns(@PathParam("merchantId") int merchantId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGenMonthWiseTxns(merchantId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/{citrusSellerId}/{txnDate}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getDateTxns(@PathParam("citrusSellerId") int citrusSellerId, 
+			@PathParam("txnDate") String txnDate) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getTxnsByDate(citrusSellerId, txnDate);
+		}
+		catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/{citrusSellerId}/{txnDate}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getDateTxnsPagination(@PathParam("citrusSellerId") int citrusSellerId, 
+			@PathParam("txnDate") String txnDate, 
+			@PathParam("firstTxnId") int firstTxnId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getDateWiseTxnsPagination(citrusSellerId, txnDate, firstTxnId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/gen/{merchantId}/{txnDate}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getGeneralDateTxn(@PathParam("merchantId") int merchantId,
+			@PathParam("txnDate") String txnDate) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGeneralDateTxns(merchantId, txnDate);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@GET
+	@Path("/date/gen/{merchantId}/{txnDate}/{firstTxnId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerTxnHistoryBean getGeneralDateTxnPagintion(@PathParam("merchantId") int merchantId,
+			@PathParam("txnDate") String txnDate, int firstTxnId) throws Exception{
+		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			historyBean = manager.getGeneralDateWiseTxnsPagination(merchantId, txnDate, firstTxnId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return historyBean;
+	}
+	
+	@POST
+	@Path("/trans/mail")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TxnMailResponseBean txnMail(TxnMailRequestBean requestBean) throws Exception{
+		TxnMailResponseBean responseBean = new TxnMailResponseBean();
+		try{
+			PaymentTxnManager manager = new PaymentTxnManager();
+			responseBean = manager.sendMail(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

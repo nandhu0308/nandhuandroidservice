@@ -6,6 +6,15 @@ public class CustomerCreditResponseBean {
 	private String sellerName;
 	private String sellerPhone;
 	private double totalCredits;
+	private int merchantId;
+
+	public int getMerchantId() {
+		return merchantId;
+	}
+
+	public void setMerchantId(int merchantId) {
+		this.merchantId = merchantId;
+	}
 
 	public int getSellerId() {
 		return sellerId;

@@ -4,6 +4,7 @@ public class EngageSellerBean {
 	
 	private int citrusSellerId;
 	private String sellerName;
+	private String sellerShopName;
 	private String emailId;
 	private String passwd;
 	private String countryCode;
@@ -12,6 +13,8 @@ public class EngageSellerBean {
 	private String address;
 	private String sellerDeviceId;
 	private String mobileNumber;
+	private String sellerType;
+	private String sellerRole;
 	
 	private float latitude;
 	private float longitude;
@@ -110,5 +113,22 @@ public class EngageSellerBean {
 	public void setSellerDeviceId(String sellerDeviceId) {
 		this.sellerDeviceId = sellerDeviceId;
 	}
-	
+	public String getSellerType() {
+		return sellerType;
+	}
+	public void setSellerType(String sellerType) {
+		this.sellerType = sellerType;
+	}
+	public String getSellerShopName() {
+		return sellerShopName;
+	}
+	public void setSellerShopName(String sellerShopName) {
+		this.sellerShopName = sellerShopName;
+	}
+	public String getSellerRole() {
+		return sellerRole;
+	}
+	public void setSellerRole(String sellerRole) {
+		this.sellerRole = sellerRole;
+	}
 }

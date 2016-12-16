@@ -20,6 +20,7 @@ public class PaymentTxnBean {
 		PAYMENT_INITIATED, PAYMENT_SUCCESSFUL, PAYMENT_FAILED, FUND_RELEASED, REFUND_INITIATED, REFUND_PROCESSED;
 	}
 	private TxnStatus txnStatus;
+	private String txnNotes;
 	
 	public TxnStatus getTxnStatus() {
 		return txnStatus;
@@ -81,6 +82,12 @@ public class PaymentTxnBean {
 	}
 	public void setCitrusSellerId(int citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
+	}
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
 	}
 	
 }

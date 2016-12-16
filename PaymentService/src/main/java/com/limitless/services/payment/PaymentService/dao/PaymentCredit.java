@@ -25,6 +25,8 @@ public class PaymentCredit implements java.io.Serializable {
 	private Integer creditId;
 	@Column(name="TXN_ID")
 	private Integer txnId;
+	@Column(name="MERCHANT_ID")
+	private Integer merchantId;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
 	@Column(name="CUSTOMER_ID")
@@ -40,6 +42,10 @@ public class PaymentCredit implements java.io.Serializable {
 	@Column(name="CREDIT_UPDATED_TIME")
 	@Version
 	private Date creditUpdatedTime;
+	@Column(name="CREDIT_TEMP")
+	private float creditTemp;
+	@Column(name="DEBIT_TEMP")
+	private float debitTemp;
 
 	public PaymentCredit() {
 	}
@@ -51,6 +57,14 @@ public class PaymentCredit implements java.io.Serializable {
 		this.debitAmount = debitAmount;
 		this.creditCreatedTime = creditCreatedTime;
 		this.creditUpdatedTime = creditUpdatedTime;
+	}
+
+	public Integer getMerchantId() {
+		return merchantId;
+	}
+
+	public void setMerchantId(Integer merchantId) {
+		this.merchantId = merchantId;
 	}
 
 	public Integer getTxnId() {
@@ -115,6 +129,22 @@ public class PaymentCredit implements java.io.Serializable {
 
 	public void setCreditUpdatedTime(Date creditUpdatedTime) {
 		this.creditUpdatedTime = creditUpdatedTime;
+	}
+
+	public float getCreditTemp() {
+		return creditTemp;
+	}
+
+	public void setCreditTemp(float creditTemp) {
+		this.creditTemp = creditTemp;
+	}
+
+	public float getDebitTemp() {
+		return debitTemp;
+	}
+
+	public void setDebitTemp(float debitTemp) {
+		this.debitTemp = debitTemp;
 	}
 
 }

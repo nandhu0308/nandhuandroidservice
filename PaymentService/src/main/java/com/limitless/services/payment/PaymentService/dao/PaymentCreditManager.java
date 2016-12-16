@@ -23,6 +23,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.SellerCreditsResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
@@ -52,16 +53,23 @@ public class PaymentCreditManager {
 	public void persist(PaymentCredit transientInstance) {
 		log.debug("persisting PaymentCredit instance");
 		Transaction tx = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			tx = session.beginTransaction();
 			session.persist(transientInstance);
+			tx.commit();
 			log.debug("persist successful");
 		} catch (RuntimeException re) {
+			if (tx != null) {
+				tx.rollback();
+			}
 			log.error("persist failed", re);
 			throw re;
 		} finally {
-			tx.commit();
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
 	}
 
@@ -144,8 +152,9 @@ public class PaymentCreditManager {
 		log.debug("Getting Total credits for seller" + sellerId);
 		List<SellerCreditsResponseBean> creditsList = new ArrayList<SellerCreditsResponseBean>();
 		Transaction transaction = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(PaymentCredit.class);
 			criteria.add(Restrictions.eq("sellerId", sellerId))
@@ -161,6 +170,13 @@ public class PaymentCreditManager {
 					List amountList = query.list();
 					log.debug("Amount :" + amountList.toString());
 					double creditAmt = (Double) amountList.get(0);
+					Query query2 = session.createQuery(
+							"select sum(PC.debitAmount) from PaymentCredit PC where PC.customerId = :customerId");
+					query2.setParameter("customerId", custId);
+					List amountList2 = query2.list();
+					log.debug("Amount :" + amountList2.toString());
+					double debitAmt = (Double) amountList2.get(0);
+					double netCredit = creditAmt - debitAmt;
 					EngageCustomer customer = (EngageCustomer) session
 							.get("com.limitless.services.engage.dao.EngageCustomer", custId);
 					String customerName = customer.getCustomerName();
@@ -169,16 +185,22 @@ public class PaymentCreditManager {
 					bean.setCustomerId(custId);
 					bean.setCustomerName(customerName);
 					bean.setCustomerPhone(customerPhone);
-					bean.setTotalCredits(creditAmt);
+					bean.setTotalCredits(netCredit);
 					creditsList.add(bean);
 					bean = null;
 				}
 			}
+			transaction.commit();
 		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			log.error("Getting sellers credits failed");
 			throw re;
 		} finally {
-			transaction.commit();
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
 		return creditsList;
 	}
@@ -188,8 +210,9 @@ public class PaymentCreditManager {
 		log.debug("Getting Total credits for Customer" + customerId);
 		List<CustomerCreditResponseBean> creditsList = new ArrayList<CustomerCreditResponseBean>();
 		Transaction transaction = null;
+		Session session = null;
 		try {
-			Session session = sessionFactory.getCurrentSession();
+			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(PaymentCredit.class);
 			criteria.add(Restrictions.eq("customerId", customerId))
@@ -206,28 +229,80 @@ public class PaymentCreditManager {
 					List amountList = query.list();
 					log.debug("Amount :" + amountList.toString());
 					double creditAmt = (Double) amountList.get(0);
+					Query query2 = session.createQuery(
+							"select sum(PC.debitAmount) from PaymentCredit PC where PC.sellerId = :sellerId and PC.customerId = :customerId");
+					query2.setParameter("sellerId", sellerId);
+					query2.setParameter("customerId", customerId);
+					List amountList2 = query2.list();
+					log.debug("Amount :" + amountList2.toString());
+					double debitAmt = (Double) amountList2.get(0);
+					double netCredit = creditAmt - debitAmt;
 					Criteria criteria2 = session.createCriteria(EngageSeller.class);
 					criteria2.add(Restrictions.eq("citrusSellerId", sellerId));
 					List<EngageSeller> sellerList = criteria2.list();
 					EngageSeller seller = sellerList.get(0);
 					String sellerName = seller.getSellerName();
 					String sellerPhone = seller.getSellerMobileNumber();
+					int merchantId = seller.getSellerId();
 					CustomerCreditResponseBean bean = new CustomerCreditResponseBean();
 					bean.setSellerId(sellerId);
 					bean.setSellerName(sellerName);
 					bean.setSellerPhone(sellerPhone);
-					bean.setTotalCredits(creditAmt);
+					bean.setTotalCredits(netCredit);
+					bean.setMerchantId(merchantId);
 					creditsList.add(bean);
 					bean = null;
 				}
 			}
+			transaction.commit();
 		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			log.error("Getting customer credits failed");
 			throw re;
 		} finally {
-			transaction.commit();
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
 		return creditsList;
+	}
+
+	public CreditRespBean updateCreditDebitTrans(int txnId) {
+		log.debug("Updating Credit/Debit Trans");
+		CreditRespBean respBean = new CreditRespBean();
+		Transaction transaction = null;
+		Session session = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(PaymentCredit.class);
+			criteria.add(Restrictions.eq("txnId", txnId));
+			List<PaymentCredit> credits = criteria.list();
+			log.debug("Credits Size: " + credits.size());
+			if (credits.size() > 0) {
+				for (PaymentCredit credit : credits) {
+					credit.setCreditAmount(credit.getCreditTemp());
+					credit.setDebitAmount(credit.getDebitTemp());
+					respBean.setCreditId(credit.getCreditId());
+					respBean.setMessage("Success");
+				}
+			} else if (credits.isEmpty()) {
+				respBean.setMessage("Failed");
+			}
+			transaction.commit();
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Updating Credit/Debit Trans failed" + re);
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return respBean;
 	}
 
 }

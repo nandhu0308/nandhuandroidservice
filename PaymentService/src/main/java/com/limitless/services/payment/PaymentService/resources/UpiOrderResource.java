@@ -1,5 +1,8 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.io.StringReader;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -11,6 +14,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
+import org.xml.sax.InputSource;
 
 import com.limitless.services.engage.upi.UpiOrderBean;
 import com.limitless.services.engage.upi.UpiOrderResponseBean;
@@ -93,12 +101,18 @@ public class UpiOrderResource {
 				
 				String output = response.getEntity(String.class).toString();
 				
-				System.out.println(output);
+				System.out.println("Output : "+output);
 				
-				//TODO - Needs to use XML Parser
-				if(output.substring(output.lastIndexOf("<OperationStatus>") + 17, output.lastIndexOf("</OperationStatus>")).equals("0000")){
-					upiOrderResp.setMessage("Success");
-					upiOrderResp.setOrderId(upiOrder.getOrderId());
+				//Response XML Parsing
+				SAXReader reader = new SAXReader();
+				Document document = reader.read(new InputSource(new StringReader(output)));
+				Element rootElement = document.getRootElement();
+				List<Node> nodeList = document.selectNodes("MB/RS");
+				if(nodeList.size()==1){
+					for(Node node : nodeList){
+						upiOrderResp.setOrderId(orderId);
+						upiOrderResp.setMessage("Success");
+					}
 				}
 				
 			} catch (Exception e) {

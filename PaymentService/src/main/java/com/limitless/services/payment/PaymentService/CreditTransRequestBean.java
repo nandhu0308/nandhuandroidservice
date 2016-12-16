@@ -6,8 +6,10 @@ public class CreditTransRequestBean {
 	private int sellerId;
 	private float transAmount;
 	private float creditAmount;
+	private float debitAmount;
 	private String sellerName;
 	private String status;
+	private String txnNotes;
 	
 	public int getCustomerId() {
 		return customerId;
@@ -44,6 +46,18 @@ public class CreditTransRequestBean {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public float getDebitAmount() {
+		return debitAmount;
+	}
+	public void setDebitAmount(float debitAmount) {
+		this.debitAmount = debitAmount;
+	}
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
 	}
 	
 }

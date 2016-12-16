@@ -10,14 +10,27 @@ public class TxnHistoryBean {
 	private int sellerId;
 	private String sellerName;
 	private double txtAmount;
+	private double creditAmount;
 	private int citrusMpTxnId;
 	private int splitId;
 	private String txtStatus;
 	private String txnTime;
+	private String txnNotes;
+	private PaymentsSettlementResponseBean settlement;
 	
 	public TxnHistoryBean(){
 		
 	}
+
+	public double getCreditAmount() {
+		return creditAmount;
+	}
+
+
+	public void setCreditAmount(double creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
 
 	public int getTxnId() {
 		return txnId;
@@ -97,6 +110,22 @@ public class TxnHistoryBean {
 
 	public void setCustomerName(String customerName) {
 		this.customerName = customerName;
+	}
+
+	public PaymentsSettlementResponseBean getSettlement() {
+		return settlement;
+	}
+
+	public void setSettlement(PaymentsSettlementResponseBean settlement) {
+		this.settlement = settlement;
+	}
+
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
 	}
 
 }
