@@ -53,7 +53,7 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerKycDocType;
 	@Column(name="SELLER_KYC_DOC_VALUE")
 	private String sellerKycDocValue;
-	@Column(name="SELLER_CREATED_TIME")
+	@Column(name="SELLER_CREATED_TIME", insertable = false, updatable = false)
 	private Date sellerCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="SELLER_UPDATED_TIME")

@@ -26,7 +26,7 @@ public class UpiOrder implements java.io.Serializable {
 	private float orderAmount;
 	@Column(name="ORDER_STATUS")
 	private String orderStatus;
-	@Column(name="ORDER_CREATED_TIME")
+	@Column(name="ORDER_CREATED_TIME", insertable = false, updatable = false)
 	private Date orderCreatedTime;
 	@Column(name="ORDER_UPDATED_TIME")
 	private Date orderUpdatedTime;

@@ -46,7 +46,7 @@ public class PaymentTxn implements java.io.Serializable {
 	@Column(name="TXN_STATUS")
 	private String txnStatus;
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="TXN_CREATED_TIME")
+	@Column(name="TXN_CREATED_TIME", insertable = false, updatable = false)
 	private Date txnCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="TXN_UPDATED_TIME")
