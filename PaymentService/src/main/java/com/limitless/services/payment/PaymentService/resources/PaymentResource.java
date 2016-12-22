@@ -46,8 +46,10 @@ import com.limitless.services.payment.PaymentService.TxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnMailRequestBean;
 import com.limitless.services.payment.PaymentService.TxnMailResponseBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
+import com.limitless.services.payment.PaymentService.TxnSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentCredit;
 import com.limitless.services.payment.PaymentService.dao.PaymentCreditManager;
+import com.limitless.services.payment.PaymentService.dao.PaymentSettlementManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
 import com.limitless.services.payment.PaymentService.util.PaymentConstants;
@@ -323,12 +325,15 @@ public class PaymentResource {
 		double feePercent = 0;
 		double txnAmount = 0;
 		double feeAmount = 0;
+		int sellerSettlePref = 0;
 		try {
 			logger.info("Id:" + id);
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.findById(id);
 			EngageSellerManager sellerMgr = new EngageSellerManager();
+			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
+			
 			
 			PaymentCreditManager creditManager = new PaymentCreditManager();
 			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
@@ -342,7 +347,7 @@ public class PaymentResource {
 
 			int txnId = paymentTxn.getTxnId();
 			int citrusSellerId = paymentTxn.getCitrusSellerId();
-			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
+			
 			String sellerDeviceId = paymentTxn.getSellerDeviceId();
 			int customerId = paymentTxn.getEngageCustomerId();
 			String txnDate = paymentTxn.getTxnUpdatedTime().toString();
@@ -360,6 +365,7 @@ public class PaymentResource {
 				feeAmount = txnAmount * (feePercent / 100);
 				// round off to 2 decimal
 				feeAmount = Math.round(feeAmount * 100) / 100D;
+				sellerSettlePref = seller.getSellerSettlePref();
 			}
 			else{
 				txnAmount = paymentTxn.getTxnAmount();
@@ -407,6 +413,13 @@ public class PaymentResource {
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
 			splitResp.setSellerDeviceId(sellerDeviceId);
+			
+			TxnSettlementResponseBean txnSettlementResponseBean = new TxnSettlementResponseBean();
+			if(sellerSettlePref == 1){
+				PaymentSettlementManager settlementManager = new PaymentSettlementManager();
+				txnSettlementResponseBean = settlementManager.settleTxnById(txnId);
+				System.out.println("Settle Id : "+txnSettlementResponseBean.getPsId());
+			}
 			
 			MessageBean messageBean = new MessageBean();
 			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());

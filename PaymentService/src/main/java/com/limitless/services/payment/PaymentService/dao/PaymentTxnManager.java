@@ -1014,8 +1014,8 @@ public class PaymentTxnManager {
 			double txnAmount = txn.getTxnAmount();
 			String txnNotes = txn.getTxnNotes();
 			
-			String statusInMessage = "";
-			if(txnStatus.equals("PAYMENT_SUCCESS")){
+			String statusInMessage = txn.getTxnStatus();
+			if(txnStatus.equals("PAYMENT_SUCCESSFUL")){
 				statusInMessage = "SUCCESS";
 			}
 			else if(txnStatus.equals("PAYMENT_FAILED")){

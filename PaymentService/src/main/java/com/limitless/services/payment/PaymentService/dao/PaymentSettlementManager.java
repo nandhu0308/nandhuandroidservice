@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -20,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.payment.PaymentService.CitrusAccountBalanceBean;
 import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.ReleaseFundsRequestBean;
 import com.limitless.services.payment.PaymentService.ReleaseFundsResponseBean;
@@ -354,11 +357,95 @@ public class PaymentSettlementManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
+			
+			CitrusAuthToken token = (CitrusAuthToken) session
+					.get("com.limitless.services.payment.PaymentService.dao.CitrusAuthToken", 1);
+			String authToken = token.getAuthToken();
 
 			// Getting Txn details
 			PaymentTxn txn = (PaymentTxn) session.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn",
 					txnId);
-			SettlementRequestBean requestBean = new SettlementRequestBean();
+			CitrusAccountBalanceBean balanceBean = checkAccountBalance(authToken);
+			if(balanceBean.getMessage().equals("Success")){
+				if(balanceBean.getAccountBalance()>=txn.getTxnAmount()){
+					SettlementRequestBean requestBean = new SettlementRequestBean();
+					requestBean.setTrans_id(txn.getCitrusMpTxnId());
+					requestBean.setSettlement_ref("LimitlessCircle Pay");
+					requestBean.setTrans_source("CITRUS");
+					double txnAmount = txn.getTxnAmount();
+					
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", txn.getSellerId());
+					double feePercent = 0.0;
+					if (seller != null) {
+						feePercent = seller.getSellerSplitPercent();
+					}
+
+					// Calculating settlement amount and split amount
+					double feeAmount = txnAmount * (feePercent / 100);
+					// round off to 2 decimal
+					feeAmount = Math.round(feeAmount * 100) / 100D;
+
+					double settlementAmount = txnAmount - feeAmount;
+					log.debug("Settlement Amount: " + settlementAmount);
+					requestBean.setSettlement_amount(settlementAmount);
+					requestBean.setFee_amount(feeAmount);
+					requestBean.setSettlement_date_time(txn.getTxnUpdatedTime().toString());
+					
+					SettlementResponseBean settleResponseBean = new SettlementResponseBean();
+					try{
+						settleResponseBean = callSettlementApi(requestBean, authToken);
+					}
+					catch(Exception e){
+						log.error("Settle went wrong : "+e);
+					}
+					
+					PaymentSettlement settlement = new PaymentSettlement();
+					if(settleResponseBean.getMessage().equals("Success")){
+						settlement.setSettlementId(settleResponseBean.getSettlementId());
+						settlement.setSettlementAmount(settlementAmount);
+						settlement.setTxnId(txnId);
+					}
+					else{
+						settlement.setErrorIdSettle(settleResponseBean.getErrorId());
+						settlement.setTxnId(txnId);
+						settlement.setErrorDescriptionSettle(settleResponseBean.getErrorDescription());
+					}
+					
+					int citrusSplitId = txn.getSellerId();
+					ReleaseFundsRequestBean fundBean = new ReleaseFundsRequestBean();
+					fundBean.setSplit_id(citrusSplitId);
+					
+					ReleaseFundsResponseBean fundResponseBean = new ReleaseFundsResponseBean();
+					try{
+						fundResponseBean = callReleaseFundsApi(fundBean, authToken);
+					}
+					catch(Exception e){
+						log.error("Release went wrong : "+e);
+					}
+					
+					if(fundResponseBean.getMessage().equals("Success")){
+						settlement.setReleasefundRefId(fundResponseBean.getReleaseFundsRefId());
+						settlement.setSettlementStatus("RELEASE_SUCCESS");
+					}
+					else{
+						settlement.setErrorIdRelease(fundResponseBean.getErrorId());
+						settlement.setErrorDescriptionRelease(fundResponseBean.getErrorDescription());
+					}
+					
+					session.persist(settlement);
+					responseBean.setMessage("Success");
+					responseBean.setPsId(settlement.getPsId());
+					responseBean.setTxnId(txnId);
+				}
+				else{
+					responseBean.setMessage("Failed");
+				}
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
 
 		} catch (RuntimeException re) {
 			if (transaction != null) {
@@ -372,5 +459,32 @@ public class PaymentSettlementManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public CitrusAccountBalanceBean checkAccountBalance(String authToken){
+		log.debug("Checking citrus balance");
+		CitrusAccountBalanceBean balanceBean = new CitrusAccountBalanceBean();
+		try{
+			client.setConnectTimeout(3000);
+			client.setReadTimeout(3000);
+			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/merchant/getbalance/");
+			ClientResponse clientResponse = webResource.header("auth_token", authToken)
+					.accept("application/json")
+					.get(ClientResponse.class);
+			String responseString = clientResponse.getEntity(String.class);
+			log.debug("Balance Response : "+responseString);
+			JSONObject responseJson = new JSONObject(responseString);
+			if(responseJson.has("account_balance")){
+				balanceBean.setAccountBalance(responseJson.getDouble("account_balance"));
+				balanceBean.setMessage("Success");
+			}
+			else if(responseJson.has("error_id")){
+				balanceBean.setMessage("Failed");
+			}
+		}
+		catch(RuntimeException re){
+			log.error("Checking citrus balance failed : "+re);
+		}
+		return balanceBean;
 	}
 }
