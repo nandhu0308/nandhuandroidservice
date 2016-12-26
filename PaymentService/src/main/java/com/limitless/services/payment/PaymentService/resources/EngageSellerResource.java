@@ -60,9 +60,11 @@ public class EngageSellerResource {
 			
 			seller.setSellerKycDocType(bean.getKycDocType());
 			seller.setSellerKycDocValue(bean.getKycDocValue());
+			seller.setKycDocImage(bean.getKycDocImage());
 			
 			seller.setSellerLocationLatitude(bean.getLatitude());
 			seller.setSellerLocationLongitude(bean.getLongitude());
+			seller.setIsActive(bean.getIsActive());
 			
 			seller.setSellerSplitPercent(bean.getSplitPerent());
 			

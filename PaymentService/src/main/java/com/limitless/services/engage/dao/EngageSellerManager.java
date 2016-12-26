@@ -18,6 +18,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
@@ -238,10 +239,11 @@ public class EngageSellerManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageSeller.class);
-			Criterion emailCriterion = Restrictions.eq("sellerEmail99", reqBean.getEmailId());
-			Criterion passwdCriterion = Restrictions.eq("sellerPasswd99", reqBean.getPasswd());
-			LogicalExpression logExp = Restrictions.and(emailCriterion, passwdCriterion);
-			criteria.add(logExp);
+			Junction conditionGroup = Restrictions.conjunction()
+					.add(Restrictions.eq("sellerEmail99", reqBean.getEmailId()))
+					.add(Restrictions.eq("sellerPasswd99", reqBean.getPasswd()))
+					.add(Restrictions.eq("isActive", 1));
+			criteria.add(conditionGroup);
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Size: "+sellerList.size());
 			if( sellerList != null && sellerList.size() == 1){
@@ -264,7 +266,7 @@ public class EngageSellerManager {
 				session.update(seller);
 			}
 			else{
-				respBean.setMessage("Login Failed");
+				respBean.setMessage("Login Failed/Account Not Activated");
 				respBean.setStatus(-1);
 			}
 			transaction.commit();
@@ -414,13 +416,18 @@ public class EngageSellerManager {
 				criteria2.add(Restrictions.eq("customerMobileNumber", sellerMobileNumber));
 				List<EngageCustomer> customerList = criteria2.list();
 				log.debug("Size : " + customerList.size());
-				if(customerList.size()>0){
+				if(customerList.size()==1){
 					for(EngageCustomer customer : customerList){
-						responseBean.setCitrusSellerId(customer.getCitrusSellerId());
-						responseBean.setSellerName(customer.getCustomerName());
-						responseBean.setSellerId(customer.getCustomerId());
-						responseBean.setMobileNumber(customer.getCustomerMobileNumber());
-						responseBean.setMessage("Success");
+						if(customer.getCitrusSellerId()==0){
+							responseBean.setMessage("Mobile Number Not Registered For Funds Transfer");
+						}
+						else{
+							responseBean.setCitrusSellerId(customer.getCitrusSellerId());
+							responseBean.setSellerName(customer.getCustomerName());
+							responseBean.setSellerId(customer.getCustomerId());
+							responseBean.setMobileNumber(customer.getCustomerMobileNumber());
+							responseBean.setMessage("Success");
+						}
 					}
 				}
 				else{

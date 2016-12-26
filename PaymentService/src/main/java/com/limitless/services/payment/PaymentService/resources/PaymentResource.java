@@ -430,6 +430,7 @@ public class PaymentResource {
 			messageBean.setTxnId(paymentTxn.getTxnId());
 			
 			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
+			System.out.println("Message : " + messageResponseBean.getMessage());
 			
 			TxnMailRequestBean mailBean = new TxnMailRequestBean();
 			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());

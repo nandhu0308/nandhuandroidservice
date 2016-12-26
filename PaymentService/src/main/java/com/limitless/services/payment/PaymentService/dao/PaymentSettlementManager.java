@@ -412,7 +412,7 @@ public class PaymentSettlementManager {
 						settlement.setErrorDescriptionSettle(settleResponseBean.getErrorDescription());
 					}
 					
-					int citrusSplitId = txn.getSellerId();
+					int citrusSplitId = txn.getSplitId();
 					ReleaseFundsRequestBean fundBean = new ReleaseFundsRequestBean();
 					fundBean.setSplit_id(citrusSplitId);
 					
