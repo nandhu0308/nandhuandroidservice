@@ -6,6 +6,7 @@ public class SellerTempRequestBean {
 	private String sellerKycImage;
 	private String sellerBankProof;
 	private String status;
+	private int sellerId;
 	public String getSellerBankAccountNumber() {
 		return sellerBankAccountNumber;
 	}
@@ -35,5 +36,11 @@ public class SellerTempRequestBean {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
 	}
 }

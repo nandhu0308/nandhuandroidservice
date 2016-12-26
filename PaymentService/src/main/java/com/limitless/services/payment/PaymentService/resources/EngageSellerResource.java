@@ -23,8 +23,11 @@ import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
+import com.limitless.services.engage.SellerTempRequestBean;
+import com.limitless.services.engage.SellerTempResponseBean;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.dao.SellerTempManager;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -75,6 +78,25 @@ public class EngageSellerResource {
 				sellerResp.setSellerId(seller.getSellerId());
 				sellerResp.setStatus(1);
 				sellerResp.setMessage("Success");
+				
+				if(bean.getIsActive()==0){
+					SellerTempRequestBean tempRequestBean = new SellerTempRequestBean();
+					if(bean.getCitrusSellerId()==0){
+						tempRequestBean.setSellerId(seller.getSellerId());
+						tempRequestBean.setSellerBankAccountNumber(bean.getSellerBankAccountNumber());
+						tempRequestBean.setSellerIfsc(bean.getSellerIfsc());
+						tempRequestBean.setSellerBankProof(bean.getSellerBankProof());
+						tempRequestBean.setSellerKycImage(bean.getKycDocImage());
+					    tempRequestBean.setStatus("NOTYET");
+					}
+					else if(bean.getCitrusSellerId()>0){
+						tempRequestBean.setSellerId(seller.getSellerId());
+						tempRequestBean.setStatus("ONBOARDED");
+					}
+					SellerTempManager tempMananger = new SellerTempManager();
+					SellerTempResponseBean tempResponseBean = tempMananger.addTempDetails(tempRequestBean);
+				}
+				
 			} else {
 				sellerResp.setStatus(-1);
 				sellerResp.setMessage("Failure - Duplicate Email / Mobile Number");
