@@ -64,7 +64,6 @@ public class EngageSellerResource {
 			
 			seller.setSellerKycDocType(bean.getKycDocType());
 			seller.setSellerKycDocValue(bean.getKycDocValue());
-			seller.setKycDocImage(bean.getKycDocImage());
 			
 			seller.setSellerLocationLatitude(bean.getLatitude());
 			seller.setSellerLocationLongitude(bean.getLongitude());
@@ -96,6 +95,7 @@ public class EngageSellerResource {
 					}
 					SellerTempManager tempMananger = new SellerTempManager();
 					SellerTempResponseBean tempResponseBean = tempMananger.addTempDetails(tempRequestBean);
+					sellerResp.setMessage("NotYet");
 				}
 				
 			} else {

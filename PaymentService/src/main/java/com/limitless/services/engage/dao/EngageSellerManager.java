@@ -479,6 +479,10 @@ public class EngageSellerManager {
 			}
 			else if(sellersList.size()<2 || sellersList.isEmpty()){
 				responseBean.setAmbassadorMobileNumber(ambassadorMobileNumber);
+				responseBean.setMerchantOnboardCount(sellersList.size());
+				responseBean.setMessage("NotEligible");
+			}
+			else{
 				responseBean.setMessage("Failed");
 			}
 		}
