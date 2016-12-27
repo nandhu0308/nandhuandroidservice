@@ -65,8 +65,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerShopName;
 	@Column(name="SELLER_ROLE")
 	private String sellerRole;
-	@Column(name="AMBASSADOR_ID")
-	private int ambassadorId;
+	@Column(name="AMBASSADOR_MOBILE")
+	private String ambassadorMobile;
 	@Column(name="SELLER_SETTLE_PREF")
 	private int sellerSettlePref;
 	@Column(name="KYC_DOC_IMG")
@@ -290,14 +290,6 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerRole = sellerRole;
 	}
 
-	public int getAmbassadorId() {
-		return ambassadorId;
-	}
-
-	public void setAmbassadorId(int ambassadorId) {
-		this.ambassadorId = ambassadorId;
-	}
-
 	public int getSellerSettlePref() {
 		return sellerSettlePref;
 	}
@@ -320,5 +312,13 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setIsActive(int isActive) {
 		this.isActive = isActive;
+	}
+
+	public String getAmbassadorMobile() {
+		return ambassadorMobile;
+	}
+
+	public void setAmbassadorMobile(String ambassadorMobile) {
+		this.ambassadorMobile = ambassadorMobile;
 	}
 }

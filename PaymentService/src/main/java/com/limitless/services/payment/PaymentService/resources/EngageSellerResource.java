@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
@@ -196,6 +197,22 @@ public class EngageSellerResource {
 			ProductManager productManager = new ProductManager();
 			List<Product> products =  productManager.getAllProducts(responseBean.getSellerId());
 			responseBean.setProducts(products);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/ambassador/{ambassadorMobileNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public AmbassadorResponseBean checkAmbassadorCount(@PathParam("ambassadorMobileNumber") String ambassadorMobileNumber) throws Exception{
+		AmbassadorResponseBean responseBean = new AmbassadorResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.ambassadorCount(ambassadorMobileNumber);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

@@ -22,6 +22,7 @@ import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
@@ -447,6 +448,48 @@ public class EngageSellerManager {
 			throw re;
 		}
 		finally{
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public AmbassadorResponseBean ambassadorCount(String ambassadorMobileNumber){
+		log.debug("Getting seller details by mobile");
+		AmbassadorResponseBean responseBean = new AmbassadorResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.eq("ambassadorMobile", ambassadorMobileNumber));
+			List<EngageSeller> sellersList = criteria.list();
+			log.debug("Sellers Size : "+sellersList.size());
+			if(sellersList.size()>=2){
+				int counter = 0;
+				for(EngageSeller seller : sellersList){
+					counter++;
+				}
+				responseBean.setAmbassadorMobileNumber(ambassadorMobileNumber);
+				responseBean.setMerchantOnboardCount(counter);
+				responseBean.setMessage("Success");
+			}
+			else if(sellersList.size()<2 || sellersList.isEmpty()){
+				responseBean.setAmbassadorMobileNumber(ambassadorMobileNumber);
+				responseBean.setMessage("Failed");
+			}
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("Getting seller details by mobile failed");
+			throw re;
+		}
+		finally {
 			if(session != null && session.isOpen()){
 				session.close();
 			}

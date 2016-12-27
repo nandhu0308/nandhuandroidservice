@@ -23,6 +23,7 @@ public class EngageSellerBean {
 	private String kycDocValue;
 	private String KycDocImage;
 	
+	private String ambassadorMobile;
 	private int isActive;
 	private String sellerBankAccountNumber;
 	private String sellerIfsc;
@@ -166,5 +167,11 @@ public class EngageSellerBean {
 	}
 	public void setSellerBankProof(String sellerBankProof) {
 		this.sellerBankProof = sellerBankProof;
+	}
+	public String getAmbassadorMobile() {
+		return ambassadorMobile;
+	}
+	public void setAmbassadorMobile(String ambassadorMobile) {
+		this.ambassadorMobile = ambassadorMobile;
 	}
 }
