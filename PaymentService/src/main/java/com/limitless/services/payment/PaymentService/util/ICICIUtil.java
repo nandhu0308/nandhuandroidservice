@@ -26,7 +26,7 @@ public class ICICIUtil {
 	
 	public static final String APIVERSION = "1.8";
 	
-	public static final String MERCHANTID = "MID025";
+	public static final String MERCHANTID = "mid025";
 	
 	public static final String ICICIUPIURL = "https://imob.icicibank.com/isdkLIVE/GatewayController";
 
