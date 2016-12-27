@@ -39,7 +39,7 @@ public class EngageCustomer implements java.io.Serializable {
 	private String customerCountry;
 	@Column(name="CUSTOMER_CITY")
 	private String customerCity;
-	@Column(name="CUSTOMER_CREATED_TIME")
+	@Column(name="CUSTOMER_CREATED_TIME", insertable = false, updatable = false)
 	private Date customerCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="CUSTOMER_UPDATED_TIME")

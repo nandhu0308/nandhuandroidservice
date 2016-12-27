@@ -75,7 +75,8 @@ public class PaymentSettlementResource {
 	public TxnSettlementResponseBean settleTxn(@PathParam("txnId") int txnId) throws Exception{
 		TxnSettlementResponseBean responseBean = new TxnSettlementResponseBean();
 		try{
-			
+			PaymentSettlementManager manager = new PaymentSettlementManager();
+			responseBean = manager.settleTxnById(txnId);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

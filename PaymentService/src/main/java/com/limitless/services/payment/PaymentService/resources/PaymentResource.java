@@ -46,8 +46,10 @@ import com.limitless.services.payment.PaymentService.TxnHistoryBean;
 import com.limitless.services.payment.PaymentService.TxnMailRequestBean;
 import com.limitless.services.payment.PaymentService.TxnMailResponseBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
+import com.limitless.services.payment.PaymentService.TxnSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.dao.PaymentCredit;
 import com.limitless.services.payment.PaymentService.dao.PaymentCreditManager;
+import com.limitless.services.payment.PaymentService.dao.PaymentSettlementManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
 import com.limitless.services.payment.PaymentService.util.PaymentConstants;
@@ -144,7 +146,6 @@ public class PaymentResource {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(),
 					paymentTxnBean.getTxnStatus().toString());
-			
 
 			EngageCustomerManager customerManager = new EngageCustomerManager();
 			EngageCustomer customer = customerManager.findById(paymentTxn.getEngageCustomerId());
@@ -155,7 +156,7 @@ public class PaymentResource {
 			txnResp.setDate(paymentTxn.getTxnUpdatedTime().toString());
 			txnResp.setName(customer.getCustomerName());
 			txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
-			
+
 			MessageBean messageBean = new MessageBean();
 			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
 			messageBean.setSellerCitrusId(paymentTxn.getCitrusSellerId());
@@ -163,17 +164,17 @@ public class PaymentResource {
 			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
 			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
 			messageBean.setTxnId(paymentTxn.getTxnId());
-			
+
 			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
-			
+
 			TxnMailRequestBean mailBean = new TxnMailRequestBean();
 			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());
 			mailBean.setSellerId(paymentTxn.getSellerId());
 			mailBean.setTxnId(paymentTxn.getTxnId());
 			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
-			
+
 			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
-			
+
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -323,26 +324,27 @@ public class PaymentResource {
 		double feePercent = 0;
 		double txnAmount = 0;
 		double feeAmount = 0;
+		int sellerSettlePref = 0;
 		try {
 			logger.info("Id:" + id);
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.findById(id);
 			EngageSellerManager sellerMgr = new EngageSellerManager();
-			
+			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
+
 			PaymentCreditManager creditManager = new PaymentCreditManager();
 			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
-			
-			if(respBean.getMessage().equals("Success")){
+
+			if (respBean.getMessage().equals("Success")) {
 				System.out.println("Credit/Debit Trans Success");
-			}
-			else if(respBean.getMessage().equals("Failed")){
+			} else if (respBean.getMessage().equals("Failed")) {
 				System.out.println("Not Credit/Debit Trans");
 			}
 
 			int txnId = paymentTxn.getTxnId();
 			int citrusSellerId = paymentTxn.getCitrusSellerId();
-			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
+
 			String sellerDeviceId = paymentTxn.getSellerDeviceId();
 			int customerId = paymentTxn.getEngageCustomerId();
 			String txnDate = paymentTxn.getTxnUpdatedTime().toString();
@@ -354,14 +356,14 @@ public class PaymentResource {
 
 			String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
 
-			if(seller != null){
+			if (seller != null) {
 				feePercent = seller.getSellerSplitPercent();
 				txnAmount = paymentTxn.getTxnAmount();
 				feeAmount = txnAmount * (feePercent / 100);
 				// round off to 2 decimal
 				feeAmount = Math.round(feeAmount * 100) / 100D;
-			}
-			else{
+				sellerSettlePref = seller.getSellerSettlePref();
+			} else {
 				txnAmount = paymentTxn.getTxnAmount();
 				feeAmount = 0;
 			}
@@ -378,15 +380,13 @@ public class PaymentResource {
 			splitRequest.put("split_amount", txnAmount);
 			splitRequest.put("fee_amount", feeAmount);
 			splitRequest.put("auto_payout", 1);
-			
+
 			PaymentConstants constants = PaymentConstants.getInstance();
 
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/split");
 
 			ClientResponse splitResponse = webResource.accept("application/json").type("application/json")
-					.header("auth_token",
-							constants.getAuth_Token())
-					.post(ClientResponse.class, splitRequest);
+					.header("auth_token", constants.getAuth_Token()).post(ClientResponse.class, splitRequest);
 
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
 			System.out.println("Slipt Response: " + splitResponseStr);
@@ -407,7 +407,14 @@ public class PaymentResource {
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
 			splitResp.setSellerDeviceId(sellerDeviceId);
-			
+
+			TxnSettlementResponseBean txnSettlementResponseBean = new TxnSettlementResponseBean();
+			if (sellerSettlePref == 1) {
+				PaymentSettlementManager settlementManager = new PaymentSettlementManager();
+				txnSettlementResponseBean = settlementManager.settleTxnById(txnId);
+				System.out.println("Settle Id : " + txnSettlementResponseBean.getPsId());
+			}
+
 			MessageBean messageBean = new MessageBean();
 			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
 			messageBean.setSellerCitrusId(paymentTxn.getCitrusSellerId());
@@ -415,15 +422,16 @@ public class PaymentResource {
 			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
 			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
 			messageBean.setTxnId(paymentTxn.getTxnId());
-			
+
 			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
-			
+			System.out.println("Message : " + messageResponseBean.getMessage());
+
 			TxnMailRequestBean mailBean = new TxnMailRequestBean();
 			mailBean.setCustomerId(paymentTxn.getEngageCustomerId());
 			mailBean.setSellerId(paymentTxn.getSellerId());
 			mailBean.setTxnId(paymentTxn.getTxnId());
 			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
-			
+
 			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
 
 		} catch (Exception e) {
@@ -489,8 +497,10 @@ public class PaymentResource {
 			EngageSeller seller = sellerManager.findById(Integer.parseInt(request.getTo()));
 
 			request.setTo(seller.getSellerDeviceId());
-			
+
 			DataBean data = request.getData();
+			if (data == null)
+				data = new DataBean();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date date = new Date();
 			Calendar calendar = Calendar.getInstance();
@@ -499,7 +509,7 @@ public class PaymentResource {
 			calendar.add(Calendar.MINUTE, 30);
 			String localTime = sdf.format(calendar.getTime());
 			date = sdf.parse(localTime);
-			
+
 			data.setTime(date);
 
 			WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
@@ -510,8 +520,7 @@ public class PaymentResource {
 			System.out.println(clientResponse.getEntity(String.class));
 			response.setMessage(String.valueOf(clientResponse.getStatus()));
 		} catch (Exception e) {
-			logger.error("API Error", e);
-			throw new Exception("Internal Server Error");
+			logger.error("API Error", e);			
 
 		}
 
@@ -578,184 +587,172 @@ public class PaymentResource {
 		}
 		return responseBean;
 	}
-	
+
 	@GET
 	@Path("/trans/day/{citrusSellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean transDays(@PathParam("citrusSellerId") int citrusSellerId) throws Exception{
+	public SellerTxnHistoryBean transDays(@PathParam("citrusSellerId") int citrusSellerId) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getDayTxns(citrusSellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/trans/month/{citrusSellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean transMonths(@PathParam("citrusSellerId") int citrusSellerId) throws Exception{
+	public SellerTxnHistoryBean transMonths(@PathParam("citrusSellerId") int citrusSellerId) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getMonthTxns(citrusSellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("trans/gen/{merchantId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralSellerTxnHistoryBean getGenSellerTxns(@PathParam("merchantId") int merchantId) throws Exception{
+	public GeneralSellerTxnHistoryBean getGenSellerTxns(@PathParam("merchantId") int merchantId) throws Exception {
 		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getGenSellerTxns(merchantId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/trans/gen/{merchantId}/{firstTxnId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(@PathParam("merchantId") int merchantId, 
-			@PathParam("firstTxnId") int firstTxnId) throws Exception{
+	public GeneralSellerTxnHistoryBean getGenSellerTxnsPagination(@PathParam("merchantId") int merchantId,
+			@PathParam("firstTxnId") int firstTxnId) throws Exception {
 		GeneralSellerTxnHistoryBean historyBean = new GeneralSellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getGenSellerTxnsPagination(merchantId, firstTxnId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/trans/gen/day/{merchantId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean genDayTxns(@PathParam("merchantId") int merchantId) throws Exception{
+	public SellerTxnHistoryBean genDayTxns(@PathParam("merchantId") int merchantId) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getGenDayWiseTxn(merchantId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/trans/gen/month/{merchantId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean genMonthTxns(@PathParam("merchantId") int merchantId) throws Exception{
+	public SellerTxnHistoryBean genMonthTxns(@PathParam("merchantId") int merchantId) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getGenMonthWiseTxns(merchantId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/date/{citrusSellerId}/{txnDate}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean getDateTxns(@PathParam("citrusSellerId") int citrusSellerId, 
-			@PathParam("txnDate") String txnDate) throws Exception{
+	public SellerTxnHistoryBean getDateTxns(@PathParam("citrusSellerId") int citrusSellerId,
+			@PathParam("txnDate") String txnDate) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getTxnsByDate(citrusSellerId, txnDate);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/date/{citrusSellerId}/{txnDate}/{firstTxnId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerTxnHistoryBean getDateTxnsPagination(@PathParam("citrusSellerId") int citrusSellerId, 
-			@PathParam("txnDate") String txnDate, 
-			@PathParam("firstTxnId") int firstTxnId) throws Exception{
+	public SellerTxnHistoryBean getDateTxnsPagination(@PathParam("citrusSellerId") int citrusSellerId,
+			@PathParam("txnDate") String txnDate, @PathParam("firstTxnId") int firstTxnId) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getDateWiseTxnsPagination(citrusSellerId, txnDate, firstTxnId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/date/gen/{merchantId}/{txnDate}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SellerTxnHistoryBean getGeneralDateTxn(@PathParam("merchantId") int merchantId,
-			@PathParam("txnDate") String txnDate) throws Exception{
+			@PathParam("txnDate") String txnDate) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getGeneralDateTxns(merchantId, txnDate);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@GET
 	@Path("/date/gen/{merchantId}/{txnDate}/{firstTxnId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SellerTxnHistoryBean getGeneralDateTxnPagintion(@PathParam("merchantId") int merchantId,
-			@PathParam("txnDate") String txnDate, int firstTxnId) throws Exception{
+			@PathParam("txnDate") String txnDate, int firstTxnId) throws Exception {
 		SellerTxnHistoryBean historyBean = new SellerTxnHistoryBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			historyBean = manager.getGeneralDateWiseTxnsPagination(merchantId, txnDate, firstTxnId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return historyBean;
 	}
-	
+
 	@POST
 	@Path("/trans/mail")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TxnMailResponseBean txnMail(TxnMailRequestBean requestBean) throws Exception{
+	public TxnMailResponseBean txnMail(TxnMailRequestBean requestBean) throws Exception {
 		TxnMailResponseBean responseBean = new TxnMailResponseBean();
-		try{
+		try {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			responseBean = manager.sendMail(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}

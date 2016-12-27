@@ -53,7 +53,7 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerKycDocType;
 	@Column(name="SELLER_KYC_DOC_VALUE")
 	private String sellerKycDocValue;
-	@Column(name="SELLER_CREATED_TIME")
+	@Column(name="SELLER_CREATED_TIME", insertable = false, updatable = false)
 	private Date sellerCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="SELLER_UPDATED_TIME")
@@ -65,6 +65,14 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerShopName;
 	@Column(name="SELLER_ROLE")
 	private String sellerRole;
+	@Column(name="AMBASSADOR_MOBILE")
+	private String ambassadorMobile;
+	@Column(name="SELLER_SETTLE_PREF")
+	private int sellerSettlePref;
+	@Column(name="KYC_DOC_IMG")
+	private String kycDocImage;
+	@Column(name="ISACTIVE")
+	private int isActive;
 
 	public EngageSeller() {
 	}
@@ -281,5 +289,36 @@ public class EngageSeller implements java.io.Serializable {
 	public void setSellerRole(String sellerRole) {
 		this.sellerRole = sellerRole;
 	}
-	
+
+	public int getSellerSettlePref() {
+		return sellerSettlePref;
+	}
+
+	public void setSellerSettlePref(int sellerSettlePref) {
+		this.sellerSettlePref = sellerSettlePref;
+	}
+
+	public String getKycDocImage() {
+		return kycDocImage;
+	}
+
+	public void setKycDocImage(String kycDocImage) {
+		this.kycDocImage = kycDocImage;
+	}
+
+	public int getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(int isActive) {
+		this.isActive = isActive;
+	}
+
+	public String getAmbassadorMobile() {
+		return ambassadorMobile;
+	}
+
+	public void setAmbassadorMobile(String ambassadorMobile) {
+		this.ambassadorMobile = ambassadorMobile;
+	}
 }

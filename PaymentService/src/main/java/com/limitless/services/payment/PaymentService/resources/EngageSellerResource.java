@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
@@ -23,8 +24,11 @@ import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
+import com.limitless.services.engage.SellerTempRequestBean;
+import com.limitless.services.engage.SellerTempResponseBean;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.dao.SellerTempManager;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -60,9 +64,11 @@ public class EngageSellerResource {
 			
 			seller.setSellerKycDocType(bean.getKycDocType());
 			seller.setSellerKycDocValue(bean.getKycDocValue());
+			seller.setKycDocImage(bean.getKycDocImage());
 			
 			seller.setSellerLocationLatitude(bean.getLatitude());
 			seller.setSellerLocationLongitude(bean.getLongitude());
+			seller.setIsActive(bean.getIsActive());
 			
 			seller.setSellerSplitPercent(bean.getSplitPerent());
 			
@@ -73,6 +79,25 @@ public class EngageSellerResource {
 				sellerResp.setSellerId(seller.getSellerId());
 				sellerResp.setStatus(1);
 				sellerResp.setMessage("Success");
+				
+				if(bean.getIsActive()==0){
+					SellerTempRequestBean tempRequestBean = new SellerTempRequestBean();
+					if(bean.getCitrusSellerId()==0){
+						tempRequestBean.setSellerId(seller.getSellerId());
+						tempRequestBean.setSellerBankAccountNumber(bean.getSellerBankAccountNumber());
+						tempRequestBean.setSellerIfsc(bean.getSellerIfsc());
+						tempRequestBean.setSellerBankProof(bean.getSellerBankProof());
+						tempRequestBean.setSellerKycImage(bean.getKycDocImage());
+					    tempRequestBean.setStatus("NOTYET");
+					}
+					else if(bean.getCitrusSellerId()>0){
+						tempRequestBean.setSellerId(seller.getSellerId());
+						tempRequestBean.setStatus("ONBOARDED");
+					}
+					SellerTempManager tempMananger = new SellerTempManager();
+					SellerTempResponseBean tempResponseBean = tempMananger.addTempDetails(tempRequestBean);
+				}
+				
 			} else {
 				sellerResp.setStatus(-1);
 				sellerResp.setMessage("Failure - Duplicate Email / Mobile Number");
@@ -172,6 +197,22 @@ public class EngageSellerResource {
 			ProductManager productManager = new ProductManager();
 			List<Product> products =  productManager.getAllProducts(responseBean.getSellerId());
 			responseBean.setProducts(products);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/ambassador/{ambassadorMobileNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public AmbassadorResponseBean checkAmbassadorCount(@PathParam("ambassadorMobileNumber") String ambassadorMobileNumber) throws Exception{
+		AmbassadorResponseBean responseBean = new AmbassadorResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.ambassadorCount(ambassadorMobileNumber);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

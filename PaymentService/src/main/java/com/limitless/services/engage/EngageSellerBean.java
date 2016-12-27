@@ -18,10 +18,17 @@ public class EngageSellerBean {
 	
 	private float latitude;
 	private float longitude;
-	private float splitPerent;
 	
 	private String kycDocType; 
 	private String kycDocValue;
+	private String KycDocImage;
+	
+	private String ambassadorMobile;
+	private int isActive;
+	private String sellerBankAccountNumber;
+	private String sellerIfsc;
+	private float splitPerent;
+	private String sellerBankProof;
 	
 	public int getCitrusSellerId() {
 		return citrusSellerId;
@@ -130,5 +137,41 @@ public class EngageSellerBean {
 	}
 	public void setSellerRole(String sellerRole) {
 		this.sellerRole = sellerRole;
+	}
+	public String getKycDocImage() {
+		return KycDocImage;
+	}
+	public void setKycDocImage(String kycDocImage) {
+		KycDocImage = kycDocImage;
+	}
+	public int getIsActive() {
+		return isActive;
+	}
+	public void setIsActive(int isActive) {
+		this.isActive = isActive;
+	}
+	public String getSellerBankAccountNumber() {
+		return sellerBankAccountNumber;
+	}
+	public void setSellerBankAccountNumber(String sellerBankAccountNumber) {
+		this.sellerBankAccountNumber = sellerBankAccountNumber;
+	}
+	public String getSellerIfsc() {
+		return sellerIfsc;
+	}
+	public void setSellerIfsc(String sellerIfsc) {
+		this.sellerIfsc = sellerIfsc;
+	}
+	public String getSellerBankProof() {
+		return sellerBankProof;
+	}
+	public void setSellerBankProof(String sellerBankProof) {
+		this.sellerBankProof = sellerBankProof;
+	}
+	public String getAmbassadorMobile() {
+		return ambassadorMobile;
+	}
+	public void setAmbassadorMobile(String ambassadorMobile) {
+		this.ambassadorMobile = ambassadorMobile;
 	}
 }
