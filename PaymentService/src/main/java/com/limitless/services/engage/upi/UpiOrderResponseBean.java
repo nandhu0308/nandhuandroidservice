@@ -2,8 +2,9 @@ package com.limitless.services.engage.upi;
 
 public class UpiOrderResponseBean {
 	
-	private int orderId;
+	private int orderId = 0;
 	private String message = "Failure";
+	
 	public int getOrderId() {
 		return orderId;
 	}

@@ -20,15 +20,15 @@ public class ICICIUtil {
 	
 	public static final String RANDOMKEY = "aaaaaaaaaaaaaaaa";
 	
-	public static final String SALTKEY = "ICICI_BANK1_SALT";
+	public static final String SALTKEY = "860stGmwvRZSxOig";
 	
-	public static final String APIKEY = "1001";
+	public static final String APIKEY = "1122";
 	
 	public static final String APIVERSION = "1.8";
 	
-	public static final String MERCHANTID = "MID001";
+	public static final String MERCHANTID = "MID025";
 	
-	public static final String ICICIUPIURL = "https://imob.icicibank.com/isdkCUG/GatewayController";
+	public static final String ICICIUPIURL = "https://imob.icicibank.com/isdkLIVE/GatewayController";
 
 	public static String encrypt(String key, String inputString) {
 		try {
