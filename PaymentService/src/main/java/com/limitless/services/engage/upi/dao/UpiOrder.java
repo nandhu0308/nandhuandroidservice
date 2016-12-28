@@ -33,6 +33,9 @@ public class UpiOrder implements java.io.Serializable {
 	@Column(name="ORDER_AMOUNT")
 	private float orderAmount;
 	
+	@Column(name="TXN_NOTES")
+	private String txnNotes;
+	
 	@Column(name="ICICI_TXN_NO")
 	private String iciciTxnNo;
 	
@@ -66,11 +69,12 @@ public class UpiOrder implements java.io.Serializable {
 		this.orderAmount = orderAmount;
 	}
 
-	public UpiOrder(int customerId, int sellerId, float orderAmount, String iciciTxnNo, String iciciTxnTime, String orderStatus, String orderPaymentType,
+	public UpiOrder(int customerId, int sellerId, float orderAmount, String txnNotes, String iciciTxnNo, String iciciTxnTime, String orderStatus, String orderPaymentType,
 			Date orderCreatedTime, Date orderUpdatedTime) {
 		this.customerId = customerId;
 		this.sellerId = sellerId;
 		this.orderAmount = orderAmount;
+		this.txnNotes = txnNotes;
 		this.iciciTxnNo = iciciTxnNo;
 		this.iciciTxnTime = iciciTxnTime;
 		this.orderStatus = orderStatus;
@@ -166,5 +170,14 @@ public class UpiOrder implements java.io.Serializable {
 	public void setOrderErrorCode(String orderErrorCode) {
 		this.orderErrorCode = orderErrorCode;
 	}
+
+	public String getTxnNotes() {
+		return txnNotes;
+	}
+
+	public void setTxnNotes(String txnNotes) {
+		this.txnNotes = txnNotes;
+	}
+	
 	
 }
