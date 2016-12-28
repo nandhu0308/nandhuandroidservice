@@ -24,6 +24,7 @@ public class SellerTempManager {
 			transaction = session.beginTransaction();
 			
 			SellerTemp temp = new SellerTemp();
+			temp.setSellerId(requestBean.getSellerId());
 			temp.setSellerAccount(requestBean.getSellerBankAccountNumber());
 			temp.setSellerIfsc(requestBean.getSellerIfsc());
 			temp.setSellerKycImage(requestBean.getSellerKycImage());

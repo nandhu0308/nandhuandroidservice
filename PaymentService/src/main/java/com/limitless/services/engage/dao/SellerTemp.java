@@ -7,14 +7,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="seller_temp", catalog="llcdb")
+@Table(name="sellers_temp", catalog="llcdb")
 public class SellerTemp {
 	@Id
 	@GeneratedValue
 	@Column(name="ST_ID")
 	private Integer stId;
 	@Column(name="SELLER_ID")
-	private String sellerId;
+	private Integer sellerId;
 	@Column(name="SELLER_ACCOUNT")
 	private String sellerAccount;
 	@Column(name="SELLER_IFSC")
@@ -31,10 +31,10 @@ public class SellerTemp {
 	public void setStId(Integer stId) {
 		this.stId = stId;
 	}
-	public String getSellerId() {
+	public Integer getSellerId() {
 		return sellerId;
 	}
-	public void setSellerId(String sellerId) {
+	public void setSellerId(Integer sellerId) {
 		this.sellerId = sellerId;
 	}
 	public String getSellerAccount() {

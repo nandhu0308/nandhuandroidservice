@@ -77,6 +77,7 @@ public class EngageSellerResource {
 			if( !manager.checkDuplicateEmail(bean.getEmailId()) && !manager.checkDuplicateMobile(bean.getMobileNumber()) ){
 				manager.persist(seller);
 				sellerResp.setSellerId(seller.getSellerId());
+				System.out.println("Seller Id: "+seller.getSellerId());
 				sellerResp.setStatus(1);
 				sellerResp.setMessage("Success");
 				
@@ -84,6 +85,7 @@ public class EngageSellerResource {
 					SellerTempRequestBean tempRequestBean = new SellerTempRequestBean();
 					if(bean.getCitrusSellerId()==0){
 						tempRequestBean.setSellerId(seller.getSellerId());
+						System.out.println("Seller Id: "+seller.getSellerId());
 						tempRequestBean.setSellerBankAccountNumber(bean.getSellerBankAccountNumber());
 						tempRequestBean.setSellerIfsc(bean.getSellerIfsc());
 						tempRequestBean.setSellerBankProof(bean.getSellerBankProof());
