@@ -12,6 +12,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
 
+import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -133,6 +134,80 @@ public class UpiOrderManager {
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
 			throw re;
+		}
+	}
+	
+	public UpiOrder updateUPIOrderSuccess(int orderId, String iciciTxnNo, String iciciTxnTime, String orderStatus, String orderPaymentType) {
+		Transaction transaction = null;
+		Session session = null;
+		try {
+
+			// TODO
+
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			UpiOrder instance = (UpiOrder) session
+					.get("com.limitless.services.engage.upi.dao.UpiOrder", orderId);
+
+			instance.setIciciTxnNo(iciciTxnNo);
+			instance.setIciciTxnTime(iciciTxnTime);
+			instance.setOrderStatus(orderStatus);
+			instance.setOrderPaymentType(orderPaymentType);
+
+			session.update(instance);
+
+			UpiOrder upiOrder = (UpiOrder) session
+					.get("com.limitless.services.engage.upi.dao.UpiOrder", orderId);
+			
+			transaction.commit();
+			return upiOrder;
+			
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("merge failed", re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+	}
+	
+	public UpiOrder updateUPIOrderFailure(int orderId, String orderStatus, String errorCode) {
+		Transaction transaction = null;
+		Session session = null;
+		try {
+
+			// TODO
+
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			UpiOrder instance = (UpiOrder) session
+					.get("com.limitless.services.engage.upi.dao.UpiOrder", orderId);
+
+			instance.setOrderErrorCode(errorCode);
+			instance.setOrderStatus(orderStatus);
+
+			session.update(instance);
+
+			UpiOrder upiOrder = (UpiOrder) session
+					.get("com.limitless.services.engage.upi.dao.UpiOrder", orderId);
+			
+			transaction.commit();
+			return upiOrder;
+			
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("merge failed", re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
 	}
 }

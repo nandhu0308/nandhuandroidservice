@@ -69,6 +69,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String ambassadorMobile;
 	@Column(name="SELLER_SETTLE_PREF")
 	private int sellerSettlePref;
+/*	@Column(name="KYC_DOC_IMG")
+	private String kycDocImage;*/
 	@Column(name="ISACTIVE")
 	private int isActive;
 
@@ -295,6 +297,14 @@ public class EngageSeller implements java.io.Serializable {
 	public void setSellerSettlePref(int sellerSettlePref) {
 		this.sellerSettlePref = sellerSettlePref;
 	}
+
+/*	public String getKycDocImage() {
+		return kycDocImage;
+	}
+
+	public void setKycDocImage(String kycDocImage) {
+		this.kycDocImage = kycDocImage;
+	}*/
 
 	public int getIsActive() {
 		return isActive;
