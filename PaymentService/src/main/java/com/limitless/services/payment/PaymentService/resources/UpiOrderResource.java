@@ -84,6 +84,7 @@ public class UpiOrderResource {
 				upiOrder.setSellerId(bean.getSellerId());
 				upiOrder.setOrderAmount(bean.getOrderAmount());
 				upiOrder.setOrderStatus("PAYMENT_INITIATED");
+				upiOrder.setTxnNotes(bean.getTxnNotes());
 				
 				UpiOrderManager manager = new UpiOrderManager();
 				manager.persist(upiOrder);
