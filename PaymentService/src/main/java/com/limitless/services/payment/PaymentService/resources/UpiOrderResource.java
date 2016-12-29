@@ -21,6 +21,7 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
+import com.limitless.services.engage.upi.UpiCustomerTxnHistoryBean;
 import com.limitless.services.engage.upi.UpiOrderBean;
 import com.limitless.services.engage.upi.UpiOrderBean.OrderStatus;
 import com.limitless.services.engage.upi.UpiOrderResponseBean;
@@ -158,6 +159,39 @@ public class UpiOrderResource {
 					throw new Exception("Internal Server Error");
 				}
 			return upiOrderResponseBean;
+		}
+		
+		@GET
+		@Path("customer/{customerId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public UpiCustomerTxnHistoryBean getCustomerHistory(@PathParam("customerId") int customerId) throws Exception{
+			UpiCustomerTxnHistoryBean historyBean =  new UpiCustomerTxnHistoryBean();
+			try{
+				UpiOrderManager manager = new UpiOrderManager();
+				historyBean = manager.getCustomerTransactions(customerId);
+			}
+			catch(Exception e){
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
+			return historyBean;
+		}
+		
+		@GET
+		@Path("/customer/{customerId}/{firstTxnId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public UpiCustomerTxnHistoryBean getCustomerHitoryPagination(@PathParam("customerId") int customerId, 
+				@PathParam("firstTxnId") int firstTxnId) throws Exception{
+			UpiCustomerTxnHistoryBean historyBean =  new UpiCustomerTxnHistoryBean();
+			try{
+				UpiOrderManager manager = new UpiOrderManager();
+				historyBean = manager.getCustomerTransactionsPagination(customerId, firstTxnId);
+			}
+			catch(Exception e){
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
+			return historyBean;
 		}
 		
 		public static void main(String[] args) throws Exception{

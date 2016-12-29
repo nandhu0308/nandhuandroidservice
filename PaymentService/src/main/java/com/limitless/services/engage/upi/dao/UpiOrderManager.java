@@ -1,18 +1,28 @@
 package com.limitless.services.engage.upi.dao;
 
+import java.util.ArrayList;
+
 // Generated Oct 24, 2016 8:29:02 PM by Hibernate Tools 3.4.0.CR1
 
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
-import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
+import com.limitless.services.engage.dao.EngageCustomer;
+import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.upi.UpiCustomerTxnHistoryBean;
+import com.limitless.services.engage.upi.UpiTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 /**
@@ -209,5 +219,140 @@ public class UpiOrderManager {
 				session.close();
 			}
 		}
+	}
+	
+	public UpiCustomerTxnHistoryBean getCustomerTransactions(int customerId){
+		log.debug("Getting customer txns : " + customerId);
+		UpiCustomerTxnHistoryBean historyBean = new UpiCustomerTxnHistoryBean();
+		List<UpiTxnHistoryBean> txnBean = new ArrayList<UpiTxnHistoryBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			String customerName = "";
+			if(customer!=null){
+				customerName = customer.getCustomerName();
+			}
+			
+			Criteria criteria = session.createCriteria(UpiOrder.class);
+			criteria.add(Restrictions.eq("customerId", customerId));
+			criteria.setMaxResults(10);
+			criteria.addOrder(Order.desc("orderId"));
+			List<UpiOrder> ordersList = criteria.list();
+			log.debug("Orders Size : " + ordersList.size());
+			if(ordersList.size()>0){
+				for(UpiOrder order : ordersList){
+					UpiTxnHistoryBean bean = new UpiTxnHistoryBean();
+					bean.setCustomerId(customerId);
+					bean.setCustomerName(customerName);
+					bean.setOrderId(order.getOrderId());
+					bean.setSellerId(order.getSellerId());
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
+					bean.setSellerName(seller.getSellerShopName());
+					bean.setOrderAmount(order.getOrderAmount());
+					bean.setTxnNotes(order.getTxnNotes());
+					bean.setIciciTxnNo(order.getIciciTxnNo());
+					bean.setIciciTxnTime(order.getIciciTxnTime());
+					bean.setOrderStatus(order.getOrderStatus());
+					bean.setPaymentType(order.getOrderPaymentType());
+					bean.setOrderTime(order.getOrderCreatedTime().toString());
+					txnBean.add(bean);
+					bean = null;
+				}
+				historyBean.setMessage("Success");
+				historyBean.setTxnList(txnBean);
+			}
+			else if(ordersList.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting txn history failed", re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return historyBean;
+	}
+	
+	public UpiCustomerTxnHistoryBean getCustomerTransactionsPagination(int customerId, int firstTxnId){
+		log.debug("Getting customer txns : " + customerId + "Last Txn Id : " + firstTxnId );
+		UpiCustomerTxnHistoryBean historyBean = new UpiCustomerTxnHistoryBean();
+		List<UpiTxnHistoryBean> txnBean = new ArrayList<UpiTxnHistoryBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			String customerName = "";
+			if(customer!=null){
+				customerName = customer.getCustomerName();
+			}
+			
+			Criteria criteria = session.createCriteria(UpiOrder.class);
+			Criterion cIdCriterion = Restrictions.eq("customerId", customerId);
+			Criterion txnIdCriterion = Restrictions.lt("orderId", firstTxnId);
+			LogicalExpression logExp = Restrictions.and(cIdCriterion, txnIdCriterion);
+			criteria.add(logExp);
+			criteria.addOrder(Order.desc("orderId"));
+			criteria.setMaxResults(10);
+			List<UpiOrder> ordersList = criteria.list();
+			log.debug("Orders Size : " + ordersList.size());
+			if(ordersList.size()>0){
+				for(UpiOrder order : ordersList){
+					UpiTxnHistoryBean bean = new UpiTxnHistoryBean();
+					bean.setCustomerId(customerId);
+					bean.setCustomerName(customerName);
+					bean.setOrderId(order.getOrderId());
+					bean.setSellerId(order.getSellerId());
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
+					bean.setSellerName(seller.getSellerShopName());
+					bean.setOrderAmount(order.getOrderAmount());
+					bean.setTxnNotes(order.getTxnNotes());
+					bean.setIciciTxnNo(order.getIciciTxnNo());
+					bean.setIciciTxnTime(order.getIciciTxnTime());
+					bean.setOrderStatus(order.getOrderStatus());
+					bean.setPaymentType(order.getOrderPaymentType());
+					bean.setOrderTime(order.getOrderCreatedTime().toString());
+					txnBean.add(bean);
+					bean = null;
+				}
+				historyBean.setMessage("Success");
+				historyBean.setTxnList(txnBean);
+			}
+			else if(ordersList.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting txn history failed", re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return historyBean;
 	}
 }

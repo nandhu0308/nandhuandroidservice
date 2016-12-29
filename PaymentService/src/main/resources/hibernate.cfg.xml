@@ -34,6 +34,7 @@
   <mapping class="com.limitless.services.engage.sellers.product.dao.SellerProduct"/>
   <mapping class="com.limitless.services.engage.sellers.product.dao.Product"/>
   <mapping class="com.limitless.services.engage.dao.SellerTemp"/>
+  <mapping class="com.limitless.services.engage.upi.dao.UpiIciciCredit"/>
 
   
  </session-factory>
