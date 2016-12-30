@@ -35,7 +35,8 @@
   <mapping class="com.limitless.services.engage.sellers.product.dao.Product"/>
   <mapping class="com.limitless.services.engage.dao.SellerTemp"/>
   <mapping class="com.limitless.services.engage.upi.dao.UpiIciciCredit"/>
-
+  <mapping class="com.limitless.services.engage.sellers.dao.SellerVersion"/>
+  <mapping class="com.limitless.services.engage.dao.CustomerVersion"/>
   
  </session-factory>
 </hibernate-configuration>
