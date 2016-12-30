@@ -32,6 +32,7 @@ import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.DataBean;
 import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.MasterTxnRequestBean;
 import com.limitless.services.payment.PaymentService.MessageBean;
 import com.limitless.services.payment.PaymentService.MessageResponseBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
@@ -127,6 +128,13 @@ public class PaymentResource {
 
 			txnResp.setTxnId(paymentTxn.getTxnId());
 			txnResp.setMessage("Success");
+			
+			MasterTxnRequestBean masterTxnRequestBean = new MasterTxnRequestBean();
+			masterTxnRequestBean.setCitrusTxnId(paymentTxn.getTxnId());
+			masterTxnRequestBean.setIciciUorderId(0);
+			masterTxnRequestBean.setSellerId(paymentTxn.getSellerId());
+			masterTxnRequestBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");

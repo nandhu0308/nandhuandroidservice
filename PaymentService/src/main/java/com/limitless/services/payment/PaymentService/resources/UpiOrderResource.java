@@ -25,6 +25,7 @@ import com.limitless.services.engage.upi.UpiCustomerTxnHistoryBean;
 import com.limitless.services.engage.upi.UpiOrderBean;
 import com.limitless.services.engage.upi.UpiOrderBean.OrderStatus;
 import com.limitless.services.engage.upi.UpiOrderResponseBean;
+import com.limitless.services.engage.upi.UpiSellerTxnHistoryBean;
 import com.limitless.services.engage.upi.dao.UpiOrder;
 import com.limitless.services.engage.upi.dao.UpiOrderManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -186,6 +187,22 @@ public class UpiOrderResource {
 			try{
 				UpiOrderManager manager = new UpiOrderManager();
 				historyBean = manager.getCustomerTransactionsPagination(customerId, firstTxnId);
+			}
+			catch(Exception e){
+				logger.error("API Error", e);
+				throw new Exception("Internal Server Error");
+			}
+			return historyBean;
+		}
+		
+		@GET
+		@Path("/seller/{sellerId}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public UpiSellerTxnHistoryBean getSellerHistory(@PathParam("sellerId") int sellerId) throws Exception{
+			UpiSellerTxnHistoryBean historyBean = new UpiSellerTxnHistoryBean();
+			try{
+				UpiOrderManager manager = new UpiOrderManager();
+				
 			}
 			catch(Exception e){
 				logger.error("API Error", e);

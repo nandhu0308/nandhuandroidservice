@@ -22,6 +22,7 @@ import org.hibernate.criterion.Restrictions;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.upi.UpiCustomerTxnHistoryBean;
+import com.limitless.services.engage.upi.UpiSellerTxnHistoryBean;
 import com.limitless.services.engage.upi.UpiTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
@@ -249,18 +250,19 @@ public class UpiOrderManager {
 					UpiTxnHistoryBean bean = new UpiTxnHistoryBean();
 					bean.setCustomerId(customerId);
 					bean.setCustomerName(customerName);
-					bean.setOrderId(order.getOrderId());
+					bean.setTxnId(order.getOrderId());
 					bean.setSellerId(order.getSellerId());
 					EngageSeller seller = (EngageSeller) session
 							.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 					bean.setSellerName(seller.getSellerShopName());
-					bean.setOrderAmount(order.getOrderAmount());
+					bean.setTxtAmount(order.getOrderAmount());
+					bean.setCreditAmount(0);
 					bean.setTxnNotes(order.getTxnNotes());
 					bean.setIciciTxnNo(order.getIciciTxnNo());
 					bean.setIciciTxnTime(order.getIciciTxnTime());
-					bean.setOrderStatus(order.getOrderStatus());
+					bean.setTxtStatus(order.getOrderStatus());
 					bean.setPaymentType(order.getOrderPaymentType());
-					bean.setOrderTime(order.getOrderCreatedTime().toString());
+					bean.setTxnTime(order.getOrderCreatedTime().toString());
 					txnBean.add(bean);
 					bean = null;
 				}
@@ -318,18 +320,19 @@ public class UpiOrderManager {
 					UpiTxnHistoryBean bean = new UpiTxnHistoryBean();
 					bean.setCustomerId(customerId);
 					bean.setCustomerName(customerName);
-					bean.setOrderId(order.getOrderId());
+					bean.setTxnId(order.getOrderId());
 					bean.setSellerId(order.getSellerId());
 					EngageSeller seller = (EngageSeller) session
 							.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 					bean.setSellerName(seller.getSellerShopName());
-					bean.setOrderAmount(order.getOrderAmount());
+					bean.setTxtAmount(order.getOrderAmount());
 					bean.setTxnNotes(order.getTxnNotes());
+					bean.setCreditAmount(0);
 					bean.setIciciTxnNo(order.getIciciTxnNo());
 					bean.setIciciTxnTime(order.getIciciTxnTime());
-					bean.setOrderStatus(order.getOrderStatus());
+					bean.setTxtStatus(order.getOrderStatus());
 					bean.setPaymentType(order.getOrderPaymentType());
-					bean.setOrderTime(order.getOrderCreatedTime().toString());
+					bean.setTxnTime(order.getOrderCreatedTime().toString());
 					txnBean.add(bean);
 					bean = null;
 				}
@@ -346,6 +349,56 @@ public class UpiOrderManager {
 				transaction.rollback();
 			}
 			log.error("getting txn history failed", re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return historyBean;
+	}
+	
+	public UpiSellerTxnHistoryBean getSellerTxns(int sellerId){
+		log.debug("Getting txns for seller : " + sellerId);
+		UpiSellerTxnHistoryBean historyBean = new UpiSellerTxnHistoryBean();
+		List<UpiTxnHistoryBean> txnBean = new ArrayList<UpiTxnHistoryBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			String sellerName = "";
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			if(seller!=null){
+				sellerName = seller.getSellerShopName();
+			}
+			
+			Criteria criteria = session.createCriteria(UpiOrder.class);
+			criteria.add(Restrictions.eq("sellerId", sellerId));
+			criteria.setMaxResults(10);
+			criteria.addOrder(Order.desc("orderId"));
+			List<UpiOrder> ordersList = criteria.list();
+			log.debug("Orders Size : " + ordersList.size());
+			if(ordersList.size()>0){
+				for(UpiOrder order : ordersList){
+					UpiTxnHistoryBean bean = new UpiTxnHistoryBean();
+					bean.setTxnId(order.getOrderId());
+					bean.setCustomerId(order.getCustomerId());
+				}
+			}
+			else if(ordersList.isEmpty()){
+				historyBean.setMessage("No Record Found");
+			}
+			
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting seller txn history failed", re);
 			throw re;
 		}
 		finally {
