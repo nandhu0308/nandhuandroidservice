@@ -26,6 +26,7 @@ import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.SellerTempRequestBean;
 import com.limitless.services.engage.SellerTempResponseBean;
+import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.dao.SellerTempManager;
@@ -35,17 +36,17 @@ import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 
 @Path("/merchant")
 public class EngageSellerResource {
-	
+
 	final static Logger logger = Logger.getLogger(EngageSellerResource.class);
-	
+
 	@POST
-    @Path("/seller")
+	@Path("/seller")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public EngageSellerResponseBean addTxn(EngageSellerBean bean) throws Exception{
-		
+	public EngageSellerResponseBean addTxn(EngageSellerBean bean) throws Exception {
+
 		EngageSellerResponseBean sellerResp = new EngageSellerResponseBean();
-		
+
 		try {
 			EngageSeller seller = new EngageSeller();
 			seller.setCitrusSellerId(bean.getCitrusSellerId());
@@ -61,45 +62,45 @@ public class EngageSellerResource {
 			seller.setSellerType(bean.getSellerType());
 			seller.setSellerShopName(bean.getSellerShopName());
 			seller.setSellerRole(bean.getSellerRole());
-			
+
 			seller.setSellerKycDocType(bean.getKycDocType());
 			seller.setSellerKycDocValue(bean.getKycDocValue());
-			//seller.setKycDocImage(bean.getKycDocImage());
-			
+			// seller.setKycDocImage(bean.getKycDocImage());
+
 			seller.setSellerLocationLatitude(bean.getLatitude());
 			seller.setSellerLocationLongitude(bean.getLongitude());
 			seller.setIsActive(bean.getIsActive());
-			
+
 			seller.setSellerSplitPercent(bean.getSplitPerent());
-			
+
 			EngageSellerManager manager = new EngageSellerManager();
-			
-			if( !manager.checkDuplicateEmail(bean.getEmailId()) && !manager.checkDuplicateMobile(bean.getMobileNumber()) ){
+
+			if (!manager.checkDuplicateEmail(bean.getEmailId())
+					&& !manager.checkDuplicateMobile(bean.getMobileNumber())) {
 				manager.persist(seller);
 				sellerResp.setSellerId(seller.getSellerId());
-				System.out.println("Seller Id: "+seller.getSellerId());
+				System.out.println("Seller Id: " + seller.getSellerId());
 				sellerResp.setStatus(1);
 				sellerResp.setMessage("Success");
-				
-				if(bean.getIsActive()==0){
+
+				if (bean.getIsActive() == 0) {
 					SellerTempRequestBean tempRequestBean = new SellerTempRequestBean();
-					if(bean.getCitrusSellerId()==0){
+					if (bean.getCitrusSellerId() == 0) {
 						tempRequestBean.setSellerId(seller.getSellerId());
-						System.out.println("Seller Id: "+seller.getSellerId());
+						System.out.println("Seller Id: " + seller.getSellerId());
 						tempRequestBean.setSellerBankAccountNumber(bean.getSellerBankAccountNumber());
 						tempRequestBean.setSellerIfsc(bean.getSellerIfsc());
 						tempRequestBean.setSellerBankProof(bean.getSellerBankProof());
 						tempRequestBean.setSellerKycImage(bean.getKycDocImage());
-					    tempRequestBean.setStatus("NOTYET");
-					}
-					else if(bean.getCitrusSellerId()>0){
+						tempRequestBean.setStatus("NOTYET");
+					} else if (bean.getCitrusSellerId() > 0) {
 						tempRequestBean.setSellerId(seller.getSellerId());
 						tempRequestBean.setStatus("ONBOARDED");
 					}
 					SellerTempManager tempMananger = new SellerTempManager();
 					SellerTempResponseBean tempResponseBean = tempMananger.addTempDetails(tempRequestBean);
 				}
-				
+
 			} else {
 				sellerResp.setStatus(-1);
 				sellerResp.setMessage("Failure - Duplicate Email / Mobile Number");
@@ -110,117 +111,121 @@ public class EngageSellerResource {
 		}
 		return sellerResp;
 	}
-	
+
 	@GET
 	@Path("/seller/{id}/deviceid")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SellerDeviceIdRespBean getSellerDeviceId(@PathParam("id") int id) throws Exception {
 		EngageSellerManager manager = new EngageSellerManager();
 		EngageSeller engageSeller = manager.findById(id);
-		
+
 		SellerDeviceIdRespBean bean = new SellerDeviceIdRespBean();
-		if(engageSeller == null){
+		if (engageSeller == null) {
 			bean.setSellerDeviceId("NA");
-		}
-		else{
+		} else {
 			bean.setSellerDeviceId(engageSeller.getSellerDeviceId());
 		}
-		
+
 		return bean;
 	}
-	
+
 	@GET
 	@Path("/getVersion")
 	public Response getVersion() {
-		String output = "1.0.0";
-		logger.info("Reached getVersion..");
-		return Response.status(200).entity(output).build();
+		logger.info("Reached Seller getVersion..");
+		String version = "";
+
+		try {
+			EngageSellerManager manager = new EngageSellerManager();
+			version = manager.getSellerVersion();
+		} catch (Exception e) {
+			logger.error("API Error", e);
+		}
+
+		return Response.status(200).entity(version).build();
 	}
-	
+
 	@POST
 	@Path("/login")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerLoginResponseBean loginSeller(SellerLoginRequestBean reqBean) throws Exception{
+	public SellerLoginResponseBean loginSeller(SellerLoginRequestBean reqBean) throws Exception {
 		SellerLoginResponseBean respBean = new SellerLoginResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			respBean = manager.sellerLogin(reqBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return respBean;
 	}
-	
+
 	@PUT
 	@Path("/cpwd")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerPasswdResponseBean changePasswd(SellerPasswdRequestBean reqBean)throws Exception{
+	public SellerPasswdResponseBean changePasswd(SellerPasswdRequestBean reqBean) throws Exception {
 		SellerPasswdResponseBean respBean = new SellerPasswdResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			respBean = manager.changeSellerPasswd(reqBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return respBean;
 	}
-	
+
 	@GET
 	@Path("/coordinates")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<CoordinatesResponseBean> sellerCoordibates()throws Exception{
+	public List<CoordinatesResponseBean> sellerCoordibates() throws Exception {
 		List<CoordinatesResponseBean> coords = new ArrayList<CoordinatesResponseBean>();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			coords = manager.sellerCoordinates();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return coords;
 	}
-	
+
 	@GET
 	@Path("/get/{sellerMobileNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
+	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber)
+			throws Exception {
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerByMobile(sellerMobileNumber);
-			
+
 			ProductManager productManager = new ProductManager();
-			List<Product> products =  productManager.getAllProducts(responseBean.getSellerId());
+			List<Product> products = productManager.getAllProducts(responseBean.getSellerId());
 			responseBean.setProducts(products);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@GET
 	@Path("/ambassador/{ambassadorMobileNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public AmbassadorResponseBean checkAmbassadorCount(@PathParam("ambassadorMobileNumber") String ambassadorMobileNumber) throws Exception{
+	public AmbassadorResponseBean checkAmbassadorCount(
+			@PathParam("ambassadorMobileNumber") String ambassadorMobileNumber) throws Exception {
 		AmbassadorResponseBean responseBean = new AmbassadorResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.ambassadorCount(ambassadorMobileNumber);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 }
