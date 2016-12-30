@@ -28,8 +28,11 @@ import com.limitless.services.engage.upi.UpiOrderResponseBean;
 import com.limitless.services.engage.upi.UpiSellerTxnHistoryBean;
 import com.limitless.services.engage.upi.dao.UpiOrder;
 import com.limitless.services.engage.upi.dao.UpiOrderManager;
+import com.limitless.services.payment.PaymentService.MasterTxnRequestBean;
+import com.limitless.services.payment.PaymentService.MasterTxnResponseBean;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
+import com.limitless.services.payment.PaymentService.dao.MasterTxnManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.dao.PaymentTxnManager;
 import com.limitless.services.payment.PaymentService.util.ICICIUtil;
@@ -92,6 +95,16 @@ public class UpiOrderResource {
 				manager.persist(upiOrder);
 				
 				int orderId = upiOrder.getOrderId();
+				
+				MasterTxnRequestBean masterTxnRequestBean = new MasterTxnRequestBean();
+				masterTxnRequestBean.setCitrusTxnId(0);
+				masterTxnRequestBean.setIciciUorderId(orderId);
+				masterTxnRequestBean.setCustomerId(bean.getCustomerId());
+				masterTxnRequestBean.setSellerId(bean.getSellerId());
+				
+				MasterTxnManager masterTxnManager = new MasterTxnManager();
+				MasterTxnResponseBean masterTxnResponseBean = masterTxnManager.createMasterTxn(masterTxnRequestBean);
+				System.out.println("Master Txn Id : " + masterTxnResponseBean.getMasterId());
 				
 				//Save Order in UPI
 				String inputString = "APIKey="+ICICIUtil.APIKEY+"&SDKVersion="+ICICIUtil.APIVERSION+"&Package=com.autodidact.android.paylimitless&OrderId="+orderId+"&MID="+ICICIUtil.MERCHANTID+"&TAmt="+bean.getOrderAmount()+"&Currency=INR&CustomField1=&CustomField2=&CustomField3=";

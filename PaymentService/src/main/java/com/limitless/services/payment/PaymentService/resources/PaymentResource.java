@@ -33,6 +33,7 @@ import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.DataBean;
 import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.MasterTxnRequestBean;
+import com.limitless.services.payment.PaymentService.MasterTxnResponseBean;
 import com.limitless.services.payment.PaymentService.MessageBean;
 import com.limitless.services.payment.PaymentService.MessageResponseBean;
 import com.limitless.services.payment.PaymentService.NotificationRequestBean;
@@ -48,6 +49,7 @@ import com.limitless.services.payment.PaymentService.TxnMailRequestBean;
 import com.limitless.services.payment.PaymentService.TxnMailResponseBean;
 import com.limitless.services.payment.PaymentService.TxnResponseBean;
 import com.limitless.services.payment.PaymentService.TxnSettlementResponseBean;
+import com.limitless.services.payment.PaymentService.dao.MasterTxnManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentCredit;
 import com.limitless.services.payment.PaymentService.dao.PaymentCreditManager;
 import com.limitless.services.payment.PaymentService.dao.PaymentSettlementManager;
@@ -134,6 +136,9 @@ public class PaymentResource {
 			masterTxnRequestBean.setIciciUorderId(0);
 			masterTxnRequestBean.setSellerId(paymentTxn.getSellerId());
 			masterTxnRequestBean.setCustomerId(paymentTxn.getEngageCustomerId());
+			
+			MasterTxnManager masterManager = new MasterTxnManager();
+			MasterTxnResponseBean masterTxnResponseBean = masterManager.createMasterTxn(masterTxnRequestBean);
 			
 		} catch (Exception e) {
 			logger.error("API Error", e);

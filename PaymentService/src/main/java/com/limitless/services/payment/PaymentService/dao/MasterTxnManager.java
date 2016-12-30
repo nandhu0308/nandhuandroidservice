@@ -33,12 +33,19 @@ public class MasterTxnManager {
 			
 			responseBean.setMasterId(txn.getId());
 			responseBean.setMessage("Success");
+			
+			transaction.commit();
 		}
 		catch(RuntimeException re){
-			
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.debug("Master Txn adding failed : " + re);
 		}
 		finally {
-			
+			if(session!=null & session.isOpen()){
+				session.close();
+			}
 		}
 		return responseBean;
 	}
