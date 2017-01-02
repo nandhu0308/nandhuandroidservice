@@ -73,6 +73,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String kycDocImage;*/
 	@Column(name="ISACTIVE")
 	private int isActive;
+	@Column(name="MOBILE_ALIAS")
+	private String mobileAlias;
 
 	public EngageSeller() {
 	}
@@ -321,4 +323,13 @@ public class EngageSeller implements java.io.Serializable {
 	public void setAmbassadorMobile(String ambassadorMobile) {
 		this.ambassadorMobile = ambassadorMobile;
 	}
+
+	public String getMobileAlias() {
+		return mobileAlias;
+	}
+
+	public void setMobileAlias(String mobileAlias) {
+		this.mobileAlias = mobileAlias;
+	}
+	
 }

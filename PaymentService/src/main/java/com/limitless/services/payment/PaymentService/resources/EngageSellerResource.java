@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
@@ -72,6 +73,7 @@ public class EngageSellerResource {
 			seller.setIsActive(bean.getIsActive());
 
 			seller.setSellerSplitPercent(bean.getSplitPerent());
+			seller.setMobileAlias(bean.getMobileAlias());
 
 			EngageSellerManager manager = new EngageSellerManager();
 
@@ -227,5 +229,20 @@ public class EngageSellerResource {
 		}
 		return responseBean;
 	}
-
+	
+	@GET
+    @Path("/aliascheck/{aliasNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public AliasCheckResponseBean checkAlias(@PathParam("aliasNumber") String aliasNumber) throws Exception{
+		AliasCheckResponseBean responseBean = new AliasCheckResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.getAliasNumber(aliasNumber);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
 }

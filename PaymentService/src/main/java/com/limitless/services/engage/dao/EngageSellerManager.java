@@ -20,6 +20,7 @@ import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
@@ -498,6 +499,40 @@ public class EngageSellerManager {
 			}
 		}
 		return sellerVersion;
+	}
+	
+	public AliasCheckResponseBean getAliasNumber(String aliasNumber){
+		log.debug("Checking mobile alias");
+		AliasCheckResponseBean responseBean = new AliasCheckResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.eq("mobileAlias", aliasNumber));
+			List<EngageSeller> sellerList = criteria.list();
+			log.debug("Seller size : " + sellerList.size());
+			if(sellerList.isEmpty()){
+				responseBean.setMessage("Success");
+			}
+			else if(sellerList.size()>0){
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Checking alias number failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 	/*

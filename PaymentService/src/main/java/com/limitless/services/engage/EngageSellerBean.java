@@ -29,6 +29,7 @@ public class EngageSellerBean {
 	private String sellerIfsc;
 	private float splitPerent;
 	private String sellerBankProof;
+	private String mobileAlias;
 	
 	public int getCitrusSellerId() {
 		return citrusSellerId;
@@ -173,5 +174,11 @@ public class EngageSellerBean {
 	}
 	public void setAmbassadorMobile(String ambassadorMobile) {
 		this.ambassadorMobile = ambassadorMobile;
+	}
+	public String getMobileAlias() {
+		return mobileAlias;
+	}
+	public void setMobileAlias(String mobileAlias) {
+		this.mobileAlias = mobileAlias;
 	}
 }
