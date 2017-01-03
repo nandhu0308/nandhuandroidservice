@@ -74,6 +74,7 @@ public class EngageSellerResource {
 
 			seller.setSellerSplitPercent(bean.getSplitPerent());
 			seller.setMobileAlias(bean.getMobileAlias());
+			seller.setAmbassadorMobile(bean.getAmbassadorMobile());
 
 			EngageSellerManager manager = new EngageSellerManager();
 

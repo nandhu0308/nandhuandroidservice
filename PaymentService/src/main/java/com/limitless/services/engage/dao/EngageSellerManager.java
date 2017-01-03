@@ -381,10 +381,13 @@ public class EngageSellerManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageSeller.class);
-			criteria.add(Restrictions.eq("sellerMobileNumber", sellerMobileNumber));
+			Criterion mobileCriterion = Restrictions.eq("sellerMobileNumber", sellerMobileNumber);
+			Criterion aliasCriterion = Restrictions.eq("mobileAlias", sellerMobileNumber);
+			LogicalExpression logicalExpression = Restrictions.or(mobileCriterion, aliasCriterion);
+			criteria.add(logicalExpression);
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Size : " + sellerList.size());
-			if (sellerList.size() > 0) {
+			if (sellerList.size() == 1) {
 				for (EngageSeller seller : sellerList) {
 					responseBean.setSellerId(seller.getSellerId());
 					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
