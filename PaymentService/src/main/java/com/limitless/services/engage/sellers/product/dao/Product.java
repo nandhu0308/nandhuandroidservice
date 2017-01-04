@@ -15,7 +15,10 @@ public class Product {
 	@Column(name="PRODUCT_NAME")
 	private String productName;
 	@Column(name="PRODUCT_PRICE")
-	private float productPrice;
+	private float productPrice;	
+	@Column(name="PRODUCT_IMAGE")
+	private String product_image;
+	
 	public Integer getProductId() {
 		return productId;
 	}
@@ -33,6 +36,12 @@ public class Product {
 	}
 	public void setProductPrice(float productPrice) {
 		this.productPrice = productPrice;
+	}
+	public String getProduct_image() {
+		return product_image;
+	}
+	public void setProduct_image(String product_image) {
+		this.product_image = product_image;
 	}
 	
 }

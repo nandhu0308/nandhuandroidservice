@@ -393,6 +393,7 @@ public class EngageSellerManager {
 					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
 					responseBean.setSellerName(seller.getSellerName());
 					responseBean.setSellerType(seller.getSellerType());
+					responseBean.setBrandingUrl(seller.getBranding_url());
 					responseBean.setMessage("Success");
 				}
 			} else if (sellerList.isEmpty()) {
