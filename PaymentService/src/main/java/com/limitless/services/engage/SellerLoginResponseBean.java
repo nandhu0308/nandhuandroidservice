@@ -17,6 +17,7 @@ public class SellerLoginResponseBean {
 	private String sellerType;
 	private String sellerRole;
 	private List<Product> products;
+	private String brandingUrl;
 	
 	public List<Product> getProducts() {
 		return products;
@@ -84,4 +85,11 @@ public class SellerLoginResponseBean {
 	public void setSellerRole(String sellerRole) {
 		this.sellerRole = sellerRole;
 	}
+	public String getBrandingUrl() {
+		return brandingUrl;
+	}
+	public void setBrandingUrl(String brandingUrl) {
+		this.brandingUrl = brandingUrl;
+	}
+	
 }

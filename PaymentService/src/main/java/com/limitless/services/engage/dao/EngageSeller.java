@@ -75,7 +75,9 @@ public class EngageSeller implements java.io.Serializable {
 	private int isActive;
 	@Column(name="MOBILE_ALIAS")
 	private String mobileAlias;
-
+	@Column(name="BRANDING_URL")
+	private String branding_url;
+	
 	public EngageSeller() {
 	}
 
@@ -330,6 +332,14 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setMobileAlias(String mobileAlias) {
 		this.mobileAlias = mobileAlias;
+	}
+
+	public String getBranding_url() {
+		return branding_url;
+	}
+
+	public void setBranding_url(String branding_url) {
+		this.branding_url = branding_url;
 	}
 	
 }
