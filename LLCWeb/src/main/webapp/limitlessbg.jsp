@@ -36,7 +36,11 @@ String buyerId = request.getParameter("bid");
 String sellerName = request.getParameter("sname");
 //String sellerDeviceId = request.getParameter("sdid");
 String userString = System.getProperty("AUTH_STRING");
-
+//String userString = "MTAwMDAwOjJlNjJhMjI0YjQxNDRkZDFiZjdmZWU3YTJlM2M1NjliMzI1MzQyYTIwODE4NjU4ZTdlMjMyNmRlMWM4YzZlZWE=";
+String orderId = request.getParameter("orderId");
+if(orderId == null){
+	orderId = "0";
+}
 String creditAmountStr = request.getParameter("credamt");
 String debitAmountStr = request.getParameter("debamt");
 String txnNotes = request.getParameter("notes");
@@ -54,6 +58,9 @@ Client client = RestClientUtil.createClient();
 WebResource sellerResource = client.resource("https://services.beinglimitless.in/engage/merchant/seller/" + sellerId + "/deviceid");
 SellerDeviceIdRespBean sellerDeviceIdRespBean = sellerResource.accept("application/json").header("Authorization","Basic " + userString).get(SellerDeviceIdRespBean.class);
 String sellerDeviceId = sellerDeviceIdRespBean.getSellerDeviceId();
+if(sellerDeviceId == null){
+	sellerDeviceId = "NA";
+}
 
 WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");
 
@@ -67,6 +74,7 @@ bean.setSellerName(sellerName);
 bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 bean.setSellerDeviceId(sellerDeviceId);
+bean.setOrderId(Integer.parseInt(orderId));
 if(txnNotes.equals("NA")){
 	bean.setTxnNotes("NA");
 }

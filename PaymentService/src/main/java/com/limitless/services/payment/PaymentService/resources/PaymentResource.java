@@ -24,6 +24,8 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.order.OrderStatusResponseBean;
+import com.limitless.services.engage.order.dao.OrdersManager;
 import com.limitless.services.payment.PaymentService.CreditBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
@@ -124,6 +126,7 @@ public class PaymentResource {
 			paymentTxn.setTxnStatus(bean.getTxnStatus().toString());
 			paymentTxn.setSellerDeviceId(bean.getSellerDeviceId());
 			paymentTxn.setTxnNotes(bean.getTxnNotes());
+			paymentTxn.setOrderId(bean.getOrderId());
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			manager.persist(paymentTxn);
@@ -169,6 +172,12 @@ public class PaymentResource {
 			txnResp.setDate(paymentTxn.getTxnUpdatedTime().toString());
 			txnResp.setName(customer.getCustomerName());
 			txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
+			
+			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
+			if(paymentTxn.getOrderId()>0){
+				OrdersManager ordersManager = new OrdersManager();
+				orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
+			}
 
 			MessageBean messageBean = new MessageBean();
 			messageBean.setCustomerId(paymentTxn.getEngageCustomerId());
@@ -345,6 +354,7 @@ public class PaymentResource {
 			PaymentTxn paymentTxn = manager.findById(id);
 			EngageSellerManager sellerMgr = new EngageSellerManager();
 			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
+			int orderId = paymentTxn.getOrderId();
 
 			PaymentCreditManager creditManager = new PaymentCreditManager();
 			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
@@ -420,6 +430,12 @@ public class PaymentResource {
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
 			splitResp.setSellerDeviceId(sellerDeviceId);
+			
+			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
+			if(orderId>0){
+				OrdersManager ordersManager = new OrdersManager();
+				orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
+			}
 
 			TxnSettlementResponseBean txnSettlementResponseBean = new TxnSettlementResponseBean();
 			if (sellerSettlePref == 1) {

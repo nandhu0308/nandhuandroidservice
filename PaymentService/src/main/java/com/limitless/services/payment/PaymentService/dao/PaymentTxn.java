@@ -54,6 +54,8 @@ public class PaymentTxn implements java.io.Serializable {
 	private Date txnUpdatedTime;
 	@Column(name="TXN_NOTES")
 	private String txnNotes;
+	@Column(name="ORDER_ID")
+	private Integer orderId;
 
 	public PaymentTxn() {
 	}
@@ -186,6 +188,14 @@ public class PaymentTxn implements java.io.Serializable {
 
 	public void setTxnNotes(String txnNotes) {
 		this.txnNotes = txnNotes;
+	}
+
+	public Integer getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Integer orderId) {
+		this.orderId = orderId;
 	}
 
 	@Override
