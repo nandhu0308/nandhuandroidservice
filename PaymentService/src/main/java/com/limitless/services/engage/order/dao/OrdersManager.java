@@ -364,10 +364,9 @@ public class OrdersManager {
 			
 			try{
 				javax.mail.Message message = new MimeMessage(mailSession);
-				message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
-				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
-				
 				if(!order.getOrderStatus().equals("PROCESS_FAILED")){
+					message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
+					message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
 					message.setSubject("Order Received Successfully. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
@@ -388,13 +387,15 @@ public class OrdersManager {
 									+"<img src="+productImage+" height=100 width=100>"
 									+ "</td><td><b>"+productName+"</b>&nbsp;Price Rs:"+productPrice+"</td>"
 											+ "<td>Quantity:&nbsp;"+quantity+"</td>"
-													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>"
-															+ "<br><h2>Total Amount Paid Rs. "+totalPrice+"</h2>";
-							message.setContent(mailContent,"text/html");
+													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
 						}
 					}
+					mailContent +="<br><h2>Total Amount Paid Rs. "+totalAmount+"</h2>";
+					message.setContent(mailContent,"text/html");
 				}
 				else if(order.getOrderStatus().equals("PROCESS_FAILED")){
+					message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
+					message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(customerEmail));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
 					message.setSubject("Order Failed. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
@@ -412,13 +413,13 @@ public class OrdersManager {
 							double productPrice = product.getProductPrice();
 							
 							mailContent += "<table><tr><td rowspan=3>"
-									+"<img src="+productImage+">"
+									+"<img src="+productImage+" height=100 width=100>"
 									+ "</td><td><b>"+productName+"</b>&nbsp;Price Rs:"+productPrice+"</td>"
 											+ "<td>Quantity:&nbsp;"+quantity+"</td>"
-													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
-							message.setContent(mailContent,"text/html");
+													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";	
 						}
 					}
+					message.setContent(mailContent,"text/html");
 				}
 				Transport.send(message);
 				responseBean.setOrderId(orderId);
@@ -434,7 +435,7 @@ public class OrdersManager {
 				transaction.rollback();
 			}
 			log.error("sending email failed : " + re);
-			throw re;
+			//throw re;
 		}
 		finally {
 			if(session!=null && session.isOpen()){

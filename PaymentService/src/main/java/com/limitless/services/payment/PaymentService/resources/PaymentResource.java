@@ -178,7 +178,7 @@ public class PaymentResource {
 			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
 			if(paymentTxn.getOrderId()>0){
 				OrdersManager ordersManager = new OrdersManager();
-				orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 1);
+				orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
 				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
 				orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(), paymentTxn.getTxnId());
 				System.out.println("Status: " + orderMailResponseBean.getMessage());
