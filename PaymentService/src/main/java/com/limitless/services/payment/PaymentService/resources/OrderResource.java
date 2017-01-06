@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.order.OrderDetailResponseBean;
+import com.limitless.services.engage.order.OrderMailResponseBean;
 import com.limitless.services.engage.order.OrderRequestBean;
 import com.limitless.services.engage.order.OrderResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
@@ -98,6 +99,22 @@ public class OrderResource {
 			responseBean = manager.getOrderById(orderId);
 		}
 		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@Path("/mail/{orderId}/{txnId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public OrderMailResponseBean orderMail(@PathParam("orderId") int orderId, @PathParam("txnId") int txnId) throws Exception{
+		OrderMailResponseBean responseBean = new OrderMailResponseBean();
+		try{
+			OrdersManager manager = new OrdersManager();
+			responseBean = manager.sendMailOrderTxn(orderId, txnId);
+		}
+		catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}

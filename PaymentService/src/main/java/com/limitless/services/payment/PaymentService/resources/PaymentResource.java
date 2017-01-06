@@ -24,6 +24,7 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.order.OrderMailResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
 import com.limitless.services.engage.order.dao.OrdersManager;
 import com.limitless.services.payment.PaymentService.CreditBean;
@@ -174,9 +175,13 @@ public class PaymentResource {
 			txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
 			
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
+			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
 			if(paymentTxn.getOrderId()>0){
 				OrdersManager ordersManager = new OrdersManager();
-				orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
+				orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 1);
+				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
+				orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(), paymentTxn.getTxnId());
+				System.out.println("Status: " + orderMailResponseBean.getMessage());
 			}
 
 			MessageBean messageBean = new MessageBean();
@@ -432,9 +437,13 @@ public class PaymentResource {
 			splitResp.setSellerDeviceId(sellerDeviceId);
 			
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
+			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
 			if(orderId>0){
 				OrdersManager ordersManager = new OrdersManager();
 				orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
+				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
+				orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
+				System.out.println("Status: " + orderMailResponseBean.getMessage());
 			}
 
 			TxnSettlementResponseBean txnSettlementResponseBean = new TxnSettlementResponseBean();

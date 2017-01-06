@@ -2,6 +2,13 @@ package com.limitless.services.engage.order.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +22,7 @@ import org.hibernate.criterion.Restrictions;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.order.OrderDetailResponseBean;
+import com.limitless.services.engage.order.OrderMailResponseBean;
 import com.limitless.services.engage.order.OrderProductsBean;
 import com.limitless.services.engage.order.OrderProductsListBean;
 import com.limitless.services.engage.order.OrderRequestBean;
@@ -304,6 +312,128 @@ public class OrdersManager {
 				transaction.rollback();
 			}
 			log.error("getting order failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public OrderMailResponseBean sendMailOrderTxn(int orderId, int txnId){
+		log.debug("Sending email");
+		OrderMailResponseBean responseBean = new OrderMailResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			//getting order
+			Orders order = (Orders) session
+					.get("com.limitless.services.engage.order.dao.Orders", orderId);
+			int customerId = order.getCustomerId();
+			int sellerId = order.getSellerId();
+			//getting customer
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			String customerEmail = customer.getCustomerEmail99();
+			//getting seller
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);	
+			String sellerEmail = seller.getSellerEmail99();
+			
+			final String username = "transactions@limitlesscircle.com";
+			final String password = "Engage@12E";
+			String sendMailTo = customerEmail+","+sellerEmail;
+			log.debug("Mailing to : " + sendMailTo);
+			Properties properties = new Properties();
+			properties.put("mail.smtp.host", "smtp.zoho.com");
+			properties.put("mail.smtp.socketFactory.port", "465");
+			properties.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+			properties.put("mail.smtp.auth", "true");
+			properties.put("mail.smtp.port", "465");
+			
+			javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(properties,
+					new javax.mail.Authenticator() {
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(username, password);
+				}
+			  });
+			
+			try{
+				javax.mail.Message message = new MimeMessage(mailSession);
+				message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
+				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
+				
+				if(!order.getOrderStatus().equals("PROCESS_FAILED")){
+					double totalAmount = order.getTotalAmount();
+					String mailContent = "";
+					message.setSubject("Order Received Successfully. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
+					Criteria criteria = session.createCriteria(OrderDetails.class);
+					criteria.add(Restrictions.eq("orderId", orderId));
+					List<OrderDetails> detailsList = criteria.list();
+					if(detailsList.size()>0){
+						for(OrderDetails detail : detailsList){
+							int quantity = detail.getQuantity();
+							double totalPrice = detail.getUnitPrice();
+							Product product = (Product) session
+									.get("com.limitless.services.engage.sellers.product.dao.Product", detail.getProductId());
+							String productName = product.getProductName();
+							String productImage = product.getProduct_image();
+							double productPrice = product.getProductPrice();
+							
+							mailContent += "<table><tr><td rowspan=3>"
+									+"<img src="+productImage+" height=100 width=100>"
+									+ "</td><td><b>"+productName+"</b>&nbsp;Price Rs:"+productPrice+"</td>"
+											+ "<td>Quantity:&nbsp;"+quantity+"</td>"
+													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>"
+															+ "<br><h2>Total Amount Paid Rs. "+totalPrice+"</h2>";
+							message.setContent(mailContent,"text/html");
+						}
+					}
+				}
+				else if(order.getOrderStatus().equals("PROCESS_FAILED")){
+					double totalAmount = order.getTotalAmount();
+					String mailContent = "";
+					message.setSubject("Order Failed. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
+					Criteria criteria = session.createCriteria(OrderDetails.class);
+					criteria.add(Restrictions.eq("orderId", orderId));
+					List<OrderDetails> detailsList = criteria.list();
+					if(detailsList.size()>0){
+						for(OrderDetails detail : detailsList){
+							int quantity = detail.getQuantity();
+							double totalPrice = detail.getUnitPrice();
+							Product product = (Product) session
+									.get("com.limitless.services.engage.sellers.product.dao.Product", detail.getProductId());
+							String productName = product.getProductName();
+							String productImage = product.getProduct_image();
+							double productPrice = product.getProductPrice();
+							
+							mailContent += "<table><tr><td rowspan=3>"
+									+"<img src="+productImage+">"
+									+ "</td><td><b>"+productName+"</b>&nbsp;Price Rs:"+productPrice+"</td>"
+											+ "<td>Quantity:&nbsp;"+quantity+"</td>"
+													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
+							message.setContent(mailContent,"text/html");
+						}
+					}
+				}
+				Transport.send(message);
+				responseBean.setOrderId(orderId);
+				responseBean.setTxnId(txnId);
+				responseBean.setMessage("Success");
+			}
+			catch(Exception e){
+				log.error("mail error : " + e);
+			}
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending email failed : " + re);
 			throw re;
 		}
 		finally {
