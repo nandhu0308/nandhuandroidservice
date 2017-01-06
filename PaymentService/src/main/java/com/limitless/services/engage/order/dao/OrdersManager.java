@@ -1,6 +1,10 @@
 package com.limitless.services.engage.order.dao;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -16,6 +20,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -149,7 +155,7 @@ public class OrdersManager {
 		return responseBean;
 	}
 	
-	public OrderSummaryResponseBean sellerOrderSummary(int sellerId){
+	public OrderSummaryResponseBean sellerOrderSummary(int sellerId) throws Exception{
 		log.debug("getting seller order summary");
 		OrderSummaryResponseBean responseBean = new OrderSummaryResponseBean();
 		List<OrdersListBean> ordersList = new ArrayList<OrdersListBean>();
@@ -165,7 +171,10 @@ public class OrdersManager {
 				String sellerName = seller.getSellerShopName();
 
 				Criteria criteria = session.createCriteria(Orders.class);
-				criteria.add(Restrictions.eq("sellerId", sellerId));
+				Criterion sidCriterion = Restrictions.eq("sellerId", sellerId);
+				Criterion statusCriterion = Restrictions.ne("orderStatus", "ORDER_INITIATED");
+				LogicalExpression logicalExpression = Restrictions.and(sidCriterion, statusCriterion);
+				criteria.add(logicalExpression);
 				criteria.addOrder(Order.desc("orderId"));
 				List<Orders> orderList = criteria.list();
 				log.debug("order size : " + orderList.size());
@@ -180,7 +189,15 @@ public class OrdersManager {
 						listBean.setSellerId(sellerId);
 						listBean.setSellerName(sellerName);
 						listBean.setTotalAmount(order.getTotalAmount());
-						listBean.setTime(order.getOrderCreatedTime().toString());
+						String gmtTime = order.getOrderCreatedTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						Date dateTxn = sdf3.parse(gmtTime);
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(dateTxn);
+						calendar.add(Calendar.HOUR, 5);
+						calendar.add(Calendar.MINUTE, 30);
+						String localTime = sdf3.format(calendar.getTime());
+						listBean.setTime(localTime);
 						listBean.setOrderStatus(order.getOrderStatus());
 						ordersList.add(listBean);
 						listBean = null;
@@ -211,7 +228,7 @@ public class OrdersManager {
 		return responseBean;
 	}
 	
-	public OrderSummaryResponseBean customerOrderSummary(int customerId){
+	public OrderSummaryResponseBean customerOrderSummary(int customerId) throws Exception{
 		log.debug("getting customer order summary");
 		OrderSummaryResponseBean responseBean = new OrderSummaryResponseBean();
 		List<OrdersListBean> ordersList = new ArrayList<OrdersListBean>();
@@ -227,7 +244,10 @@ public class OrdersManager {
 				String customerName = customer.getCustomerName();
 				
 				Criteria criteria = session.createCriteria(Orders.class);
-				criteria.add(Restrictions.eq("customerId", customerId));
+				Criterion cidCriterion = Restrictions.eq("customerId", customerId);
+				Criterion statusCriterion = Restrictions.ne("orderStatus", "ORDER_INITIATED");
+				LogicalExpression logicalExpression = Restrictions.and(cidCriterion, statusCriterion);
+				criteria.add(logicalExpression);
 				criteria.addOrder(Order.desc("orderId"));
 				List<Orders> orderList = criteria.list();
 				log.debug("orderlist size : " + orderList.size());
@@ -242,7 +262,15 @@ public class OrdersManager {
 								.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 						listBean.setSellerName(seller.getSellerShopName());
 						listBean.setTotalAmount(order.getTotalAmount());
-						listBean.setTime(order.getOrderCreatedTime().toString());
+						String gmtTime = order.getOrderCreatedTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						Date dateTxn = sdf3.parse(gmtTime);
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(dateTxn);
+						calendar.add(Calendar.HOUR, 5);
+						calendar.add(Calendar.MINUTE, 30);
+						String localTime = sdf3.format(calendar.getTime());
+						listBean.setTime(localTime);
 						listBean.setOrderStatus(order.getOrderStatus());
 						ordersList.add(listBean);
 						listBean = null;
