@@ -28,6 +28,8 @@ import com.limitless.services.engage.order.OrderMailResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
 import com.limitless.services.engage.order.dao.OrdersManager;
 import com.limitless.services.payment.PaymentService.CreditBean;
+import com.limitless.services.payment.PaymentService.CreditReminderRequestBean;
+import com.limitless.services.payment.PaymentService.CreditReminderResponseBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CreditTransRequestBean;
 import com.limitless.services.payment.PaymentService.CreditTransResponseBean;
@@ -791,6 +793,23 @@ public class PaymentResource {
 			PaymentTxnManager manager = new PaymentTxnManager();
 			responseBean = manager.sendMail(requestBean);
 		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/credit/reminder")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CreditReminderResponseBean creditReminder(CreditReminderRequestBean requestBean) throws Exception{
+		CreditReminderResponseBean responseBean = new CreditReminderResponseBean();
+		try{
+			PaymentCreditManager manager = new PaymentCreditManager();
+			responseBean = manager.sendCreditReminder(requestBean);
+		}
+		catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}

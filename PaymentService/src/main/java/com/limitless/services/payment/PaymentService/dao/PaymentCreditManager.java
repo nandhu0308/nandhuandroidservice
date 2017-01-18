@@ -1,5 +1,11 @@
 package com.limitless.services.payment.PaymentService.dao;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 // Generated Oct 19, 2016 7:49:46 PM by Hibernate Tools 3.4.0.CR1
@@ -17,12 +23,15 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.payment.PaymentService.CreditReminderRequestBean;
+import com.limitless.services.payment.PaymentService.CreditReminderResponseBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
 import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.SellerCreditsResponseBean;
@@ -303,6 +312,90 @@ public class PaymentCreditManager {
 			}
 		}
 		return respBean;
+	}
+	
+	public CreditReminderResponseBean sendCreditReminder(CreditReminderRequestBean requestBean) throws Exception{
+		log.debug("sending credit reminder");
+		CreditReminderResponseBean responseBean = new CreditReminderResponseBean();
+		String response = "";
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			int sellerId = requestBean.getSellerId();
+			int customerId = requestBean.getCustomerId();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			String sellerShopName = seller.getSellerShopName();
+			String sellerMobileNumber = seller.getSellerMobileNumber();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+			String customerName = customer.getCustomerName();
+			String customerMobileNumber = customer.getCustomerMobileNumber();
+			
+			Query query = session.createQuery(
+					"select sum(PC.creditAmount) from PaymentCredit PC where PC.merchantId = :sellerId and PC.customerId = :customerId");
+			query.setParameter("sellerId", sellerId);
+			query.setParameter("customerId", customerId);
+			List creditAmountList = query.list();
+			log.debug("credit amount : " + creditAmountList.toString());
+			
+			Query query2 = session.createQuery(
+					"select sum(PC.debitAmount) from PaymentCredit PC where PC.merchantId = :sellerId and PC.customerId = :customerId");
+			query2.setParameter("sellerId", sellerId);
+			query2.setParameter("customerId", customerId);
+			List debitAmountList = query2.list();
+			log.debug("debit amount : " + debitAmountList.toString());
+			
+			double creditAmount = (Double) creditAmountList.get(0);
+			double debitAmount = (Double) debitAmountList.get(0);
+			double netCredit = creditAmount - debitAmount;
+			
+			log.debug("Net credit amount : " + netCredit);
+			
+			String message = "REMINDER! "+customerName+" kindly pay Rs. "+netCredit+" to Ms. "+sellerShopName+". Thanks for going cashfree with LimitlessCircle.";
+			String encoded_message = URLEncoder.encode(message);
+			String authkey = "129194Aa6NwGoQsVt580d9a57";
+			String mobiles = customerMobileNumber;
+			String senderId = "LLCCRR";
+			String route = "4";
+			String mainUrl = "http://api.msg91.com/api/sendhttp.php?";
+			StringBuilder sbPostData = new StringBuilder(mainUrl);
+			sbPostData.append("authkey=" + authkey);
+			sbPostData.append("&mobiles=" + mobiles);
+			sbPostData.append("&message=" + encoded_message);
+			sbPostData.append("&route=" + route);
+			sbPostData.append("&sender=" + senderId);
+			mainUrl = sbPostData.toString();
+			URL msgUrl = new URL(mainUrl);
+			URLConnection con = msgUrl.openConnection();
+			con.connect();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			while ((response = reader.readLine()) != null) {
+				System.out.println(response);
+			}
+			reader.close();
+			
+			responseBean.setCustomerId(requestBean.getCustomerId());
+			responseBean.setSellerId(requestBean.getSellerId());
+			responseBean.setMessage("Success");
+			transaction.commit();
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("sending credit reminder failed: " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 }

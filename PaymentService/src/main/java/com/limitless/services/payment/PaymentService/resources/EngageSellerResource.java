@@ -20,6 +20,9 @@ import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
+import com.limitless.services.engage.MerchantRequestCountBean;
+import com.limitless.services.engage.MerchantRequestListBean;
+import com.limitless.services.engage.NewMerchantsRequestBean;
 import com.limitless.services.engage.SellerDeviceIdRespBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
@@ -27,6 +30,8 @@ import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.SellerTempRequestBean;
 import com.limitless.services.engage.SellerTempResponseBean;
+import com.limitless.services.engage.SellerUpdateRequestBean;
+import com.limitless.services.engage.SellerUpdateResponseBean;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
@@ -246,4 +251,70 @@ public class EngageSellerResource {
 		}
 		return responseBean;
 	}
+	
+	@GET
+	@Path("/requestcount")
+	@Produces(MediaType.APPLICATION_JSON)
+	public MerchantRequestCountBean getCounts() throws Exception{
+		MerchantRequestCountBean countBean = new MerchantRequestCountBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			countBean = manager.getRequestCount();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return countBean;
+	}
+	
+	@GET
+	@Path("/requestlist")
+	@Produces(MediaType.APPLICATION_JSON)
+	public NewMerchantsRequestBean requestNewMerchantsList() throws Exception{
+		NewMerchantsRequestBean requestBean = new NewMerchantsRequestBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			requestBean = manager.getRequestList();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return requestBean;
+	}
+	
+	@GET
+	@Path("/requestseller/{sellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public MerchantRequestListBean requestSeller(@PathParam("sellerId") int sellerId) throws Exception{
+		MerchantRequestListBean listBean = new MerchantRequestListBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.sellerRequest(sellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
+	}
+	
+	@PUT
+	@Path("/activate")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public SellerUpdateResponseBean activteSeller(SellerUpdateRequestBean requestBean) throws Exception{
+		SellerUpdateResponseBean responseBean = new SellerUpdateResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.sellerActivate(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
 }
