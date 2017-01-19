@@ -2,6 +2,7 @@ package com.limitless.services.engage.sellers.product.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,6 +11,7 @@ import javax.persistence.Table;
 public class Product {
 	
 	@Id
+	@GeneratedValue
 	@Column(name="PRODUCT_ID")
 	private Integer productId;
 	@Column(name="PRODUCT_NAME")
@@ -18,6 +20,8 @@ public class Product {
 	private float productPrice;	
 	@Column(name="PRODUCT_IMAGE")
 	private String product_image;
+	@Column(name="PRODUCT_DESCRIPTION")
+	private String productDescription;
 	
 	public Integer getProductId() {
 		return productId;
@@ -42,6 +46,12 @@ public class Product {
 	}
 	public void setProduct_image(String product_image) {
 		this.product_image = product_image;
+	}
+	public String getProductDescription() {
+		return productDescription;
+	}
+	public void setProductDescription(String productDescription) {
+		this.productDescription = productDescription;
 	}
 	
 }

@@ -15,6 +15,10 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.sellers.NewProductsRequestBean;
+import com.limitless.services.engage.sellers.NewProductsResponseBean;
+import com.limitless.services.engage.sellers.ProductBean;
+import com.limitless.services.engage.sellers.ProductResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 public class ProductManager {
@@ -78,6 +82,91 @@ public class ProductManager {
 			}
 		}
 		return products;
+	}
+	
+	public NewProductsResponseBean addNewProducts(NewProductsRequestBean requestBean){
+		log.debug("adding new products");
+		NewProductsResponseBean responseBean = new NewProductsResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			for(ProductBean bean : requestBean.getProductList()){
+				Product product = new Product();
+				product.setProductName(bean.getProductName());
+				product.setProductPrice(bean.getProductPrice());
+				product.setProduct_image(bean.getProductImage());
+				product.setProductDescription(bean.getProductDescription());
+				
+				session.persist(product);
+				
+				SellerProduct sellerProduct = new SellerProduct();
+				sellerProduct.setProductId(product.getProductId());
+				sellerProduct.setSellerId(requestBean.getSellerId());
+				
+				session.persist(sellerProduct);
+			}
+			responseBean.setMessage("Success");
+			responseBean.setSellerId(requestBean.getSellerId());
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("adding product failed");
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public ProductResponseBean updateProduct(ProductBean bean){
+		log.debug("updating product");
+		ProductResponseBean responseBean = new ProductResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Product product = (Product) session
+					.get("com.limitless.services.engage.sellers.product.dao.Product", bean.getProductId());
+			if(product != null){
+				product.setProductName(bean.getProductName());
+				product.setProductDescription(bean.getProductDescription());
+				product.setProductPrice(bean.getProductPrice());
+				product.setProduct_image(bean.getProductImage());
+				
+				session.update(product);
+				
+				responseBean.setProductId(bean.getProductId());
+				responseBean.setMessage("Success");
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("updating product failed");
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 	
 	public static void main(String[] args) {

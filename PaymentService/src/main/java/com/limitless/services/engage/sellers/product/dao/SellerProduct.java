@@ -2,6 +2,7 @@ package com.limitless.services.engage.sellers.product.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,6 +11,7 @@ import javax.persistence.Table;
 public class SellerProduct {
 	
 	@Id
+	@GeneratedValue
 	@Column(name="SELLER_PRODUCT_ID")
 	private Integer sellerProductId;
 	@Column(name="SELLER_ID")

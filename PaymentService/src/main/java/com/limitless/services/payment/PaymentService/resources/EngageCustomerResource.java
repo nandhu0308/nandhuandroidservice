@@ -22,6 +22,8 @@ import com.limitless.services.engage.AddAccountRequestBean;
 import com.limitless.services.engage.AddAccountResponseBean;
 import com.limitless.services.engage.CheckEmailRequestBean;
 import com.limitless.services.engage.CheckEmailResponseBean;
+import com.limitless.services.engage.CustomerAddressRequestBean;
+import com.limitless.services.engage.CustomerAddressResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
@@ -296,6 +298,22 @@ public class EngageCustomerResource {
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.moneyTransferRegister(requestBean);
 		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/address/new")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerAddressResponseBean newAddress(CustomerAddressRequestBean requestBean) throws Exception{
+		CustomerAddressResponseBean responseBean = new CustomerAddressResponseBean();
+		try{
+			
+		}
+		catch(Exception e){
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
