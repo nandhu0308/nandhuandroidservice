@@ -90,7 +90,7 @@ public class MailManager {
 			try{
 				javax.mail.Message message = new MimeMessage(mailSession);
 				message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
-				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("chandra@limitlesscircle.com"));
+				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("chandra@limitlesscircle.com,shreejon@limitlesscircle.com"));
 				
 				message.setSubject("Report for the day");
 				String messageContent = "<table><tr><td><b>Total Merchants<b></td><td>:</td>"

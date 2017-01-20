@@ -1,7 +1,7 @@
 package com.limitless.services.engage;
 
-public class CustomerAddressRequestBean {
-	private int cabId;
+public class AddressListBean {
+	private int cadId;
 	private int customerId;
 	private String receiverName;
 	private String customerAddress1;
@@ -11,6 +11,12 @@ public class CustomerAddressRequestBean {
 	private String customerZip;
 	private String customerDeliveryMobile;
 	private String customerLandmark;
+	public int getCadId() {
+		return cadId;
+	}
+	public void setCadId(int cadId) {
+		this.cadId = cadId;
+	}
 	public int getCustomerId() {
 		return customerId;
 	}
@@ -64,11 +70,5 @@ public class CustomerAddressRequestBean {
 	}
 	public void setCustomerLandmark(String customerLandmark) {
 		this.customerLandmark = customerLandmark;
-	}
-	public int getCabId() {
-		return cabId;
-	}
-	public void setCabId(int cabId) {
-		this.cabId = cabId;
 	}
 }

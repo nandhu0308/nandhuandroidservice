@@ -7,6 +7,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -22,6 +23,7 @@ import com.limitless.services.engage.AddAccountRequestBean;
 import com.limitless.services.engage.AddAccountResponseBean;
 import com.limitless.services.engage.CheckEmailRequestBean;
 import com.limitless.services.engage.CheckEmailResponseBean;
+import com.limitless.services.engage.CustomerAddressListBean;
 import com.limitless.services.engage.CustomerAddressRequestBean;
 import com.limitless.services.engage.CustomerAddressResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
@@ -37,6 +39,7 @@ import com.limitless.services.engage.PasswdRequestBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
+import com.limitless.services.engage.dao.CustomerAddressBookManager;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.payment.PaymentService.AuthTokenBean;
@@ -311,7 +314,57 @@ public class EngageCustomerResource {
 	public CustomerAddressResponseBean newAddress(CustomerAddressRequestBean requestBean) throws Exception{
 		CustomerAddressResponseBean responseBean = new CustomerAddressResponseBean();
 		try{
-			
+			CustomerAddressBookManager manager = new CustomerAddressBookManager();
+			responseBean = manager.addAddress(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
+	@Path("/customer/address/{customerId}/list")
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerAddressListBean getAddresses(@PathParam("customerId") int customerId) throws Exception{
+		CustomerAddressListBean listBean = new CustomerAddressListBean();
+		try{
+			CustomerAddressBookManager manager = new CustomerAddressBookManager();
+			listBean = manager.getCustomerAddressList(customerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
+	}
+	
+	@PUT
+	@Path("/customer/address/edit")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerAddressResponseBean editAddress(CustomerAddressRequestBean requestBean) throws Exception{
+		CustomerAddressResponseBean responseBean = new CustomerAddressResponseBean();
+		try{
+			CustomerAddressBookManager manager = new CustomerAddressBookManager();
+			responseBean = manager.editCustomerAddress(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@DELETE
+	@Path("/customer/address/{addressId}/remove")
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerAddressResponseBean removeAddress(@PathParam("addressId") int addressId) throws Exception{
+		CustomerAddressResponseBean responseBean = new CustomerAddressResponseBean();
+		try{
+			CustomerAddressBookManager manager = new CustomerAddressBookManager();
+			responseBean = manager.deleteCustomerAddress(addressId);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
