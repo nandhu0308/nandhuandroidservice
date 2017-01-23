@@ -6,6 +6,7 @@ public class ProductBean {
 	private float productPrice;
 	private String productImage;
 	private String productDescription;
+	private String productStock;
 	public String getProductName() {
 		return productName;
 	}
@@ -35,5 +36,11 @@ public class ProductBean {
 	}
 	public void setProductId(int productId) {
 		this.productId = productId;
+	}
+	public String getProductStock() {
+		return productStock;
+	}
+	public void setProductStock(String productStock) {
+		this.productStock = productStock;
 	}
 }

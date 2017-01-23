@@ -18,6 +18,8 @@ import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.sellers.NewProductsRequestBean;
 import com.limitless.services.engage.sellers.NewProductsResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
+import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
+import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
@@ -151,6 +153,49 @@ public class ProductManager {
 			}
 			else{
 				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("updating product failed");
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public ProductInventoryResponseBean addProductInventory(ProductInventoryRequestBean requestBean){
+		log.debug("adding inventory");
+		ProductInventoryResponseBean responseBean = new ProductInventoryResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			ProductInventory inventoryInstance = (ProductInventory) session
+					.get("com.limitless.services.engage.sellers.product.dao.ProductInventory", requestBean.getProductId());
+			if(inventoryInstance!=null){
+				inventoryInstance.setProductStock(inventoryInstance.getProductStock() + requestBean.getProductStock());
+				session.update(inventoryInstance);
+				responseBean.setProductId(requestBean.getProductId());
+				responseBean.setMessage("Success");
+			}
+			else if(inventoryInstance==null){
+				ProductInventory inventory = new ProductInventory();
+				inventory.setProductId(requestBean.getProductId());
+				inventory.setProductStock(requestBean.getProductStock());
+				inventory.setProductSold(0);
+				session.persist(inventory);
+				responseBean.setProductId(requestBean.getProductId());
+				responseBean.setMessage("Success");
 			}
 			transaction.commit();
 		}

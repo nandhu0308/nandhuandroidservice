@@ -37,6 +37,8 @@ import com.limitless.services.engage.order.OrderStatusResponseBean;
 import com.limitless.services.engage.order.OrderSummaryResponseBean;
 import com.limitless.services.engage.order.OrdersListBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
+import com.limitless.services.engage.sellers.product.dao.ProductInventory;
+import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 public class OrdersManager {
@@ -457,6 +459,7 @@ public class OrdersManager {
 			catch(Exception e){
 				log.error("mail error : " + e);
 			}
+			transaction.commit();
 		}
 		catch(RuntimeException re){
 			if(transaction!=null){
@@ -464,6 +467,51 @@ public class OrdersManager {
 			}
 			log.error("sending email failed : " + re);
 			//throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public InventoryUpdateResponseBean updateInventory(int orderId){
+		log.debug("updating product inventory");
+		InventoryUpdateResponseBean responseBean = new InventoryUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(OrderDetails.class);
+			criteria.add(Restrictions.eq("orderId", orderId));
+			List<OrderDetails> detailsList = criteria.list();
+			log.debug("orders list : "+detailsList.size());
+			if(detailsList.size()>0){
+				for(OrderDetails details : detailsList){
+					ProductInventory inventory = (ProductInventory) session
+							.get("com.limitless.services.engage.sellers.product.dao.ProductInventory", details.getProductId());
+					if(inventory!=null){
+						inventory.setProductSold(details.getQuantity() + inventory.getProductSold());
+						inventory.setProductStock(inventory.getProductStock() - details.getQuantity());
+						session.update(inventory);
+						responseBean.setOrderId(orderId);
+						responseBean.setMessage("Success");
+					}
+				}
+			}
+			else if(detailsList.isEmpty()){
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("updating inventory failed : " + re);
 		}
 		finally {
 			if(session!=null && session.isOpen()){

@@ -37,6 +37,7 @@ import com.limitless.services.payment.PaymentService.CustomerCreditResponseBean;
 import com.limitless.services.payment.PaymentService.CustomerTxnHistoryBean;
 import com.limitless.services.payment.PaymentService.DataBean;
 import com.limitless.services.payment.PaymentService.GeneralSellerTxnHistoryBean;
+import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
 import com.limitless.services.payment.PaymentService.MasterTxnRequestBean;
 import com.limitless.services.payment.PaymentService.MasterTxnResponseBean;
 import com.limitless.services.payment.PaymentService.MessageBean;
@@ -444,6 +445,8 @@ public class PaymentResource {
 				OrdersManager ordersManager = new OrdersManager();
 				orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
 				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
+				InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
+				System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
 				orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
 				System.out.println("Status: " + orderMailResponseBean.getMessage());
 			}
