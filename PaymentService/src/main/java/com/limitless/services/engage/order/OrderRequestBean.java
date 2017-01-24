@@ -5,6 +5,7 @@ import java.util.List;
 public class OrderRequestBean {
 	private int customerId;
 	private int sellerId;
+	private int addressId;
 	private List<OrderProductsBean> orderList;
 	public int getCustomerId() {
 		return customerId;
@@ -23,5 +24,11 @@ public class OrderRequestBean {
 	}
 	public void setOrderList(List<OrderProductsBean> orderList) {
 		this.orderList = orderList;
+	}
+	public int getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(int addressId) {
+		this.addressId = addressId;
 	}
 }

@@ -26,6 +26,8 @@ public class Orders {
 	private double totalAmount;
 	@Column(name="ORDER_STATUS")
 	private String orderStatus;
+	@Column(name="DELIVERY_ADDRESS")
+	private Integer deliveryAddress;
 	@Column(name="ORDER_CREATED_TIME", insertable = false, updatable = false)
 	private Date orderCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
@@ -74,5 +76,11 @@ public class Orders {
 	}
 	public void setOrderUpdatedTime(Date orderUpdatedTime) {
 		this.orderUpdatedTime = orderUpdatedTime;
+	}
+	public Integer getDeliveryAddress() {
+		return deliveryAddress;
+	}
+	public void setDeliveryAddress(Integer deliveryAddress) {
+		this.deliveryAddress = deliveryAddress;
 	}
 }

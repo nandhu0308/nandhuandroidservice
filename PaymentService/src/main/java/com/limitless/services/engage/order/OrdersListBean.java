@@ -1,5 +1,7 @@
 package com.limitless.services.engage.order;
 
+import com.limitless.services.engage.AddressListBean;
+
 public class OrdersListBean {
 	private int orderId;
 	private int customerId;
@@ -9,6 +11,7 @@ public class OrdersListBean {
 	private double totalAmount;
 	private String time;
 	private String orderStatus;
+	private AddressListBean addressBean;
 	public int getOrderId() {
 		return orderId;
 	}
@@ -57,5 +60,10 @@ public class OrdersListBean {
 	public void setOrderStatus(String orderStatus) {
 		this.orderStatus = orderStatus;
 	}
-	
+	public AddressListBean getAddressBean() {
+		return addressBean;
+	}
+	public void setAddressBean(AddressListBean addressBean) {
+		this.addressBean = addressBean;
+	}
 }

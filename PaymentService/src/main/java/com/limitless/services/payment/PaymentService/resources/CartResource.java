@@ -52,4 +52,19 @@ public class CartResource {
 		return responseBean;
 	}
 	
+	@Path("/remove/{cartId}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	public CartResponseBean removeCart(@PathParam("cartId") int cartId) throws Exception{
+		CartResponseBean responseBean = new CartResponseBean();
+		try{
+			
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
 }

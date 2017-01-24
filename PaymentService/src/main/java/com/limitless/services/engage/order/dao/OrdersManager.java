@@ -25,6 +25,8 @@ import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.AddressListBean;
+import com.limitless.services.engage.dao.CustomerAddressBook;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.order.OrderDetailResponseBean;
@@ -68,6 +70,7 @@ public class OrdersManager {
 			order.setSellerId(requestBean.getSellerId());
 			order.setTotalAmount(totalAmount);
 			order.setOrderStatus("ORDER_INITIATED");
+			order.setDeliveryAddress(requestBean.getAddressId());
 			session.persist(order);
 			
 			int orderId = order.getOrderId();
@@ -201,6 +204,20 @@ public class OrdersManager {
 						String localTime = sdf3.format(calendar.getTime());
 						listBean.setTime(localTime);
 						listBean.setOrderStatus(order.getOrderStatus());
+						CustomerAddressBook address = (CustomerAddressBook) session
+								.get("com.limitless.services.engage.dao.CustomerAddressBook", order.getDeliveryAddress());
+						AddressListBean addressBean = new AddressListBean();
+						addressBean.setCadId(address.getCabId());
+						addressBean.setReceiverName(address.getReceiverName());
+						addressBean.setCustomerId(address.getCustomerId());
+						addressBean.setCustomerAddress1(address.getCustomerAddress1());
+						addressBean.setCustomerAddress2(address.getCustomerAddress2());
+						addressBean.setCustomerCity(address.getCustomerCity());
+						addressBean.setCustomerState(address.getCustomerState());
+						addressBean.setCustomerZip(address.getCustomerZip());
+						addressBean.setCustomerLandmark(address.getCustomerLandmark());
+						addressBean.setCustomerDeliveryMobile(address.getCustomerDeliveryMobile());
+						listBean.setAddressBean(addressBean);
 						ordersList.add(listBean);
 						listBean = null;
 					}
@@ -274,6 +291,20 @@ public class OrdersManager {
 						String localTime = sdf3.format(calendar.getTime());
 						listBean.setTime(localTime);
 						listBean.setOrderStatus(order.getOrderStatus());
+						CustomerAddressBook address = (CustomerAddressBook) session
+								.get("com.limitless.services.engage.dao.CustomerAddressBook", order.getDeliveryAddress());
+						AddressListBean addressBean = new AddressListBean();
+						addressBean.setCadId(address.getCabId());
+						addressBean.setReceiverName(address.getReceiverName());
+						addressBean.setCustomerId(address.getCustomerId());
+						addressBean.setCustomerAddress1(address.getCustomerAddress1());
+						addressBean.setCustomerAddress2(address.getCustomerAddress2());
+						addressBean.setCustomerCity(address.getCustomerCity());
+						addressBean.setCustomerState(address.getCustomerState());
+						addressBean.setCustomerZip(address.getCustomerZip());
+						addressBean.setCustomerLandmark(address.getCustomerLandmark());
+						addressBean.setCustomerDeliveryMobile(address.getCustomerDeliveryMobile());
+						listBean.setAddressBean(addressBean);
 						ordersList.add(listBean);
 						listBean = null;
 					}
