@@ -2,6 +2,7 @@ package com.limitless.services.engage;
 
 import java.util.List;
 
+import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
 
 public class SellerLoginResponseBean {
@@ -16,13 +17,14 @@ public class SellerLoginResponseBean {
 	private String sellerCity;
 	private String sellerType;
 	private String sellerRole;
-	private List<Product> products;
+	private List<ProductBean> products;
 	private String brandingUrl;
 	
-	public List<Product> getProducts() {
+	
+	public List<ProductBean> getProducts() {
 		return products;
 	}
-	public void setProducts(List<Product> products) {
+	public void setProducts(List<ProductBean> products) {
 		this.products = products;
 	}
 	public String getSellerName() {

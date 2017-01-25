@@ -42,13 +42,14 @@ public class ProductManager {
 	
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 	
-	public List<Product> getAllProducts(int sellerId){
+	public List<ProductBean> getAllProducts(int sellerId){
 		log.debug("Getting all product ids for a seller");
 		Transaction transaction = null;
 		Session session = null;
 		Set<Integer> productIds = new HashSet<Integer>();
 		
-		List<Product> products = new ArrayList<Product>();
+		List<ProductBean> productsList = new ArrayList<ProductBean>();
+		
 		try{
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
@@ -67,8 +68,24 @@ public class ProductManager {
 				//Get All products
 				Criteria productcriteria = session.createCriteria(Product.class);
 				productcriteria.add(Restrictions.in("productId", productIds));
-				products = productcriteria.list();
+				List<Product> products = productcriteria.list();
 				log.debug("Size : " + products.size());
+				if(products.size()>0){
+					for(Product product : products){
+						ProductBean bean = new ProductBean();
+						bean.setProductId(product.getProductId());
+						bean.setProductName(product.getProductName());
+						bean.setProductDescription(product.getProductDescription());
+						bean.setProductPrice(product.getProductPrice());
+						bean.setDiscountRate(product.getDiscountRate());
+						float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+						bean.setDiscountedPrice(discountedPrice);
+						bean.setProduct_image(product.getProduct_image());
+						bean.setProductInStock(product.getProductInStock());
+						productsList.add(bean);
+						bean = null;
+					}
+				}
 			}
 		}
 		catch(RuntimeException re){
@@ -83,7 +100,7 @@ public class ProductManager {
 				session.close();
 			}
 		}
-		return products;
+		return productsList;
 	}
 	
 	public NewProductsResponseBean addNewProducts(NewProductsRequestBean requestBean){
@@ -99,7 +116,7 @@ public class ProductManager {
 				Product product = new Product();
 				product.setProductName(bean.getProductName());
 				product.setProductPrice(bean.getProductPrice());
-				product.setProduct_image(bean.getProductImage());
+				product.setProduct_image(bean.getProduct_image());
 				product.setProductDescription(bean.getProductDescription());
 				
 				session.persist(product);
@@ -144,7 +161,7 @@ public class ProductManager {
 				product.setProductName(bean.getProductName());
 				product.setProductDescription(bean.getProductDescription());
 				product.setProductPrice(bean.getProductPrice());
-				product.setProduct_image(bean.getProductImage());
+				product.setProduct_image(bean.getProduct_image());
 				
 				session.update(product);
 				
@@ -216,11 +233,11 @@ public class ProductManager {
 	
 	public static void main(String[] args) {
 		ProductManager manager = new ProductManager();
-		List<Product> products = manager.getAllProducts(5000000);
-		for (Iterator iterator = products.iterator(); iterator.hasNext();) {
-			Product product = (Product) iterator.next();
-			System.out.println(product.getProductId() + " | " + product.getProductName() + " | " + product.getProductPrice() );
-		}
+//		List<Product> products = manager.getAllProducts(5000000);
+//		for (Iterator iterator = products.iterator(); iterator.hasNext();) {
+//			Product product = (Product) iterator.next();
+//			System.out.println(product.getProductId() + " | " + product.getProductName() + " | " + product.getProductPrice() );
+//		}
 	}
 	
 }

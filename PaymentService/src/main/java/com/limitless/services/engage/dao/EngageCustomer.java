@@ -31,6 +31,8 @@ public class EngageCustomer implements java.io.Serializable {
 	private String customerEmail99;
 	@Column(name="CUSTOMER_PASSWD99")
 	private String customerPasswd99;
+	@Column(name="DEVICE_ID")
+	private String deviceId;
 	@Column(name="CUSTOMER_COUNTRY_CODE")
 	private String customerCountryCode;
 	@Column(name="CUSTOMER_MOBILE_NUMBER")
@@ -152,5 +154,12 @@ public class EngageCustomer implements java.io.Serializable {
 	public void setCitrusSellerId(Integer citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
 	}
-	
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
 }

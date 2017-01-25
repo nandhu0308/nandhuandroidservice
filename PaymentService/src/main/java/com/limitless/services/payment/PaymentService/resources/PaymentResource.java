@@ -445,8 +445,8 @@ public class PaymentResource {
 				OrdersManager ordersManager = new OrdersManager();
 				orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
 				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
-				InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
-				System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
+				//InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
+				//System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
 				orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
 				System.out.println("Status: " + orderMailResponseBean.getMessage());
 			}

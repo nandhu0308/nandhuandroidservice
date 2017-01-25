@@ -22,6 +22,10 @@ public class Product {
 	private String product_image;
 	@Column(name="PRODUCT_DESCRIPTION")
 	private String productDescription;
+	@Column(name="DISCOUNT_RATE")
+	private double discountRate;
+	@Column(name="PRODUCT_IN_STOCK")
+	private Integer productInStock;
 	
 	public Integer getProductId() {
 		return productId;
@@ -53,5 +57,16 @@ public class Product {
 	public void setProductDescription(String productDescription) {
 		this.productDescription = productDescription;
 	}
-	
+	public double getDiscountRate() {
+		return discountRate;
+	}
+	public void setDiscountRate(double discountRate) {
+		this.discountRate = discountRate;
+	}
+	public Integer getProductInStock() {
+		return productInStock;
+	}
+	public void setProductInStock(Integer productInStock) {
+		this.productInStock = productInStock;
+	}
 }

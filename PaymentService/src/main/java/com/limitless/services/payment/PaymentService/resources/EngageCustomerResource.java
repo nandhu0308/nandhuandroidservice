@@ -26,6 +26,10 @@ import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.CustomerAddressListBean;
 import com.limitless.services.engage.CustomerAddressRequestBean;
 import com.limitless.services.engage.CustomerAddressResponseBean;
+import com.limitless.services.engage.CustomerDeviceIdRequestBean;
+import com.limitless.services.engage.CustomerDeviceIdResponseBean;
+import com.limitless.services.engage.CustomerNotifyRequestBean;
+import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
@@ -372,5 +376,55 @@ public class EngageCustomerResource {
 		}
 		return responseBean;
 	}
-
+	
+	@PUT
+	@Path("/customer/deviceid")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerDeviceIdResponseBean updateCustomer(CustomerDeviceIdRequestBean requestBean) throws Exception{
+		CustomerDeviceIdResponseBean responseBean = new CustomerDeviceIdResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.addDeviceIdForCustomer(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/notify/offers/all")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerNotifyResponseBean notifyOffersAll(CustomerNotifyRequestBean requestBean) throws Exception{
+		CustomerNotifyResponseBean responseBean = new CustomerNotifyResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.notifyAllCustomer(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/notify/offers")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerNotifyResponseBean notifyOfferCustomer(CustomerNotifyRequestBean requestBean) throws Exception{
+		CustomerNotifyResponseBean responseBean = new CustomerNotifyResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.notifyCustomer(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
 }

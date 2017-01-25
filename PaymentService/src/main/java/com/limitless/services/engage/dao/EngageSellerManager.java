@@ -396,7 +396,7 @@ public class EngageSellerManager {
 				for (EngageSeller seller : sellerList) {
 					responseBean.setSellerId(seller.getSellerId());
 					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
-					responseBean.setSellerName(seller.getSellerName());
+					responseBean.setSellerName(seller.getSellerShopName());
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
 					responseBean.setMessage("Success");

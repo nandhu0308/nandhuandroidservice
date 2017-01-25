@@ -4,9 +4,12 @@ public class ProductBean {
 	private int productId;
 	private String productName;
 	private float productPrice;
-	private String productImage;
+	private String product_image;
 	private String productDescription;
 	private String productStock;
+	private double discountRate;
+	private float discountedPrice;
+	private int productInStock;
 	public String getProductName() {
 		return productName;
 	}
@@ -19,11 +22,11 @@ public class ProductBean {
 	public void setProductPrice(float productPrice) {
 		this.productPrice = productPrice;
 	}
-	public String getProductImage() {
-		return productImage;
+	public String getProduct_image() {
+		return product_image;
 	}
-	public void setProductImage(String productImage) {
-		this.productImage = productImage;
+	public void setProduct_image(String product_image) {
+		this.product_image = product_image;
 	}
 	public String getProductDescription() {
 		return productDescription;
@@ -42,5 +45,23 @@ public class ProductBean {
 	}
 	public void setProductStock(String productStock) {
 		this.productStock = productStock;
+	}
+	public double getDiscountRate() {
+		return discountRate;
+	}
+	public void setDiscountRate(double discountRate) {
+		this.discountRate = discountRate;
+	}
+	public float getDiscountedPrice() {
+		return discountedPrice;
+	}
+	public void setDiscountedPrice(float discountedPrice) {
+		this.discountedPrice = discountedPrice;
+	}
+	public int getProductInStock() {
+		return productInStock;
+	}
+	public void setProductInStock(int productInStock) {
+		this.productInStock = productInStock;
 	}
 }
