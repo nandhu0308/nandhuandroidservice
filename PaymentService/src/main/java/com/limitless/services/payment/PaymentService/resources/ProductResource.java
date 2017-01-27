@@ -1,12 +1,15 @@
 package com.limitless.services.payment.PaymentService.resources;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
@@ -14,6 +17,7 @@ import com.limitless.services.engage.order.dao.OrdersManager;
 import com.limitless.services.engage.sellers.NewProductsRequestBean;
 import com.limitless.services.engage.sellers.NewProductsResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
+import com.limitless.services.engage.sellers.ProductErrorBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
@@ -89,6 +93,20 @@ public class ProductResource {
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
+	}
+	
+	@Path("/get/{productId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getProduct(@PathParam("productId") int productId){
+		ProductManager manager = new ProductManager();
+		ProductBean bean = manager.getProductById(productId);
+		if(bean!=null){
+			return Response.status(200).entity(bean).build();
+		}
+		ProductErrorBean errorBean = new ProductErrorBean();
+		errorBean.setMessage("Not Found...");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
 	}
 	
 }

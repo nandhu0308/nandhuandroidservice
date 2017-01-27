@@ -20,6 +20,7 @@ import com.limitless.services.engage.sellers.NewProductsResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
+import com.limitless.services.engage.sellers.ProductModelsBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
@@ -229,6 +230,71 @@ public class ProductManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public ProductBean getProductById(int productId){
+		log.debug("Getting product by id");
+		ProductBean productBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Product product = (Product) session
+					.get("com.limitless.services.engage.sellers.product.dao.Product", productId);
+			if(product != null){
+				productBean = new ProductBean();
+				productBean.setProductId(productId);
+				productBean.setProductName(product.getProductName());
+				productBean.setProduct_image(product.getProduct_image());
+				productBean.setProductDescription(product.getProductDescription());
+				productBean.setProductPrice(product.getProductPrice());
+				productBean.setProductInStock(product.getProductInStock());
+				float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+				productBean.setDiscountRate(product.getDiscountRate());
+				productBean.setDiscountedPrice(discountedPrice);
+				
+				List<ProductModelsBean> modelsList = new ArrayList<ProductModelsBean>();
+				Criteria criteria = session.createCriteria(ProductPricesMapper.class);
+				criteria.add(Restrictions.eq("productId", productId));
+				List<ProductPricesMapper> mappersList = criteria.list();
+				log.debug("mapper size : " + mappersList.size());
+
+				if(mappersList.size()>0){
+					for(ProductPricesMapper mapper : mappersList){
+						ProductModelsBean modelsBean = new ProductModelsBean();
+						modelsBean.setProductId(productId);
+						modelsBean.setColor(mapper.getProductColor());
+						modelsBean.setSizeNumber(mapper.getProductSizeNumber());
+						modelsBean.setSizeText(mapper.getProductSizeText());
+						modelsBean.setProductPrice(mapper.getProductPrice());
+						modelsBean.setDiscountRate(mapper.getDiscountRate());
+						float discountedPrice2 = (float) ((Float) mapper.getProductPrice() - (mapper.getProductPrice()*(mapper.getDiscountRate()/100)));
+						modelsBean.setDiscountedPrice(discountedPrice2);
+						modelsList.add(modelsBean);
+						modelsBean = null;
+					}
+				}
+				else if(mappersList.isEmpty()){
+					modelsList = null;
+				}
+				productBean.setModelsList(modelsList);
+			}
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting product failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return productBean;
 	}
 	
 	public static void main(String[] args) {

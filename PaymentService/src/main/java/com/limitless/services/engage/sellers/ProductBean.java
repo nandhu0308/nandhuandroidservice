@@ -1,5 +1,7 @@
 package com.limitless.services.engage.sellers;
 
+import java.util.List;
+
 public class ProductBean {
 	private int productId;
 	private String productName;
@@ -10,6 +12,7 @@ public class ProductBean {
 	private double discountRate;
 	private float discountedPrice;
 	private int productInStock;
+	private List<ProductModelsBean> modelsList;
 	public String getProductName() {
 		return productName;
 	}
@@ -63,5 +66,11 @@ public class ProductBean {
 	}
 	public void setProductInStock(int productInStock) {
 		this.productInStock = productInStock;
+	}
+	public List<ProductModelsBean> getModelsList() {
+		return modelsList;
+	}
+	public void setModelsList(List<ProductModelsBean> modelsList) {
+		this.modelsList = modelsList;
 	}
 }

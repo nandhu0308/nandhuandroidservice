@@ -45,6 +45,7 @@
   <mapping class="com.limitless.services.engage.order.dao.CartDetails"/>
   <mapping class="com.limitless.services.engage.sellers.product.dao.ProductInventory"/>
   <mapping class="com.limitless.services.engage.sellers.product.dao.ProductImages"/>
+  <mapping class="com.limitless.services.engage.sellers.product.dao.ProductPricesMapper"/>  
   
  </session-factory>
 </hibernate-configuration>
