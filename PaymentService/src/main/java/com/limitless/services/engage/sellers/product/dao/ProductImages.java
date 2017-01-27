@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="product_images", catalog="llcdb")
-public class ProductImges {
+public class ProductImages {
 	@Id
 	@Column(name="PRODUCT_ID")
 	private Integer productId;
