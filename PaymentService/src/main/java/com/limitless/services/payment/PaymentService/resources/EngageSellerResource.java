@@ -18,11 +18,15 @@ import org.apache.log4j.Logger;
 import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
+import com.limitless.services.engage.CustomerNotifyRequestBean;
+import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
+import com.limitless.services.engage.SellerContactsRequestBean;
+import com.limitless.services.engage.SellerContactsResponseBean;
 import com.limitless.services.engage.SellerDeviceIdRespBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
@@ -316,6 +320,49 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
+	}
+	
+	@POST
+	@Path("/sync")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerContactsResponseBean addContacts(SellerContactsRequestBean requestBean) throws Exception{
+		SellerContactsResponseBean responseBean = new SellerContactsResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.addSellerContacts(requestBean);
+		}
+		catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/post/circle")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postCircle(CustomerNotifyRequestBean requestBean) throws Exception{
+		EngageSellerManager manager = new EngageSellerManager();
+		CustomerNotifyResponseBean responseBean = manager.postToCircle(requestBean);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+	
+	@POST
+	@Path("/post")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postAll(CustomerNotifyRequestBean requestBean) throws Exception{
+		EngageSellerManager manager = new EngageSellerManager();
+		CustomerNotifyResponseBean responseBean = manager.postToAll(requestBean);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
 	}
 	
 }

@@ -23,4 +23,8 @@ public class CustomerFcmRequestBean {
 	public void setData(CustomerDataBean data) {
 		this.data = data;
 	}
+	@Override
+	public String toString() {
+		return "CustomerFcmRequestBean [to=" + to + ", priority=" + priority + ", data=" + data + "]";
+	}
 }

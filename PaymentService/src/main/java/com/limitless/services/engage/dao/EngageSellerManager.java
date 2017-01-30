@@ -23,9 +23,16 @@ import org.hibernate.criterion.Restrictions;
 import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
+import com.limitless.services.engage.CustomerDataBean;
+import com.limitless.services.engage.CustomerFcmRequestBean;
+import com.limitless.services.engage.CustomerNotifyRequestBean;
+import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
+import com.limitless.services.engage.PhoneNumber;
+import com.limitless.services.engage.SellerContactsRequestBean;
+import com.limitless.services.engage.SellerContactsResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
@@ -34,6 +41,10 @@ import com.limitless.services.engage.SellerUpdateRequestBean;
 import com.limitless.services.engage.SellerUpdateResponseBean;
 import com.limitless.services.engage.sellers.dao.SellerVersion;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
+import com.limitless.services.payment.PaymentService.util.RestClientUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * Home object for domain model class EngageSeller.
@@ -44,6 +55,7 @@ import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 public class EngageSellerManager {
 
 	private static final Log log = LogFactory.getLog(EngageSellerManager.class);
+	Client client = RestClientUtil.createClient();
 
 	/*
 	 * private final SessionFactory sessionFactory = getSessionFactory();
@@ -727,6 +739,175 @@ public class EngageSellerManager {
 				transaction.rollback();
 			}
 			log.error("Getting request count failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public SellerContactsResponseBean addSellerContacts(SellerContactsRequestBean requestBean){
+		log.debug("adding seller contacts");
+		SellerContactsResponseBean responseBean = new SellerContactsResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			if(requestBean.getPhoneNumberList().size()>0){
+				for(PhoneNumber number : requestBean.getPhoneNumberList()){
+					Criteria  criteria = session.createCriteria(EngageCustomer.class);
+					criteria.add(Restrictions.eq("customerMobileNumber", number.getPhoneNumber()));
+					List<EngageCustomer> customerList = criteria.list();
+					if(customerList.size()==1){
+						for(EngageCustomer customer : customerList){
+							Criteria criteria2 = session.createCriteria(SellerCustomerMapper.class);
+							criteria2.add(Restrictions.eq("customerId", customer.getCustomerId()));
+							List<SellerCustomerMapper> mapperList = criteria2.list();
+							log.debug("Mapper List size : " + mapperList.size());
+							if(mapperList.isEmpty()){
+								SellerCustomerMapper mapper = new SellerCustomerMapper();
+								mapper.setSellerId(requestBean.getSellerId());
+								mapper.setCustomerId(customer.getCustomerId());
+								
+								session.persist(mapper);
+								log.debug("SCM ID : " +mapper.getScmId());
+							}
+						}
+					}
+				}
+				responseBean.setMessage("Success");
+			}
+			else if(requestBean.getPhoneNumberList().isEmpty()){
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding seller contacts failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public CustomerNotifyResponseBean postToCircle(CustomerNotifyRequestBean requestBean){
+		log.debug("notifying circle customers");
+		CustomerNotifyResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				String sellerMobileNumber = seller.getSellerMobileNumber();
+				Criteria criteria = session.createCriteria(SellerCustomerMapper.class);
+				criteria.add(Restrictions.eq("sellerId", requestBean.getSellerId()));
+				List<SellerCustomerMapper> mapperList = criteria.list();
+				log.debug("Mapper Size : " + mapperList.size());
+				if(mapperList.size()>0){
+					for(SellerCustomerMapper mapper : mapperList){
+						EngageCustomer customer = (EngageCustomer) session
+								.get("com.limitless.services.engage.dao.EngageCustomer", mapper.getCustomerId());
+						CustomerFcmRequestBean fcmBean = new CustomerFcmRequestBean();
+						log.debug("Device ID : " + customer.getDeviceId());
+						fcmBean.setTo(customer.getDeviceId());
+						fcmBean.setPriority("high");
+						CustomerDataBean dataBean = new CustomerDataBean();
+						dataBean.setImageUrl(requestBean.getImageUrl());
+						dataBean.setMerchantMobile(sellerMobileNumber);
+						dataBean.setTitle(requestBean.getTitle());
+						dataBean.setBody(requestBean.getBody());
+						fcmBean.setData(dataBean);
+						log.debug("FCM Bean : " + fcmBean.toString());
+						WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+						ClientResponse clientResponse = webResource2.type("application/json")
+								.header("Authorization", "key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
+								.post(ClientResponse.class, fcmBean);
+						System.out.println(clientResponse.getStatus());
+						System.out.println(clientResponse.getEntity(String.class));
+					}
+					responseBean = new CustomerNotifyResponseBean();
+					responseBean.setMessage("Success");
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding seller contacts failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public CustomerNotifyResponseBean postToAll(CustomerNotifyRequestBean requestBean){
+		log.debug("notify to all");
+		CustomerNotifyResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				String sellerMobileNumber = seller.getSellerMobileNumber();
+
+				Criteria criteria = session.createCriteria(EngageCustomer.class);
+				List<EngageCustomer> customerList = criteria.list();
+				log.debug("CustomerSize : " + customerList.size());
+				if (customerList.size() > 0) {
+					for (EngageCustomer customer : customerList) {
+						if(customer.getDeviceId()!=null){
+							CustomerFcmRequestBean fcmBean = new CustomerFcmRequestBean();
+							log.debug("Device ID : " + customer.getDeviceId());
+							fcmBean.setTo(customer.getDeviceId());
+							fcmBean.setPriority("high");
+							CustomerDataBean dataBean = new CustomerDataBean();
+							dataBean.setImageUrl(requestBean.getImageUrl());
+							dataBean.setMerchantMobile(sellerMobileNumber);
+							dataBean.setTitle(requestBean.getTitle());
+							dataBean.setBody(requestBean.getBody());
+							fcmBean.setData(dataBean);
+							log.debug("FCM Bean : " + fcmBean.toString());
+							WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+							ClientResponse clientResponse = webResource2.type("application/json")
+									.header("Authorization", "key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
+									.post(ClientResponse.class, fcmBean);
+							System.out.println(clientResponse.getStatus());
+							System.out.println(clientResponse.getEntity(String.class));
+						}
+					}
+					responseBean = new CustomerNotifyResponseBean();
+					responseBean.setMessage("Success");
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding seller contacts failed " + re);
 		}
 		finally {
 			if (session != null && session.isOpen()) {

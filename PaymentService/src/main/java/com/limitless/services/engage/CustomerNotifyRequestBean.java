@@ -6,6 +6,7 @@ public class CustomerNotifyRequestBean {
 	private String body;
 	private String imageUrl;
 	private String merchantMobile;
+	private int sellerId;
 	public int getCustomerId() {
 		return customerId;
 	}
@@ -35,5 +36,11 @@ public class CustomerNotifyRequestBean {
 	}
 	public void setMerchantMobile(String merchantMobile) {
 		this.merchantMobile = merchantMobile;
+	}
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
 	}
 }
