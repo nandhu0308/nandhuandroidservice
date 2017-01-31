@@ -19,7 +19,8 @@ public class SellerLoginResponseBean {
 	private String sellerRole;
 	private List<ProductBean> products;
 	private String brandingUrl;
-	
+	private String sessionKey;
+	private int sessionId;
 	
 	public List<ProductBean> getProducts() {
 		return products;
@@ -93,5 +94,16 @@ public class SellerLoginResponseBean {
 	public void setBrandingUrl(String brandingUrl) {
 		this.brandingUrl = brandingUrl;
 	}
-	
+	public String getSessionKey() {
+		return sessionKey;
+	}
+	public void setSessionKey(String sessionKey) {
+		this.sessionKey = sessionKey;
+	}
+	public int getSessionId() {
+		return sessionId;
+	}
+	public void setSessionId(int sessionId) {
+		this.sessionId = sessionId;
+	}
 }

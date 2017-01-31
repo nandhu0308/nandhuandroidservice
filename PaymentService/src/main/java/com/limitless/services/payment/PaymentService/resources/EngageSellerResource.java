@@ -22,6 +22,10 @@ import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
+import com.limitless.services.engage.MerchantDeviceIdRequestBean;
+import com.limitless.services.engage.MerchantDeviceIdResponseBean;
+import com.limitless.services.engage.MerchantLogoutRequestBean;
+import com.limitless.services.engage.MerchantLogoutResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
@@ -51,7 +55,7 @@ public class EngageSellerResource {
 	final static Logger logger = Logger.getLogger(EngageSellerResource.class);
 
 	@POST
-	@Path("/seller")
+	@Path("/seller/register")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public EngageSellerResponseBean addTxn(EngageSellerBean bean) throws Exception {
@@ -126,7 +130,7 @@ public class EngageSellerResource {
 	}
 
 	@GET
-	@Path("/seller/{id}/deviceid")
+	@Path("/seller/{id}/deviceidbg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SellerDeviceIdRespBean getSellerDeviceId(@PathParam("id") int id) throws Exception {
 		EngageSellerManager manager = new EngageSellerManager();
@@ -365,4 +369,38 @@ public class EngageSellerResource {
 		return Response.status(404).build();
 	}
 	
+	@PUT
+	@Path("/deviceid")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public MerchantDeviceIdResponseBean updateDeviceId(MerchantDeviceIdRequestBean requestBean) throws Exception{
+		MerchantDeviceIdResponseBean responseBean = new MerchantDeviceIdResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.sellerDeviceIdUpadte(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/logout")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public MerchantLogoutResponseBean sellerLogout(MerchantLogoutRequestBean requestBean) throws Exception{
+		MerchantLogoutResponseBean responseBean = new MerchantLogoutResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.logoutSeller(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+		
 }

@@ -1,6 +1,11 @@
 package com.limitless.services.engage.dao;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 
 // Generated Oct 14, 2016 12:16:27 AM by Hibernate Tools 3.4.0.CR1
 
@@ -19,6 +24,7 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
+import org.json.JSONObject;
 
 import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
@@ -27,6 +33,10 @@ import com.limitless.services.engage.CustomerDataBean;
 import com.limitless.services.engage.CustomerFcmRequestBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
+import com.limitless.services.engage.MerchantDeviceIdRequestBean;
+import com.limitless.services.engage.MerchantDeviceIdResponseBean;
+import com.limitless.services.engage.MerchantLogoutRequestBean;
+import com.limitless.services.engage.MerchantLogoutResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
@@ -236,7 +246,7 @@ public class EngageSellerManager {
 		}
 	}
 
-	public SellerLoginResponseBean sellerLogin(SellerLoginRequestBean reqBean) {
+	public SellerLoginResponseBean sellerLogin(SellerLoginRequestBean reqBean) throws Exception {
 		log.debug("Logging in seller");
 		SellerLoginResponseBean respBean = new SellerLoginResponseBean();
 		Transaction transaction = null;
@@ -265,6 +275,36 @@ public class EngageSellerManager {
 					respBean.setSellerRole(seller.getSellerRole());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
+					
+					SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(new Date());
+					calendar.add(Calendar.MINUTE, 5);
+					String validDate = sdf1.format(calendar.getTime());
+					log.debug("Date String : " + validDate);
+					Date validTill = sdf1.parse(validDate);
+					log.debug("Date String : " + validTill.toString());
+					
+					JSONObject sessionKeyJson = new JSONObject();
+					sessionKeyJson.put("role", "merchant");
+					sessionKeyJson.put("key", seller.getSellerId());
+					sessionKeyJson.put("value", seller.getSellerPasswd99());
+					
+					SessionKeys sessionKeys = new SessionKeys();
+					sessionKeys.setUserId(seller.getSellerId());
+					sessionKeys.setSessionKey(sessionKeyJson.toString());
+					sessionKeys.setKeyAlive(1);
+					
+					session.persist(sessionKeys);
+					
+					int sesssionKeyId = sessionKeys.getSessionId();
+					
+					String sessionKeyString = sesssionKeyId+"."+sessionKeyJson.toString();
+					String sessionKeyB64 = Base64.getEncoder().encodeToString(sessionKeyString.getBytes());
+					log.debug("Session Key : " +sessionKeyB64);
+					
+					respBean.setSessionKey(sessionKeyB64);
+					respBean.setSessionId(sesssionKeyId);
 				}
 				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 						sellerId);
@@ -908,6 +948,120 @@ public class EngageSellerManager {
 				transaction.rollback();
 			}
 			log.error("adding seller contacts failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public boolean authenticateMerchant(String sessionKey, int sessionId){
+		log.debug("authenticating customer");
+		boolean isCustomerAuthorized = false;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			JSONObject sessionJson = new JSONObject(sessionKey);
+			int sellerId = sessionJson.getInt("key");
+			
+			SessionKeys sessionKeys = (SessionKeys) session
+					.get("com.limitless.services.engage.dao.SessionKeys", sessionId);
+			if(sessionKeys!=null){
+				if(sessionKeys.getKeyAlive()==1 && sessionKeys.getUserId()==sellerId){
+					isCustomerAuthorized = true;
+				}
+				else{
+					isCustomerAuthorized = false;
+				}
+			}
+			else{
+				isCustomerAuthorized = false;
+			}
+			transaction.commit();
+		}
+		catch(Exception e){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("authenticating custimer failed :" + e);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return isCustomerAuthorized;
+	}
+	
+	public MerchantDeviceIdResponseBean sellerDeviceIdUpadte(MerchantDeviceIdRequestBean requestBean){
+		log.debug("updating device id");
+		MerchantDeviceIdResponseBean responseBean = new MerchantDeviceIdResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = 	(EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				seller.setSellerDeviceId(requestBean.getDeviceId());
+				session.update(seller);
+				responseBean.setSellerId(requestBean.getSellerId());
+				responseBean.setMessage("Success");
+			}
+			else if(seller == null){
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding device id failed : ", re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public MerchantLogoutResponseBean logoutSeller(MerchantLogoutRequestBean requestBean){
+		log.debug("deactivting session key");
+		MerchantLogoutResponseBean responseBean = new MerchantLogoutResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SessionKeys key = (SessionKeys) session
+					.get("com.limitless.services.engage.dao.SessionKeys", requestBean.getSessionId());
+			if(key!=null){
+				key.setKeyAlive(0);
+				session.update(key);
+				responseBean.setSellerId(requestBean.getSellerId());
+				responseBean.setMessage("Success");
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("deactivting session key failed :" + re);
 		}
 		finally {
 			if (session != null && session.isOpen()) {

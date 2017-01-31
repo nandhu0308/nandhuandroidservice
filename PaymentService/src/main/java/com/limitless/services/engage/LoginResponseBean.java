@@ -9,7 +9,9 @@ public class LoginResponseBean {
 	private int customerId;
 	private String customerName;
 	private String customerEmail;
-	
+	private String sessionKey;
+	private int sessionId;
+	private String deviceId;
 	
 	public int getLoginStatus() {
 		return loginStatus;
@@ -50,6 +52,29 @@ public class LoginResponseBean {
 	public void setCustomerEmail(String customerEmail) {
 		this.customerEmail = customerEmail;
 	}
-	
+
+	public String getSessionKey() {
+		return sessionKey;
+	}
+
+	public void setSessionKey(String sessionKey) {
+		this.sessionKey = sessionKey;
+	}
+
+	public int getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(int sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
 
 }

@@ -26,8 +26,7 @@ public class RestAuthenticationFilter implements Filter {
 			FilterChain filter) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
 			HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-			String authCredentials = httpServletRequest
-					.getHeader(AUTHENTICATION_HEADER);
+			String authCredentials = httpServletRequest.getHeader(AUTHENTICATION_HEADER);
 			
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
@@ -41,8 +40,12 @@ public class RestAuthenticationFilter implements Filter {
 				authenticationStatus = true;
 			} /*else if(path.endsWith("customer") && httpRequest.getMethod().equals("POST") ){
 				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);
-			} */else {
+			} */else if(path.contains("login") || path.endsWith("split") || path.endsWith("credit") 
+					|| path.endsWith("payment/trans") || path.contains("customer/register") || path.contains("deviceidbg") || path.contains("seller/register")) {
 				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);
+			}
+			else{
+				authenticationStatus = AuthenticationUtil.getInstance().authenticateUser(authCredentials);
 			}
 
 			if (authenticationStatus) {

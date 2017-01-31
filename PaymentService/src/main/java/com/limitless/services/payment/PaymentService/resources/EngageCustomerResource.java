@@ -28,6 +28,8 @@ import com.limitless.services.engage.CustomerAddressRequestBean;
 import com.limitless.services.engage.CustomerAddressResponseBean;
 import com.limitless.services.engage.CustomerDeviceIdRequestBean;
 import com.limitless.services.engage.CustomerDeviceIdResponseBean;
+import com.limitless.services.engage.CustomerLogoutRequestBean;
+import com.limitless.services.engage.CustomerLogoutResponseBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
@@ -55,7 +57,7 @@ public class EngageCustomerResource {
 	final static Logger logger = Logger.getLogger(EngageCustomerResource.class);
 
 	@POST
-	@Path("/customer")
+	@Path("/customer/register")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public EngageCustomerResponseBean addTxn(EngageCustomerBean bean) throws Exception {
@@ -420,6 +422,23 @@ public class EngageCustomerResource {
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.notifyCustomer(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/logout")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerLogoutResponseBean customerLogout(CustomerLogoutRequestBean requestBean) throws Exception{
+		CustomerLogoutResponseBean responseBean = new CustomerLogoutResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.deacticateSessionKey(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

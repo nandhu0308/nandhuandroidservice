@@ -5,6 +5,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 
 // Generated Sep 25, 2016 10:49:31 PM by Hibernate Tools 3.4.0.CR1
 
@@ -34,6 +39,8 @@ import com.limitless.services.engage.CustomerDataBean;
 import com.limitless.services.engage.CustomerDeviceIdRequestBean;
 import com.limitless.services.engage.CustomerDeviceIdResponseBean;
 import com.limitless.services.engage.CustomerFcmRequestBean;
+import com.limitless.services.engage.CustomerLogoutRequestBean;
+import com.limitless.services.engage.CustomerLogoutResponseBean;
 import com.limitless.services.engage.CustomerNotificationBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
@@ -293,7 +300,7 @@ public class EngageCustomerManager {
 		}
 	}
 
-	public LoginResponseBean validateUser(String customerMobile, String passwd) {
+	public LoginResponseBean validateUser(String customerMobile, String passwd) throws Exception {
 		log.debug("checking login credentials");
 		LoginResponseBean loginResponseBean = new LoginResponseBean();
 		Transaction transaction = null;
@@ -315,7 +322,37 @@ public class EngageCustomerManager {
 					loginResponseBean.setCustomerId(user.getCustomerId());
 					loginResponseBean.setCustomerName(user.getCustomerName());
 					loginResponseBean.setCustomerEmail(user.getCustomerEmail99());
-					;
+					loginResponseBean.setDeviceId(user.getDeviceId());
+					
+					SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(new Date());
+					calendar.add(Calendar.MINUTE, 5);
+					String validDate = sdf1.format(calendar.getTime());
+					log.debug("Date String : " + validDate);
+					Date validTill = sdf1.parse(validDate);
+					log.debug("Date String : " + validTill.toString());
+					
+					JSONObject sessionKeyJson = new JSONObject();
+					sessionKeyJson.put("role", "customer");
+					sessionKeyJson.put("key", user.getCustomerId());
+					sessionKeyJson.put("value", passwd);
+					
+					SessionKeys sessionKeys = new SessionKeys();
+					sessionKeys.setUserId(user.getCustomerId());
+					sessionKeys.setSessionKey(sessionKeyJson.toString());
+					sessionKeys.setKeyAlive(1);
+					
+					session.persist(sessionKeys);
+					
+					int sesssionKeyId = sessionKeys.getSessionId();
+					
+					String sessionKeyString = sesssionKeyId+"."+sessionKeyJson.toString();
+					String sessionKeyB64 = Base64.getEncoder().encodeToString(sessionKeyString.getBytes());
+					log.debug("Session Key : " +sessionKeyB64);
+					
+					loginResponseBean.setSessionKey(sessionKeyB64);
+					loginResponseBean.setSessionId(sesssionKeyId);
 				}
 			} else {
 				loginResponseBean.setLoginStatus(-1);
@@ -849,6 +886,83 @@ public class EngageCustomerManager {
 			}
 			log.error("sending notification failed : ", re);
 			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public boolean authenticateCustomer(String sessionKey, int sessionId){
+		log.debug("authenticating customer");
+		boolean isCustomerAuthorized = false;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			JSONObject sessionJson = new JSONObject(sessionKey);
+			int customerId = sessionJson.getInt("key");
+			
+			SessionKeys sessionKeys = (SessionKeys) session
+					.get("com.limitless.services.engage.dao.SessionKeys", sessionId);
+			if(sessionKeys!=null){
+				if(sessionKeys.getKeyAlive()==1 && sessionKeys.getUserId()==customerId){
+					isCustomerAuthorized = true;
+				}
+				else{
+					isCustomerAuthorized = false;
+				}
+			}
+			else{
+				isCustomerAuthorized = false;
+			}
+			transaction.commit();
+		}
+		catch(Exception e){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("authenticating custimer failed :" + e);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return isCustomerAuthorized;
+	}
+	
+	public CustomerLogoutResponseBean deacticateSessionKey(CustomerLogoutRequestBean requestBean){
+		log.debug("deactivting session key");
+		CustomerLogoutResponseBean responseBean = new CustomerLogoutResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SessionKeys key = (SessionKeys) session
+					.get("com.limitless.services.engage.dao.SessionKeys", requestBean.getSessionId());
+			if(key!=null){
+				key.setKeyAlive(0);
+				session.update(key);
+				responseBean.setCustomerId(requestBean.getCustomerId());
+				responseBean.setMessage("Success");
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("deactivting session key failed :" + re);
 		}
 		finally {
 			if (session != null && session.isOpen()) {

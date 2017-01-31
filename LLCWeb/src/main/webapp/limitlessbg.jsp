@@ -55,7 +55,7 @@ if(txnNotes==null)
 Client client = RestClientUtil.createClient();
 
 //Retrieve Seller Device ID from Engage Seller Table
-WebResource sellerResource = client.resource("https://services.beinglimitless.in/engage/merchant/seller/" + sellerId + "/deviceid");
+WebResource sellerResource = client.resource("https://services.beinglimitless.in/engage/merchant/seller/" + sellerId + "/deviceidbg");
 SellerDeviceIdRespBean sellerDeviceIdRespBean = sellerResource.accept("application/json").header("Authorization","Basic " + userString).get(SellerDeviceIdRespBean.class);
 String sellerDeviceId = sellerDeviceIdRespBean.getSellerDeviceId();
 if(sellerDeviceId == null){

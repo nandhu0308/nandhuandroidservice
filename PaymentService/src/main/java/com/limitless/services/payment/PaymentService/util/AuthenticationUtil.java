@@ -5,8 +5,10 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import com.limitless.services.engage.dao.EngageCustomerManager;
+import com.limitless.services.engage.dao.EngageSellerManager;
 
 public class AuthenticationUtil {
 	
@@ -61,4 +63,34 @@ public class AuthenticationUtil {
 		
 		return isValidCredentials;
 	}
+	
+	public boolean authenticateUser(String sessionKey){
+		boolean isUserAuthenticated = false;
+		if(sessionKey==null){
+			return isUserAuthenticated;
+		}
+		
+		byte[] sessionKeyBytes = java.util.Base64.getDecoder().decode(sessionKey);
+		String sessionKeyString = new String(sessionKeyBytes);
+		logger.info("Token : " +sessionKeyString);
+		StringTokenizer tokenizer = new StringTokenizer(sessionKeyString, ".");
+		int sessionId = Integer.parseInt(tokenizer.nextToken());
+		String sessionToken = tokenizer.nextToken();
+		
+		JSONObject tokenJson = new JSONObject(sessionToken);
+		String role = tokenJson.getString("role");
+		
+		if(role.equals("customer")){
+			EngageCustomerManager manager = new EngageCustomerManager();
+			isUserAuthenticated = manager.authenticateCustomer(sessionToken, sessionId);
+		}
+		
+		else if(role.equals("merchant")){
+			EngageSellerManager manager = new EngageSellerManager();
+			isUserAuthenticated = manager.authenticateMerchant(sessionToken, sessionId);
+		}
+		
+		return isUserAuthenticated;
+	}
+	
 }
