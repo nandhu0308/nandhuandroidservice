@@ -34,6 +34,8 @@ import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
+import com.limitless.services.engage.GuestLoginRequestBean;
+import com.limitless.services.engage.GuestLoginResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
 import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginRequestBean;
@@ -446,4 +448,40 @@ public class EngageCustomerResource {
 		}
 		return responseBean;
 	}
+	
+	@PUT
+	@Path("/customer/lcpwd/{customerId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public PasswdResponseBean resetPassword(@PathParam("customerId") int customerId, 
+			PasswdRequestBean requestBean) throws Exception{
+		PasswdResponseBean responseBean = new PasswdResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.changePassword(customerId, requestBean.getOldPasswd(), requestBean.getNewPasswd());
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/customer/guest")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public GuestLoginResponseBean guestLogin(GuestLoginRequestBean requestBean) throws Exception{
+		GuestLoginResponseBean responseBean = new GuestLoginResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.loginGuestUser(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
 }

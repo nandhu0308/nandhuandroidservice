@@ -15,6 +15,7 @@ import java.util.Date;
 
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -44,6 +45,8 @@ import com.limitless.services.engage.CustomerLogoutResponseBean;
 import com.limitless.services.engage.CustomerNotificationBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
+import com.limitless.services.engage.GuestLoginRequestBean;
+import com.limitless.services.engage.GuestLoginResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
 import com.limitless.services.engage.InviteResponseBean;
 import com.limitless.services.engage.LoginResponseBean;
@@ -963,6 +966,91 @@ public class EngageCustomerManager {
 				transaction.rollback();
 			}
 			log.error("deactivting session key failed :" + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public GuestLoginResponseBean loginGuestUser(GuestLoginRequestBean requestBean){
+		log.debug("guest login");
+		GuestLoginResponseBean responseBean = new GuestLoginResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(GuestUser.class);
+			criteria.add(Restrictions.eq("deviceMac", requestBean.getDeviceMac()));
+			List<GuestUser> guestList = criteria.list();
+			log.debug("Guest list : " + guestList.size());
+			if(guestList.size()>0){
+				for(GuestUser guest : guestList){
+					responseBean.setCustomerId(-1);
+					responseBean.setGuestId(guest.getGuestId());
+					Criteria criteria2 = session.createCriteria(SessionKeys.class);
+					Criterion uidCriterion = Restrictions.eq("userId", guest.getGuestId());
+					Criterion aliveCriterion = Restrictions.eq("keyAlive", 1);
+					LogicalExpression logExp = Restrictions.and(uidCriterion, aliveCriterion);
+					criteria2.add(logExp);
+					List<SessionKeys> sessionList = criteria2.list();
+					log.debug("Session list : " + sessionList.size());
+					if(sessionList.size()==1){
+						for(SessionKeys sessionKeys : sessionList){
+							String sessionKeyString = sessionKeys.getSessionId()+"."+sessionKeys.getSessionKey();
+							String sessionKeyB64 = Base64.getEncoder().encodeToString(sessionKeyString.getBytes());
+							log.debug("Session Key : " +sessionKeyB64);
+							
+							responseBean.setSessionKey(sessionKeyB64);
+							responseBean.setSessionId(sessionKeys.getSessionId());
+						}
+					}
+				}
+				responseBean.setMessage("Success");
+			}
+			else if(guestList.isEmpty()){
+				GuestUser guestUser = new GuestUser();
+				guestUser.setDeviceMac(requestBean.getDeviceMac());
+				session.persist(guestUser);
+				
+				String guestPwd = DigestUtils.sha256Hex("guest@llc2o2o"+guestUser.getGuestId());
+				log.debug("pwd hash : "+guestPwd);
+				
+				JSONObject sessionKeyJson = new JSONObject();
+				sessionKeyJson.put("role", "customer");
+				sessionKeyJson.put("key", guestUser.getGuestId());
+				sessionKeyJson.put("value", guestPwd);
+				
+				SessionKeys sessionKeys = new SessionKeys();
+				sessionKeys.setUserId(guestUser.getGuestId());
+				sessionKeys.setSessionKey(sessionKeyJson.toString());
+				sessionKeys.setKeyAlive(1);
+				
+				session.persist(sessionKeys);
+				
+				int sesssionKeyId = sessionKeys.getSessionId();
+				
+				String sessionKeyString = sesssionKeyId+"."+sessionKeyJson.toString();
+				String sessionKeyB64 = Base64.getEncoder().encodeToString(sessionKeyString.getBytes());
+				log.debug("Session Key : " +sessionKeyB64);
+				
+				responseBean.setCustomerId(-1);
+				responseBean.setGuestId(guestUser.getGuestId());
+				responseBean.setSessionKey(sessionKeyB64);
+				responseBean.setSessionId(sesssionKeyId);
+				responseBean.setMessage("Success");
+			}
+			transaction.commit();			
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("guest login failed :" + re);
 		}
 		finally {
 			if (session != null && session.isOpen()) {
