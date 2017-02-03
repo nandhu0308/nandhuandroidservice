@@ -255,6 +255,21 @@ public class ProductManager {
 				productBean.setDiscountRate(product.getDiscountRate());
 				productBean.setDiscountedPrice(discountedPrice);
 				
+				ProductImages images = (ProductImages) session
+						.get("com.limitless.services.engage.sellers.product.dao.ProductImages", productId);
+				if(images != null){
+					productBean.setImage1(images.getImage1());
+					productBean.setImage2(images.getImage2());
+					productBean.setImage3(images.getImage3());
+					productBean.setImage4(images.getImage4());
+					productBean.setImage5(images.getImage5());
+					productBean.setImage6(images.getImage6());
+					productBean.setImage7(images.getImage7());
+					productBean.setImage8(images.getImage8());
+					productBean.setImage9(images.getImage9());
+					productBean.setImage10(images.getImage10());
+				}
+				
 				List<ProductModelsBean> modelsList = new ArrayList<ProductModelsBean>();
 				Criteria criteria = session.createCriteria(ProductPricesMapper.class);
 				criteria.add(Restrictions.eq("productId", productId));
@@ -272,6 +287,16 @@ public class ProductManager {
 						modelsBean.setDiscountRate(mapper.getDiscountRate());
 						float discountedPrice2 = (float) ((Float) mapper.getProductPrice() - (mapper.getProductPrice()*(mapper.getDiscountRate()/100)));
 						modelsBean.setDiscountedPrice(discountedPrice2);
+						modelsBean.setImage1(mapper.getImage1());
+						modelsBean.setImage2(mapper.getImage2());
+						modelsBean.setImage3(mapper.getImage3());
+						modelsBean.setImage4(mapper.getImage4());
+						modelsBean.setImage5(mapper.getImage5());
+						modelsBean.setImage6(mapper.getImage6());
+						modelsBean.setImage7(mapper.getImage7());
+						modelsBean.setImage8(mapper.getImage8());
+						modelsBean.setImage9(mapper.getImage9());
+						modelsBean.setImage10(mapper.getImage10());
 						modelsList.add(modelsBean);
 						modelsBean = null;
 					}

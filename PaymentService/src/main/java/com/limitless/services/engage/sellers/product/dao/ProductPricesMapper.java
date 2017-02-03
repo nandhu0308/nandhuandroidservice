@@ -27,7 +27,7 @@ public class ProductPricesMapper {
 	private double discountRate;
 	@Column(name="IS_DEFAULT")
 	private Integer isDefault;
-	/*@Column(name="IMAGE1")
+	@Column(name="IMAGE1")
 	private String image1;
 	@Column(name="IMAGE2")
 	private String image2;
@@ -46,7 +46,7 @@ public class ProductPricesMapper {
 	@Column(name="IMAGE9")
 	private String image9;
 	@Column(name="IMAGE10")
-	private String image10;*/
+	private String image10;
 	
 	public Integer getPpmId() {
 		return ppmId;
@@ -96,7 +96,7 @@ public class ProductPricesMapper {
 	public void setProductSizeText(String productSizeText) {
 		this.productSizeText = productSizeText;
 	}
-	/*public String getImage1() {
+	public String getImage1() {
 		return image1;
 	}
 	public void setImage1(String image1) {
@@ -155,5 +155,5 @@ public class ProductPricesMapper {
 	}
 	public void setImage10(String image10) {
 		this.image10 = image10;
-	}*/
+	}
 }
