@@ -36,13 +36,13 @@ public class RestAuthenticationFilter implements Filter {
 			boolean authenticationStatus = false;
 			
 			//Get Version
-			if(path.contains("getVersion") || path.contains("selfinvite")){
+			if(path.contains("getVersion") || path.contains("selfinvite") || path.contains("seller/register")){
 				authenticationStatus = true;
 			} /*else if(path.endsWith("customer") && httpRequest.getMethod().equals("POST") ){
 				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);
 			} */else if(path.contains("login") || path.endsWith("split") || path.endsWith("credit") 
 					|| path.endsWith("payment/trans") || path.contains("deviceidbg") 
-					|| path.contains("seller/register") || path.contains("customer/get") || path.contains("customer/cpwd")
+					|| path.contains("customer/get") || path.contains("customer/cpwd")
 					|| path.contains("customer/guest")) {
 				authenticationStatus = AuthenticationUtil.getInstance().validateCredentials(authCredentials, true);
 			}
