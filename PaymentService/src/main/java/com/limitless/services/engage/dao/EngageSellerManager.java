@@ -49,6 +49,8 @@ import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.SellerUpdateRequestBean;
 import com.limitless.services.engage.SellerUpdateResponseBean;
+import com.limitless.services.engage.sellers.SubMerchantBean;
+import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.dao.SellerVersion;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
@@ -275,7 +277,7 @@ public class EngageSellerManager {
 					respBean.setSellerRole(seller.getSellerRole());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
-					
+
 					SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(new Date());
@@ -284,25 +286,25 @@ public class EngageSellerManager {
 					log.debug("Date String : " + validDate);
 					Date validTill = sdf1.parse(validDate);
 					log.debug("Date String : " + validTill.toString());
-					
+
 					JSONObject sessionKeyJson = new JSONObject();
 					sessionKeyJson.put("role", "merchant");
 					sessionKeyJson.put("key", seller.getSellerId());
 					sessionKeyJson.put("value", seller.getSellerPasswd99());
-					
+
 					SessionKeys sessionKeys = new SessionKeys();
 					sessionKeys.setUserId(seller.getSellerId());
 					sessionKeys.setSessionKey(sessionKeyJson.toString());
 					sessionKeys.setKeyAlive(1);
-					
+
 					session.persist(sessionKeys);
-					
+
 					int sesssionKeyId = sessionKeys.getSessionId();
-					
-					String sessionKeyString = sesssionKeyId+"."+sessionKeyJson.toString();
+
+					String sessionKeyString = sesssionKeyId + "." + sessionKeyJson.toString();
 					String sessionKeyB64 = Base64.getEncoder().encodeToString(sessionKeyString.getBytes());
-					log.debug("Session Key : " +sessionKeyB64);
-					
+					log.debug("Session Key : " + sessionKeyB64);
+
 					respBean.setSessionKey(sessionKeyB64);
 					respBean.setSessionId(sesssionKeyId);
 				}
@@ -561,93 +563,87 @@ public class EngageSellerManager {
 		}
 		return sellerVersion;
 	}
-	
-	public AliasCheckResponseBean getAliasNumber(String aliasNumber){
+
+	public AliasCheckResponseBean getAliasNumber(String aliasNumber) {
 		log.debug("Checking mobile alias");
 		AliasCheckResponseBean responseBean = new AliasCheckResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			criteria.add(Restrictions.eq("mobileAlias", aliasNumber));
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Seller size : " + sellerList.size());
-			if(sellerList.isEmpty()){
+			if (sellerList.isEmpty()) {
 				responseBean.setMessage("Success");
-			}
-			else if(sellerList.size()>0){
+			} else if (sellerList.size() > 0) {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Checking alias number failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public MerchantRequestCountBean getRequestCount(){
+
+	public MerchantRequestCountBean getRequestCount() {
 		log.debug("Getting request count");
 		MerchantRequestCountBean countBean = new MerchantRequestCountBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			criteria.add(Restrictions.eq("citrusSellerId", 0));
 			List<EngageSeller> sellerList = criteria.list();
-			log.debug("seller list size : " +sellerList.size());
-			if(sellerList.size()>0){
+			log.debug("seller list size : " + sellerList.size());
+			if (sellerList.size() > 0) {
 				countBean.setMessage("Success");
 				countBean.setRequestCount(sellerList.size());
-			}
-			else if(sellerList.isEmpty()){
+			} else if (sellerList.isEmpty()) {
 				countBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch (RuntimeException re) {
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Getting request count failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return countBean;
 	}
-	
-	public NewMerchantsRequestBean getRequestList(){
+
+	public NewMerchantsRequestBean getRequestList() {
 		log.debug("Getting new request list");
 		NewMerchantsRequestBean requestBean = new NewMerchantsRequestBean();
 		List<MerchantRequestListBean> listBean = new ArrayList<MerchantRequestListBean>();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			criteria.add(Restrictions.eq("citrusSellerId", 0));
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("seller list size : " + sellerList.size());
-			if(sellerList.size()>0){
-				for(EngageSeller seller : sellerList){
+			if (sellerList.size() > 0) {
+				for (EngageSeller seller : sellerList) {
 					MerchantRequestListBean bean = new MerchantRequestListBean();
 					bean.setSellerId(seller.getSellerId());
 					bean.setSellerName(seller.getSellerName());
@@ -660,13 +656,13 @@ public class EngageSellerManager {
 					bean.setSellerState("KA");
 					bean.setSellerCity(seller.getSellerCity());
 					bean.setSellerZip("560001");
-					
+
 					Criteria criteria2 = session.createCriteria(SellerTemp.class);
 					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 					List<SellerTemp> tempList = criteria2.list();
-					log.debug("Seller Temp List size : " +sellerList.size());
-					if(tempList.size()==1){
-						for(SellerTemp temp : tempList){
+					log.debug("Seller Temp List size : " + sellerList.size());
+					if (tempList.size() == 1) {
+						for (SellerTemp temp : tempList) {
 							bean.setSellerIdProof(temp.getSellerKycImage());
 							bean.setSellerBankIfsc(temp.getSellerIfsc());
 							bean.setSellerBankAccountNumber(temp.getSellerAccount());
@@ -679,38 +675,35 @@ public class EngageSellerManager {
 				requestBean.setRequestList(listBean);
 				requestBean.setRequestCount(sellerList.size());
 				requestBean.setMessage("Success");
-			}
-			else if(sellerList.isEmpty()){
+			} else if (sellerList.isEmpty()) {
 				requestBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch (RuntimeException re) {
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Getting request count failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return requestBean;
 	}
-	
-	public MerchantRequestListBean sellerRequest(int sellerId){
+
+	public MerchantRequestListBean sellerRequest(int sellerId) {
 		log.debug("getting seller");
 		MerchantRequestListBean listBean = new MerchantRequestListBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					sellerId);
+			if (seller != null) {
 				listBean.setSellerId(sellerId);
 				listBean.setSellerName(seller.getSellerName());
 				listBean.setSellerEmailId(seller.getSellerEmail99());
@@ -723,142 +716,133 @@ public class EngageSellerManager {
 				Criteria criteria = session.createCriteria(SellerTemp.class);
 				criteria.add(Restrictions.eq("sellerId", sellerId));
 				List<SellerTemp> tempList = criteria.list();
-				if(tempList.size()==1){
-					for(SellerTemp temp : tempList){
+				if (tempList.size() == 1) {
+					for (SellerTemp temp : tempList) {
 						listBean.setSellerBankAccountNumber(temp.getSellerAccount());
 						listBean.setSellerBankIfsc(temp.getSellerIfsc());
 					}
 				}
 				listBean.setMessage("Success");
-			}
-			else if(seller == null){
+			} else if (seller == null) {
 				listBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Getting request count failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return listBean;
 	}
-	
-	public SellerUpdateResponseBean sellerActivate(SellerUpdateRequestBean requestBean){
+
+	public SellerUpdateResponseBean sellerActivate(SellerUpdateRequestBean requestBean) {
 		log.debug("activating seller");
 		SellerUpdateResponseBean responseBean = new SellerUpdateResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
 				seller.setCitrusSellerId(requestBean.getCitrusSellerId());
 				seller.setIsActive(1);
 				session.update(seller);
 				responseBean.setCitrusSellerId(requestBean.getCitrusSellerId());
 				responseBean.setSellerId(requestBean.getSellerId());
 				responseBean.setMessage("Success");
-			}
-			else if(seller == null) {
+			} else if (seller == null) {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Getting request count failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public SellerContactsResponseBean addSellerContacts(SellerContactsRequestBean requestBean){
+
+	public SellerContactsResponseBean addSellerContacts(SellerContactsRequestBean requestBean) {
 		log.debug("adding seller contacts");
 		SellerContactsResponseBean responseBean = new SellerContactsResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			if(requestBean.getPhoneNumberList().size()>0){
-				for(PhoneNumber number : requestBean.getPhoneNumberList()){
-					Criteria  criteria = session.createCriteria(EngageCustomer.class);
+
+			if (requestBean.getPhoneNumberList().size() > 0) {
+				for (PhoneNumber number : requestBean.getPhoneNumberList()) {
+					Criteria criteria = session.createCriteria(EngageCustomer.class);
 					criteria.add(Restrictions.eq("customerMobileNumber", number.getPhoneNumber()));
 					List<EngageCustomer> customerList = criteria.list();
-					if(customerList.size()==1){
-						for(EngageCustomer customer : customerList){
+					if (customerList.size() == 1) {
+						for (EngageCustomer customer : customerList) {
 							Criteria criteria2 = session.createCriteria(SellerCustomerMapper.class);
 							criteria2.add(Restrictions.eq("customerId", customer.getCustomerId()));
 							List<SellerCustomerMapper> mapperList = criteria2.list();
 							log.debug("Mapper List size : " + mapperList.size());
-							if(mapperList.isEmpty()){
+							if (mapperList.isEmpty()) {
 								SellerCustomerMapper mapper = new SellerCustomerMapper();
 								mapper.setSellerId(requestBean.getSellerId());
 								mapper.setCustomerId(customer.getCustomerId());
-								
+
 								session.persist(mapper);
-								log.debug("SCM ID : " +mapper.getScmId());
+								log.debug("SCM ID : " + mapper.getScmId());
 							}
 						}
 					}
 				}
 				responseBean.setMessage("Success");
-			}
-			else if(requestBean.getPhoneNumberList().isEmpty()){
+			} else if (requestBean.getPhoneNumberList().isEmpty()) {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding seller contacts failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public CustomerNotifyResponseBean postToCircle(CustomerNotifyRequestBean requestBean){
+
+	public CustomerNotifyResponseBean postToCircle(CustomerNotifyRequestBean requestBean) {
 		log.debug("notifying circle customers");
 		CustomerNotifyResponseBean responseBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
 				String sellerMobileNumber = seller.getSellerMobileNumber();
 				Criteria criteria = session.createCriteria(SellerCustomerMapper.class);
 				criteria.add(Restrictions.eq("sellerId", requestBean.getSellerId()));
 				List<SellerCustomerMapper> mapperList = criteria.list();
 				log.debug("Mapper Size : " + mapperList.size());
-				if(mapperList.size()>0){
-					for(SellerCustomerMapper mapper : mapperList){
+				if (mapperList.size() > 0) {
+					for (SellerCustomerMapper mapper : mapperList) {
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", mapper.getCustomerId());
 						CustomerFcmRequestBean fcmBean = new CustomerFcmRequestBean();
@@ -884,32 +868,30 @@ public class EngageSellerManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding seller contacts failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public CustomerNotifyResponseBean postToAll(CustomerNotifyRequestBean requestBean){
+
+	public CustomerNotifyResponseBean postToAll(CustomerNotifyRequestBean requestBean) {
 		log.debug("notify to all");
 		CustomerNotifyResponseBean responseBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
 				String sellerMobileNumber = seller.getSellerMobileNumber();
 
 				Criteria criteria = session.createCriteria(EngageCustomer.class);
@@ -917,7 +899,7 @@ public class EngageSellerManager {
 				log.debug("CustomerSize : " + customerList.size());
 				if (customerList.size() > 0) {
 					for (EngageCustomer customer : customerList) {
-						if(customer.getDeviceId()!=null){
+						if (customer.getDeviceId() != null) {
 							CustomerFcmRequestBean fcmBean = new CustomerFcmRequestBean();
 							log.debug("Device ID : " + customer.getDeviceId());
 							fcmBean.setTo(customer.getDeviceId());
@@ -942,135 +924,170 @@ public class EngageSellerManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding seller contacts failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public boolean authenticateMerchant(String sessionKey, int sessionId){
+
+	public boolean authenticateMerchant(String sessionKey, int sessionId) {
 		log.debug("authenticating customer");
 		boolean isCustomerAuthorized = false;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			JSONObject sessionJson = new JSONObject(sessionKey);
 			int sellerId = sessionJson.getInt("key");
-			
-			SessionKeys sessionKeys = (SessionKeys) session
-					.get("com.limitless.services.engage.dao.SessionKeys", sessionId);
-			if(sessionKeys!=null){
-				if(sessionKeys.getKeyAlive()==1 && sessionKeys.getUserId()==sellerId){
+
+			SessionKeys sessionKeys = (SessionKeys) session.get("com.limitless.services.engage.dao.SessionKeys",
+					sessionId);
+			if (sessionKeys != null) {
+				if (sessionKeys.getKeyAlive() == 1 && sessionKeys.getUserId() == sellerId) {
 					isCustomerAuthorized = true;
-				}
-				else{
+				} else {
 					isCustomerAuthorized = false;
 				}
-			}
-			else{
+			} else {
 				isCustomerAuthorized = false;
 			}
 			transaction.commit();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("authenticating custimer failed :" + e);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return isCustomerAuthorized;
 	}
-	
-	public MerchantDeviceIdResponseBean sellerDeviceIdUpadte(MerchantDeviceIdRequestBean requestBean){
+
+	public MerchantDeviceIdResponseBean sellerDeviceIdUpadte(MerchantDeviceIdRequestBean requestBean) {
 		log.debug("updating device id");
 		MerchantDeviceIdResponseBean responseBean = new MerchantDeviceIdResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = 	(EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
 				seller.setSellerDeviceId(requestBean.getDeviceId());
 				session.update(seller);
 				responseBean.setSellerId(requestBean.getSellerId());
 				responseBean.setMessage("Success");
-			}
-			else if(seller == null){
+			} else if (seller == null) {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding device id failed : ", re);
 			throw re;
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public MerchantLogoutResponseBean logoutSeller(MerchantLogoutRequestBean requestBean){
+
+	public MerchantLogoutResponseBean logoutSeller(MerchantLogoutRequestBean requestBean) {
 		log.debug("deactivting session key");
 		MerchantLogoutResponseBean responseBean = new MerchantLogoutResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			SessionKeys key = (SessionKeys) session
-					.get("com.limitless.services.engage.dao.SessionKeys", requestBean.getSessionId());
-			if(key!=null){
+
+			SessionKeys key = (SessionKeys) session.get("com.limitless.services.engage.dao.SessionKeys",
+					requestBean.getSessionId());
+			if (key != null) {
 				key.setKeyAlive(0);
 				session.update(key);
 				responseBean.setSellerId(requestBean.getSellerId());
 				responseBean.setMessage("Success");
-			}
-			else{
+			} else {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("deactivting session key failed :" + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
+
+	public SubMerchantListResponseBean getSubMerchants(int sellerId) {
+		log.debug("getting sub-merchants");
+		SubMerchantListResponseBean listBean = new SubMerchantListResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					sellerId);
+			if (seller != null) {
+				int citrusSellerId = seller.getCitrusSellerId();
+
+				Criteria criteria = session.createCriteria(EngageSeller.class);
+				criteria.add(Restrictions.eq("citrusSellerId", citrusSellerId));
+				List<EngageSeller> list = criteria.list();
+				List<SubMerchantBean> subMerchants = new ArrayList<SubMerchantBean>();
+				if (list.size() > 0) {
+					for (EngageSeller listItem : list) {
+
+						SubMerchantBean subMerchantBean = new SubMerchantBean();
+						subMerchantBean.setId(listItem.getSellerId());
+						subMerchantBean.setName(listItem.getSellerName());
+						subMerchantBean.setShopName(listItem.getSellerShopName());
+						subMerchants.add(subMerchantBean);
+						subMerchantBean = null;
+					}
+				}
+				listBean.setSubMerchants(subMerchants);
+				listBean.setMessage("Success");
+			} else if (seller == null) {
+				listBean.setMessage("Failed");
+			}
+			transaction.commit();
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Getting request count failed " + re);
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return listBean;
+	}
 
 	/*
 	 * public static void main(String[] args) { EngageSellerManager manager =
