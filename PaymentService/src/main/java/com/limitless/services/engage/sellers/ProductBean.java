@@ -4,6 +4,7 @@ import java.util.List;
 
 public class ProductBean {
 	private int productId;
+	private int parentProductId;
 	private String productName;
 	private float productPrice;
 	private String product_image;
@@ -52,6 +53,13 @@ public class ProductBean {
 	}
 	public void setProductId(int productId) {
 		this.productId = productId;
+	}
+	
+	public int getParentProductId() {
+		return parentProductId;
+	}
+	public void setParentProductId(int parentProductId) {
+		this.parentProductId = parentProductId;
 	}
 	public String getProductStock() {
 		return productStock;
