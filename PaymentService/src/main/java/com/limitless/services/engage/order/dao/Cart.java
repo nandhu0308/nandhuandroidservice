@@ -17,6 +17,8 @@ public class Cart {
 	private Integer customerId;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
+	@Column(name="IS_DELETED")
+	private int isDeleted;
 	public Integer getCartId() {
 		return cartId;
 	}
@@ -34,5 +36,11 @@ public class Cart {
 	}
 	public void setSellerId(Integer sellerId) {
 		this.sellerId = sellerId;
+	}
+	public int getIsDeleted() {
+		return isDeleted;
+	}
+	public void setIsDeleted(int isDeleted) {
+		this.isDeleted = isDeleted;
 	}
 }

@@ -21,6 +21,8 @@ public class OrderDetails {
 	private Integer quantity;
 	@Column(name="UNIT_PRICE")
 	private double unitPrice;
+	@Column(name="PPM_ID")
+	private Integer productPricesMapperId;
 	
 	public Integer getOrderDetailsId() {
 		return orderDetailsId;
@@ -51,5 +53,11 @@ public class OrderDetails {
 	}
 	public void setUnitPrice(double unitPrice) {
 		this.unitPrice = unitPrice;
+	}
+	public Integer getProductPricesMapperId() {
+		return productPricesMapperId;
+	}
+	public void setProductPricesMapperId(Integer productPricesMapperId) {
+		this.productPricesMapperId = productPricesMapperId;
 	}
 }

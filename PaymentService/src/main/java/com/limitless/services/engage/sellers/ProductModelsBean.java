@@ -1,6 +1,7 @@
 package com.limitless.services.engage.sellers;
 
 public class ProductModelsBean {
+	private int productPricesMapperId;
 	private int productId;
 	private String sizeText;
 	private int sizeNumber;
@@ -119,5 +120,11 @@ public class ProductModelsBean {
 	}
 	public void setImage10(String image10) {
 		this.image10 = image10;
+	}
+	public int getProductPricesMapperId() {
+		return productPricesMapperId;
+	}
+	public void setProductPricesMapperId(int productPricesMapperId) {
+		this.productPricesMapperId = productPricesMapperId;
 	}
 }
