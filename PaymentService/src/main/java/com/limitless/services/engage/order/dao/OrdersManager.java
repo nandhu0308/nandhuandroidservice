@@ -40,6 +40,7 @@ import com.limitless.services.engage.order.OrderSummaryResponseBean;
 import com.limitless.services.engage.order.OrdersListBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductInventory;
+import com.limitless.services.engage.sellers.product.dao.ProductPricesMapper;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
@@ -59,9 +60,10 @@ public class OrdersManager {
 			double totalAmount = 0;
 			List<OrderProductsBean> productList = requestBean.getOrderList();
 			for(OrderProductsBean products : productList){
-				Product product = (Product) session
-						.get("com.limitless.services.engage.sellers.product.dao.Product", products.getProductId());
-				double totalPrice = products.getQuantity() * product.getProductPrice();
+				ProductPricesMapper product = (ProductPricesMapper) session
+						.get("com.limitless.services.engage.sellers.product.dao.ProductPricesMapper", products.getProductPricesMapperId());
+				float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+				double totalPrice = products.getQuantity() * discountedPrice;
 				totalAmount +=totalPrice;
 			}
 			
@@ -76,9 +78,10 @@ public class OrdersManager {
 			int orderId = order.getOrderId();
 			List<OrderProductsBean> productList2 = requestBean.getOrderList();
 			for(OrderProductsBean products2 : productList){
-				Product product = (Product) session
-						.get("com.limitless.services.engage.sellers.product.dao.Product", products2.getProductId());
-				double totalPrice = products2.getQuantity() * product.getProductPrice();
+				ProductPricesMapper product = (ProductPricesMapper) session
+						.get("com.limitless.services.engage.sellers.product.dao.ProductPricesMapper", products2.getProductPricesMapperId());
+				float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+				double totalPrice = products2.getQuantity() * discountedPrice;
 				OrderDetails details = new OrderDetails();
 				details.setOrderId(orderId);
 				details.setProductId(products2.getProductId());
@@ -175,6 +178,7 @@ public class OrdersManager {
 					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
 			if(seller!=null){
 				String sellerName = seller.getSellerShopName();
+				String sellerMobileNumber = seller.getSellerMobileNumber();
 
 				Criteria criteria = session.createCriteria(Orders.class);
 				Criterion sidCriterion = Restrictions.eq("sellerId", sellerId);
@@ -194,6 +198,7 @@ public class OrdersManager {
 						listBean.setCustomerName(customer.getCustomerName());
 						listBean.setSellerId(sellerId);
 						listBean.setSellerName(sellerName);
+						listBean.setSellerMobileNumber(sellerMobileNumber);
 						listBean.setTotalAmount(order.getTotalAmount());
 						String gmtTime = order.getOrderCreatedTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -283,6 +288,7 @@ public class OrdersManager {
 						EngageSeller seller = (EngageSeller) session
 								.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 						listBean.setSellerName(seller.getSellerShopName());
+						listBean.setSellerMobileNumber(seller.getSellerMobileNumber());
 						listBean.setTotalAmount(order.getTotalAmount());
 						String gmtTime = order.getOrderCreatedTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -362,6 +368,14 @@ public class OrdersManager {
 					listBean.setProductName(product.getProductName());
 					listBean.setQuantity(details.getQuantity());
 					listBean.setTotalPrice(details.getUnitPrice());
+					if(details.getProductPricesMapperId()!=null){
+						ProductPricesMapper mapper = (ProductPricesMapper) session
+								.get("com.limitless.services.engage.sellers.product.dao.ProductPricesMapper", details.getProductPricesMapperId());
+						if(mapper!=null){
+							listBean.setProductColor(mapper.getProductColor());
+							listBean.setProductSize(mapper.getProductSizeText());
+						}
+					}
 					productsList.add(listBean);
 					listBean = null;
 				}
@@ -447,13 +461,19 @@ public class OrdersManager {
 									.get("com.limitless.services.engage.sellers.product.dao.Product", detail.getProductId());
 							String productName = product.getProductName();
 							String productImage = product.getProduct_image();
-							double productPrice = product.getProductPrice();
+							
+							ProductPricesMapper mapper = (ProductPricesMapper) session
+									.get("com.limitless.services.engage.sellers.product.dao.ProductPricesMapper", detail.getProductPricesMapperId());
+							double productPrice = mapper.getProductPrice();
+							float discountedPrice = (float) ((Float) mapper.getProductPrice() - (mapper.getProductPrice()*(mapper.getDiscountRate()/100)));
 							
 							mailContent += "<table><tr><td rowspan=3>"
 									+"<img src="+productImage+" height=100 width=100>"
-									+ "</td><td><b>"+productName+"</b>&nbsp;Price Rs:"+productPrice+"</td>"
-											+ "<td>Quantity:&nbsp;"+quantity+"</td>"
-													+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
+									+ "</td><td><b>"+productName+"</b>&nbsp;MRP Rs:"+productPrice+"</td>"
+									+"<td>Specs:<br>Color:"+mapper.getProductColor()+"<br>Size:"+mapper.getProductSizeText()
+									+ "<td>Quantity:&nbsp;"+quantity+"</td>"
+									+"<td>Discounted Price:&nbsp;"+discountedPrice+"</td>"
+									+ "<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
 						}
 					}
 					mailContent +="<br><h2>Total Amount Paid Rs. "+totalAmount+"</h2>";
@@ -494,6 +514,7 @@ public class OrdersManager {
 			}
 			catch(Exception e){
 				log.error("mail error : " + e);
+				
 			}
 			transaction.commit();
 		}

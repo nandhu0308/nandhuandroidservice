@@ -5,6 +5,8 @@ public class OrderProductsListBean {
 	private String productName;
 	private int quantity;
 	private double totalPrice;
+	private String productColor;
+	private String productSize;
 	public int getProductId() {
 		return productId;
 	}
@@ -28,5 +30,17 @@ public class OrderProductsListBean {
 	}
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+	public String getProductColor() {
+		return productColor;
+	}
+	public void setProductColor(String productColor) {
+		this.productColor = productColor;
+	}
+	public String getProductSize() {
+		return productSize;
+	}
+	public void setProductSize(String productSize) {
+		this.productSize = productSize;
 	}
 }

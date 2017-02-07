@@ -8,6 +8,7 @@ public class OrdersListBean {
 	private String customerName;
 	private int sellerId;
 	private String sellerName;
+	private String sellerMobileNumber;
 	private double totalAmount;
 	private String time;
 	private String orderStatus;
@@ -65,5 +66,11 @@ public class OrdersListBean {
 	}
 	public void setAddressBean(AddressListBean addressBean) {
 		this.addressBean = addressBean;
+	}
+	public String getSellerMobileNumber() {
+		return sellerMobileNumber;
+	}
+	public void setSellerMobileNumber(String sellerMobileNumber) {
+		this.sellerMobileNumber = sellerMobileNumber;
 	}
 }
