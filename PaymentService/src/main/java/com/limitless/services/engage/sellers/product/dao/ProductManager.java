@@ -281,6 +281,7 @@ public class ProductManager {
 				if(mappersList.size()>0){
 					for(ProductPricesMapper mapper : mappersList){
 						ProductModelsBean modelsBean = new ProductModelsBean();
+						modelsBean.setProductPricesMapperId(mapper.getPpmId());
 						modelsBean.setProductId(productId);
 						modelsBean.setColor(mapper.getProductColor());
 						modelsBean.setSizeNumber(mapper.getProductSizeNumber());

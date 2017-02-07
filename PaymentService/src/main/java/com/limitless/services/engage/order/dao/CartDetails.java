@@ -19,6 +19,11 @@ public class CartDetails {
 	private Integer productId;
 	@Column(name="QUANTITY")
 	private Integer quantity;
+	@Column(name="IS_REMOVED")
+	private int isRemoved;
+	@Column(name="PPM_ID")
+	private Integer productPricesMapperId;
+	
 	public Integer getCartDetailsId() {
 		return cartDetailsId;
 	}
@@ -42,5 +47,17 @@ public class CartDetails {
 	}
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
+	}
+	public int getIsRemoved() {
+		return isRemoved;
+	}
+	public void setIsRemoved(int isRemoved) {
+		this.isRemoved = isRemoved;
+	}
+	public Integer getProductPricesMapperId() {
+		return productPricesMapperId;
+	}
+	public void setProductPricesMapperId(Integer productPricesMapperId) {
+		this.productPricesMapperId = productPricesMapperId;
 	}
 }

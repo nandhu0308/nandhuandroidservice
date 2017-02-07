@@ -84,6 +84,7 @@ public class OrdersManager {
 				details.setProductId(products2.getProductId());
 				details.setQuantity(products2.getQuantity());
 				details.setUnitPrice(totalPrice);
+				details.setProductPricesMapperId(products2.getProductPricesMapperId());
 				session.persist(details);
 			}
 			responseBean.setOrderId(orderId);

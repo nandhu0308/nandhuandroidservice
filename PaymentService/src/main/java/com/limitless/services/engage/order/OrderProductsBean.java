@@ -3,6 +3,7 @@ package com.limitless.services.engage.order;
 public class OrderProductsBean {
 	private int productId;
 	private int quantity;
+	private int productPricesMapperId;
 	public int getProductId() {
 		return productId;
 	}
@@ -14,5 +15,11 @@ public class OrderProductsBean {
 	}
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+	public int getProductPricesMapperId() {
+		return productPricesMapperId;
+	}
+	public void setProductPricesMapperId(int productPricesMapperId) {
+		this.productPricesMapperId = productPricesMapperId;
 	}
 }
