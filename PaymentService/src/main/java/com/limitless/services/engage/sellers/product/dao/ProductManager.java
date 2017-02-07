@@ -75,6 +75,7 @@ public class ProductManager {
 					for(Product product : products){
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
+						bean.setParentProductId(product.getParent_productid());
 						bean.setProductName(product.getProductName());
 						bean.setProductDescription(product.getProductDescription());
 						bean.setProductPrice(product.getProductPrice());
@@ -246,6 +247,7 @@ public class ProductManager {
 			if(product != null){
 				productBean = new ProductBean();
 				productBean.setProductId(productId);
+				productBean.setParentProductId(product.getParent_productid());
 				productBean.setProductName(product.getProductName());
 				productBean.setProduct_image(product.getProduct_image());
 				productBean.setProductDescription(product.getProductDescription());

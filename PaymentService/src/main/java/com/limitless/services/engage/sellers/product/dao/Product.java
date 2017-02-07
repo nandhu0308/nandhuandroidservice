@@ -26,12 +26,21 @@ public class Product {
 	private double discountRate;
 	@Column(name="PRODUCT_IN_STOCK")
 	private Integer productInStock;
+	@Column(name="PARENT_PRODUCT_ID")
+	private Integer parent_productid;
 	
 	public Integer getProductId() {
 		return productId;
 	}
 	public void setProductId(Integer productId) {
 		this.productId = productId;
+	}
+	
+	public Integer getParent_productid() {
+		return parent_productid;
+	}
+	public void setParent_productid(Integer parent_productid) {
+		this.parent_productid = parent_productid;
 	}
 	public String getProductName() {
 		return productName;
