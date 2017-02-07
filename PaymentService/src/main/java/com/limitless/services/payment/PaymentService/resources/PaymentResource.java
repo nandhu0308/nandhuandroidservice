@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
@@ -818,5 +819,20 @@ public class PaymentResource {
 		}
 		return responseBean;
 	}
-
+	
+	@GET
+	@Path("/getSubMerchants/{sellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public MerchantRequestListBean requestSeller(@PathParam("sellerId") int sellerId) throws Exception{
+		MerchantRequestListBean listBean = new MerchantRequestListBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.sellerRequest(sellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
+	}
 }

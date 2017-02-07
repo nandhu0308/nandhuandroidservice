@@ -45,6 +45,7 @@ import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.dao.SellerTempManager;
 import com.limitless.services.engage.sellers.ProductBean;
+import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
@@ -403,4 +404,19 @@ public class EngageSellerResource {
 		return responseBean;
 	}
 		
+	@GET
+	@Path("/getsubmerchants/{sellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SubMerchantListResponseBean getSubMerchants(@PathParam("sellerId") int sellerId) throws Exception{
+		SubMerchantListResponseBean listBean = new SubMerchantListResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.getSubMerchants(sellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
+	}
 }
