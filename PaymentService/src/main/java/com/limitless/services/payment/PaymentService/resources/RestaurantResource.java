@@ -1,6 +1,8 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -11,6 +13,8 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantErrorResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -32,4 +36,21 @@ public class RestaurantResource {
 		errorBean.setMessage("Not Found");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
 	}
+	
+	@Path("/order/new")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response newOrder(RestaurantOrderRequestBean requestBean){
+		RestaurantManager manager = new RestaurantManager();
+		RestaurantOrderResponseBean responseBean = manager.createOrder(requestBean);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
+		errorBean.setRestaurantId(requestBean.getRestaurantId());
+		errorBean.setMessage("Not Found");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
 }

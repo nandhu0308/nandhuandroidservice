@@ -15,6 +15,9 @@ import com.limitless.services.engage.SellerRestaurantListBean;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantCategoryListBean;
 import com.limitless.services.engage.restaurants.RestaurantItemListBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderItemsBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantSubcategoryListBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
@@ -218,6 +221,72 @@ public class RestaurantManager {
 			}
 		}
 		return restaurantsList;
+	}
+	
+	public RestaurantOrderResponseBean createOrder(RestaurantOrderRequestBean requestBean){
+		log.debug("new order");
+		RestaurantOrderResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			float totalAmount = 0;
+			
+			for(RestaurantOrderItemsBean items : requestBean.getItemsList()){
+				RestaurantItems item = (RestaurantItems) session
+						.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
+				if(item!=null){
+					float totalPrice = item.getItemPrice() + items.getItemQuantity();
+					totalAmount += totalPrice;
+				}
+			}
+			log.debug("total amount : " + totalAmount);
+			
+			RestaurantOrder order = new RestaurantOrder();
+			order.setCustomerId(requestBean.getCustomerId());
+			order.setRestaurantId(requestBean.getRestaurantId());
+			order.setOrderType(requestBean.getOrderStyle());
+			order.setDeliveryAddressId(requestBean.getDeliveryAddressId());
+			order.setTotalAmount(totalAmount);
+			
+			session.persist(order);
+			log.debug("ordee id : " + order.getOrderId());
+			int orderId = order.getOrderId();
+			
+			for(RestaurantOrderItemsBean items : requestBean.getItemsList()){
+				RestaurantOrderDetails orderDetails = new RestaurantOrderDetails();
+				orderDetails.setItemId(items.getItemId());
+				orderDetails.setOrderId(orderId);
+				orderDetails.setQuantity(items.getItemQuantity());
+				RestaurantItems item = (RestaurantItems) session
+						.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
+				if(item!=null){
+					float totalPrice = item.getItemPrice() + items.getItemQuantity();
+					orderDetails.setItemPrice(item.getItemPrice());
+					orderDetails.setTotalPrice(totalPrice);
+				}
+				session.persist(orderDetails);
+			}
+			responseBean.setRestaurantOrderId(orderId);
+			responseBean.setTotalAmount(totalAmount);
+			
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("new order failed : " +re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 	
 }

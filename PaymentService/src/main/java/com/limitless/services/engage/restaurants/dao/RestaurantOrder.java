@@ -25,6 +25,9 @@ public class RestaurantOrder {
 	private String orderType;
 	@Column(name="ORDER_TIME", insertable = false, updatable = false)
 	private Date orderTime;
+	@Column(name="DELIEVRY_ADDRESS_ID")
+	private Integer deliveryAddressId;
+	
 	public Integer getOrderId() {
 		return orderId;
 	}
@@ -60,5 +63,11 @@ public class RestaurantOrder {
 	}
 	public void setOrderTime(Date orderTime) {
 		this.orderTime = orderTime;
+	}
+	public Integer getDeliveryAddressId() {
+		return deliveryAddressId;
+	}
+	public void setDeliveryAddressId(Integer deliveryAddressId) {
+		this.deliveryAddressId = deliveryAddressId;
 	}
 }

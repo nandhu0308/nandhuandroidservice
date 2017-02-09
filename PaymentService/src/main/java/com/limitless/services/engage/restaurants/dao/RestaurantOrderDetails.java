@@ -23,6 +23,7 @@ public class RestaurantOrderDetails {
 	private Integer quantity;
 	@Column(name="TOTAL_PRICE")
 	private float totalPrice;
+	
 	public Integer getRodId() {
 		return rodId;
 	}
