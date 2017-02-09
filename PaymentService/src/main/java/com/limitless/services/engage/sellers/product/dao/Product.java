@@ -27,7 +27,39 @@ public class Product {
 	@Column(name="PRODUCT_IN_STOCK")
 	private Integer productInStock;
 	@Column(name="PARENT_PRODUCT_ID")
-	private Integer parent_productid;
+	private Integer parentProductId;
+	@Column(name="GROUPID")
+	private Integer groupId;
+	@Column(name="CATEGORYID")
+	private Integer categoryId;
+	@Column(name="PRODUCT_SIZE_TEXT")
+	private String productSizeText;
+	@Column(name="PRODUCT_SIZE_NUMBER")
+	private Integer productSizeNumber;
+	@Column(name="PRODUCT_COLOR")
+	private String productColor;
+	@Column(name="IS_DEFAULT")
+	private Integer isDefault;
+	@Column(name="IMAGE1")
+	private String image1;
+	@Column(name="IMAGE2")
+	private String image2;
+	@Column(name="IMAGE3")
+	private String image3;
+	@Column(name="IMAGE4")
+	private String image4;
+	@Column(name="IMAGE5")
+	private String image5;
+	@Column(name="IMAGE6")
+	private String image6;
+	@Column(name="IMAGE7")
+	private String image7;
+	@Column(name="IMAGE8")
+	private String image8;
+	@Column(name="IMAGE9")
+	private String image9;
+	@Column(name="IMAGE10")
+	private String image10;
 	
 	public Integer getProductId() {
 		return productId;
@@ -35,12 +67,11 @@ public class Product {
 	public void setProductId(Integer productId) {
 		this.productId = productId;
 	}
-	
-	public Integer getParent_productid() {
-		return parent_productid;
+	public Integer getParentProductId() {
+		return parentProductId;
 	}
-	public void setParent_productid(Integer parent_productid) {
-		this.parent_productid = parent_productid;
+	public void setParentProductId(Integer parentProductId) {
+		this.parentProductId = parentProductId;
 	}
 	public String getProductName() {
 		return productName;
@@ -77,5 +108,101 @@ public class Product {
 	}
 	public void setProductInStock(Integer productInStock) {
 		this.productInStock = productInStock;
+	}
+	public Integer getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(Integer groupId) {
+		this.groupId = groupId;
+	}
+	public Integer getCategoryId() {
+		return categoryId;
+	}
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
+	}
+	public String getProductSizeText() {
+		return productSizeText;
+	}
+	public void setProductSizeText(String productSizeText) {
+		this.productSizeText = productSizeText;
+	}
+	public Integer getProductSizeNumber() {
+		return productSizeNumber;
+	}
+	public void setProductSizeNumber(Integer productSizeNumber) {
+		this.productSizeNumber = productSizeNumber;
+	}
+	public String getProductColor() {
+		return productColor;
+	}
+	public void setProductColor(String productColor) {
+		this.productColor = productColor;
+	}
+	public Integer getIsDefault() {
+		return isDefault;
+	}
+	public void setIsDefault(Integer isDefault) {
+		this.isDefault = isDefault;
+	}
+	public String getImage1() {
+		return image1;
+	}
+	public void setImage1(String image1) {
+		this.image1 = image1;
+	}
+	public String getImage2() {
+		return image2;
+	}
+	public void setImage2(String image2) {
+		this.image2 = image2;
+	}
+	public String getImage3() {
+		return image3;
+	}
+	public void setImage3(String image3) {
+		this.image3 = image3;
+	}
+	public String getImage4() {
+		return image4;
+	}
+	public void setImage4(String image4) {
+		this.image4 = image4;
+	}
+	public String getImage5() {
+		return image5;
+	}
+	public void setImage5(String image5) {
+		this.image5 = image5;
+	}
+	public String getImage6() {
+		return image6;
+	}
+	public void setImage6(String image6) {
+		this.image6 = image6;
+	}
+	public String getImage7() {
+		return image7;
+	}
+	public void setImage7(String image7) {
+		this.image7 = image7;
+	}
+	public String getImage8() {
+		return image8;
+	}
+	public void setImage8(String image8) {
+		this.image8 = image8;
+	}
+	public String getImage9() {
+		return image9;
+	}
+	public void setImage9(String image9) {
+		this.image9 = image9;
+	}
+	public String getImage10() {
+		return image10;
+	}
+	public void setImage10(String image10) {
+		this.image10 = image10;
 	}
 }

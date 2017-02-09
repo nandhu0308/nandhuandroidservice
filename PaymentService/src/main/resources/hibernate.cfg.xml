@@ -49,6 +49,12 @@
   <mapping class="com.limitless.services.engage.dao.SellerCustomerMapper"/>  
   <mapping class="com.limitless.services.engage.dao.SessionKeys"/>
   <mapping class="com.limitless.services.engage.dao.GuestUser"/>
+  <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantCategory"/>
+  <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantItems"/>
+  <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantSubCategory"/>
+  <mapping class="com.limitless.services.engage.restaurants.dao.Restaurants"/>
+  <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantOrderDetails"/>
+  <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantOrder"/>
   
  </session-factory>
 </hibernate-configuration>

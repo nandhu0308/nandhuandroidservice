@@ -36,6 +36,7 @@ import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
+import com.limitless.services.engage.SellerRestaurantListBean;
 import com.limitless.services.engage.SellerTempRequestBean;
 import com.limitless.services.engage.SellerTempResponseBean;
 import com.limitless.services.engage.SellerUpdateRequestBean;
@@ -44,6 +45,7 @@ import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.dao.SellerTempManager;
+import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
@@ -219,10 +221,17 @@ public class EngageSellerResource {
 		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerByMobile(sellerMobileNumber);
-
-			ProductManager productManager = new ProductManager();
-			List<ProductBean> products = productManager.getAllProducts(responseBean.getSellerId());
-			responseBean.setProducts(products);
+			
+			if(responseBean.getBusinessType().equals("restaurant")){
+				RestaurantManager restaurantManager = new RestaurantManager();
+				List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+				responseBean.setRestaurants(restaurantListBeans);
+			}
+			else if(responseBean.getBusinessType().equals("eCommerce")){
+				ProductManager productManager = new ProductManager();
+				List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
+				responseBean.setProducts(productList);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");

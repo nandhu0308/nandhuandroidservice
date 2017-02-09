@@ -75,7 +75,7 @@ public class ProductManager {
 					for(Product product : products){
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
-						bean.setParentProductId(product.getParent_productid());
+						bean.setParentProductId(product.getParentProductId());
 						bean.setProductName(product.getProductName());
 						bean.setProductDescription(product.getProductDescription());
 						bean.setProductPrice(product.getProductPrice());
@@ -84,6 +84,22 @@ public class ProductManager {
 						bean.setDiscountedPrice(discountedPrice);
 						bean.setProduct_image(product.getProduct_image());
 						bean.setProductInStock(product.getProductInStock());
+						bean.setCategoryId(product.getCategoryId());
+						bean.setGroupId(product.getGroupId());
+						bean.setIsDefault(product.getIsDefault());
+						bean.setProductColor(product.getProductColor());
+						bean.setProductSizeText(product.getProductSizeText());
+						bean.setProductSizeNumber(product.getProductSizeNumber());
+						bean.setImage1(product.getImage1());
+						bean.setImage2(product.getImage2());
+						bean.setImage3(product.getImage3());
+						bean.setImage4(product.getImage4());
+						bean.setImage5(product.getImage5());
+						bean.setImage6(product.getImage6());
+						bean.setImage7(product.getImage7());
+						bean.setImage8(product.getImage8());
+						bean.setImage9(product.getImage9());
+						bean.setImage10(product.getImage10());
 						productsList.add(bean);
 						bean = null;
 					}
@@ -247,7 +263,7 @@ public class ProductManager {
 			if(product != null){
 				productBean = new ProductBean();
 				productBean.setProductId(productId);
-				productBean.setParentProductId(product.getParent_productid());
+				productBean.setParentProductId(product.getParentProductId());
 				productBean.setProductName(product.getProductName());
 				productBean.setProduct_image(product.getProduct_image());
 				productBean.setProductDescription(product.getProductDescription());

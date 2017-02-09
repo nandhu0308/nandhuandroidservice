@@ -1,5 +1,7 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +15,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
+import com.limitless.services.engage.SellerLoginResponseBean;
+import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.order.dao.OrdersManager;
 import com.limitless.services.engage.sellers.NewProductsRequestBean;
 import com.limitless.services.engage.sellers.NewProductsResponseBean;
@@ -21,6 +25,7 @@ import com.limitless.services.engage.sellers.ProductErrorBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
+import com.limitless.services.engage.sellers.SellerProductBean;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
 
@@ -107,6 +112,32 @@ public class ProductResource {
 		ProductErrorBean errorBean = new ProductErrorBean();
 		errorBean.setMessage("Not Found...");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/get/seller/{sellerMobileNumber}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerProductBean getSellerProducts(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
+		SellerProductBean productBean = new SellerProductBean();
+		try{
+			EngageSellerManager sellerManager = new EngageSellerManager();
+			SellerLoginResponseBean loginResponseBean = sellerManager.getSellerByMobile(sellerMobileNumber);
+			
+			ProductManager productManager = new ProductManager();
+			List<ProductBean> productList = productManager.getAllProducts(loginResponseBean.getSellerId());
+			if(productList.size()>0){
+				productBean.setMessage("Success");
+				productBean.setProducts(productList);
+			}
+			else if(productList.isEmpty()){
+				productBean.setMessage("Not Found");
+			}
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return productBean;
 	}
 	
 }

@@ -23,6 +23,12 @@ public class ProductBean {
 	private String image8;
 	private String image9;
 	private String image10;
+	private int categoryId;
+	private int isDefault;
+	private int groupId;
+	private String productSizeText;
+	private int productSizeNumber;
+	private String productColor;
 	private List<ProductModelsBean> modelsList;
 	public String getProductName() {
 		return productName;
@@ -150,5 +156,41 @@ public class ProductBean {
 	}
 	public void setImage10(String image10) {
 		this.image10 = image10;
+	}
+	public int getCategoryId() {
+		return categoryId;
+	}
+	public void setCategoryId(int categoryId) {
+		this.categoryId = categoryId;
+	}
+	public int getIsDefault() {
+		return isDefault;
+	}
+	public void setIsDefault(int isDefault) {
+		this.isDefault = isDefault;
+	}
+	public int getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+	public String getProductSizeText() {
+		return productSizeText;
+	}
+	public void setProductSizeText(String productSizeText) {
+		this.productSizeText = productSizeText;
+	}
+	public int getProductSizeNumber() {
+		return productSizeNumber;
+	}
+	public void setProductSizeNumber(int productSizeNumber) {
+		this.productSizeNumber = productSizeNumber;
+	}
+	public String getProductColor() {
+		return productColor;
+	}
+	public void setProductColor(String productColor) {
+		this.productColor = productColor;
 	}
 }

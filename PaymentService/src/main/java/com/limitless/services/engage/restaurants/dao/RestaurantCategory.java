@@ -15,6 +15,8 @@ public class RestaurantCategory {
 	private Integer categoryId;
 	@Column(name="CATEGORY_NAME")
 	private String categoryName;
+	@Column(name="RESTAURANT_ID")
+	private int restaurantId;
 	public Integer getCategoryId() {
 		return categoryId;
 	}
@@ -26,5 +28,11 @@ public class RestaurantCategory {
 	}
 	public void setCategoryName(String categoryName) {
 		this.categoryName = categoryName;
+	}
+	public int getRestaurantId() {
+		return restaurantId;
+	}
+	public void setRestaurantId(int restaurantId) {
+		this.restaurantId = restaurantId;
 	}
 }

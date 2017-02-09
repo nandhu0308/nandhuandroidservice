@@ -275,6 +275,7 @@ public class EngageSellerManager {
 					respBean.setCitrusSellerId(seller.getCitrusSellerId());
 					respBean.setSellerType(seller.getSellerType());
 					respBean.setSellerRole(seller.getSellerRole());
+					respBean.setBusinessType(seller.getBusinessType());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 
@@ -453,6 +454,7 @@ public class EngageSellerManager {
 					responseBean.setSellerName(seller.getSellerShopName());
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
+					responseBean.setBusinessType(seller.getBusinessType());
 					responseBean.setMessage("Success");
 				}
 			} else if (sellerList.isEmpty()) {

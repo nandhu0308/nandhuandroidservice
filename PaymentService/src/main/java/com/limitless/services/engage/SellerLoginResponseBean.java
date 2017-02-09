@@ -16,18 +16,14 @@ public class SellerLoginResponseBean {
 	private String sellerAddress;
 	private String sellerCity;
 	private String sellerType;
+	private String businessType;
 	private String sellerRole;
-	private List<ProductBean> products;
 	private String brandingUrl;
 	private String sessionKey;
 	private int sessionId;
+	private List<ProductBean> products;
+	private List<SellerRestaurantListBean> restaurants;
 	
-	public List<ProductBean> getProducts() {
-		return products;
-	}
-	public void setProducts(List<ProductBean> products) {
-		this.products = products;
-	}
 	public String getSellerName() {
 		return sellerName;
 	}
@@ -105,5 +101,23 @@ public class SellerLoginResponseBean {
 	}
 	public void setSessionId(int sessionId) {
 		this.sessionId = sessionId;
+	}
+	public String getBusinessType() {
+		return businessType;
+	}
+	public void setBusinessType(String businessType) {
+		this.businessType = businessType;
+	}
+	public List<ProductBean> getProducts() {
+		return products;
+	}
+	public void setProducts(List<ProductBean> products) {
+		this.products = products;
+	}
+	public List<SellerRestaurantListBean> getRestaurants() {
+		return restaurants;
+	}
+	public void setRestaurants(List<SellerRestaurantListBean> restaurants) {
+		this.restaurants = restaurants;
 	}
 }
