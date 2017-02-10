@@ -6,6 +6,7 @@ public class RestaurantBean {
 	private int restaurantId;
 	private String restaurantName;
 	private String restaurantCity;
+	private String restaurantPhone;
 	private int restaurantOrderStyle;
 	private List<RestaurantItemListBean> itemsList;
 	private List<RestaurantCategoryListBean> categorysList;
@@ -44,5 +45,11 @@ public class RestaurantBean {
 	}
 	public void setCategorysList(List<RestaurantCategoryListBean> categorysList) {
 		this.categorysList = categorysList;
+	}
+	public String getRestaurantPhone() {
+		return restaurantPhone;
+	}
+	public void setRestaurantPhone(String restaurantPhone) {
+		this.restaurantPhone = restaurantPhone;
 	}
 }

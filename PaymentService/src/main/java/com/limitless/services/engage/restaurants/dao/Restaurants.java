@@ -27,6 +27,9 @@ public class Restaurants {
 	private Integer restaurantOrderStyle;
 	@Column(name="CREATED_TIME", insertable = false, updatable = false)
 	private Date createdTime;
+	@Column(name="RESTAURANT_PHONE")
+	private String restaurantPhone;
+	
 	public Integer getRestaurantId() {
 		return restaurantId;
 	}
@@ -68,5 +71,11 @@ public class Restaurants {
 	}
 	public void setCreatedTime(Date createdTime) {
 		this.createdTime = createdTime;
+	}
+	public String getRestaurantPhone() {
+		return restaurantPhone;
+	}
+	public void setRestaurantPhone(String restaurantPhone) {
+		this.restaurantPhone = restaurantPhone;
 	}
 }

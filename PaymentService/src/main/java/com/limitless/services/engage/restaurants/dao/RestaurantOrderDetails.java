@@ -19,7 +19,7 @@ public class RestaurantOrderDetails {
 	private Integer itemId;
 	@Column(name="ITEM_PRICE")
 	private float itemPrice;
-	@Column(name="QUANTITY")
+	@Column(name="ITEM_QUANTITY")
 	private Integer quantity;
 	@Column(name="TOTAL_PRICE")
 	private float totalPrice;

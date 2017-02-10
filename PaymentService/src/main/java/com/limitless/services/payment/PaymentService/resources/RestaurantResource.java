@@ -3,6 +3,7 @@ package com.limitless.services.payment.PaymentService.resources;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -13,8 +14,11 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantErrorResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateRequestBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateResponseBean;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -50,6 +54,50 @@ public class RestaurantResource {
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
 		errorBean.setRestaurantId(requestBean.getRestaurantId());
 		errorBean.setMessage("Not Found");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/order/status")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response statusUpdate(RestaurantOrderStatusUpdateRequestBean requestBean){
+		RestaurantManager manager = new RestaurantManager();
+		RestaurantOrderStatusUpdateResponseBean responseBean = manager.orderStatusUpdate(requestBean);
+		if(responseBean != null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
+		errorBean.setRestaurantId(requestBean.getRestaurantId());
+		errorBean.setMessage("Failed");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/order/summary/customer/{customerId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response gettingCustomerSummary(@PathParam("customerId") int customerId){
+		RestaurantManager manager = new RestaurantManager();
+		RestaurantOrderBean bean = manager.getCustomerOrderSummary(customerId);
+		if(bean!=null){
+			return Response.status(200).entity(bean).build();
+		}
+		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
+		errorBean.setMessage("Failed");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/order/summary/restaurant/{restaurantId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response gettingRestaurantSummary(@PathParam("restaurantId") int restaurantId){
+		RestaurantManager manager = new RestaurantManager();
+		RestaurantOrderBean bean = manager.getRestaurantOrderSummary(restaurantId);
+		if(bean!=null){
+			return Response.status(200).entity(bean).build();
+		}
+		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
+		errorBean.setMessage("Failed");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
 	}
 	

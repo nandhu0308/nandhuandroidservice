@@ -11,13 +11,20 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.AddressListBean;
 import com.limitless.services.engage.SellerRestaurantListBean;
+import com.limitless.services.engage.dao.CustomerAddressBook;
+import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantCategoryListBean;
 import com.limitless.services.engage.restaurants.RestaurantItemListBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderItemsBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderListBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateRequestBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantSubcategoryListBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
@@ -46,6 +53,7 @@ public class RestaurantManager {
 				bean.setRestaurantId(restaurantId);
 				bean.setRestaurantName(restaurant.getRestaurantName());
 				bean.setRestaurantCity(restaurant.getRestaurantCity());
+				bean.setRestaurantPhone(restaurant.getRestaurantPhone());
 				bean.setRestaurantOrderStyle(restaurant.getRestaurantOrderStyle());
 				
 				Criteria criteria = session.createCriteria(RestaurantCategory.class);
@@ -233,45 +241,119 @@ public class RestaurantManager {
 			transaction = session.beginTransaction();
 			
 			float totalAmount = 0;
-			
-			for(RestaurantOrderItemsBean items : requestBean.getItemsList()){
-				RestaurantItems item = (RestaurantItems) session
-						.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
-				if(item!=null){
-					float totalPrice = item.getItemPrice() + items.getItemQuantity();
-					totalAmount += totalPrice;
+			Restaurants restaurants = (Restaurants) session
+					.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
+			if (restaurants != null) {
+				for (RestaurantOrderItemsBean items : requestBean.getItemsList()) {
+					RestaurantItems item = (RestaurantItems) session
+							.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
+					if (item != null) {
+						float totalPrice = item.getItemPrice() + items.getItemQuantity();
+						totalAmount += totalPrice;
+					}
+				}
+				log.debug("total amount : " + totalAmount);
+
+				RestaurantOrder order = new RestaurantOrder();
+				order.setCustomerId(requestBean.getCustomerId());
+				order.setRestaurantId(requestBean.getRestaurantId());
+				order.setOrderType(requestBean.getOrderStyle());
+				order.setDeliveryAddressId(requestBean.getDeliveryAddressId());
+				order.setOrderStatus("ORDER_INITIATED");
+				order.setTotalAmount(totalAmount);
+
+				session.persist(order);
+				log.debug("order id : " + order.getOrderId());
+				int orderId = order.getOrderId();
+
+				for (RestaurantOrderItemsBean items : requestBean.getItemsList()) {
+					RestaurantOrderDetails orderDetails = new RestaurantOrderDetails();
+					orderDetails.setItemId(items.getItemId());
+					orderDetails.setOrderId(orderId);
+					orderDetails.setQuantity(items.getItemQuantity());
+					RestaurantItems item = (RestaurantItems) session
+							.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
+					if (item != null) {
+						float totalPrice = item.getItemPrice() + items.getItemQuantity();
+						orderDetails.setItemPrice(item.getItemPrice());
+						orderDetails.setTotalPrice(totalPrice);
+					}
+					session.persist(orderDetails);
+				}
+				if (orderId > 0) {
+					responseBean = new RestaurantOrderResponseBean();
+					responseBean.setRestaurantOrderId(orderId);
+					responseBean.setTotalAmount(totalAmount);
 				}
 			}
-			log.debug("total amount : " + totalAmount);
 			
-			RestaurantOrder order = new RestaurantOrder();
-			order.setCustomerId(requestBean.getCustomerId());
-			order.setRestaurantId(requestBean.getRestaurantId());
-			order.setOrderType(requestBean.getOrderStyle());
-			order.setDeliveryAddressId(requestBean.getDeliveryAddressId());
-			order.setTotalAmount(totalAmount);
-			
-			session.persist(order);
-			log.debug("ordee id : " + order.getOrderId());
-			int orderId = order.getOrderId();
-			
-			for(RestaurantOrderItemsBean items : requestBean.getItemsList()){
-				RestaurantOrderDetails orderDetails = new RestaurantOrderDetails();
-				orderDetails.setItemId(items.getItemId());
-				orderDetails.setOrderId(orderId);
-				orderDetails.setQuantity(items.getItemQuantity());
-				RestaurantItems item = (RestaurantItems) session
-						.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
-				if(item!=null){
-					float totalPrice = item.getItemPrice() + items.getItemQuantity();
-					orderDetails.setItemPrice(item.getItemPrice());
-					orderDetails.setTotalPrice(totalPrice);
-				}
-				session.persist(orderDetails);
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
 			}
-			responseBean.setRestaurantOrderId(orderId);
-			responseBean.setTotalAmount(totalAmount);
+			log.error("new order failed : " +re);
+			//throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public RestaurantOrderStatusUpdateResponseBean orderStatusUpdate(RestaurantOrderStatusUpdateRequestBean requestBean){
+		log.debug("updating order status");
+		RestaurantOrderStatusUpdateResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
 			
+			Restaurants restaurant = (Restaurants) session
+					.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
+			if(restaurant != null){
+				RestaurantOrder order = (RestaurantOrder) session
+						.get("com.limitless.services.engage.restaurants.dao.RestaurantOrder", requestBean.getOrderId());
+				if(order!=null && requestBean.getRestaurantId() == order.getRestaurantId() && requestBean.getOrderStatus()>=3){
+					responseBean = new RestaurantOrderStatusUpdateResponseBean();
+					responseBean.setOrderId(requestBean.getOrderId());
+					responseBean.setRestaurantId(requestBean.getRestaurantId());
+					responseBean.setPreviousStatus(order.getOrderStatus());
+					if(requestBean.getOrderStatus()==3){
+						order.setOrderStatus("READY_FOR_SERVE");
+						responseBean.setCurrentStatus("READY_FOR_SERVE");
+					}
+					else if(requestBean.getOrderStatus()==4){
+						order.setOrderStatus("READY_FOR_PICKUP");
+						responseBean.setCurrentStatus("READY_FOR_PICKUP");
+					}
+					else if(requestBean.getOrderStatus()==5){
+						order.setOrderStatus("OUT_FOR_DELIVERY");
+						responseBean.setCurrentStatus("OUT_FOR_DELIVERY");
+					}
+					else if(requestBean.getOrderStatus()==6){
+						order.setOrderStatus("DELIEVERED");
+						responseBean.setCurrentStatus("DELIEVERED");
+					}
+					else if(requestBean.getOrderStatus()==7){
+						order.setOrderStatus("ORDER_FAILED");
+						responseBean.setCurrentStatus("ORDER_FAILED");
+					}
+					else if(requestBean.getOrderStatus()==8){
+						order.setOrderStatus("DELIVERY_FAILED");
+						responseBean.setCurrentStatus("DELIVERY_FAILED");
+					}
+					else if(requestBean.getOrderStatus()==9){
+						order.setOrderStatus("PICKUP_FAILED");
+						responseBean.setCurrentStatus("PICKUP_FAILED");
+					}
+					session.update(order);
+				}
+			}
 			transaction.commit();
 		}
 		catch(RuntimeException re){
@@ -287,6 +369,158 @@ public class RestaurantManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public RestaurantOrderBean getCustomerOrderSummary(int customerId){
+		log.debug("getting customer order summary");
+		RestaurantOrderBean bean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			if(customer!=null){
+				String customerName = customer.getCustomerName();
+				String customerPhone = customer.getCustomerMobileNumber();
+				
+				Criteria criteria = session.createCriteria(RestaurantOrder.class);
+				criteria.add(Restrictions.eq("customerId", customerId));
+				List<RestaurantOrder> orders = criteria.list();
+				log.debug("order list size : " +orders.size());
+				if(orders.size()>0){
+					List<RestaurantOrderListBean> orderList = new ArrayList<RestaurantOrderListBean>();
+					for(RestaurantOrder order : orders){
+						RestaurantOrderListBean listBean = new RestaurantOrderListBean();
+						listBean.setOrderId(order.getOrderId());
+						listBean.setOrderStyle(order.getOrderType());
+						listBean.setOrderTotalAmount((float) order.getTotalAmount());
+						listBean.setCustomerId(order.getCustomerId());
+						listBean.setCustomerName(customerName);
+						listBean.setCustomerMobileNumber(customerPhone);
+						listBean.setRestaurantId(order.getRestaurantId());
+						Restaurants restaurant = (Restaurants) session
+								.get("com.limitless.services.engage.restaurants.dao.Restaurants", order.getRestaurantId());
+						if(restaurant!=null){
+							listBean.setRestaurantName(restaurant.getRestaurantName());
+							listBean.setRestaurantCity(restaurant.getRestaurantCity());
+							listBean.setRestaurantMobileNumber(restaurant.getRestaurantPhone());
+						}
+						CustomerAddressBook address = (CustomerAddressBook) session
+								.get("com.limitless.services.engage.dao.CustomerAddressBook", order.getDeliveryAddressId());
+						if(address!=null){
+							AddressListBean addressBean = new AddressListBean();
+							addressBean.setCadId(address.getCabId());
+							addressBean.setReceiverName(address.getReceiverName());
+							addressBean.setCustomerAddress1(address.getCustomerAddress1());
+							addressBean.setCustomerAddress2(address.getCustomerAddress2());
+							addressBean.setCustomerCity(address.getCustomerCity());
+							addressBean.setCustomerState(address.getCustomerState());
+							addressBean.setCustomerZip(address.getCustomerZip());
+							addressBean.setCustomerDeliveryMobile(address.getCustomerDeliveryMobile());
+							addressBean.setCustomerLandmark(address.getCustomerLandmark());
+							listBean.setDeliveryAddress(addressBean);
+						}
+						orderList.add(listBean);
+					}
+					bean = new RestaurantOrderBean();
+					bean.setCustomerId(customerId);
+					bean.setOrderList(orderList);
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting customer order summary failed : " +re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return bean;
+	}
+	
+	public RestaurantOrderBean getRestaurantOrderSummary(int restaurantId){
+		log.debug("getting restaurant order summary");
+		RestaurantOrderBean bean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Restaurants restaurant = (Restaurants) session
+					.get("com.limitless.services.engage.restaurants.dao.Restaurants", restaurantId);
+			if(restaurant!=null){
+				String restaurantName = restaurant.getRestaurantName();
+				String restaurantCity = restaurant.getRestaurantCity();
+				String restaurantPhone = restaurant.getRestaurantPhone();
+				
+				Criteria criteria = session.createCriteria(RestaurantOrder.class);
+				criteria.add(Restrictions.eq("restaurantId", restaurantId));
+				List<RestaurantOrder> orders = criteria.list();
+				log.debug("order list size : " +orders.size());
+				if(orders.size()>0){
+					List<RestaurantOrderListBean> orderList = new ArrayList<RestaurantOrderListBean>();
+					for(RestaurantOrder order : orders){
+						RestaurantOrderListBean listBean = new RestaurantOrderListBean();
+						listBean.setOrderId(order.getOrderId());
+						listBean.setOrderStyle(order.getOrderType());
+						listBean.setOrderTotalAmount((float) order.getTotalAmount());
+						EngageCustomer customer = (EngageCustomer) session
+								.get("com.limitless.services.engage.dao.EngageCustomer", order.getCustomerId());
+						if(customer!=null){
+							listBean.setCustomerName(customer.getCustomerName());
+							listBean.setCustomerMobileNumber(customer.getCustomerMobileNumber());
+						}
+						listBean.setRestaurantId(order.getRestaurantId());
+						listBean.setRestaurantName(restaurantName);
+						listBean.setRestaurantCity(restaurantCity);
+						listBean.setRestaurantMobileNumber(restaurantPhone);
+						CustomerAddressBook address = (CustomerAddressBook) session
+								.get("com.limitless.services.engage.dao.CustomerAddressBook", order.getDeliveryAddressId());
+						if(address!=null){
+							AddressListBean addressBean = new AddressListBean();
+							addressBean.setCadId(address.getCabId());
+							addressBean.setReceiverName(address.getReceiverName());
+							addressBean.setCustomerAddress1(address.getCustomerAddress1());
+							addressBean.setCustomerAddress2(address.getCustomerAddress2());
+							addressBean.setCustomerCity(address.getCustomerCity());
+							addressBean.setCustomerState(address.getCustomerState());
+							addressBean.setCustomerZip(address.getCustomerZip());
+							addressBean.setCustomerDeliveryMobile(address.getCustomerDeliveryMobile());
+							addressBean.setCustomerLandmark(address.getCustomerLandmark());
+							listBean.setDeliveryAddress(addressBean);
+						}
+						orderList.add(listBean);
+					}
+					bean = new RestaurantOrderBean();
+					bean.setRestaurantId(restaurantId);
+					bean.setOrderList(orderList);
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting restaurant order summary failed : " +re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return bean;
 	}
 	
 }
