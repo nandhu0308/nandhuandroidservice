@@ -222,15 +222,17 @@ public class EngageSellerResource {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerByMobile(sellerMobileNumber);
 			
-			if(responseBean.getBusinessType().equals("restaurant")){
-				RestaurantManager restaurantManager = new RestaurantManager();
-				List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
-				responseBean.setRestaurants(restaurantListBeans);
-			}
-			else if(responseBean.getBusinessType().equals("eCommerce")){
-				ProductManager productManager = new ProductManager();
-				List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
-				responseBean.setProducts(productList);
+			if(responseBean.getMessage().equals("Success")){
+				if(responseBean.getBusinessType().equals("restaurant")){
+					RestaurantManager restaurantManager = new RestaurantManager();
+					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+					responseBean.setRestaurants(restaurantListBeans);
+				}
+				else if(responseBean.getBusinessType().equals("eCommerce")){
+					ProductManager productManager = new ProductManager();
+					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
+					responseBean.setProducts(productList);
+				}
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);

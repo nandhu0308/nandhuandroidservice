@@ -79,6 +79,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String branding_url;
 	@Column(name="BUSINESS_TYPE")
 	private String businessType;
+	@Column(name="IS_DELETED")
+	private Integer isDeleted;
 	
 	public EngageSeller() {
 	}
@@ -350,5 +352,13 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setBusinessType(String businessType) {
 		this.businessType = businessType;
+	}
+
+	public Integer getIsDeleted() {
+		return isDeleted;
+	}
+
+	public void setIsDeleted(Integer isDeleted) {
+		this.isDeleted = isDeleted;
 	}
 }

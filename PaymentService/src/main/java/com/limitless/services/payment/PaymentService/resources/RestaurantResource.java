@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantErrorResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderDetailsResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateRequestBean;
@@ -53,7 +54,7 @@ public class RestaurantResource {
 		}
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
 		errorBean.setRestaurantId(requestBean.getRestaurantId());
-		errorBean.setMessage("Not Found");
+		errorBean.setMessage("Failed");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
 	}
 	
@@ -83,7 +84,7 @@ public class RestaurantResource {
 			return Response.status(200).entity(bean).build();
 		}
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
-		errorBean.setMessage("Failed");
+		errorBean.setMessage("Not Found");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
 	}
 	
@@ -97,7 +98,21 @@ public class RestaurantResource {
 			return Response.status(200).entity(bean).build();
 		}
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
-		errorBean.setMessage("Failed");
+		errorBean.setMessage("Not Found");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/order/get/{orderId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response gettingOrderByOrderId(@PathParam("orderId") int orderId){
+		RestaurantManager manager = new RestaurantManager();
+		RestaurantOrderDetailsResponseBean responseBean = manager.getOrderById(orderId);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
+		errorBean.setMessage("Not Found");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
 	}
 	

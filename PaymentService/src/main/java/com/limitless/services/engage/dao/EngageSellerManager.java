@@ -441,10 +441,13 @@ public class EngageSellerManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(EngageSeller.class);
-			Criterion mobileCriterion = Restrictions.eq("sellerMobileNumber", sellerMobileNumber);
-			Criterion aliasCriterion = Restrictions.eq("mobileAlias", sellerMobileNumber);
-			LogicalExpression logicalExpression = Restrictions.or(mobileCriterion, aliasCriterion);
-			criteria.add(logicalExpression);
+			Junction condition1 = Restrictions.disjunction()
+					.add(Restrictions.eq("sellerMobileNumber", sellerMobileNumber))
+					.add(Restrictions.eq("mobileAlias", sellerMobileNumber));
+			Junction condition2 = Restrictions.conjunction()
+					.add(condition1)
+					.add(Restrictions.ne("isDeleted", 1));
+			criteria.add(condition2);
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Size : " + sellerList.size());
 			if (sellerList.size() == 1) {

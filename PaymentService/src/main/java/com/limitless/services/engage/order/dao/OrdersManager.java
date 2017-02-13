@@ -508,7 +508,6 @@ public class OrdersManager {
 			}
 			catch(Exception e){
 				log.error("mail error : " + e);
-				
 			}
 			transaction.commit();
 		}
