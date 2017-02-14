@@ -81,6 +81,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String businessType;
 	@Column(name="IS_DELETED")
 	private Integer isDeleted;
+	@Column(name="EXTRA_EMAILS")
+	private String extraEmails;
 	
 	public EngageSeller() {
 	}
@@ -360,5 +362,13 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setIsDeleted(Integer isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+
+	public String getExtraEmails() {
+		return extraEmails;
+	}
+
+	public void setExtraEmails(String extraEmails) {
+		this.extraEmails = extraEmails;
 	}
 }

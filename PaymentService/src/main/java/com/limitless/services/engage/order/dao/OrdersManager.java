@@ -199,6 +199,7 @@ public class OrdersManager {
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", order.getCustomerId());
 						listBean.setCustomerName(customer.getCustomerName());
+						listBean.setCustomerMobileNumber(customer.getCustomerMobileNumber());
 						listBean.setSellerId(sellerId);
 						listBean.setSellerName(sellerName);
 						listBean.setSellerMobileNumber(sellerMobileNumber);
@@ -272,6 +273,7 @@ public class OrdersManager {
 					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
 			if(customer!=null){
 				String customerName = customer.getCustomerName();
+				String customerMobileNumber = customer.getCustomerMobileNumber();
 				
 				Criteria criteria = session.createCriteria(Orders.class);
 				Criterion cidCriterion = Restrictions.eq("customerId", customerId);
@@ -287,6 +289,7 @@ public class OrdersManager {
 						listBean.setOrderId(order.getOrderId());
 						listBean.setCustomerId(order.getCustomerId());
 						listBean.setCustomerName(customerName);
+						listBean.setCustomerMobileNumber(customerMobileNumber);
 						listBean.setSellerId(order.getSellerId());
 						EngageSeller seller = (EngageSeller) session
 								.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
@@ -399,7 +402,7 @@ public class OrdersManager {
 		return responseBean;
 	}
 	
-	public OrderMailResponseBean sendMailOrderTxn(int orderId, int txnId){
+	public OrderMailResponseBean sendMailOrderTxn(int orderId, int txnId) throws Exception{
 		log.debug("Sending email");
 		OrderMailResponseBean responseBean = new OrderMailResponseBean();
 		Session session = null;
@@ -416,14 +419,20 @@ public class OrdersManager {
 			EngageCustomer customer = (EngageCustomer) session
 					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
 			String customerEmail = customer.getCustomerEmail99();
+			log.debug("customer mail : " + customerEmail);
 			//getting seller
 			EngageSeller seller = (EngageSeller) session
 					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);	
 			String sellerEmail = seller.getSellerEmail99();
+			log.debug("seller mail : " + sellerEmail);
+			String sellerExtraEmail = "";
+			if(seller.getExtraEmails()!= null){
+				sellerExtraEmail = ","+seller.getExtraEmails();
+			}
 			
 			final String username = "transactions@limitlesscircle.com";
 			final String password = "Engage@12E";
-			String sendMailTo = customerEmail+","+sellerEmail;
+			String sendMailTo = customerEmail+","+sellerEmail+sellerExtraEmail;
 			log.debug("Mailing to : " + sendMailTo);
 			Properties properties = new Properties();
 			properties.put("mail.smtp.host", "smtp.zoho.com");
@@ -508,6 +517,7 @@ public class OrdersManager {
 			}
 			catch(Exception e){
 				log.error("mail error : " + e);
+				throw e;
 			}
 			transaction.commit();
 		}

@@ -6,6 +6,7 @@ public class OrdersListBean {
 	private int orderId;
 	private int customerId;
 	private String customerName;
+	private String customerMobileNumber;
 	private int sellerId;
 	private String sellerName;
 	private String sellerMobileNumber;
@@ -72,5 +73,11 @@ public class OrdersListBean {
 	}
 	public void setSellerMobileNumber(String sellerMobileNumber) {
 		this.sellerMobileNumber = sellerMobileNumber;
+	}
+	public String getCustomerMobileNumber() {
+		return customerMobileNumber;
+	}
+	public void setCustomerMobileNumber(String customerMobileNumber) {
+		this.customerMobileNumber = customerMobileNumber;
 	}
 }
