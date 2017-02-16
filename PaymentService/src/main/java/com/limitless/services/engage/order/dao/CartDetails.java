@@ -21,8 +21,6 @@ public class CartDetails {
 	private Integer quantity;
 	@Column(name="IS_REMOVED")
 	private int isRemoved;
-	@Column(name="PPM_ID")
-	private Integer productPricesMapperId;
 	
 	public Integer getCartDetailsId() {
 		return cartDetailsId;
@@ -53,11 +51,5 @@ public class CartDetails {
 	}
 	public void setIsRemoved(int isRemoved) {
 		this.isRemoved = isRemoved;
-	}
-	public Integer getProductPricesMapperId() {
-		return productPricesMapperId;
-	}
-	public void setProductPricesMapperId(Integer productPricesMapperId) {
-		this.productPricesMapperId = productPricesMapperId;
 	}
 }

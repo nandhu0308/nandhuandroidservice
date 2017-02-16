@@ -10,6 +10,7 @@ public class CartBean {
 	private int sellerId;
 	private String sellerShopName;
 	private String sellerMobileNumber;
+	private int cartItemsCount;
 	private List<CartItemsListBean> cartItemsList;
 	private String message;
 	public int getCartId() {
@@ -65,5 +66,11 @@ public class CartBean {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public int getCartItemsCount() {
+		return cartItemsCount;
+	}
+	public void setCartItemsCount(int cartItemsCount) {
+		this.cartItemsCount = cartItemsCount;
 	}
 }

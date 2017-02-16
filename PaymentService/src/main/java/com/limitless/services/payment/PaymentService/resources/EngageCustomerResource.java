@@ -34,6 +34,7 @@ import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
 import com.limitless.services.engage.EngageCustomerBean;
 import com.limitless.services.engage.EngageCustomerResponseBean;
+import com.limitless.services.engage.Guest2CustomerLoginRequestBean;
 import com.limitless.services.engage.GuestLoginRequestBean;
 import com.limitless.services.engage.GuestLoginResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
@@ -253,7 +254,7 @@ public class EngageCustomerResource {
 	public String inviteSelf(@PathParam("customerMobileNumber") String customerMobileNumber) throws Exception {
 		String response = "";
 		try {
-			String message = "LETS GO CASHLESS! Download the app: goo.gl/ejZrmv";
+			String message = "LETS GO CASHLESS! Download the LimitlessCircle app: goo.gl/ejZrmv";
 			String encoded_message = URLEncoder.encode(message);
 			String authkey = "129194Aa6NwGoQsVt580d9a57";
 			String mobiles = customerMobileNumber;
@@ -476,6 +477,23 @@ public class EngageCustomerResource {
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.loginGuestUser(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/guest2customer")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public LoginResponseBean loginGuest2Customer(Guest2CustomerLoginRequestBean requestBean) throws Exception{
+		LoginResponseBean responseBean = new LoginResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.guest2CustomerLogin(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

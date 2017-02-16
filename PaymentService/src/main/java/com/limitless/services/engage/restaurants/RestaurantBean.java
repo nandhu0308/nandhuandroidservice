@@ -7,6 +7,9 @@ public class RestaurantBean {
 	private String restaurantName;
 	private String restaurantCity;
 	private String restaurantPhone;
+	private String restaurantSellerName;
+	private String restaurantSellerEmail;
+	private int restaurantSellerCitrusId;
 	private int restaurantOrderStyle;
 	private List<RestaurantItemListBean> itemsList;
 	private List<RestaurantCategoryListBean> categorysList;
@@ -51,5 +54,23 @@ public class RestaurantBean {
 	}
 	public void setRestaurantPhone(String restaurantPhone) {
 		this.restaurantPhone = restaurantPhone;
+	}
+	public String getRestaurantSellerName() {
+		return restaurantSellerName;
+	}
+	public void setRestaurantSellerName(String restaurantSellerName) {
+		this.restaurantSellerName = restaurantSellerName;
+	}
+	public String getRestaurantSellerEmail() {
+		return restaurantSellerEmail;
+	}
+	public void setRestaurantSellerEmail(String restaurantSellerEmail) {
+		this.restaurantSellerEmail = restaurantSellerEmail;
+	}
+	public int getRestaurantSellerCitrusId() {
+		return restaurantSellerCitrusId;
+	}
+	public void setRestaurantSellerCitrusId(int restaurantSellerCitrusId) {
+		this.restaurantSellerCitrusId = restaurantSellerCitrusId;
 	}
 }

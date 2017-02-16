@@ -460,26 +460,6 @@ public class EngageSellerManager {
 					responseBean.setBusinessType(seller.getBusinessType());
 					responseBean.setMessage("Success");
 				}
-			} else if (sellerList.isEmpty()) {
-				Criteria criteria2 = session.createCriteria(EngageCustomer.class);
-				criteria2.add(Restrictions.eq("customerMobileNumber", sellerMobileNumber));
-				List<EngageCustomer> customerList = criteria2.list();
-				log.debug("Size : " + customerList.size());
-				if (customerList.size() == 1) {
-					for (EngageCustomer customer : customerList) {
-						if (customer.getCitrusSellerId() == 0) {
-							responseBean.setMessage("Mobile Number Not Registered For Funds Transfer");
-						} else {
-							responseBean.setCitrusSellerId(customer.getCitrusSellerId());
-							responseBean.setSellerName(customer.getCustomerName());
-							responseBean.setSellerId(customer.getCustomerId());
-							responseBean.setMobileNumber(customer.getCustomerMobileNumber());
-							responseBean.setMessage("Success");
-						}
-					}
-				} else {
-					responseBean.setMessage("Mobile Number Not Registered");
-				}
 			} else {
 				responseBean.setMessage("Mobile Number Not Registered");
 			}

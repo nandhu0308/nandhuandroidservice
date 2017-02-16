@@ -45,6 +45,7 @@ import com.limitless.services.engage.CustomerLogoutResponseBean;
 import com.limitless.services.engage.CustomerNotificationBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
+import com.limitless.services.engage.Guest2CustomerLoginRequestBean;
 import com.limitless.services.engage.GuestLoginRequestBean;
 import com.limitless.services.engage.GuestLoginResponseBean;
 import com.limitless.services.engage.InviteRequestBean;
@@ -56,6 +57,7 @@ import com.limitless.services.engage.P2PCustomerVerificationResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
+import com.limitless.services.engage.order.dao.Cart;
 import com.limitless.services.engage.sellers.CitrusSellerResponseBean;
 import com.limitless.services.engage.sellers.dao.CitrusSeller;
 import com.limitless.services.engage.sellers.dao.CitrusSellerManager;
@@ -503,17 +505,30 @@ public class EngageCustomerManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			String senderName = "";
+			String message = "";
 			if (requestBean.getKey().equals("merchant")) {
 				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 						requestBean.getSellerId());
 				senderName = seller.getSellerName();
+				if(seller.getMobileAlias()!=null){
+					message = senderName
+							+ " invites you to join LimitlessCircle. "
+							+ "Download the app: goo.gl/ejZrmv & use code to view my store: " + seller.getMobileAlias()+" or "
+							+"click the link: http://www.limitlesscircle.com/seller/"+seller.getMobileAlias();
+				}
+				else if(seller.getSellerMobileNumber()!=null){
+					message = "LETS GO DIGITAL! " + senderName
+							+ " has invited you to join LimitlessCircle. "
+							+ "Download the app: goo.gl/ejZrmv and use the code to view my store: " + seller.getSellerMobileNumber()+" or "
+							+"click the link: http://www.limitlesscircle.com/seller/"+seller.getSellerMobileNumber();
+				}
 			} else if (requestBean.getKey().equals("customer")) {
 				EngageCustomer customer = (EngageCustomer) session
 						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
 				senderName = customer.getCustomerName();
+				message = "LETS GO DIGITAL! " + senderName
+						+ " has invited you to join LimitlessCircle. Download the app: goo.gl/ejZrmv";
 			}
-			String message = "LETS GO CASHLESS! " + senderName
-					+ " has invited you to join LimitlessCircle. Download the app: goo.gl/ejZrmv";
 			String encoded_message = URLEncoder.encode(message);
 			String authkey = "129194Aa6NwGoQsVt580d9a57";
 			String mobiles = requestBean.getMobileNumbers();
@@ -1047,6 +1062,103 @@ public class EngageCustomerManager {
 			transaction.commit();			
 		}
 		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("guest login failed :" + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public LoginResponseBean guest2CustomerLogin(Guest2CustomerLoginRequestBean requestBean) throws Exception{
+		log.debug("guest to customer login");
+		LoginResponseBean responseBean = new LoginResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SessionKeys key = (SessionKeys) session
+					.get("com.limitless.services.engage.dao.SessionKeys", requestBean.getSessionId());
+			if(key!=null){
+				if(key.getUserId() == requestBean.getGuestId()){
+					key.setKeyAlive(0);
+					session.update(key);
+					String customerMobile = requestBean.getCustomerMobileNumber();
+					String passwd = requestBean.getCustomerPasswd();
+					Criteria criteria = session.createCriteria(EngageCustomer.class);
+					Criterion emailCriterion = Restrictions.eq("customerMobileNumber", customerMobile);
+					Criterion passwdCriterion = Restrictions.eq("customerPasswd99", passwd);
+					LogicalExpression logicalExp = Restrictions.and(emailCriterion, passwdCriterion);
+					criteria.add(logicalExp);
+					List<EngageCustomer> userList = criteria.list();
+					if (userList.size() > 0 && userList.size() == 1) {
+						log.debug("Size: " + userList.size());
+						for (EngageCustomer user : userList) {
+							responseBean.setLoginStatus(1);
+							responseBean.setMessage("Success");
+							responseBean.setCustomerId(user.getCustomerId());
+							responseBean.setCustomerName(user.getCustomerName());
+							responseBean.setCustomerEmail(user.getCustomerEmail99());
+							responseBean.setDeviceId(user.getDeviceId());
+							
+							SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+							Calendar calendar = Calendar.getInstance();
+							calendar.setTime(new Date());
+							calendar.add(Calendar.MINUTE, 5);
+							String validDate = sdf1.format(calendar.getTime());
+							log.debug("Date String : " + validDate);
+							Date validTill = sdf1.parse(validDate);
+							log.debug("Date String : " + validTill.toString());
+							
+							JSONObject sessionKeyJson = new JSONObject();
+							sessionKeyJson.put("role", "customer");
+							sessionKeyJson.put("key", user.getCustomerId());
+							sessionKeyJson.put("value", passwd);
+							
+							SessionKeys sessionKeys = new SessionKeys();
+							sessionKeys.setUserId(user.getCustomerId());
+							sessionKeys.setSessionKey(sessionKeyJson.toString());
+							sessionKeys.setKeyAlive(1);
+							
+							session.persist(sessionKeys);
+							
+							int sesssionKeyId = sessionKeys.getSessionId();
+							
+							String sessionKeyString = sesssionKeyId+"."+sessionKeyJson.toString();
+							String sessionKeyB64 = Base64.getEncoder().encodeToString(sessionKeyString.getBytes());
+							log.debug("Session Key : " +sessionKeyB64);
+							
+							responseBean.setSessionKey(sessionKeyB64);
+							responseBean.setSessionId(sesssionKeyId);
+							
+							Criteria criteria2 = session.createCriteria(Cart.class);
+							criteria2.add(Restrictions.eq("customerId", requestBean.getGuestId()));
+							List<Cart> cartList = criteria2.list();
+							log.debug("cart list size : " + cartList.size());
+							if(cartList.size()>0){
+								for(Cart cart : cartList){
+									Cart cartInstance = (Cart) session
+											.get("com.limitless.services.engage.order.dao.Cart", cart.getCartId());
+									cartInstance.setCustomerId(user.getCustomerId());
+									session.update(cartInstance);
+								}
+							}
+						}
+					} else {
+						responseBean.setLoginStatus(-1);
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}

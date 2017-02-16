@@ -12,7 +12,9 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.order.CartBean;
+import com.limitless.services.engage.order.CartItemResponseBean;
 import com.limitless.services.engage.order.CartItemsListBean;
+import com.limitless.services.engage.order.CartListBean;
 import com.limitless.services.engage.order.CartRequestBean;
 import com.limitless.services.engage.order.CartResponseBean;
 import com.limitless.services.engage.order.dao.CartManager;
@@ -102,6 +104,56 @@ public class CartResource {
 			throw new Exception("Internal Server Error");
 		}
 		return bean;
+	}
+	
+	@Path("/get/list/{customerId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public CartListBean getCustomerCart(@PathParam("customerId") int customerId) throws Exception{
+		CartListBean listBean = new CartListBean();
+		try{
+			CartManager manager = new CartManager();
+			listBean = manager.getCustomerCart(customerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
+	}
+	
+	@Path("/get/summary/{customerId}/{sellerId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public CartBean getCustomerSellerCart(@PathParam("customerId") int customerId,
+			@PathParam("sellerId") int sellerId) throws Exception{
+		CartBean bean = new CartBean();
+		try{
+			CartManager manager = new CartManager();
+			bean = manager.getCustomerSellerCart(customerId, sellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return bean;
+	}
+	
+	@Path("/update/item")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CartItemResponseBean updateCartItem(CartItemsListBean itemBean) throws Exception{
+		CartItemResponseBean responseBean = new CartItemResponseBean();
+		try{
+			CartManager manager = new CartManager();
+			responseBean = manager.cartItemUpdate(itemBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 	
 }

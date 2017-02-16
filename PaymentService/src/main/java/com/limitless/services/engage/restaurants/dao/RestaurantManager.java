@@ -15,6 +15,7 @@ import com.limitless.services.engage.AddressListBean;
 import com.limitless.services.engage.SellerRestaurantListBean;
 import com.limitless.services.engage.dao.CustomerAddressBook;
 import com.limitless.services.engage.dao.EngageCustomer;
+import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantCategoryListBean;
 import com.limitless.services.engage.restaurants.RestaurantItemListBean;
@@ -27,6 +28,7 @@ import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantSellerResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantSubcategoryListBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
@@ -52,6 +54,13 @@ public class RestaurantManager {
 				List<RestaurantCategoryListBean> categorysList = new ArrayList<RestaurantCategoryListBean>();
 				List<RestaurantSubcategoryListBean> subcategorysList = new ArrayList<RestaurantSubcategoryListBean>();
 				bean = new RestaurantBean();
+				EngageSeller seller = (EngageSeller) session
+						.get("com.limitless.services.engage.dao.EngageSeller", restaurant.getSellerId());
+				if(seller!=null){
+					bean.setRestaurantSellerCitrusId(seller.getCitrusSellerId());
+					bean.setRestaurantSellerName(seller.getSellerName());
+					bean.setRestaurantSellerEmail(seller.getSellerEmail99());
+				}
 				bean.setRestaurantId(restaurantId);
 				bean.setRestaurantName(restaurant.getRestaurantName());
 				bean.setRestaurantCity(restaurant.getRestaurantCity());
@@ -569,6 +578,48 @@ public class RestaurantManager {
 				transaction.rollback();
 			}
 			log.error("getting order details failed : " +re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public RestaurantSellerResponseBean getRestaurantSeller(int restaurantId){
+		log.debug("getting restaurant seller");
+		RestaurantSellerResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Restaurants restaurant = (Restaurants) session
+					.get("com.limitless.services.engage.restaurants.dao.Restaurants", restaurantId);
+			if(restaurant!=null){
+				EngageSeller seller = (EngageSeller) session
+						.get("com.limitless.services.engage.dao.EngageSeller", restaurant.getSellerId());
+				if(seller!=null){
+					responseBean = new RestaurantSellerResponseBean();
+					responseBean.setRestaurantId(restaurantId);
+					responseBean.setSellerId(seller.getSellerId());
+					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
+					responseBean.setSellerName(seller.getSellerName());
+					responseBean.setSellerMobile(seller.getSellerMobileNumber());
+					responseBean.setSellerEmail(seller.getSellerEmail99());
+					responseBean.setSellerDeviceId(seller.getSellerDeviceId());
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting restaurant seller failed : " +re);
 			throw re;
 		}
 		finally {

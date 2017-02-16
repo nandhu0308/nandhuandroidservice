@@ -19,6 +19,8 @@ public class Cart {
 	private Integer sellerId;
 	@Column(name="IS_DELETED")
 	private int isDeleted;
+	@Column(name="IS_CHECKED_OUT")
+	private Integer isCheckedOut;
 	public Integer getCartId() {
 		return cartId;
 	}
@@ -42,5 +44,11 @@ public class Cart {
 	}
 	public void setIsDeleted(int isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+	public Integer getIsCheckedOut() {
+		return isCheckedOut;
+	}
+	public void setIsCheckedOut(Integer isCheckedOut) {
+		this.isCheckedOut = isCheckedOut;
 	}
 }

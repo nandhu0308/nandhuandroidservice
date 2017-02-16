@@ -20,6 +20,7 @@ import com.limitless.services.engage.restaurants.RestaurantOrderRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantSellerResponseBean;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -109,6 +110,20 @@ public class RestaurantResource {
 		RestaurantManager manager = new RestaurantManager();
 		RestaurantOrderDetailsResponseBean responseBean = manager.getOrderById(orderId);
 		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
+		errorBean.setMessage("Not Found");
+		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/get/seller/{restaurantId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getRestaurantSeller(@PathParam("restaurantId") int restaurantId){
+		RestaurantManager manager = new RestaurantManager();
+		RestaurantSellerResponseBean responseBean = manager.getRestaurantSeller(restaurantId);
+		if(responseBean != null){
 			return Response.status(200).entity(responseBean).build();
 		}
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
