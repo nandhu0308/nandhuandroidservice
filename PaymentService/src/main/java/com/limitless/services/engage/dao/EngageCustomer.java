@@ -47,6 +47,16 @@ public class EngageCustomer implements java.io.Serializable {
 	@Column(name="CUSTOMER_UPDATED_TIME")
 	@Version
 	private Date customerUpdatedTime;
+	@Column(name="UTM_SOURCE")
+	private String utmSource;
+	@Column(name="UTM_MEDIUM")
+	private String utmMedium;
+	@Column(name="UTM_CAMPIGN")
+	private String utmCampign;
+	@Column(name="UTM_TERM")
+	private String utmTerm;
+	@Column(name="UTM_CONTENT")
+	private String utmContent;
 
 	public EngageCustomer() {
 	}
@@ -161,5 +171,45 @@ public class EngageCustomer implements java.io.Serializable {
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public String getUtmSource() {
+		return utmSource;
+	}
+
+	public void setUtmSource(String utmSource) {
+		this.utmSource = utmSource;
+	}
+
+	public String getUtmMedium() {
+		return utmMedium;
+	}
+
+	public void setUtmMedium(String utmMedium) {
+		this.utmMedium = utmMedium;
+	}
+
+	public String getUtmCampign() {
+		return utmCampign;
+	}
+
+	public void setUtmCampign(String utmCampign) {
+		this.utmCampign = utmCampign;
+	}
+
+	public String getUtmTerm() {
+		return utmTerm;
+	}
+
+	public void setUtmTerm(String utmTerm) {
+		this.utmTerm = utmTerm;
+	}
+
+	public String getUtmContent() {
+		return utmContent;
+	}
+
+	public void setUtmContent(String utmContent) {
+		this.utmContent = utmContent;
 	}
 }

@@ -13,6 +13,7 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -453,6 +454,7 @@ public class OrdersManager {
 				if(!order.getOrderStatus().equals("PROCESS_FAILED")){
 					message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
 					message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
+					message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
 					message.setSubject("Order Received Successfully. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
@@ -485,6 +487,7 @@ public class OrdersManager {
 				else if(order.getOrderStatus().equals("PROCESS_FAILED")){
 					message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
 					message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(customerEmail));
+					message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
 					message.setSubject("Order Failed. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
@@ -510,7 +513,7 @@ public class OrdersManager {
 					}
 					message.setContent(mailContent,"text/html");
 				}
-				Transport.send(message);
+				Transport.send(message, message.getAllRecipients());
 				responseBean.setOrderId(orderId);
 				responseBean.setTxnId(txnId);
 				responseBean.setMessage("Success");

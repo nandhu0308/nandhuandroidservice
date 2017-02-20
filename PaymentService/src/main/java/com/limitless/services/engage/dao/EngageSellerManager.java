@@ -777,7 +777,10 @@ public class EngageSellerManager {
 					if (customerList.size() == 1) {
 						for (EngageCustomer customer : customerList) {
 							Criteria criteria2 = session.createCriteria(SellerCustomerMapper.class);
-							criteria2.add(Restrictions.eq("customerId", customer.getCustomerId()));
+							Junction condition =  Restrictions.conjunction()
+									.add(Restrictions.eq("customerId", customer.getCustomerId()))
+									.add(Restrictions.eq("sellerId", requestBean.getSellerId()));
+							criteria2.add(condition);
 							List<SellerCustomerMapper> mapperList = criteria2.list();
 							log.debug("Mapper List size : " + mapperList.size());
 							if (mapperList.isEmpty()) {
@@ -1072,6 +1075,44 @@ public class EngageSellerManager {
 			}
 		}
 		return listBean;
+	}
+	
+	public SellerContactsResponseBean addSearchMapper(int customerId, int sellerId){
+		log.debug("adding search mapper");
+		SellerContactsResponseBean responseBean = new SellerContactsResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(SellerCustomerMapper.class);
+			Junction condition = Restrictions.conjunction()
+					.add(Restrictions.eq("sellerId", sellerId))
+					.add(Restrictions.eq("customerId", customerId));
+			criteria.add(condition);
+			List<SellerCustomerMapper> mapperList = criteria.list();
+			log.debug("mapper size : " + mapperList.size());
+			if(mapperList.isEmpty()){
+				SellerCustomerMapper mapper = new SellerCustomerMapper();
+				mapper.setCustomerId(customerId);
+				mapper.setSellerId(sellerId);
+				session.persist(mapper);
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding search mapper failed " + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 	/*

@@ -513,14 +513,12 @@ public class EngageCustomerManager {
 				if(seller.getMobileAlias()!=null){
 					message = senderName
 							+ " invites you to join LimitlessCircle. "
-							+ "Download the app: goo.gl/ejZrmv & use code to view my store: " + seller.getMobileAlias()+" or "
-							+"click the link: http://www.limitlesscircle.com/seller/"+seller.getMobileAlias();
+							+ "Click here: https://goo.gl/BEv6i7?referrer=app_sms_st_"+seller.getMobileAlias()+"_lot or use code:"+seller.getMobileAlias();
 				}
 				else if(seller.getSellerMobileNumber()!=null){
-					message = "LETS GO DIGITAL! " + senderName
+					message = senderName
 							+ " has invited you to join LimitlessCircle. "
-							+ "Download the app: goo.gl/ejZrmv and use the code to view my store: " + seller.getSellerMobileNumber()+" or "
-							+"click the link: http://www.limitlesscircle.com/seller/"+seller.getSellerMobileNumber();
+							+ "Click here: https://goo.gl/BEv6i7?referrer=app_sms_st_"+seller.getSellerMobileNumber()+"_lot or use code:"+seller.getSellerMobileNumber();
 				}
 			} else if (requestBean.getKey().equals("customer")) {
 				EngageCustomer customer = (EngageCustomer) session
@@ -1030,6 +1028,11 @@ public class EngageCustomerManager {
 			else if(guestList.isEmpty()){
 				GuestUser guestUser = new GuestUser();
 				guestUser.setDeviceMac(requestBean.getDeviceMac());
+				guestUser.setUtmSource(requestBean.getUtmSource());
+				guestUser.setUtmMedium(requestBean.getUtmMedium());
+				guestUser.setUtmCampign(requestBean.getUtmCampign());
+				guestUser.setUtmTerm(requestBean.getUtmTerm());
+				guestUser.setUtmContent(requestBean.getUtmContent());
 				session.persist(guestUser);
 				
 				String guestPwd = DigestUtils.sha256Hex("guest@llc2o2o"+guestUser.getGuestId());

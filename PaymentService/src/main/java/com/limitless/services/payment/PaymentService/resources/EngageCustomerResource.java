@@ -78,6 +78,11 @@ public class EngageCustomerResource {
 			customer.setCustomerCity(bean.getCity());
 			customer.setCustomerCountry(bean.getCountry());
 			customer.setCitrusSellerId(0);
+			customer.setUtmSource(bean.getUtmSource());
+			customer.setUtmMedium(bean.getUtmMedium());
+			customer.setUtmCampign(bean.getUtmCampign());
+			customer.setUtmTerm(bean.getUtmTerm());
+			customer.setUtmContent(bean.getUtmContent());
 
 			EngageCustomerManager manager = new EngageCustomerManager();
 

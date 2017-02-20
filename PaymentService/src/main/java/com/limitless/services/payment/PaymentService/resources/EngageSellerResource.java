@@ -213,9 +213,40 @@ public class EngageSellerResource {
 	}
 
 	@GET
+	@Path("/get/{customerId}/{sellerMobileNumber}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber,
+			@PathParam("customerId") int customerId)
+			throws Exception {
+		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
+		try {
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.getSellerByMobile(sellerMobileNumber);
+			
+			if(responseBean.getMessage().equals("Success")){
+				if(responseBean.getBusinessType().equals("restaurant")){
+					RestaurantManager restaurantManager = new RestaurantManager();
+					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+					responseBean.setRestaurants(restaurantListBeans);
+				}
+				else if(responseBean.getBusinessType().equals("eCommerce")){
+					ProductManager productManager = new ProductManager();
+					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
+					responseBean.setProducts(productList);
+				}
+				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(customerId, responseBean.getSellerId());
+			}
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@GET
 	@Path("/get/{sellerMobileNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber)
+	public SellerLoginResponseBean getSeller2(@PathParam("sellerMobileNumber") String sellerMobileNumber)
 			throws Exception {
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
 		try {
