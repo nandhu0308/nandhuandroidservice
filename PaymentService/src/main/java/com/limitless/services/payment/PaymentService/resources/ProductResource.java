@@ -24,6 +24,7 @@ import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductErrorBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
+import com.limitless.services.engage.sellers.ProductListBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
 import com.limitless.services.engage.sellers.SellerProductBean;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
@@ -138,6 +139,25 @@ public class ProductResource {
 			throw new Exception("Internal Server Error");
 		}
 		return productBean;
+	}
+	
+	@Path("/get/seller/v2/{sellerMobileNumber}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductListBean getSellerProductV2(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
+		ProductListBean listBean = new ProductListBean();
+		try{
+			EngageSellerManager sellerManager = new EngageSellerManager();
+			SellerLoginResponseBean loginResponseBean = sellerManager.getSellerByMobile(sellerMobileNumber);
+			
+			ProductManager productManager = new ProductManager();
+			listBean = productManager.getSellerProductsV2(loginResponseBean.getSellerId());
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
 	}
 	
 }

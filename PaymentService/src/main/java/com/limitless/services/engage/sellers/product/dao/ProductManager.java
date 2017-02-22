@@ -20,8 +20,11 @@ import com.limitless.services.engage.sellers.NewProductsResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
+import com.limitless.services.engage.sellers.ProductListBean;
 import com.limitless.services.engage.sellers.ProductModelsBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
+import com.limitless.services.engage.sellers.ProductSubCategoryListBean;
+import com.limitless.services.engage.sellers.ProductsCategoryListBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 
 public class ProductManager {
@@ -339,6 +342,197 @@ public class ProductManager {
 			}
 		}
 		return productBean;
+	}
+	
+	public ProductListBean getSellerProductsV2(int sellerId){
+		log.debug("getting seller products");
+		ProductListBean listBean = new ProductListBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			if(seller!=null){
+				listBean.setSellerId(sellerId);
+				listBean.setCitrusSellerId(seller.getCitrusSellerId());
+				listBean.setSellerName(seller.getSellerShopName());
+				listBean.setSellerCity(seller.getSellerCity());
+				List<ProductsCategoryListBean> categoryProductList = new ArrayList<ProductsCategoryListBean>();
+				Criteria criteria = session.createCriteria(ProductCategory.class);
+				criteria.add(Restrictions.eq("sellerId", sellerId));
+				List<ProductCategory> categoryList = criteria.list();
+				log.debug("category size : " + categoryList.size());
+				if (categoryList.size() > 0) {
+					for (ProductCategory category : categoryList) {
+						ProductsCategoryListBean categoryBean = new ProductsCategoryListBean();
+						categoryBean.setCategoryId(category.getProductCategoryId());
+						categoryBean.setProductCategorName(category.getProductCategoryName());
+						Criteria criteria2 = session.createCriteria(ProductSubcategory.class);
+						criteria2.add(Restrictions.eq("productCategoryId", category.getProductCategoryId()));
+						List<ProductSubcategory> subcategoryList = criteria2.list();
+						log.debug("sub category size : " + subcategoryList.size());
+						if (subcategoryList.size() > 0) {
+							List<ProductSubCategoryListBean> scListBean = new ArrayList<ProductSubCategoryListBean>();
+							for (ProductSubcategory subcategory : subcategoryList) {
+								ProductSubCategoryListBean subCategoryBean = new ProductSubCategoryListBean();
+								subCategoryBean.setCategoryId(subcategory.getProductCategoryId());
+								subCategoryBean.setSubcategoryId(subcategory.getProductScId());
+								subCategoryBean.setSubcategoryName(subcategory.getProductScName());
+								List<ProductBean> subcategoryProductList = new ArrayList<ProductBean>();
+								Criteria criteria3 = session.createCriteria(Product.class);
+								criteria3.add(Restrictions.eq("subcategoryId", subcategory.getProductScId()));
+								List<Product> productList = criteria3.list();
+								log.debug("products list size : " + productList.size());
+								if (productList.size() > 0) {
+									for (Product product : productList) {
+										ProductBean bean = new ProductBean();
+										bean.setProductId(product.getProductId());
+										bean.setParentProductId(product.getParentProductId());
+										bean.setProductName(product.getProductName());
+										bean.setProductDescription(product.getProductDescription());
+										bean.setProductPrice(product.getProductPrice());
+										bean.setDiscountRate(product.getDiscountRate());
+										float discountedPrice = (float) ((Float) product.getProductPrice()
+												- (product.getProductPrice() * (product.getDiscountRate() / 100)));
+										bean.setDiscountedPrice(discountedPrice);
+										bean.setProduct_image(product.getProduct_image());
+										bean.setProductInStock(product.getProductInStock());
+										bean.setCategoryId(product.getCategoryId());
+										bean.setGroupId(product.getGroupId());
+										bean.setIsDefault(product.getIsDefault());
+										bean.setProductColor(product.getProductColor());
+										bean.setProductSizeText(product.getProductSizeText());
+										bean.setProductSizeNumber(product.getProductSizeNumber());
+										bean.setImage1(product.getImage1());
+										bean.setImage2(product.getImage2());
+										bean.setImage3(product.getImage3());
+										bean.setImage4(product.getImage4());
+										bean.setImage5(product.getImage5());
+										bean.setImage6(product.getImage6());
+										bean.setImage7(product.getImage7());
+										bean.setImage8(product.getImage8());
+										bean.setImage9(product.getImage9());
+										bean.setImage10(product.getImage10());
+										subcategoryProductList.add(bean);
+										bean = null;
+									}
+									subCategoryBean.setProductsList(subcategoryProductList);
+								}
+								scListBean.add(subCategoryBean);
+								subCategoryBean = null;
+							}
+							categoryBean.setSubcategoryList(scListBean);
+						} else if (subcategoryList.isEmpty()) {
+							List<ProductBean> productList = new ArrayList<ProductBean>();
+							Criteria criteria4 = session.createCriteria(Product.class);
+							criteria4.add(Restrictions.eq("catergoryId", category.getProductCategoryId()));
+							List<Product> productList2 = criteria4.list();
+							log.debug("products list size : " + productList2.size());
+							if (productList2.size() > 0) {
+								for (Product product : productList2) {
+									ProductBean bean = new ProductBean();
+									bean.setProductId(product.getProductId());
+									bean.setParentProductId(product.getParentProductId());
+									bean.setProductName(product.getProductName());
+									bean.setProductDescription(product.getProductDescription());
+									bean.setProductPrice(product.getProductPrice());
+									bean.setDiscountRate(product.getDiscountRate());
+									float discountedPrice = (float) ((Float) product.getProductPrice()
+											- (product.getProductPrice() * (product.getDiscountRate() / 100)));
+									bean.setDiscountedPrice(discountedPrice);
+									bean.setProduct_image(product.getProduct_image());
+									bean.setProductInStock(product.getProductInStock());
+									bean.setCategoryId(product.getCategoryId());
+									bean.setGroupId(product.getGroupId());
+									bean.setIsDefault(product.getIsDefault());
+									bean.setProductColor(product.getProductColor());
+									bean.setProductSizeText(product.getProductSizeText());
+									bean.setProductSizeNumber(product.getProductSizeNumber());
+									bean.setImage1(product.getImage1());
+									bean.setImage2(product.getImage2());
+									bean.setImage3(product.getImage3());
+									bean.setImage4(product.getImage4());
+									bean.setImage5(product.getImage5());
+									bean.setImage6(product.getImage6());
+									bean.setImage7(product.getImage7());
+									bean.setImage8(product.getImage8());
+									bean.setImage9(product.getImage9());
+									bean.setImage10(product.getImage10());
+									productList.add(bean);
+									bean = null;
+								}
+								categoryBean.setProductsList(productList);
+							}
+						}
+						categoryProductList.add(categoryBean);
+						categoryBean = null;
+					}
+					listBean.setCategoryList(categoryProductList);
+				} else if(categoryList.isEmpty()) {
+					List<ProductBean> beanList = new ArrayList<ProductBean>();
+					Criteria criteria5 = session.createCriteria(Product.class);
+					criteria5.add(Restrictions.eq("sellerId", sellerId));
+					List<Product> productList = criteria5.list();
+					log.debug("product size :" + productList.size());
+					if(productList.size()>0){
+						for(Product product : productList){
+							ProductBean bean = new ProductBean();
+							bean.setProductId(product.getProductId());
+							bean.setParentProductId(product.getParentProductId());
+							bean.setProductName(product.getProductName());
+							bean.setProductDescription(product.getProductDescription());
+							bean.setProductPrice(product.getProductPrice());
+							bean.setDiscountRate(product.getDiscountRate());
+							float discountedPrice = (float) ((Float) product.getProductPrice()
+									- (product.getProductPrice() * (product.getDiscountRate() / 100)));
+							bean.setDiscountedPrice(discountedPrice);
+							bean.setProduct_image(product.getProduct_image());
+							bean.setProductInStock(product.getProductInStock());
+							bean.setCategoryId(product.getCategoryId());
+							bean.setGroupId(product.getGroupId());
+							bean.setIsDefault(product.getIsDefault());
+							bean.setProductColor(product.getProductColor());
+							bean.setProductSizeText(product.getProductSizeText());
+							bean.setProductSizeNumber(product.getProductSizeNumber());
+							bean.setImage1(product.getImage1());
+							bean.setImage2(product.getImage2());
+							bean.setImage3(product.getImage3());
+							bean.setImage4(product.getImage4());
+							bean.setImage5(product.getImage5());
+							bean.setImage6(product.getImage6());
+							bean.setImage7(product.getImage7());
+							bean.setImage8(product.getImage8());
+							bean.setImage9(product.getImage9());
+							bean.setImage10(product.getImage10());
+							beanList.add(bean);
+							bean = null;
+						}
+						listBean.setProductsList(beanList);
+					}
+				}
+				listBean.setMessage("Success");
+			}
+			else{
+				listBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting products failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return listBean;
 	}
 	
 	public static void main(String[] args) {

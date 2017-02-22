@@ -78,7 +78,7 @@ public class RestaurantResource {
 	@Path("/order/summary/customer/{customerId}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response gettingCustomerSummary(@PathParam("customerId") int customerId){
+	public Response gettingCustomerSummary(@PathParam("customerId") int customerId) throws Exception{
 		RestaurantManager manager = new RestaurantManager();
 		RestaurantOrderBean bean = manager.getCustomerOrderSummary(customerId);
 		if(bean!=null){
@@ -92,7 +92,7 @@ public class RestaurantResource {
 	@Path("/order/summary/restaurant/{restaurantId}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response gettingRestaurantSummary(@PathParam("restaurantId") int restaurantId){
+	public Response gettingRestaurantSummary(@PathParam("restaurantId") int restaurantId) throws Exception{
 		RestaurantManager manager = new RestaurantManager();
 		RestaurantOrderBean bean = manager.getRestaurantOrderSummary(restaurantId);
 		if(bean!=null){

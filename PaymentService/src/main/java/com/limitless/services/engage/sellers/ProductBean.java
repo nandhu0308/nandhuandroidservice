@@ -24,6 +24,7 @@ public class ProductBean {
 	private String image9;
 	private String image10;
 	private int categoryId;
+	private int subcategoryId;
 	private int isDefault;
 	private int groupId;
 	private String productSizeText;
@@ -192,5 +193,11 @@ public class ProductBean {
 	}
 	public void setProductColor(String productColor) {
 		this.productColor = productColor;
+	}
+	public int getSubcategoryId() {
+		return subcategoryId;
+	}
+	public void setSubcategoryId(int subcategoryId) {
+		this.subcategoryId = subcategoryId;
 	}
 }

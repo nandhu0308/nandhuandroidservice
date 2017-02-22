@@ -55,6 +55,9 @@
   <mapping class="com.limitless.services.engage.restaurants.dao.Restaurants"/>
   <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantOrderDetails"/>
   <mapping class="com.limitless.services.engage.restaurants.dao.RestaurantOrder"/>
+  <mapping class="com.limitless.services.engage.dao.CircleNotify"/>
+  <mapping class="com.limitless.services.engage.sellers.product.dao.ProductCategory"/>
+  <mapping class="com.limitless.services.engage.sellers.product.dao.ProductSubcategory"/>
   
  </session-factory>
 </hibernate-configuration>

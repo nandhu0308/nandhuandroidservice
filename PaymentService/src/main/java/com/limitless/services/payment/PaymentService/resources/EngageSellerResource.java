@@ -18,8 +18,10 @@ import org.apache.log4j.Logger;
 import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
+import com.limitless.services.engage.CustomerNotifyListBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
+import com.limitless.services.engage.CustomerNotifyUpdateResponseBean;
 import com.limitless.services.engage.EngageSellerBean;
 import com.limitless.services.engage.EngageSellerResponseBean;
 import com.limitless.services.engage.MerchantDeviceIdRequestBean;
@@ -51,6 +53,7 @@ import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
+import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/merchant")
 public class EngageSellerResource {
@@ -259,11 +262,11 @@ public class EngageSellerResource {
 					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
 				}
-				else if(responseBean.getBusinessType().equals("eCommerce")){
+				/*else if(responseBean.getBusinessType().equals("eCommerce")){
 					ProductManager productManager = new ProductManager();
 					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
 					responseBean.setProducts(productList);
-				}
+				}*/
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -410,6 +413,31 @@ public class EngageSellerResource {
 			return Response.status(200).entity(responseBean).build();
 		}
 		return Response.status(404).build();
+	}
+	
+	@PUT
+	@Path("/post/update/{notifyId}/{statusCode}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postUpdate(@PathParam("notifyId") int notifyId,
+			@PathParam("statusCode") int statusCode){
+		EngageSellerManager manager = new EngageSellerManager();
+		CustomerNotifyUpdateResponseBean responseBean = manager.updateNotifyRequest(notifyId,statusCode);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+	
+	@GET
+	@Path("/post/list")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postList(){
+		EngageSellerManager manager = new EngageSellerManager();
+		CustomerNotifyListBean listBean = manager.getAllNotifyRequest();
+		if(listBean!=null){
+			return Response.status(Status.OK).entity(listBean).build();
+		}
+		return Response.status(Status.NOT_FOUND).build();
 	}
 	
 	@PUT

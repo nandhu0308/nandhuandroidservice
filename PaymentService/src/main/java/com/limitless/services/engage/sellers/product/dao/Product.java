@@ -14,6 +14,8 @@ public class Product {
 	@GeneratedValue
 	@Column(name="PRODUCT_ID")
 	private Integer productId;
+	@Column(name="SELLER_ID")
+	private Integer sellerId;
 	@Column(name="PRODUCT_NAME")
 	private String productName;
 	@Column(name="PRODUCT_PRICE")
@@ -32,6 +34,8 @@ public class Product {
 	private Integer groupId;
 	@Column(name="CATEGORYID")
 	private Integer categoryId;
+	@Column(name="SUBCATERGORYID")
+	private Integer subcategoryId;
 	@Column(name="PRODUCT_SIZE_TEXT")
 	private String productSizeText;
 	@Column(name="PRODUCT_SIZE_NUMBER")
@@ -204,5 +208,17 @@ public class Product {
 	}
 	public void setImage10(String image10) {
 		this.image10 = image10;
+	}
+	public Integer getSubcategoryId() {
+		return subcategoryId;
+	}
+	public void setSubcategoryId(Integer subcategoryId) {
+		this.subcategoryId = subcategoryId;
+	}
+	public Integer getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(Integer sellerId) {
+		this.sellerId = sellerId;
 	}
 }

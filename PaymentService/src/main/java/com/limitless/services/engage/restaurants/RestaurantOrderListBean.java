@@ -13,6 +13,8 @@ public class RestaurantOrderListBean {
 	private String customerMobileNumber;
 	private float orderTotalAmount;
 	private String orderStyle;
+	private String restaurantOrderStatus;
+	private String restaurantOrderTime;
 	private AddressListBean deliveryAddress;
 	public int getOrderId() {
 		return orderId;
@@ -79,5 +81,17 @@ public class RestaurantOrderListBean {
 	}
 	public void setDeliveryAddress(AddressListBean deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;
+	}
+	public String getRestaurantOrderStatus() {
+		return restaurantOrderStatus;
+	}
+	public void setRestaurantOrderStatus(String restaurantOrderStatus) {
+		this.restaurantOrderStatus = restaurantOrderStatus;
+	}
+	public String getRestaurantOrderTime() {
+		return restaurantOrderTime;
+	}
+	public void setRestaurantOrderTime(String restaurantOrderTime) {
+		this.restaurantOrderTime = restaurantOrderTime;
 	}
 }

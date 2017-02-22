@@ -1,6 +1,10 @@
 package com.limitless.services.engage.restaurants.dao;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -382,7 +386,7 @@ public class RestaurantManager {
 		return responseBean;
 	}
 	
-	public RestaurantOrderBean getCustomerOrderSummary(int customerId){
+	public RestaurantOrderBean getCustomerOrderSummary(int customerId) throws Exception{
 		log.debug("getting customer order summary");
 		RestaurantOrderBean bean = null;
 		Session session = null;
@@ -411,6 +415,16 @@ public class RestaurantManager {
 						listBean.setCustomerId(order.getCustomerId());
 						listBean.setCustomerName(customerName);
 						listBean.setCustomerMobileNumber(customerPhone);
+						listBean.setRestaurantOrderStatus(order.getOrderStatus());
+						String gmtTime = order.getOrderTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						Date dateTxn = sdf3.parse(gmtTime);
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(dateTxn);
+						calendar.add(Calendar.HOUR, 5);
+						calendar.add(Calendar.MINUTE, 30);
+						String localTime = sdf3.format(calendar.getTime());
+						listBean.setRestaurantOrderTime(localTime);
 						listBean.setRestaurantId(order.getRestaurantId());
 						Restaurants restaurant = (Restaurants) session
 								.get("com.limitless.services.engage.restaurants.dao.Restaurants", order.getRestaurantId());
@@ -458,7 +472,7 @@ public class RestaurantManager {
 		return bean;
 	}
 	
-	public RestaurantOrderBean getRestaurantOrderSummary(int restaurantId){
+	public RestaurantOrderBean getRestaurantOrderSummary(int restaurantId) throws Exception{
 		log.debug("getting restaurant order summary");
 		RestaurantOrderBean bean = null;
 		Session session = null;
@@ -484,6 +498,16 @@ public class RestaurantManager {
 						RestaurantOrderListBean listBean = new RestaurantOrderListBean();
 						listBean.setOrderId(order.getOrderId());
 						listBean.setOrderStyle(order.getOrderType());
+						listBean.setRestaurantOrderStatus(order.getOrderStatus());
+						String gmtTime = order.getOrderTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						Date dateTxn = sdf3.parse(gmtTime);
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(dateTxn);
+						calendar.add(Calendar.HOUR, 5);
+						calendar.add(Calendar.MINUTE, 30);
+						String localTime = sdf3.format(calendar.getTime());
+						listBean.setRestaurantOrderTime(localTime);
 						listBean.setOrderTotalAmount((float) order.getTotalAmount());
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", order.getCustomerId());
