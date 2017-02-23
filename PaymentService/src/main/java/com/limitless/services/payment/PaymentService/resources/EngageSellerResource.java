@@ -38,6 +38,7 @@ import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
+import com.limitless.services.engage.SellerRequestBean;
 import com.limitless.services.engage.SellerRestaurantListBean;
 import com.limitless.services.engage.SellerTempRequestBean;
 import com.limitless.services.engage.SellerTempResponseBean;
@@ -213,6 +214,36 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return coords;
+	}
+	
+	@POST
+	@Path("/search")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerLoginResponseBean getSeller(SellerRequestBean requestBean) 
+			throws Exception {
+		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
+		try {
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.getSellerBySearchString(requestBean.getSearchString());
+			
+			if(responseBean.getMessage().equals("Success")){
+				if(responseBean.getBusinessType().equals("restaurant")){
+					RestaurantManager restaurantManager = new RestaurantManager();
+					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+					responseBean.setRestaurants(restaurantListBeans);
+				}
+				else if(responseBean.getBusinessType().equals("eCommerce")){
+					ProductManager productManager = new ProductManager();
+					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
+					responseBean.setProducts(productList);
+				}
+				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(requestBean.getCustomerId(), responseBean.getSellerId());
+			}
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 
 	@GET

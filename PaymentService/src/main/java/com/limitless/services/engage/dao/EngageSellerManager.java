@@ -447,9 +447,7 @@ public class EngageSellerManager {
 			Junction condition1 = Restrictions.disjunction()
 					.add(Restrictions.eq("sellerMobileNumber", sellerMobileNumber))
 					.add(Restrictions.eq("mobileAlias", sellerMobileNumber));
-			Junction condition2 = Restrictions.conjunction()
-					.add(condition1)
-					.add(Restrictions.ne("isDeleted", 1));
+			Junction condition2 = Restrictions.conjunction().add(condition1).add(Restrictions.ne("isDeleted", 1));
 			criteria.add(condition2);
 			List<EngageSeller> sellerList = criteria.list();
 			log.debug("Size : " + sellerList.size());
@@ -465,6 +463,53 @@ public class EngageSellerManager {
 				}
 			} else {
 				responseBean.setMessage("Mobile Number Not Registered");
+			}
+			transaction.commit();
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("Getting seller details by mobile failed");
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+
+	public SellerLoginResponseBean getSellerBySearchString(String searchString) {
+		log.debug("Getting seller details by mobile");
+		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
+		Transaction transaction = null;
+		Session session = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			Junction condition1 = Restrictions.disjunction().add(Restrictions.eq("sellerMobileNumber", searchString))
+					.add(Restrictions.eq("mobileAlias", searchString)).add(Restrictions.eq("sellerName", searchString))
+					.add(Restrictions.eq("sellerShopName", searchString))
+					.add(Restrictions.eq("sellerEmail99", searchString))
+					.add(Restrictions.like("tag", searchString));
+			Junction condition2 = Restrictions.conjunction().add(condition1).add(Restrictions.ne("isDeleted", 1));
+			criteria.add(condition2);
+			List<EngageSeller> sellerList = criteria.list();
+			log.debug("Size : " + sellerList.size());
+			if (sellerList.size() >= 1) {
+				EngageSeller seller = sellerList.get(0);
+				{
+					responseBean.setSellerId(seller.getSellerId());
+					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
+					responseBean.setSellerName(seller.getSellerShopName());
+					responseBean.setSellerType(seller.getSellerType());
+					responseBean.setBrandingUrl(seller.getBranding_url());
+					responseBean.setBusinessType(seller.getBusinessType());
+					responseBean.setMessage("Success");
+				}
+			} else {
+				responseBean.setMessage("No results found for " + searchString);
 			}
 			transaction.commit();
 		} catch (RuntimeException re) {
@@ -780,7 +825,7 @@ public class EngageSellerManager {
 					if (customerList.size() == 1) {
 						for (EngageCustomer customer : customerList) {
 							Criteria criteria2 = session.createCriteria(SellerCustomerMapper.class);
-							Junction condition =  Restrictions.conjunction()
+							Junction condition = Restrictions.conjunction()
 									.add(Restrictions.eq("customerId", customer.getCustomerId()))
 									.add(Restrictions.eq("sellerId", requestBean.getSellerId()));
 							criteria2.add(condition);
@@ -828,7 +873,7 @@ public class EngageSellerManager {
 					requestBean.getSellerId());
 			if (seller != null) {
 				String sellerMobileNumber = seller.getSellerMobileNumber();
-				
+
 				CircleNotify notify = new CircleNotify();
 				notify.setSellerId(requestBean.getSellerId());
 				notify.setCustomerId(requestBean.getCustomerId());
@@ -839,7 +884,7 @@ public class EngageSellerManager {
 				notify.setStatus("NOTYET");
 				notify.setPostType("CIRCLE");
 				session.persist(notify);
-				
+
 				responseBean = new CustomerNotifyResponseBean();
 				responseBean.setNotifyId(notify.getCircleNotifyId());
 				responseBean.setMessage("Success");
@@ -870,7 +915,7 @@ public class EngageSellerManager {
 					requestBean.getSellerId());
 			if (seller != null) {
 				String sellerMobileNumber = seller.getSellerMobileNumber();
-				
+
 				CircleNotify notify = new CircleNotify();
 				notify.setSellerId(requestBean.getSellerId());
 				notify.setCustomerId(requestBean.getCustomerId());
@@ -881,7 +926,7 @@ public class EngageSellerManager {
 				notify.setStatus("NOTYET");
 				notify.setPostType("ALL");
 				session.persist(notify);
-				
+
 				responseBean = new CustomerNotifyResponseBean();
 				responseBean.setNotifyId(notify.getCircleNotifyId());
 				responseBean.setMessage("Success");
@@ -1051,72 +1096,69 @@ public class EngageSellerManager {
 		}
 		return listBean;
 	}
-	
-	public SellerContactsResponseBean addSearchMapper(int customerId, int sellerId){
+
+	public SellerContactsResponseBean addSearchMapper(int customerId, int sellerId) {
 		log.debug("adding search mapper");
 		SellerContactsResponseBean responseBean = new SellerContactsResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(SellerCustomerMapper.class);
-			Junction condition = Restrictions.conjunction()
-					.add(Restrictions.eq("sellerId", sellerId))
+			Junction condition = Restrictions.conjunction().add(Restrictions.eq("sellerId", sellerId))
 					.add(Restrictions.eq("customerId", customerId));
 			criteria.add(condition);
 			List<SellerCustomerMapper> mapperList = criteria.list();
 			log.debug("mapper size : " + mapperList.size());
-			if(mapperList.isEmpty()){
+			if (mapperList.isEmpty()) {
 				SellerCustomerMapper mapper = new SellerCustomerMapper();
 				mapper.setCustomerId(customerId);
 				mapper.setSellerId(sellerId);
 				session.persist(mapper);
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding search mapper failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public CustomerNotifyUpdateResponseBean updateNotifyRequest(int notifyId, int statusCode){
+
+	public CustomerNotifyUpdateResponseBean updateNotifyRequest(int notifyId, int statusCode) {
 		log.debug("updating notify request");
 		CustomerNotifyUpdateResponseBean responseBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			CircleNotify notify = (CircleNotify) session
-					.get("com.limitless.services.engage.dao.CircleNotify", notifyId);
-			if(notify!=null){
-				if(statusCode>0){
-					if(statusCode==2){
+
+			CircleNotify notify = (CircleNotify) session.get("com.limitless.services.engage.dao.CircleNotify",
+					notifyId);
+			if (notify != null) {
+				if (statusCode > 0) {
+					if (statusCode == 2) {
 						notify.setStatus("APPROVED");
 						session.update(notify);
-						
-						if(notify.getPostType().equals("CIRCLE")){
+
+						if (notify.getPostType().equals("CIRCLE")) {
 							Criteria criteria = session.createCriteria(SellerCustomerMapper.class);
 							criteria.add(Restrictions.eq("sellerId", notify.getSellerId()));
 							List<SellerCustomerMapper> mapperList = criteria.list();
 							log.debug("mapper size : " + mapperList.size());
-							if(mapperList.size()>0){
-								for(SellerCustomerMapper mapper : mapperList){
-									EngageCustomer customer = (EngageCustomer) session
-											.get("com.limitless.services.engage.dao.EngageCustomer", mapper.getCustomerId());
-									if(customer!=null){
+							if (mapperList.size() > 0) {
+								for (SellerCustomerMapper mapper : mapperList) {
+									EngageCustomer customer = (EngageCustomer) session.get(
+											"com.limitless.services.engage.dao.EngageCustomer", mapper.getCustomerId());
+									if (customer != null) {
 										if (customer.getDeviceId() != null) {
 											CustomerFcmRequestBean fcmBean = new CustomerFcmRequestBean();
 											log.debug("Device ID : " + customer.getDeviceId());
@@ -1129,9 +1171,11 @@ public class EngageSellerManager {
 											dataBean.setBody(notify.getBody());
 											fcmBean.setData(dataBean);
 											log.debug("FCM Bean : " + fcmBean.toString());
-											WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+											WebResource webResource2 = client
+													.resource("https://fcm.googleapis.com/fcm/send");
 											ClientResponse clientResponse = webResource2.type("application/json")
-													.header("Authorization", "key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
+													.header("Authorization",
+															"key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
 													.post(ClientResponse.class, fcmBean);
 											System.out.println(clientResponse.getStatus());
 											System.out.println(clientResponse.getEntity(String.class));
@@ -1139,12 +1183,11 @@ public class EngageSellerManager {
 									}
 								}
 							}
-						}
-						else if(notify.getPostType().equals("ALL")){
+						} else if (notify.getPostType().equals("ALL")) {
 							Criteria criteria2 = session.createCriteria(EngageCustomer.class);
 							List<EngageCustomer> customerList = criteria2.list();
-							if(customerList.size()>0){
-								for(EngageCustomer customer : customerList){
+							if (customerList.size() > 0) {
+								for (EngageCustomer customer : customerList) {
 									if (customer.getDeviceId() != null) {
 										CustomerFcmRequestBean fcmBean = new CustomerFcmRequestBean();
 										log.debug("Device ID : " + customer.getDeviceId());
@@ -1157,7 +1200,8 @@ public class EngageSellerManager {
 										dataBean.setBody(notify.getBody());
 										fcmBean.setData(dataBean);
 										log.debug("FCM Bean : " + fcmBean.toString());
-										WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+										WebResource webResource2 = client
+												.resource("https://fcm.googleapis.com/fcm/send");
 										ClientResponse clientResponse = webResource2.type("application/json")
 												.header("Authorization", "key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
 												.post(ClientResponse.class, fcmBean);
@@ -1170,8 +1214,7 @@ public class EngageSellerManager {
 						responseBean = new CustomerNotifyUpdateResponseBean();
 						responseBean.setNotifyId(notifyId);
 						responseBean.setMessage("Success");
-					}
-					else if(statusCode==3){
+					} else if (statusCode == 3) {
 						notify.setStatus("CANCELLED");
 						session.update(notify);
 						responseBean = new CustomerNotifyUpdateResponseBean();
@@ -1181,30 +1224,28 @@ public class EngageSellerManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("updating notify request failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public CustomerNotifyListBean getAllNotifyRequest(){
+
+	public CustomerNotifyListBean getAllNotifyRequest() {
 		log.debug("getting all notify request");
 		CustomerNotifyListBean notifyBeanList = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(CircleNotify.class);
 			Criterion statusNyCriterion = Restrictions.ne("status", "NOTYET");
 			Criterion statusCnlCriterion = Restrictions.ne("status", "CANCELLED");
@@ -1212,16 +1253,16 @@ public class EngageSellerManager {
 			criteria.add(logExp);
 			List<CircleNotify> notifyList = criteria.list();
 			log.debug("notify size : " + notifyList.size());
-			if(notifyList.size()>0){
+			if (notifyList.size() > 0) {
 				List<CustomerNotifyBean> beanList = new ArrayList<CustomerNotifyBean>();
-				for(CircleNotify notify : notifyList){
+				for (CircleNotify notify : notifyList) {
 					CustomerNotifyBean bean = new CustomerNotifyBean();
 					bean.setNotifyId(notify.getCircleNotifyId());
 					bean.setSellerId(notify.getSellerId());
 					bean.setSellerMobileNumber(notify.getSellerMobile());
-					EngageSeller seller = (EngageSeller) session
-							.get("com.limitless.services.engage.dao.EngageSeller", notify.getSellerId());
-					if(seller!=null){
+					EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+							notify.getSellerId());
+					if (seller != null) {
 						bean.setSellerName(seller.getSellerName());
 					}
 					bean.setTitle(notify.getTitle());
@@ -1229,7 +1270,7 @@ public class EngageSellerManager {
 					bean.setImageUrl(notify.getImageUrl());
 					bean.setPostType(notify.getPostType());
 					bean.setNotifyCreatedTime(notify.getNotifyCreatedTime());
-					
+
 					beanList.add(bean);
 					bean = null;
 				}
@@ -1237,14 +1278,12 @@ public class EngageSellerManager {
 				notifyBeanList.setNotifyList(beanList);
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting all notify request failed " + re);
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}

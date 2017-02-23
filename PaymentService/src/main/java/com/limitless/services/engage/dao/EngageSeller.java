@@ -83,6 +83,8 @@ public class EngageSeller implements java.io.Serializable {
 	private Integer isDeleted;
 	@Column(name="EXTRA_EMAILS")
 	private String extraEmails;
+	@Column(name="TAG")
+	private String tag;
 	
 	public EngageSeller() {
 	}
@@ -371,4 +373,13 @@ public class EngageSeller implements java.io.Serializable {
 	public void setExtraEmails(String extraEmails) {
 		this.extraEmails = extraEmails;
 	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+	
 }
