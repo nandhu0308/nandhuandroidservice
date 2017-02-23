@@ -24,7 +24,7 @@ import com.limitless.services.engage.restaurants.RestaurantSellerResponseBean;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
-@Path("restaurant")
+@Path("/restaurant")
 public class RestaurantResource {
 	final static Logger logger = Logger.getLogger(RestaurantResource.class);
 	
@@ -129,6 +129,15 @@ public class RestaurantResource {
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
 		errorBean.setMessage("Not Found");
 		return Response.status(Status.NOT_FOUND).entity(errorBean).build();
+	}
+	
+	@Path("/mail/{orderId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sendMail(@PathParam("orderId") int orderId) throws Exception{
+		RestaurantManager manager = new RestaurantManager();
+		manager.sendOrderMail(orderId);
+		return Response.status(200).build();
 	}
 	
 }

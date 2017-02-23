@@ -56,6 +56,8 @@ public class PaymentTxn implements java.io.Serializable {
 	private String txnNotes;
 	@Column(name="ORDER_ID")
 	private Integer orderId;
+	@Column(name="TXN_TYPE")
+	private String txnType;
 
 	public PaymentTxn() {
 	}
@@ -196,6 +198,14 @@ public class PaymentTxn implements java.io.Serializable {
 
 	public void setOrderId(Integer orderId) {
 		this.orderId = orderId;
+	}
+
+	public String getTxnType() {
+		return txnType;
+	}
+
+	public void setTxnType(String txnType) {
+		this.txnType = txnType;
 	}
 
 	@Override

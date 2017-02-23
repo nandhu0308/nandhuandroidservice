@@ -506,6 +506,7 @@ public class EngageSellerManager {
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
 					responseBean.setBusinessType(seller.getBusinessType());
+					responseBean.setMobileNumber(seller.getSellerMobileNumber());
 					responseBean.setMessage("Success");
 				}
 			} else {

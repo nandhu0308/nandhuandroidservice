@@ -6,6 +6,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -375,7 +382,49 @@ public class RestaurantManager {
 			if(transaction!=null){
 				transaction.rollback();
 			}
-			log.error("new order failed : " +re);
+			log.error("updating order status failed : " +re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public RestaurantOrderStatusUpdateResponseBean orderStatusUpdate(int orderId, int status){
+		log.debug("upadting order status");
+		RestaurantOrderStatusUpdateResponseBean responseBean = new RestaurantOrderStatusUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			RestaurantOrder order = (RestaurantOrder) session
+					.get("com.limitless.services.engage.restaurants.dao.RestaurantOrder", orderId);
+			if(order!=null){
+				if(status==1){
+					order.setOrderStatus("ORDER_RECIEVED");
+					session.update(order);
+					responseBean.setOrderId(orderId);
+					responseBean.setCurrentStatus("ORDER_RECIEVED");
+				}
+				else if(status==2){
+					order.setOrderStatus("PROCESS_FAILED");
+					session.update(order);
+					responseBean.setOrderId(orderId);
+					responseBean.setCurrentStatus("PROCESS_FAILED");
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("updating order status failed : " +re);
 			throw re;
 		}
 		finally {
@@ -652,6 +701,174 @@ public class RestaurantManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public void sendOrderMail(int orderId) throws Exception{
+		log.debug("sending mail for order");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			RestaurantOrder order = (RestaurantOrder) session
+					.get("com.limitless.services.engage.restaurants.dao.RestaurantOrder", orderId);
+			if(order!=null){
+				int restaurantId = order.getRestaurantId();
+				String restaurantName = "";
+				String restaurantCity = "";
+				String restaurantPhone = "";
+				int sellerId = 0;
+				String sellerName = "";
+				String sellerEmailId = "";
+				String sellerCity = "";
+				String sellerMobile = "";
+				String customerName = "";
+				String customerMobile = "";
+				String customerCity = "";
+				String customerEmail = "";
+				Restaurants restaurant = (Restaurants) session
+						.get("com.limitless.services.engage.restaurants.dao.Restaurants", restaurantId);
+				if(restaurant!=null){
+					restaurantName = restaurant.getRestaurantName();
+					restaurantPhone = restaurant.getRestaurantPhone();
+					restaurantCity = restaurant.getRestaurantCity();
+					sellerId = restaurant.getSellerId();
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+					if(seller!=null){
+						sellerName = seller.getSellerName();
+						sellerEmailId = seller.getSellerEmail99();
+						sellerCity = seller.getSellerCity();
+						sellerMobile = seller.getSellerMobileNumber();
+					}
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", order.getCustomerId());
+					if(customer!=null){
+						customerName = customer.getCustomerName();
+						customerMobile = customer.getCustomerMobileNumber();
+						customerCity = customer.getCustomerCity();
+						customerEmail = customer.getCustomerEmail99();
+					}
+					
+					final String username = "transactions@limitlesscircle.com";
+					final String password = "Engage@12E";
+					String sendMailTo = sellerEmailId+","+customerEmail;
+					Properties properties = new Properties();
+					properties.put("mail.smtp.host", "smtp.zoho.com");
+					properties.put("mail.smtp.socketFactory.port", "465");
+					properties.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+					properties.put("mail.smtp.auth", "true");
+					properties.put("mail.smtp.port", "465");
+					
+					javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(properties,
+							new javax.mail.Authenticator() {
+						protected PasswordAuthentication getPasswordAuthentication() {
+							return new PasswordAuthentication(username, password);
+						}
+					  });
+					
+					try{
+						javax.mail.Message message = new MimeMessage(mailSession);
+						if(!order.getOrderStatus().equals("ORDER_INITIATED") || !order.getOrderStatus().equals("PROCESS_FAILED")){
+							message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
+							message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
+							message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
+							double totalAmount = order.getTotalAmount();
+							String mailContent = "";
+							message.setSubject("Order Recieved Successfully. Order Reference Id: "+orderId);
+							Criteria criteria = session.createCriteria(RestaurantOrderDetails.class);
+							criteria.add(Restrictions.eq("orderId", orderId));
+							List<RestaurantOrderDetails> detailsList = criteria.list();
+							log.debug("details size : " + detailsList.size());
+							if(detailsList.size()>0){
+								for(RestaurantOrderDetails details : detailsList){
+									int quantity = details.getQuantity();
+									double itemTotalPrice = details.getTotalPrice();
+									RestaurantItems item = (RestaurantItems) session
+											.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", details.getItemId());
+									String itemName = item.getItemName();
+									float itemPrice = item.getItemPrice();
+									String itemType = item.getItemType();
+									
+									mailContent += "<table>"
+											+ "<tr>"
+											+ "<td>"+itemName+"</td>"
+													+ "<td>&nbsp;</td>"
+											+ "<td>MRP:"+itemPrice+"</<td>"
+													+ "<td>&nbsp;</td>"
+											+ "<td>Quantity:"+quantity+"</td>"
+													+ "<td>&nbsp;</td>"
+											+ "<td>Total Price: "+itemTotalPrice+"</td>"
+											+ "</tr>"
+											+ "</table>"
+											+ "<br>";
+											
+								}
+								mailContent += "<h2><b>Total Amount : "+totalAmount+"</b></h2>";
+								message.setContent(mailContent,"text/html");
+							}
+						}
+						else if(order.getOrderStatus().equals("PROCESS_FAILED")){
+							message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
+							message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
+							message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
+							double totalAmount = order.getTotalAmount();
+							String mailContent = "";
+							message.setSubject("Order Failed. Order Reference Id: "+orderId);
+							Criteria criteria = session.createCriteria(RestaurantOrderDetails.class);
+							criteria.add(Restrictions.eq("orderId", orderId));
+							List<RestaurantOrderDetails> detailsList = criteria.list();
+							log.debug("details size : " + detailsList.size());
+							if(detailsList.size()>0){
+								for(RestaurantOrderDetails details : detailsList){
+									int quantity = details.getQuantity();
+									double itemTotalPrice = details.getTotalPrice();
+									RestaurantItems item = (RestaurantItems) session
+											.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", details.getItemId());
+									String itemName = item.getItemName();
+									float itemPrice = item.getItemPrice();
+									String itemType = item.getItemType();
+									
+									mailContent += "<table>"
+											+ "<tr>"
+											+ "<td>"+itemName+"</td>"
+													+ "<td>&nbsp;</td>"
+											+ "<td>MRP:"+itemPrice+"</<td>"
+													+ "<td>&nbsp;</td>"
+											+ "<td>Quantity:"+quantity+"</td>"
+													+ "<td>&nbsp;</td>"
+											+ "<td>Total Price: "+itemTotalPrice+"</td>"
+											+ "</tr>"
+											+ "</table>"
+											+ "<br>";
+											
+								}
+								message.setContent(mailContent,"text/html");
+							}
+						}
+						Transport.send(message, message.getAllRecipients());
+					}
+					catch(Exception e){
+						log.error("sending mail failed : " + e);
+						throw e;
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch (RuntimeException re) {
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending mail failed");
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
 	}
 	
 }

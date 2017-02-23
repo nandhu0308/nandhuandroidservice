@@ -28,6 +28,8 @@ import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.order.OrderMailResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
 import com.limitless.services.engage.order.dao.OrdersManager;
+import com.limitless.services.engage.restaurants.RestaurantOrderStatusUpdateResponseBean;
+import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.limitless.services.payment.PaymentService.CreditBean;
 import com.limitless.services.payment.PaymentService.CreditReminderRequestBean;
 import com.limitless.services.payment.PaymentService.CreditReminderResponseBean;
@@ -132,6 +134,7 @@ public class PaymentResource {
 			paymentTxn.setSellerDeviceId(bean.getSellerDeviceId());
 			paymentTxn.setTxnNotes(bean.getTxnNotes());
 			paymentTxn.setOrderId(bean.getOrderId());
+			paymentTxn.setTxnType(bean.getTxnType());
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			manager.persist(paymentTxn);
@@ -163,7 +166,7 @@ public class PaymentResource {
 		TxnResponseBean txnResp = new TxnResponseBean();
 
 		try {
-			// TODO - currently only the Status
+			// TODO - currently - Status,mail,SMS
 			PaymentTxnManager manager = new PaymentTxnManager();
 			PaymentTxn paymentTxn = manager.updateTxn(paymentTxnBean.getTxnId(),
 					paymentTxnBean.getTxnStatus().toString());
@@ -180,12 +183,23 @@ public class PaymentResource {
 			
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
 			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
-			if(paymentTxn.getOrderId()>0){
-				OrdersManager ordersManager = new OrdersManager();
-				orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
-				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
-				orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(), paymentTxn.getTxnId());
-				System.out.println("Status: " + orderMailResponseBean.getMessage());
+			RestaurantOrderStatusUpdateResponseBean restaurantOrderStatusUpdateResponseBean = new RestaurantOrderStatusUpdateResponseBean();
+			if(paymentTxn.getTxnType().equals("eCommerce")){
+				if(paymentTxn.getOrderId()>0){
+					OrdersManager ordersManager = new OrdersManager();
+					orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
+					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
+					orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(), paymentTxn.getTxnId());
+					System.out.println("Status: " + orderMailResponseBean.getMessage());
+				}
+			}
+			else if(paymentTxn.getTxnType().equals("restaurant")){
+				if(paymentTxn.getOrderId()>0){
+					RestaurantManager restaurantManager = new RestaurantManager();
+					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(paymentTxn.getOrderId(),1);
+					System.out.println("Restaurant Order Id :" + restaurantOrderStatusUpdateResponseBean.getOrderId());
+					restaurantManager.sendOrderMail(paymentTxn.getOrderId());
+				}
 			}
 
 			MessageBean messageBean = new MessageBean();
@@ -364,6 +378,7 @@ public class PaymentResource {
 			EngageSellerManager sellerMgr = new EngageSellerManager();
 			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
 			int orderId = paymentTxn.getOrderId();
+			String txnType = paymentTxn.getTxnType();
 
 			PaymentCreditManager creditManager = new PaymentCreditManager();
 			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
@@ -442,14 +457,25 @@ public class PaymentResource {
 			
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
 			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
-			if(orderId>0){
-				OrdersManager ordersManager = new OrdersManager();
-				orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
-				System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
-				//InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
-				//System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
-				orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
-				System.out.println("Status: " + orderMailResponseBean.getMessage());
+			RestaurantOrderStatusUpdateResponseBean restaurantOrderStatusUpdateResponseBean = new RestaurantOrderStatusUpdateResponseBean();
+			if(txnType.equals("eCommerce")){
+				if(orderId>0){
+					OrdersManager ordersManager = new OrdersManager();
+					orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
+					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
+					//InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
+					//System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
+					orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
+					System.out.println("Status: " + orderMailResponseBean.getMessage());
+				}
+			}
+			else if(txnType.equals("restaurant")){
+				if(orderId>0){
+					RestaurantManager restaurantManager = new RestaurantManager();
+					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(orderId,1);
+					System.out.println("Restaurant Order Id :" + restaurantOrderStatusUpdateResponseBean.getOrderId());
+					restaurantManager.sendOrderMail(orderId);
+				}
 			}
 
 			TxnSettlementResponseBean txnSettlementResponseBean = new TxnSettlementResponseBean();

@@ -22,6 +22,7 @@ public class PaymentTxnBean {
 	private TxnStatus txnStatus;
 	private String txnNotes;
 	private int orderId;
+	private String txnType;
 	
 	public TxnStatus getTxnStatus() {
 		return txnStatus;
@@ -95,5 +96,11 @@ public class PaymentTxnBean {
 	}
 	public void setOrderId(int orderId) {
 		this.orderId = orderId;
+	}
+	public String getTxnType() {
+		return txnType;
+	}
+	public void setTxnType(String txnType) {
+		this.txnType = txnType;
 	}
 }

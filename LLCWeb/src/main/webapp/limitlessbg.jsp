@@ -48,6 +48,10 @@ if(txnNotes==null)
 {
 	txnNotes="NA";
 }
+String txnType = request.getParameter("txnType");
+if(txnType==null){
+	txnType = "none";
+}
 
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              
@@ -75,6 +79,7 @@ bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 bean.setSellerDeviceId(sellerDeviceId);
 bean.setOrderId(Integer.parseInt(orderId));
+bean.setTxnType(txnType);
 if(txnNotes.equals("NA")){
 	bean.setTxnNotes("NA");
 }
