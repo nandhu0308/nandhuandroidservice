@@ -8,6 +8,9 @@ public class RestaurantOrderListBean {
 	private String restaurantName;
 	private String restaurantCity;
 	private String restaurantMobileNumber;
+	private String sellerName;
+	private int sellerId;
+	private int citrusSellerId;
 	private int customerId;
 	private String customerName;
 	private String customerMobileNumber;
@@ -93,5 +96,23 @@ public class RestaurantOrderListBean {
 	}
 	public void setRestaurantOrderTime(String restaurantOrderTime) {
 		this.restaurantOrderTime = restaurantOrderTime;
+	}
+	public String getSellerName() {
+		return sellerName;
+	}
+	public void setSellerName(String sellerName) {
+		this.sellerName = sellerName;
+	}
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
 	}
 }

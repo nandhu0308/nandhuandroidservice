@@ -5,6 +5,7 @@ import java.util.List;
 public class OrderRequestBean {
 	private int customerId;
 	private int sellerId;
+	private String paymentMode;
 	private int addressId;
 	private List<OrderProductsBean> orderList;
 	public int getCustomerId() {
@@ -30,5 +31,11 @@ public class OrderRequestBean {
 	}
 	public void setAddressId(int addressId) {
 		this.addressId = addressId;
+	}
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
 	}
 }

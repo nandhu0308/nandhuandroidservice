@@ -32,6 +32,7 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.order.OrderDetailResponseBean;
 import com.limitless.services.engage.order.OrderMailResponseBean;
+import com.limitless.services.engage.order.OrderPaymentModeUpdateResponseBean;
 import com.limitless.services.engage.order.OrderProductsBean;
 import com.limitless.services.engage.order.OrderProductsListBean;
 import com.limitless.services.engage.order.OrderRequestBean;
@@ -73,6 +74,7 @@ public class OrdersManager {
 			order.setSellerId(requestBean.getSellerId());
 			order.setTotalAmount(totalAmount);
 			order.setOrderStatus("ORDER_INITIATED");
+			order.setPaymentMode(requestBean.getPaymentMode());
 			order.setDeliveryAddress(requestBean.getAddressId());
 			session.persist(order);
 			
@@ -105,6 +107,51 @@ public class OrdersManager {
 			}
 			log.error("Adding order failed : " + re);
 			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public OrderPaymentModeUpdateResponseBean updatePaymentMode(int orderId, String paymentMode){
+		log.debug("updating payment mode");
+		OrderPaymentModeUpdateResponseBean responseBean = new OrderPaymentModeUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Orders order = (Orders) session
+					.get("com.limitless.services.engage.order.dao.Orders", orderId);
+			if(order!=null){
+				if(paymentMode.equals("PAID")){
+					order.setPaymentMode(paymentMode);
+					session.update(order);
+				}
+				else if(paymentMode.equals("POD")){
+					order.setPaymentMode(paymentMode);
+					session.update(order);
+				}
+				else if(paymentMode.equals("FAILED")){
+					order.setPaymentMode(paymentMode);
+					session.update(order);
+				}
+				responseBean.setOrderId(orderId);
+				responseBean.setPaymentMode(paymentMode);
+				responseBean.setMessage("Success");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("updating payment mode failed : " + re);
+			//throw re;
 		}
 		finally {
 			if(session!=null && session.isOpen()){
@@ -183,6 +230,7 @@ public class OrdersManager {
 			if(seller!=null){
 				String sellerName = seller.getSellerShopName();
 				String sellerMobileNumber = seller.getSellerMobileNumber();
+				int citrusSellerId = seller.getCitrusSellerId();
 
 				Criteria criteria = session.createCriteria(Orders.class);
 				Criterion sidCriterion = Restrictions.eq("sellerId", sellerId);
@@ -203,8 +251,10 @@ public class OrdersManager {
 						listBean.setCustomerMobileNumber(customer.getCustomerMobileNumber());
 						listBean.setSellerId(sellerId);
 						listBean.setSellerName(sellerName);
+						listBean.setCitrusSellerId(citrusSellerId);
 						listBean.setSellerMobileNumber(sellerMobileNumber);
 						listBean.setTotalAmount(order.getTotalAmount());
+						listBean.setPaymentMode(order.getPaymentMode());
 						String gmtTime = order.getOrderCreatedTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						Date dateTxn = sdf3.parse(gmtTime);
@@ -296,7 +346,9 @@ public class OrdersManager {
 								.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 						listBean.setSellerName(seller.getSellerShopName());
 						listBean.setSellerMobileNumber(seller.getSellerMobileNumber());
+						listBean.setCitrusSellerId(seller.getCitrusSellerId());
 						listBean.setTotalAmount(order.getTotalAmount());
+						listBean.setPaymentMode(order.getPaymentMode());
 						String gmtTime = order.getOrderCreatedTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						Date dateTxn = sdf3.parse(gmtTime);
@@ -403,7 +455,7 @@ public class OrdersManager {
 		return responseBean;
 	}
 	
-	public OrderMailResponseBean sendMailOrderTxn(int orderId, int txnId) throws Exception{
+	public OrderMailResponseBean sendMailOrderTxn(int orderId) throws Exception{
 		log.debug("Sending email");
 		OrderMailResponseBean responseBean = new OrderMailResponseBean();
 		Session session = null;
@@ -457,7 +509,7 @@ public class OrdersManager {
 					message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
-					message.setSubject("Order Received Successfully. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
+					message.setSubject("Order Received Successfully. Order Reference Id : "+orderId);
 					Criteria criteria = session.createCriteria(OrderDetails.class);
 					criteria.add(Restrictions.eq("orderId", orderId));
 					List<OrderDetails> detailsList = criteria.list();
@@ -481,7 +533,14 @@ public class OrdersManager {
 									+"<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
 						}
 					}
-					mailContent +="<br><h2>Total Amount Paid Rs. "+totalAmount+"</h2>";
+					if(order.getPaymentMode()!=null && order.getPaymentMode().equals("PAID")){
+						mailContent +="<br><h2>Total Amount Paid Rs. "+totalAmount+"</h2>";
+					}
+					else if(order.getPaymentMode()!=null && order.getPaymentMode().equals("POD")){
+						mailContent +="<br><h2>Total Amount To Be Paid Rs. "+totalAmount+"<sup>*</sup></h2>"
+								+ "<br>"
+								+ "<font color=red><sup>*</sup>You have opted for Pay-On-Delivery.</font>";
+					}
 					message.setContent(mailContent,"text/html");
 				}
 				else if(order.getOrderStatus().equals("PROCESS_FAILED")){
@@ -490,7 +549,7 @@ public class OrdersManager {
 					message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
-					message.setSubject("Order Failed. Order Reference Id : "+orderId+". Transaction Reference Id : " + txnId);
+					message.setSubject("Order Failed. Order Reference Id : "+orderId);
 					Criteria criteria = session.createCriteria(OrderDetails.class);
 					criteria.add(Restrictions.eq("orderId", orderId));
 					List<OrderDetails> detailsList = criteria.list();
@@ -515,7 +574,6 @@ public class OrdersManager {
 				}
 				Transport.send(message, message.getAllRecipients());
 				responseBean.setOrderId(orderId);
-				responseBean.setTxnId(txnId);
 				responseBean.setMessage("Success");
 			}
 			catch(Exception e){
@@ -529,7 +587,7 @@ public class OrdersManager {
 				transaction.rollback();
 			}
 			log.error("sending email failed : " + re);
-			//throw re;
+			throw re;
 		}
 		finally {
 			if(session!=null && session.isOpen()){

@@ -20,6 +20,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.AddressListBean;
@@ -262,10 +263,16 @@ public class RestaurantManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			
+			String sellerName = "";
+			int citrusSellerId = 0;
+			String sellerEmail = "";
+			String sellerMobileNumber = "";
+			
 			float totalAmount = 0;
 			Restaurants restaurants = (Restaurants) session
 					.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
 			if (restaurants != null) {
+				int sellerId = restaurants.getSellerId();
 				for (RestaurantOrderItemsBean items : requestBean.getItemsList()) {
 					RestaurantItems item = (RestaurantItems) session
 							.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", items.getItemId());
@@ -303,9 +310,22 @@ public class RestaurantManager {
 					session.persist(orderDetails);
 				}
 				if (orderId > 0) {
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+					if(seller!=null){
+						sellerName = seller.getSellerName();
+						citrusSellerId = seller.getCitrusSellerId();
+						sellerEmail = seller.getSellerEmail99();
+						sellerMobileNumber = seller.getSellerMobileNumber();
+					}
 					responseBean = new RestaurantOrderResponseBean();
 					responseBean.setRestaurantOrderId(orderId);
 					responseBean.setTotalAmount(totalAmount);
+					responseBean.setSellerId(sellerId);
+					responseBean.setCitrusSellerId(citrusSellerId);
+					responseBean.setSellerEmail(sellerEmail);
+					responseBean.setSellerName(sellerName);
+					responseBean.setSellerMobileName(sellerMobileNumber);
 				}
 			}
 			
@@ -451,7 +471,10 @@ public class RestaurantManager {
 				String customerPhone = customer.getCustomerMobileNumber();
 				
 				Criteria criteria = session.createCriteria(RestaurantOrder.class);
-				criteria.add(Restrictions.eq("customerId", customerId));
+				Junction condition = Restrictions.conjunction()
+						.add(Restrictions.eq("customerId", customerId))
+						.add(Restrictions.ne("orderStatus", "ORDER_INITIATED"));
+				criteria.add(condition);
 				List<RestaurantOrder> orders = criteria.list();
 				log.debug("order list size : " +orders.size());
 				if(orders.size()>0){
@@ -475,13 +498,24 @@ public class RestaurantManager {
 						String localTime = sdf3.format(calendar.getTime());
 						listBean.setRestaurantOrderTime(localTime);
 						listBean.setRestaurantId(order.getRestaurantId());
+						int sellerId = 0;
 						Restaurants restaurant = (Restaurants) session
 								.get("com.limitless.services.engage.restaurants.dao.Restaurants", order.getRestaurantId());
 						if(restaurant!=null){
 							listBean.setRestaurantName(restaurant.getRestaurantName());
 							listBean.setRestaurantCity(restaurant.getRestaurantCity());
 							listBean.setRestaurantMobileNumber(restaurant.getRestaurantPhone());
+							sellerId = restaurant.getSellerId();
 						}
+						
+						EngageSeller seller = (EngageSeller) session
+								.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+						if(seller!=null){
+							listBean.setSellerId(sellerId);
+							listBean.setCitrusSellerId(seller.getCitrusSellerId());
+							listBean.setSellerName(seller.getSellerName());
+						}
+						
 						CustomerAddressBook address = (CustomerAddressBook) session
 								.get("com.limitless.services.engage.dao.CustomerAddressBook", order.getDeliveryAddressId());
 						if(address!=null){
@@ -536,9 +570,21 @@ public class RestaurantManager {
 				String restaurantName = restaurant.getRestaurantName();
 				String restaurantCity = restaurant.getRestaurantCity();
 				String restaurantPhone = restaurant.getRestaurantPhone();
+				int sellerId = restaurant.getSellerId();
+				String sellerName = "";
+				int citrusSellerId = 0;
+				EngageSeller seller = (EngageSeller) session
+						.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+				if(seller!=null){
+					sellerName = seller.getSellerName();
+					citrusSellerId = seller.getCitrusSellerId();
+				}
 				
 				Criteria criteria = session.createCriteria(RestaurantOrder.class);
-				criteria.add(Restrictions.eq("restaurantId", restaurantId));
+				Junction condition = Restrictions.conjunction()
+						.add(Restrictions.eq("restaurantId", restaurantId))
+						.add(Restrictions.ne("orderStatus", "ORDER_INITIATED"));
+				criteria.add(condition);
 				List<RestaurantOrder> orders = criteria.list();
 				log.debug("order list size : " +orders.size());
 				if(orders.size()>0){
@@ -568,6 +614,9 @@ public class RestaurantManager {
 						listBean.setRestaurantName(restaurantName);
 						listBean.setRestaurantCity(restaurantCity);
 						listBean.setRestaurantMobileNumber(restaurantPhone);
+						listBean.setCitrusSellerId(citrusSellerId);
+						listBean.setSellerId(sellerId);
+						listBean.setSellerName(sellerName);
 						CustomerAddressBook address = (CustomerAddressBook) session
 								.get("com.limitless.services.engage.dao.CustomerAddressBook", order.getDeliveryAddressId());
 						if(address!=null){

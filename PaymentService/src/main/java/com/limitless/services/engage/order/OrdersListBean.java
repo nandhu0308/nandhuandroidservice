@@ -9,10 +9,12 @@ public class OrdersListBean {
 	private String customerMobileNumber;
 	private int sellerId;
 	private String sellerName;
+	private int citrusSellerId;
 	private String sellerMobileNumber;
 	private double totalAmount;
 	private String time;
 	private String orderStatus;
+	private String paymentMode;
 	private AddressListBean addressBean;
 	public int getOrderId() {
 		return orderId;
@@ -79,5 +81,17 @@ public class OrdersListBean {
 	}
 	public void setCustomerMobileNumber(String customerMobileNumber) {
 		this.customerMobileNumber = customerMobileNumber;
+	}
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
+	}
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
 	}
 }

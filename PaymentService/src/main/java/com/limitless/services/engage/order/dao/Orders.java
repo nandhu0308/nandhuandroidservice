@@ -34,6 +34,8 @@ public class Orders {
 	@Version
 	@Column(name="ORDER_UPDATED_TIME")
 	private Date orderUpdatedTime;
+	@Column(name="PAYMENT_MODE")
+	private String paymentMode;
 	
 	public Integer getOrderId() {
 		return orderId;
@@ -82,5 +84,14 @@ public class Orders {
 	}
 	public void setDeliveryAddress(Integer deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;
+	}
+	public String getPaymentMode() {
+		if(paymentMode == null)
+			return "";
+		else
+			return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
 	}
 }

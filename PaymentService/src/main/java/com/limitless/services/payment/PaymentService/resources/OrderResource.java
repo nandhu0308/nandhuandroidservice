@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.order.OrderDetailResponseBean;
 import com.limitless.services.engage.order.OrderMailResponseBean;
+import com.limitless.services.engage.order.OrderPaymentModeUpdateResponseBean;
 import com.limitless.services.engage.order.OrderRequestBean;
 import com.limitless.services.engage.order.OrderResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
@@ -32,6 +33,14 @@ public class OrderResource {
 		try{
 			OrdersManager manager = new OrdersManager();
 			responseBean = manager.addOrder(requestBean);
+			if(requestBean.getPaymentMode()!=null){
+				if(requestBean.getPaymentMode().equals("POD")){
+					OrderStatusResponseBean statusResponseBean = manager.orderStatusUpdate(responseBean.getOrderId(), 1);
+				}
+			}
+			if(responseBean.getOrderId()!=0 || responseBean!=null){
+				OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(responseBean.getOrderId());
+			}
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
@@ -105,14 +114,14 @@ public class OrderResource {
 		return responseBean;
 	}
 	
-	@Path("/mail/{orderId}/{txnId}")
+	@Path("/mail/{orderId}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public OrderMailResponseBean orderMail(@PathParam("orderId") int orderId, @PathParam("txnId") int txnId) throws Exception{
+	public OrderMailResponseBean orderMail(@PathParam("orderId") int orderId) throws Exception{
 		OrderMailResponseBean responseBean = new OrderMailResponseBean();
 		try{
 			OrdersManager manager = new OrdersManager();
-			responseBean = manager.sendMailOrderTxn(orderId, txnId);
+			responseBean = manager.sendMailOrderTxn(orderId);
 		}
 		catch (Exception e) {
 			logger.error("API Error", e);
@@ -120,4 +129,22 @@ public class OrderResource {
 		}
 		return responseBean;
 	}
+	
+	@Path("/update/mode/{orderId}/{paymentMode}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	public OrderPaymentModeUpdateResponseBean updateOrderPaymentMode(@PathParam("orderId") int orderId,
+			@PathParam("paymentMode") String paymentMode) throws Exception{
+		OrderPaymentModeUpdateResponseBean responseBean = new OrderPaymentModeUpdateResponseBean();
+		try{
+			OrdersManager manager = new OrdersManager();
+			responseBean = manager.updatePaymentMode(orderId, paymentMode);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
 }

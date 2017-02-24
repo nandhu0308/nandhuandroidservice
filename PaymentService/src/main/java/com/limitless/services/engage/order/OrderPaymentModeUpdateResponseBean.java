@@ -1,8 +1,7 @@
 package com.limitless.services.engage.order;
 
-public class OrderResponseBean {
+public class OrderPaymentModeUpdateResponseBean {
 	private int orderId;
-	private double totalAmount;
 	private String paymentMode;
 	private String message;
 	public int getOrderId() {
@@ -11,22 +10,16 @@ public class OrderResponseBean {
 	public void setOrderId(int orderId) {
 		this.orderId = orderId;
 	}
-	public String getMessage() {
-		return message;
-	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	public double getTotalAmount() {
-		return totalAmount;
-	}
-	public void setTotalAmount(double totalAmount) {
-		this.totalAmount = totalAmount;
-	}
 	public String getPaymentMode() {
 		return paymentMode;
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }
