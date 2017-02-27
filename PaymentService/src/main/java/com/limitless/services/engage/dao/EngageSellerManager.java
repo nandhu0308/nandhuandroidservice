@@ -50,8 +50,11 @@ import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
+import com.limitless.services.engage.SellerRestaurantListBean;
+import com.limitless.services.engage.SellerRestaurantsBean;
 import com.limitless.services.engage.SellerUpdateRequestBean;
 import com.limitless.services.engage.SellerUpdateResponseBean;
+import com.limitless.services.engage.restaurants.dao.Restaurants;
 import com.limitless.services.engage.sellers.SubMerchantBean;
 import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.dao.SellerVersion;
@@ -1290,6 +1293,64 @@ public class EngageSellerManager {
 			}
 		}
 		return notifyBeanList;
+	}
+	
+	public SellerRestaurantsBean getSellerRestaurants(int sellerId){
+		log.debug("getting restaurant");
+		SellerRestaurantsBean restaurantsBean = new SellerRestaurantsBean();
+		List<SellerRestaurantListBean> listBean = new ArrayList<SellerRestaurantListBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			if(seller!=null){
+				restaurantsBean.setSellerId(sellerId);
+				restaurantsBean.setCitrusSellerId(seller.getCitrusSellerId());
+				restaurantsBean.setSellerName(seller.getSellerName());
+				restaurantsBean.setSellerCity(seller.getSellerCity());
+				restaurantsBean.setSellerMobileNumber(seller.getSellerMobileNumber());
+				restaurantsBean.setSellerEmailId(seller.getSellerEmail99());
+				Criteria criteria = session.createCriteria(Restaurants.class);
+				criteria.add(Restrictions.eq("sellerId", sellerId));
+				List<Restaurants> restaurantsList = criteria.list();
+				log.debug("restaurant size : " + restaurantsList.size());
+				if(restaurantsList.size()>0){
+					for(Restaurants restaurant : restaurantsList){
+						SellerRestaurantListBean bean = new SellerRestaurantListBean();
+						bean.setRestaurantId(restaurant.getRestaurantId());
+						bean.setRestaurantName(restaurant.getRestaurantName());
+						bean.setRestaurantCity(restaurant.getRestaurantCity());
+						listBean.add(bean);
+						bean = null;
+					}
+					restaurantsBean.setRestaurantList(listBean);
+					restaurantsBean.setMessage("Success");
+				}
+				else if(restaurantsList.isEmpty()){
+					restaurantsBean.setMessage("Failed");
+				}
+			}
+			else if(seller==null){
+				restaurantsBean.setMessage("Failed");
+			}
+			
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return restaurantsBean;
 	}
 
 	/*

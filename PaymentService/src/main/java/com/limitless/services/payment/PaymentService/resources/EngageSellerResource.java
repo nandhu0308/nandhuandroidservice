@@ -40,6 +40,7 @@ import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.SellerRequestBean;
 import com.limitless.services.engage.SellerRestaurantListBean;
+import com.limitless.services.engage.SellerRestaurantsBean;
 import com.limitless.services.engage.SellerTempRequestBean;
 import com.limitless.services.engage.SellerTempResponseBean;
 import com.limitless.services.engage.SellerUpdateRequestBean;
@@ -520,4 +521,21 @@ public class EngageSellerResource {
 		}
 		return listBean;
 	}
+	
+	@GET
+	@Path("/restaurants/{sellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerRestaurantsBean getRestaurants(@PathParam("sellerId") int sellerId) throws Exception{
+		SellerRestaurantsBean restaurantsBean = new SellerRestaurantsBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			restaurantsBean = manager.getSellerRestaurants(sellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return restaurantsBean;
+	}
+	
 }

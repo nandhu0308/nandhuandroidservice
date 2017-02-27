@@ -36,10 +36,10 @@ public class OrderResource {
 			if(requestBean.getPaymentMode()!=null){
 				if(requestBean.getPaymentMode().equals("POD")){
 					OrderStatusResponseBean statusResponseBean = manager.orderStatusUpdate(responseBean.getOrderId(), 1);
+					if(responseBean.getOrderId()!=0 || responseBean!=null){
+						OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(responseBean.getOrderId());
+					}
 				}
-			}
-			if(responseBean.getOrderId()!=0 || responseBean!=null){
-				OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(responseBean.getOrderId());
 			}
 		}
 		catch(Exception e){

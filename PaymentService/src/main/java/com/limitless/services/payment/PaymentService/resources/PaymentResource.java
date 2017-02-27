@@ -198,7 +198,7 @@ public class PaymentResource {
 			else if(paymentTxn.getTxnType().equals("restaurant")){
 				if(paymentTxn.getOrderId()>0){
 					RestaurantManager restaurantManager = new RestaurantManager();
-					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(paymentTxn.getOrderId(),1);
+					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(paymentTxn.getOrderId(),2);
 					System.out.println("Restaurant Order Id :" + restaurantOrderStatusUpdateResponseBean.getOrderId());
 					restaurantManager.sendOrderMail(paymentTxn.getOrderId());
 				}
@@ -447,7 +447,7 @@ public class PaymentResource {
 			if (splitArr[0].equals("split_id")) {
 				splitId = Integer.parseInt(splitArr[1]);
 			}
-
+			//int splitId = 0;
 			paymentTxn = manager.updateSplitId(txnId, citrusMpTxnId, splitId, TxnStatus.PAYMENT_SUCCESSFUL.toString());
 
 			splitResp.setSplitId(paymentTxn.getSplitId());

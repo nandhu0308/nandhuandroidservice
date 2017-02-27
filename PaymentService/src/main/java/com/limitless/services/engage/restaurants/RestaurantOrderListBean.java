@@ -18,6 +18,7 @@ public class RestaurantOrderListBean {
 	private String orderStyle;
 	private String restaurantOrderStatus;
 	private String restaurantOrderTime;
+	private String paymentMode;
 	private AddressListBean deliveryAddress;
 	public int getOrderId() {
 		return orderId;
@@ -114,5 +115,11 @@ public class RestaurantOrderListBean {
 	}
 	public void setCitrusSellerId(int citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
+	}
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
 	}
 }

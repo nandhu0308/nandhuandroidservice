@@ -288,6 +288,10 @@ public class RestaurantManager {
 				order.setRestaurantId(requestBean.getRestaurantId());
 				order.setOrderType(requestBean.getOrderStyle());
 				order.setDeliveryAddressId(requestBean.getDeliveryAddressId());
+				if(requestBean.getPaymentMode()!=null && requestBean.getPaymentMode().equals("POD")){
+					order.setOrderStatus("ORDER_RECIEVED");
+					order.setPaymentMode(requestBean.getPaymentMode());
+				}
 				order.setOrderStatus("ORDER_INITIATED");
 				order.setTotalAmount(totalAmount);
 
@@ -321,6 +325,9 @@ public class RestaurantManager {
 					responseBean = new RestaurantOrderResponseBean();
 					responseBean.setRestaurantOrderId(orderId);
 					responseBean.setTotalAmount(totalAmount);
+					if(requestBean.getPaymentMode()!=null){
+						responseBean.setPaymentMode(requestBean.getPaymentMode());
+					}
 					responseBean.setSellerId(sellerId);
 					responseBean.setCitrusSellerId(citrusSellerId);
 					responseBean.setSellerEmail(sellerEmail);
@@ -427,15 +434,23 @@ public class RestaurantManager {
 			if(order!=null){
 				if(status==1){
 					order.setOrderStatus("ORDER_RECIEVED");
+					order.setPaymentMode("PAID");
 					session.update(order);
 					responseBean.setOrderId(orderId);
 					responseBean.setCurrentStatus("ORDER_RECIEVED");
 				}
 				else if(status==2){
 					order.setOrderStatus("PROCESS_FAILED");
+					order.setPaymentMode("FAILED");
 					session.update(order);
 					responseBean.setOrderId(orderId);
 					responseBean.setCurrentStatus("PROCESS_FAILED");
+				}
+				else if(status==3){
+					order.setOrderStatus("ORDER_RECIEVED");
+					session.update(order);
+					responseBean.setOrderId(orderId);
+					responseBean.setCurrentStatus("ORDER_RECIEVED");
 				}
 			}
 			transaction.commit();
@@ -488,6 +503,9 @@ public class RestaurantManager {
 						listBean.setCustomerName(customerName);
 						listBean.setCustomerMobileNumber(customerPhone);
 						listBean.setRestaurantOrderStatus(order.getOrderStatus());
+						if(order.getPaymentMode()!=null){
+							listBean.setPaymentMode(order.getPaymentMode());
+						}
 						String gmtTime = order.getOrderTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						Date dateTxn = sdf3.parse(gmtTime);
@@ -594,6 +612,9 @@ public class RestaurantManager {
 						listBean.setOrderId(order.getOrderId());
 						listBean.setOrderStyle(order.getOrderType());
 						listBean.setRestaurantOrderStatus(order.getOrderStatus());
+						if(order.getPaymentMode()!=null){
+							listBean.setPaymentMode(order.getPaymentMode());
+						}
 						String gmtTime = order.getOrderTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						Date dateTxn = sdf3.parse(gmtTime);
@@ -842,7 +863,7 @@ public class RestaurantManager {
 									
 									mailContent += "<table>"
 											+ "<tr>"
-											+ "<td>"+itemName+"</td>"
+											+ "<td>"+itemName+"-"+itemType+"</td>"
 													+ "<td>&nbsp;</td>"
 											+ "<td>MRP:"+itemPrice+"</<td>"
 													+ "<td>&nbsp;</td>"
@@ -854,8 +875,14 @@ public class RestaurantManager {
 											+ "<br>";
 											
 								}
-								mailContent += "<h2><b>Total Amount : "+totalAmount+"</b></h2>";
-								message.setContent(mailContent,"text/html");
+								if(order.getPaymentMode().equals("POD")){
+									mailContent += "<h2><b>Total Amount To Be Paid: "+totalAmount+"</b></h2>";
+									message.setContent(mailContent,"text/html");
+								}
+								else{
+									mailContent += "<h2><b>Total Amount : "+totalAmount+"</b></h2>";
+									message.setContent(mailContent,"text/html");
+								}
 							}
 						}
 						else if(order.getOrderStatus().equals("PROCESS_FAILED")){
@@ -881,7 +908,7 @@ public class RestaurantManager {
 									
 									mailContent += "<table>"
 											+ "<tr>"
-											+ "<td>"+itemName+"</td>"
+											+ "<td>"+itemName+"-"+itemType+"</td>"
 													+ "<td>&nbsp;</td>"
 											+ "<td>MRP:"+itemPrice+"</<td>"
 													+ "<td>&nbsp;</td>"

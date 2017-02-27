@@ -29,6 +29,8 @@ public class RestaurantOrder {
 	private Integer deliveryAddressId;
 	@Column(name="ORDER_STATUS")
 	private String orderStatus;
+	@Column(name="PAYMENT_MODE")
+	private String paymentMode;
 	
 	public Integer getOrderId() {
 		return orderId;
@@ -77,5 +79,11 @@ public class RestaurantOrder {
 	}
 	public void setOrderStatus(String orderStatus) {
 		this.orderStatus = orderStatus;
+	}
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
 	}
 }

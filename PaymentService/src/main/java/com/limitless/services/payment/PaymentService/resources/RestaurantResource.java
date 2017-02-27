@@ -47,12 +47,17 @@ public class RestaurantResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response newOrder(RestaurantOrderRequestBean requestBean){
+	public Response newOrder(RestaurantOrderRequestBean requestBean) throws Exception{
 		RestaurantManager manager = new RestaurantManager();
 		RestaurantOrderResponseBean responseBean = manager.createOrder(requestBean);
 		if(responseBean!=null){
+			if(requestBean.getPaymentMode()!=null && requestBean.getPaymentMode().equals("POD")){
+				RestaurantOrderStatusUpdateResponseBean statusUpdateResponseBean = manager.orderStatusUpdate(responseBean.getRestaurantOrderId(), 3);
+				manager.sendOrderMail(responseBean.getRestaurantOrderId());
+			}
 			return Response.status(200).entity(responseBean).build();
 		}
+		//RestaurantOrderStatusUpdateResponseBean statusUpdateResponseBean = manager.orderStatusUpdate(responseBean.getRestaurantOrderId(), 2);
 		RestaurantErrorResponseBean errorBean = new RestaurantErrorResponseBean();
 		errorBean.setRestaurantId(requestBean.getRestaurantId());
 		errorBean.setMessage("Failed");

@@ -521,13 +521,21 @@ public class OrdersManager {
 									.get("com.limitless.services.engage.sellers.product.dao.Product", detail.getProductId());
 							String productName = product.getProductName();
 							String productImage = product.getProduct_image();
+							String productColor = "";
+							if(product.getProductColor()!=null){
+								productColor = product.getProductColor();
+							}
+							String productSize = "";
+							if(product.getProductSizeText()!=null){
+								productSize = product.getProductSizeText();
+							}
 							double productPrice = product.getProductPrice();
 							float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
 							
 							mailContent += "<table><tr><td rowspan=3>"
 									+"<img src="+productImage+" height=100 width=100>"
 									+"</td><td><b>"+productName+"</b>&nbsp;MRP Rs:"+productPrice+"</td>"
-									+"<td>Specs:<br>Color:"+product.getProductColor()+"<br>Size:"+product.getProductSizeText()
+									+"<td>Specs:<br>Color:"+productColor+"<br>Size:"+productSize
 									+"<td>Quantity:&nbsp;"+quantity+"</td>"
 									+"<td>Discounted Price:&nbsp;"+discountedPrice+"</td>"
 									+"<td>Unit's Total Amount:&nbsp;"+totalPrice+"</td></tr></table>";
