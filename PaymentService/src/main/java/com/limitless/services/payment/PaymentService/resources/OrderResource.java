@@ -58,6 +58,9 @@ public class OrderResource {
 		try{
 			OrdersManager manager = new OrdersManager();
 			responseBean = manager.orderStatusUpdate(orderId, statusCode);
+			if(responseBean.getMessage().equals("Success")){
+				OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(orderId);
+			}
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

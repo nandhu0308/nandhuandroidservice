@@ -9,6 +9,9 @@ public class LoginResponseBean {
 	private int customerId;
 	private String customerName;
 	private String customerEmail;
+	private String customerCity;
+	private String customerCountry;
+	private String customerZip;
 	private String sessionKey;
 	private int sessionId;
 	private String deviceId;
@@ -75,6 +78,30 @@ public class LoginResponseBean {
 
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+	}
+
+	public String getCustomerCity() {
+		return customerCity;
+	}
+
+	public void setCustomerCity(String customerCity) {
+		this.customerCity = customerCity;
+	}
+
+	public String getCustomerCountry() {
+		return customerCountry;
+	}
+
+	public void setCustomerCountry(String customerCountry) {
+		this.customerCountry = customerCountry;
+	}
+
+	public String getCustomerZip() {
+		return customerZip;
+	}
+
+	public void setCustomerZip(String customerZip) {
+		this.customerZip = customerZip;
 	}
 
 }

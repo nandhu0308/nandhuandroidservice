@@ -64,6 +64,8 @@ public class Product {
 	private String image9;
 	@Column(name="IMAGE10")
 	private String image10;
+	@Column(name="IS_REMOVED")
+	private int isRemoved;
 	
 	public Integer getProductId() {
 		return productId;
@@ -220,5 +222,11 @@ public class Product {
 	}
 	public void setSellerId(Integer sellerId) {
 		this.sellerId = sellerId;
+	}
+	public int getIsRemoved() {
+		return isRemoved;
+	}
+	public void setIsRemoved(int isRemoved) {
+		this.isRemoved = isRemoved;
 	}
 }

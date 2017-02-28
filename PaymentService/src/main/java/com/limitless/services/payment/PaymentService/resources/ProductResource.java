@@ -38,11 +38,11 @@ public class ProductResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public NewProductsResponseBean newProducts(NewProductsRequestBean requestBean) throws Exception{
+	public NewProductsResponseBean newProducts(ProductBean bean) throws Exception{
 		NewProductsResponseBean responseBean = new NewProductsResponseBean();
 		try{
 			ProductManager manager = new ProductManager();
-			responseBean = manager.addNewProducts(requestBean);
+			responseBean = manager.addNewProducts(bean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
@@ -158,6 +158,22 @@ public class ProductResource {
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
+	}
+	
+	@Path("/remove/{productId}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductResponseBean removeProduct(@PathParam("productId") int productId) throws Exception{
+		ProductResponseBean responseBean = new ProductResponseBean();
+		try{
+			ProductManager manager = new ProductManager();
+			responseBean = manager.removeProductFromStore(productId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
 	}
 	
 }

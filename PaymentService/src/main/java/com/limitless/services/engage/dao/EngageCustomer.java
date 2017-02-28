@@ -57,6 +57,8 @@ public class EngageCustomer implements java.io.Serializable {
 	private String utmTerm;
 	@Column(name="UTM_CONTENT")
 	private String utmContent;
+	@Column(name="CUSTOMER_ZIP")
+	private String customerZip;
 
 	public EngageCustomer() {
 	}
@@ -212,4 +214,13 @@ public class EngageCustomer implements java.io.Serializable {
 	public void setUtmContent(String utmContent) {
 		this.utmContent = utmContent;
 	}
+
+	public String getCustomerZip() {
+		return customerZip;
+	}
+
+	public void setCustomerZip(String customerZip) {
+		this.customerZip = customerZip;
+	}
+	
 }

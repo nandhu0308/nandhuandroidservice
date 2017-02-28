@@ -15,6 +15,9 @@ public class EngageCustomerBean {
 	private String utmCampign;
 	private String utmTerm;
 	private String utmContent;
+	private String deviceId;
+	private String zip;
+	
 	public int getCustomerId() {
 		return customerId;
 	}
@@ -93,5 +96,16 @@ public class EngageCustomerBean {
 	public void setUtmContent(String utmContent) {
 		this.utmContent = utmContent;
 	}
-	
+	public String getDeviceId() {
+		return deviceId;
+	}
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	public String getZip() {
+		return zip;
+	}
+	public void setZip(String zip) {
+		this.zip = zip;
+	}
 }

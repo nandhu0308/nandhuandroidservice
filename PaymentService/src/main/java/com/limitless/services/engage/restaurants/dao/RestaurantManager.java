@@ -21,6 +21,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Junction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.AddressListBean;
@@ -32,7 +33,9 @@ import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantCategoryListBean;
 import com.limitless.services.engage.restaurants.RestaurantItemListBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderDataBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderDetailsResponseBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderFcmRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderItemsBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderItemsListBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderListBean;
@@ -45,6 +48,8 @@ import com.limitless.services.engage.restaurants.RestaurantSubcategoryListBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 public class RestaurantManager {
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
@@ -490,6 +495,7 @@ public class RestaurantManager {
 						.add(Restrictions.eq("customerId", customerId))
 						.add(Restrictions.ne("orderStatus", "ORDER_INITIATED"));
 				criteria.add(condition);
+				criteria.addOrder(Order.desc("orderId"));
 				List<RestaurantOrder> orders = criteria.list();
 				log.debug("order list size : " +orders.size());
 				if(orders.size()>0){
@@ -938,6 +944,135 @@ public class RestaurantManager {
 				transaction.rollback();
 			}
 			log.error("sending mail failed");
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+	}
+	
+	public void notificationToRestaurant(int orderId){
+		log.debug("sending notification to restaurant");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			RestaurantOrder order = (RestaurantOrder) session
+					.get("com.limitless.services.engage.restaurants.dao.RestaurantOrder", orderId);
+			if(order!=null){
+				int customerId = order.getCustomerId();
+				int restaurantId = order.getRestaurantId();	
+				
+				String customerName = "";
+				String customerMobile = "";
+				
+				EngageCustomer customer = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+				if(customer!=null){
+					customerName = customer.getCustomerName();
+					customerMobile = customer.getCustomerMobileNumber();
+				}
+				
+				Restaurants restaurants = (Restaurants) session
+						.get("com.limitless.services.engage.restaurants.dao.Restaurants", restaurantId);
+				if(restaurants!=null){
+					int sellerId = restaurants.getSellerId();
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+					if(seller!=null){
+						String to = seller.getSellerDeviceId();
+						RestaurantOrderFcmRequestBean fcmBean = new RestaurantOrderFcmRequestBean();
+						fcmBean.setTo(to);
+						fcmBean.setPriority("high");
+						RestaurantOrderDataBean data = new RestaurantOrderDataBean();
+						data.setBussinessType("restaurant");
+						data.setTitle("Order Received Successfully");
+						data.setBody(customerName+" placed order for Rs."+order.getTotalAmount());
+						data.setOrderId(orderId);
+						data.setCustomerMobile(customerMobile);
+						fcmBean.setData(data);
+						WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+						ClientResponse clientResponse = webResource2.type("application/json")
+								.header("Authorization", "key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos")
+								.post(ClientResponse.class, fcmBean);
+						System.out.println(clientResponse.getStatus());
+						System.out.println(clientResponse.getEntity(String.class));
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending notification to restaurant failed");
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+	}
+	
+	public void notificationToCustomer(int orderId){
+		log.debug("sending notification to customer");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			RestaurantOrder order = (RestaurantOrder) session
+					.get("com.limitless.services.engage.restaurants.dao.RestaurantOrder", orderId);
+			if(order!=null){
+				int customerId = order.getCustomerId();
+				int restaurantId = order.getRestaurantId();
+				
+				EngageCustomer customer = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+				if(customer!=null){
+					String customerName = customer.getCustomerName();
+					String customerMobile = customer.getCustomerMobileNumber();
+					String to = customer.getDeviceId();
+					Restaurants restaurants = (Restaurants) session
+							.get("com.limitless.services.engage.restaurants.dao.Restaurants", restaurantId);
+					if(restaurants!=null){
+						String restaurantName = restaurants.getRestaurantName();
+						String restaurantPhone = restaurants.getRestaurantPhone();
+						
+						RestaurantOrderFcmRequestBean fcmBean = new RestaurantOrderFcmRequestBean();
+						fcmBean.setTo(to);
+						fcmBean.setPriority("high");
+						RestaurantOrderDataBean data = new RestaurantOrderDataBean();
+						data.setBussinessType("restaurant");
+						data.setTitle("Order Placed Successfully");
+						data.setBody(restaurantName +" received your orders worth Rs."+order.getTotalAmount());
+						data.setOrderId(orderId);
+						data.setCustomerMobile(customerMobile);
+						data.setCustomerName(customerName);
+						fcmBean.setData(data);
+						WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+						ClientResponse clientResponse = webResource2.type("application/json")
+								.header("Authorization", "key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
+								.post(ClientResponse.class, fcmBean);
+						System.out.println(clientResponse.getStatus());
+						System.out.println(clientResponse.getEntity(String.class));
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending notification to customer failed");
 			throw re;
 		}
 		finally {

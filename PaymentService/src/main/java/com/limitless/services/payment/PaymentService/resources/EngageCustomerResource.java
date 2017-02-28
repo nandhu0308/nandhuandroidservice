@@ -83,6 +83,8 @@ public class EngageCustomerResource {
 			customer.setUtmCampign(bean.getUtmCampign());
 			customer.setUtmTerm(bean.getUtmTerm());
 			customer.setUtmContent(bean.getUtmContent());
+			customer.setDeviceId(bean.getDeviceId());
+			customer.setCustomerZip(bean.getZip());
 
 			EngageCustomerManager manager = new EngageCustomerManager();
 

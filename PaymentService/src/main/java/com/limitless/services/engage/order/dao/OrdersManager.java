@@ -31,7 +31,9 @@ import com.limitless.services.engage.dao.CustomerAddressBook;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.order.OrderDetailResponseBean;
+import com.limitless.services.engage.order.OrderFcmBean;
 import com.limitless.services.engage.order.OrderMailResponseBean;
+import com.limitless.services.engage.order.OrderNotificationDataBean;
 import com.limitless.services.engage.order.OrderPaymentModeUpdateResponseBean;
 import com.limitless.services.engage.order.OrderProductsBean;
 import com.limitless.services.engage.order.OrderProductsListBean;
@@ -44,10 +46,15 @@ import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductInventory;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
+import com.limitless.services.payment.PaymentService.util.RestClientUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 public class OrdersManager {
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 	private static final Log log = LogFactory.getLog(OrdersManager.class);
+	Client client = RestClientUtil.createClient();
 	
 	public OrderResponseBean addOrder(OrderRequestBean requestBean){
 		log.debug("Adding order");
@@ -174,7 +181,12 @@ public class OrdersManager {
 					.get("com.limitless.services.engage.order.dao.Orders", orderId);
 			if(statusCode == 1){
 				responseBean.setPrevStatus(order.getOrderStatus());
-				order.setOrderStatus("ORDER_RECEIVED");
+				if(order.getPaymentMode()!=null && order.getPaymentMode().equals("PAID") && order.getOrderStatus().equals("ORDER_PROCESSED")){
+					order.setOrderStatus("ORDER_DELIVERED");
+				}
+				else{
+					order.setOrderStatus("ORDER_RECEIVED");
+				}
 			}
 			else if(statusCode == 2){
 				responseBean.setPrevStatus(order.getOrderStatus());
@@ -468,19 +480,44 @@ public class OrdersManager {
 					.get("com.limitless.services.engage.order.dao.Orders", orderId);
 			int customerId = order.getCustomerId();
 			int sellerId = order.getSellerId();
+			int addressId = order.getDeliveryAddress();
 			//getting customer
 			EngageCustomer customer = (EngageCustomer) session
 					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
 			String customerEmail = customer.getCustomerEmail99();
+			String customerMobile = customer.getCustomerMobileNumber();
 			log.debug("customer mail : " + customerEmail);
 			//getting seller
 			EngageSeller seller = (EngageSeller) session
 					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);	
 			String sellerEmail = seller.getSellerEmail99();
+			String sellerMobile = seller.getSellerMobileNumber();
 			log.debug("seller mail : " + sellerEmail);
 			String sellerExtraEmail = "";
 			if(seller.getExtraEmails()!= null){
 				sellerExtraEmail = ","+seller.getExtraEmails();
+			}
+			
+			String receiverName = "";
+			String addressLine1 = "";
+			String addressLine2 = "";
+			String city = "";
+			String state = "";
+			String zip = "";
+			String landmark = "";
+			String receiverMobile = "";
+			
+			CustomerAddressBook address = (CustomerAddressBook) session
+					.get("com.limitless.services.engage.dao.CustomerAddressBook", addressId);
+			if(address!=null){
+				receiverName = address.getReceiverName();
+				addressLine1 = address.getCustomerAddress1();
+				addressLine2 = address.getCustomerAddress2();
+				city = address.getCustomerCity();
+				state = address.getCustomerState();
+				zip = address.getCustomerZip();
+				landmark = address.getCustomerLandmark();
+				receiverMobile = address.getCustomerDeliveryMobile();
 			}
 			
 			final String username = "transactions@limitlesscircle.com";
@@ -509,7 +546,17 @@ public class OrdersManager {
 					message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
-					message.setSubject("Order Received Successfully. Order Reference Id : "+orderId);
+					
+					if(order.getOrderStatus().equals("ORDER_RECEIVED")){
+						message.setSubject("Order Received Successfully. Order Reference Id : "+orderId);
+					}
+					else if(order.getOrderStatus().equals("ORDER_PROCESSED")){
+						message.setSubject("Order Processed Successfully. Order Reference Id : "+orderId);
+					}
+					else if(order.getOrderStatus().equals("ORDER_DELIVERED")){
+						message.setSubject("Order Delivered Successfully. Order Reference Id : "+orderId);
+					}
+					
 					Criteria criteria = session.createCriteria(OrderDetails.class);
 					criteria.add(Restrictions.eq("orderId", orderId));
 					List<OrderDetails> detailsList = criteria.list();
@@ -546,18 +593,34 @@ public class OrdersManager {
 					}
 					else if(order.getPaymentMode()!=null && order.getPaymentMode().equals("POD")){
 						mailContent +="<br><h2>Total Amount To Be Paid Rs. "+totalAmount+"<sup>*</sup></h2>"
-								+ "<br>"
-								+ "<font color=red><sup>*</sup>You have opted for Pay-On-Delivery.</font>";
+								+ "<br>";
 					}
+					mailContent += "<br>"
+							+ "<b>Delivery Address</b><br>";
+					if(order.getDeliveryAddress() == 0){
+						mailContent += "NA / IN-SHOP - DELIVERY AT THE SHOP";
+					}
+					else if(order.getDeliveryAddress() != 0){
+						mailContent += receiverName+"<br>"+addressLine1
+								+ "<br>"+addressLine2+"<br>"+city+"<br>"+state+"<br>ZIP:"+zip+"<br>Mobile:"+receiverMobile+"<sup>**</sup>";
+					}
+					mailContent += "<br><br><font color=red><sup>*</sup>You have opted for Pay-On-Delivery.</font>"
+							+ "<br>"
+							+ "<font color=red><sup>**</sup>For delivery related queries to customer call this number.</font>";
 					message.setContent(mailContent,"text/html");
 				}
-				else if(order.getOrderStatus().equals("PROCESS_FAILED")){
+				else if(order.getOrderStatus().equals("PROCESS_FAILED") || order.getOrderStatus().equals("ORDER_CANCELED")){
 					message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
 					message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(customerEmail));
 					message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
 					double totalAmount = order.getTotalAmount();
 					String mailContent = "";
-					message.setSubject("Order Failed. Order Reference Id : "+orderId);
+					if(order.getOrderStatus().equals("PROCESS_FAILED")){
+						message.setSubject("Order Failed. Order Reference Id : "+orderId);
+					}
+					else if(order.getOrderStatus().equals("ORDER_CANCELED")){
+						message.setSubject("Order Canceled. Order Reference Id : "+orderId);
+					}
 					Criteria criteria = session.createCriteria(OrderDetails.class);
 					criteria.add(Restrictions.eq("orderId", orderId));
 					List<OrderDetails> detailsList = criteria.list();
@@ -648,6 +711,123 @@ public class OrdersManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public void notificationToSeller(int orderId){
+		log.debug("sending notification to seller");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Orders order = (Orders) session
+					.get("com.limitless.services.engage.order.dao.Orders", orderId);
+			if(order!=null){
+				int customerId = order.getCustomerId();
+				int sellerId =  order.getSellerId();
+				EngageCustomer customer = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+				if(customer!=null){
+					String customerName = customer.getCustomerName();
+					String customerMobile = customer.getCustomerMobileNumber();
+					
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao", sellerId);
+					if(seller!=null){
+						String to = seller.getSellerDeviceId();
+						OrderFcmBean fcmBean = new OrderFcmBean();
+						fcmBean.setTo(to);
+						fcmBean.setPriority("high");
+						OrderNotificationDataBean data = new OrderNotificationDataBean();
+						data.setTitle("Order Received Successfully");
+						data.setBody(customerName+" placed order for Rs."+order.getTotalAmount());
+						data.setBussinessType("eCommerce");
+						data.setOrderId(orderId);
+						data.setCustomerName(customerName);
+						data.setCustomerMobile(customerMobile);
+						fcmBean.setData(data);
+						WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+						ClientResponse clientResponse = webResource2.type("application/json")
+								.header("Authorization", "key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos")
+								.post(ClientResponse.class, fcmBean);
+						System.out.println(clientResponse.getStatus());
+						System.out.println(clientResponse.getEntity(String.class));
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending notification to seller failed : " + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+	}
+	
+	public void notificationToCustomer(int orderId){
+		log.debug("sending notification to customer");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Orders order = (Orders) session
+					.get("com.limitless.services.engage.order.dao.Orders", orderId);
+			if(order!=null){
+				int customerId = order.getCustomerId();
+				int sellerId =  order.getSellerId();
+				EngageCustomer customer = (EngageCustomer) session
+						.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+				if(customer!=null){
+					String customerName = customer.getCustomerName();
+					String customerMobile = customer.getCustomerMobileNumber();
+					
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao", sellerId);
+					if(seller!=null){
+						String to = seller.getSellerDeviceId();
+						String sellerShopName = seller.getSellerShopName();
+						OrderFcmBean fcmBean = new OrderFcmBean();
+						fcmBean.setTo(to);
+						fcmBean.setPriority("high");
+						OrderNotificationDataBean data = new OrderNotificationDataBean();
+						data.setTitle("Order Placed Successfully");
+						data.setBody("You placed for Rs."+order.getTotalAmount()+" to "+sellerShopName);
+						data.setBussinessType("eCommerce");
+						data.setOrderId(orderId);
+						data.setCustomerName(customerName);
+						data.setCustomerMobile(customerMobile);
+						fcmBean.setData(data);
+						WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+						ClientResponse clientResponse = webResource2.type("application/json")
+								.header("Authorization", "key=AIzaSyAP4xJ6VMm4vpj2A1ocGDvvvwzxtUNuKI0")
+								.post(ClientResponse.class, fcmBean);
+						System.out.println(clientResponse.getStatus());
+						System.out.println(clientResponse.getEntity(String.class));
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("sending notification to customer failed : " + re);
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
 	}
 	
 }

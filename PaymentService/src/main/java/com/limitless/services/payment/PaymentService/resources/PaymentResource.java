@@ -464,13 +464,13 @@ public class PaymentResource {
 			if(txnType.equals("eCommerce")){
 				if(orderId>0){
 					OrdersManager ordersManager = new OrdersManager();
+					updateResponseBean = ordersManager.updatePaymentMode(orderId, "PAID");
 					orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
 					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
 					//InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
 					//System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
 					orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId);
 					System.out.println("Status: " + orderMailResponseBean.getMessage());
-					updateResponseBean = ordersManager.updatePaymentMode(orderId, "PAID");
 				}
 			}
 			else if(txnType.equals("restaurant")){

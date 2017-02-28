@@ -328,6 +328,9 @@ public class EngageCustomerManager {
 					loginResponseBean.setCustomerName(user.getCustomerName());
 					loginResponseBean.setCustomerEmail(user.getCustomerEmail99());
 					loginResponseBean.setDeviceId(user.getDeviceId());
+					loginResponseBean.setCustomerCity(user.getCustomerCity());
+					loginResponseBean.setCustomerCountry(user.getCustomerCountry());
+					loginResponseBean.setCustomerZip(user.getCustomerZip());
 					
 					SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 					Calendar calendar = Calendar.getInstance();
