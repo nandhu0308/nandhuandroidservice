@@ -59,6 +59,8 @@ public class EngageCustomer implements java.io.Serializable {
 	private String utmContent;
 	@Column(name="CUSTOMER_ZIP")
 	private String customerZip;
+	@Column(name="CUSTOMER_COUNTRY_ISO_CODE")
+	private String customerCountryIsoCode;
 
 	public EngageCustomer() {
 	}
@@ -221,6 +223,14 @@ public class EngageCustomer implements java.io.Serializable {
 
 	public void setCustomerZip(String customerZip) {
 		this.customerZip = customerZip;
+	}
+
+	public String getCustomerCountryIsoCode() {
+		return customerCountryIsoCode;
+	}
+
+	public void setCustomerCountryIsoCode(String customerCountryIsoCode) {
+		this.customerCountryIsoCode = customerCountryIsoCode;
 	}
 	
 }

@@ -17,6 +17,7 @@ public class EngageCustomerBean {
 	private String utmContent;
 	private String deviceId;
 	private String zip;
+	private String countryIsoCode;
 	
 	public int getCustomerId() {
 		return customerId;
@@ -107,5 +108,11 @@ public class EngageCustomerBean {
 	}
 	public void setZip(String zip) {
 		this.zip = zip;
+	}
+	public String getCountryIsoCode() {
+		return countryIsoCode;
+	}
+	public void setCountryIsoCode(String countryIsoCode) {
+		this.countryIsoCode = countryIsoCode;
 	}
 }

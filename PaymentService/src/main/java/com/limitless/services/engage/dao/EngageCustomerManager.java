@@ -40,6 +40,8 @@ import com.limitless.services.engage.CustomerDataBean;
 import com.limitless.services.engage.CustomerDeviceIdRequestBean;
 import com.limitless.services.engage.CustomerDeviceIdResponseBean;
 import com.limitless.services.engage.CustomerFcmRequestBean;
+import com.limitless.services.engage.CustomerLocationUpdateRequestBean;
+import com.limitless.services.engage.CustomerLocationUpdateResponseBean;
 import com.limitless.services.engage.CustomerLogoutRequestBean;
 import com.limitless.services.engage.CustomerLogoutResponseBean;
 import com.limitless.services.engage.CustomerNotificationBean;
@@ -1169,6 +1171,44 @@ public class EngageCustomerManager {
 				transaction.rollback();
 			}
 			log.error("guest login failed :" + re);
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public CustomerLocationUpdateResponseBean updateCustomerLocation(CustomerLocationUpdateRequestBean requestBean){
+		log.debug("updating customer location");
+		CustomerLocationUpdateResponseBean responseBean = new CustomerLocationUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
+			if(customer!=null){
+				customer.setCustomerCity(requestBean.getCustomerCity());
+				customer.setCustomerCountry(requestBean.getCustomerCountry());
+				customer.setCustomerZip(requestBean.getCustomerZip());
+				customer.setCustomerCountryIsoCode(requestBean.getCustomerCountryIsoCode());
+				
+				session.update(customer);
+				responseBean.setCustomerId(requestBean.getCustomerId());
+				responseBean.setMessage("Success");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("updating customer location failed :" + re);
+			throw re;
 		}
 		finally {
 			if (session != null && session.isOpen()) {

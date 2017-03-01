@@ -12,6 +12,8 @@ public class LoginResponseBean {
 	private String customerCity;
 	private String customerCountry;
 	private String customerZip;
+	private String customerCountryCode;
+	private String customerCountryIsoCode;
 	private String sessionKey;
 	private int sessionId;
 	private String deviceId;
@@ -102,6 +104,22 @@ public class LoginResponseBean {
 
 	public void setCustomerZip(String customerZip) {
 		this.customerZip = customerZip;
+	}
+
+	public String getCustomerCountryCode() {
+		return customerCountryCode;
+	}
+
+	public void setCustomerCountryCode(String customerCountryCode) {
+		this.customerCountryCode = customerCountryCode;
+	}
+
+	public String getCustomerCountryIsoCode() {
+		return customerCountryIsoCode;
+	}
+
+	public void setCustomerCountryIsoCode(String customerCountryIsoCode) {
+		this.customerCountryIsoCode = customerCountryIsoCode;
 	}
 
 }

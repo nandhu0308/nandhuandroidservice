@@ -69,7 +69,6 @@ public class RestaurantManager {
 					.get("com.limitless.services.engage.restaurants.dao.Restaurants", restaurantId);
 			if(restaurant != null){
 				List<RestaurantCategoryListBean> categorysList = new ArrayList<RestaurantCategoryListBean>();
-				List<RestaurantSubcategoryListBean> subcategorysList = new ArrayList<RestaurantSubcategoryListBean>();
 				bean = new RestaurantBean();
 				EngageSeller seller = (EngageSeller) session
 						.get("com.limitless.services.engage.dao.EngageSeller", restaurant.getSellerId());
@@ -94,7 +93,7 @@ public class RestaurantManager {
 						cBean.setCategoryId(category.getCategoryId());
 						cBean.setCategoryName(category.getCategoryName());
 						cBean.setRestaurantId(category.getRestaurantId());
-						
+						List<RestaurantSubcategoryListBean> subcategorysList = new ArrayList<RestaurantSubcategoryListBean>();
 						Criteria criteria2 = session.createCriteria(RestaurantSubCategory.class);
 						criteria2.add(Restrictions.eq("categoryId", category.getCategoryId()));
 						List<RestaurantSubCategory> subcategorys = criteria2.list();

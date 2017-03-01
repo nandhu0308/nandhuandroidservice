@@ -28,6 +28,8 @@ import com.limitless.services.engage.CustomerAddressRequestBean;
 import com.limitless.services.engage.CustomerAddressResponseBean;
 import com.limitless.services.engage.CustomerDeviceIdRequestBean;
 import com.limitless.services.engage.CustomerDeviceIdResponseBean;
+import com.limitless.services.engage.CustomerLocationUpdateRequestBean;
+import com.limitless.services.engage.CustomerLocationUpdateResponseBean;
 import com.limitless.services.engage.CustomerLogoutRequestBean;
 import com.limitless.services.engage.CustomerLogoutResponseBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
@@ -85,6 +87,7 @@ public class EngageCustomerResource {
 			customer.setUtmContent(bean.getUtmContent());
 			customer.setDeviceId(bean.getDeviceId());
 			customer.setCustomerZip(bean.getZip());
+			customer.setCustomerCountryIsoCode(bean.getCountryIsoCode());
 
 			EngageCustomerManager manager = new EngageCustomerManager();
 
@@ -501,6 +504,23 @@ public class EngageCustomerResource {
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.guest2CustomerLogin(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@PUT
+	@Path("/customer/update/location")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerLocationUpdateResponseBean updateLocation(CustomerLocationUpdateRequestBean requestBean) throws Exception{
+		CustomerLocationUpdateResponseBean responseBean = new CustomerLocationUpdateResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.updateCustomerLocation(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
