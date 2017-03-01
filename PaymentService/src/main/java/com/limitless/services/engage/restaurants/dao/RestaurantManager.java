@@ -633,6 +633,7 @@ public class RestaurantManager {
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", order.getCustomerId());
 						if(customer!=null){
+							listBean.setCustomerId(order.getCustomerId());
 							listBean.setCustomerName(customer.getCustomerName());
 							listBean.setCustomerMobileNumber(customer.getCustomerMobileNumber());
 						}

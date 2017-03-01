@@ -29,6 +29,14 @@ public class GuestUser {
 	private String utmTerm;
 	@Column(name="UTM_CONTENT")
 	private String utmContent;
+	@Column(name="GUEST_CITY")
+	private String guestCity;
+	@Column(name="GUEST_COUNTRY")
+	private String guestCountry;
+	@Column(name="GUEST_ZIP")
+	private String guestZip;
+	@Column(name="GUEST_COUNTRY_ISO_CODE")
+	private String guestCountryIsoCode;
 	
 	public Integer getGuestId() {
 		return guestId;
@@ -77,5 +85,29 @@ public class GuestUser {
 	}
 	public void setUtmContent(String utmContent) {
 		this.utmContent = utmContent;
+	}
+	public String getGuestCity() {
+		return guestCity;
+	}
+	public void setGuestCity(String guestCity) {
+		this.guestCity = guestCity;
+	}
+	public String getGuestCountry() {
+		return guestCountry;
+	}
+	public void setGuestCountry(String guestCountry) {
+		this.guestCountry = guestCountry;
+	}
+	public String getGuestZip() {
+		return guestZip;
+	}
+	public void setGuestZip(String guestZip) {
+		this.guestZip = guestZip;
+	}
+	public String getGuestCountryIsoCode() {
+		return guestCountryIsoCode;
+	}
+	public void setGuestCountryIsoCode(String guestCountryIsoCode) {
+		this.guestCountryIsoCode = guestCountryIsoCode;
 	}
 }

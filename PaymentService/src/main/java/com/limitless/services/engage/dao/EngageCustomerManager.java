@@ -333,6 +333,8 @@ public class EngageCustomerManager {
 					loginResponseBean.setCustomerCity(user.getCustomerCity());
 					loginResponseBean.setCustomerCountry(user.getCustomerCountry());
 					loginResponseBean.setCustomerZip(user.getCustomerZip());
+					loginResponseBean.setCustomerCountryCode(user.getCustomerCountryCode());
+					loginResponseBean.setCustomerCountryIsoCode(user.getCustomerCountryIsoCode());
 					
 					SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 					Calendar calendar = Calendar.getInstance();
@@ -1010,6 +1012,10 @@ public class EngageCustomerManager {
 				for(GuestUser guest : guestList){
 					responseBean.setCustomerId(-1);
 					responseBean.setGuestId(guest.getGuestId());
+					responseBean.setGuestCity(guest.getGuestCity());
+					responseBean.setGuestCountry(guest.getGuestCountry());
+					responseBean.setGuestZip(guest.getGuestZip());
+					responseBean.setGuestCountryIsoCode(guest.getGuestCountryIsoCode());
 					Criteria criteria2 = session.createCriteria(SessionKeys.class);
 					Criterion uidCriterion = Restrictions.eq("userId", guest.getGuestId());
 					Criterion aliveCriterion = Restrictions.eq("keyAlive", 1);
@@ -1038,6 +1044,10 @@ public class EngageCustomerManager {
 				guestUser.setUtmCampign(requestBean.getUtmCampign());
 				guestUser.setUtmTerm(requestBean.getUtmTerm());
 				guestUser.setUtmContent(requestBean.getUtmContent());
+				guestUser.setGuestCity(requestBean.getGuestCity());
+				guestUser.setGuestCountry(requestBean.getGuestCountry());
+				guestUser.setGuestZip(requestBean.getGuestZip());
+				guestUser.setGuestCountryIsoCode(requestBean.getGuestCountryIsoCode());
 				session.persist(guestUser);
 				
 				String guestPwd = DigestUtils.sha256Hex("guest@llc2o2o"+guestUser.getGuestId());
@@ -1066,6 +1076,10 @@ public class EngageCustomerManager {
 				responseBean.setSessionKey(sessionKeyB64);
 				responseBean.setSessionId(sesssionKeyId);
 				responseBean.setMessage("Success");
+				responseBean.setGuestCity(guestUser.getGuestCity());
+				responseBean.setGuestCountry(guestUser.getGuestCountry());
+				responseBean.setGuestZip(guestUser.getGuestZip());
+				responseBean.setGuestCountryIsoCode(guestUser.getGuestCountryIsoCode());
 			}
 			transaction.commit();			
 		}
