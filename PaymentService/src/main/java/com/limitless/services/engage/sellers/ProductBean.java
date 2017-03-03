@@ -30,7 +30,9 @@ public class ProductBean {
 	private String productSizeText;
 	private int productSizeNumber;
 	private String productColor;
+	private int productInventory;
 	private List<ProductModelsBean> modelsList;
+	
 	public String getProductName() {
 		return productName;
 	}
@@ -199,5 +201,11 @@ public class ProductBean {
 	}
 	public void setSubcategoryId(int subcategoryId) {
 		this.subcategoryId = subcategoryId;
+	}
+	public int getProductInventory() {
+		return productInventory;
+	}
+	public void setProductInventory(int productInventory) {
+		this.productInventory = productInventory;
 	}
 }

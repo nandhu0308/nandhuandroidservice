@@ -365,85 +365,188 @@ public class PaymentSettlementManager {
 			// Getting Txn details
 			PaymentTxn txn = (PaymentTxn) session.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn",
 					txnId);
-			CitrusAccountBalanceBean balanceBean = checkAccountBalance(authToken);
-			if(balanceBean.getMessage().equals("Success")){
-				if(balanceBean.getAccountBalance()>=txn.getTxnAmount()){
-					SettlementRequestBean requestBean = new SettlementRequestBean();
-					requestBean.setTrans_id(txn.getCitrusMpTxnId());
-					requestBean.setSettlement_ref("LimitlessCircle Pay");
-					requestBean.setTrans_source("CITRUS");
-					double txnAmount = txn.getTxnAmount();
-					
-					EngageSeller seller = (EngageSeller) session
-							.get("com.limitless.services.engage.dao.EngageSeller", txn.getSellerId());
-					double feePercent = 0.0;
-					if (seller != null) {
-						feePercent = seller.getSellerSplitPercent();
-					}
+			if(txn!=null){
+				CitrusAccountBalanceBean balanceBean = checkAccountBalance(authToken);
+				Criteria criteria = session.createCriteria(PaymentSettlement.class);
+				criteria.add(Restrictions.eq("txnId", txnId));
+				List<PaymentSettlement> settlementsList = criteria.list();
+				log.debug("settlement list size : " + settlementsList.size());
+				if(settlementsList.size()==1){
+					int psId = 0;
+					for(PaymentSettlement settlement : settlementsList){
+						psId = settlement.getPsId();
+						if(settlement.getSettlementStatus().equals("RELEASE_SUCCESS")){
+							responseBean.setMessage("Success");
+							responseBean.setPsId(settlement.getPsId());
+							responseBean.setReleaseRefId(settlement.getReleasefundRefId());
+							responseBean.setSettleId(settlement.getSettlementId());
+							responseBean.setTxnId(txnId);
+						}
+						else if(!settlement.getSettlementStatus().equals("RELEASE_SUCCESS")){
+							if(balanceBean.getMessage().equals("Success")){
+								if(balanceBean.getAccountBalance()>=txn.getTxnAmount()){
+									SettlementRequestBean requestBean = new SettlementRequestBean();
+									requestBean.setTrans_id(txn.getCitrusMpTxnId());
+									requestBean.setSettlement_ref("LimitlessCircle Pay");
+									requestBean.setTrans_source("CITRUS");
+									double txnAmount = txn.getTxnAmount();
 
-					// Calculating settlement amount and split amount
-					double feeAmount = txnAmount * (feePercent / 100);
-					// round off to 2 decimal
-					feeAmount = Math.round(feeAmount * 100) / 100D;
+									EngageSeller seller = (EngageSeller) session
+											.get("com.limitless.services.engage.dao.EngageSeller", txn.getSellerId());
+									double feePercent = 0.0;
+									if (seller != null) {
+										feePercent = seller.getSellerSplitPercent();
+									}
 
-					double settlementAmount = txnAmount - feeAmount;
-					log.debug("Settlement Amount: " + settlementAmount);
-					requestBean.setSettlement_amount(settlementAmount);
-					requestBean.setFee_amount(feeAmount);
-					requestBean.setSettlement_date_time(txn.getTxnUpdatedTime().toString());
-					
-					SettlementResponseBean settleResponseBean = new SettlementResponseBean();
-					try{
-						settleResponseBean = callSettlementApi(requestBean, authToken);
+									// Calculating settlement amount and split amount
+									double feeAmount = txnAmount * (feePercent / 100);
+									// round off to 2 decimal
+									feeAmount = Math.round(feeAmount * 100) / 100D;
+
+									double settlementAmount = txnAmount - feeAmount;
+									log.debug("Settlement Amount: " + settlementAmount);
+									requestBean.setSettlement_amount(settlementAmount);
+									requestBean.setFee_amount(feeAmount);
+									requestBean.setSettlement_date_time(txn.getTxnUpdatedTime().toString());
+
+									SettlementResponseBean settleResponseBean = new SettlementResponseBean();
+									try{
+										settleResponseBean = callSettlementApi(requestBean, authToken);
+									}
+									catch(Exception e){
+										log.error("Settle went wrong : "+e);
+									}
+
+									PaymentSettlement settlement2 = (PaymentSettlement) session
+											.get("com.limitless.services.payment.PaymentService.dao.PaymentSettlement", psId);
+									if(settleResponseBean.getMessage().equals("Success")){
+										settlement2.setSettlementId(settleResponseBean.getSettlementId());
+										settlement2.setSettlementAmount(settlementAmount);
+										settlement2.setTxnId(txnId);
+									}
+									else{
+										settlement2.setErrorIdSettle(settleResponseBean.getErrorId());
+										settlement2.setTxnId(txnId);
+										settlement2.setErrorDescriptionSettle(settleResponseBean.getErrorDescription());
+									}
+
+									int citrusSplitId = txn.getSplitId();
+									ReleaseFundsRequestBean fundBean = new ReleaseFundsRequestBean();
+									fundBean.setSplit_id(citrusSplitId);
+
+									ReleaseFundsResponseBean fundResponseBean = new ReleaseFundsResponseBean();
+									try{
+										fundResponseBean = callReleaseFundsApi(fundBean, authToken);
+									}
+									catch(Exception e){
+										log.error("Release went wrong : "+e);
+									}
+
+									if(fundResponseBean.getMessage().equals("Success")){
+										settlement2.setReleasefundRefId(fundResponseBean.getReleaseFundsRefId());
+										settlement2.setSettlementStatus("RELEASE_SUCCESS");
+									}
+									else{
+										settlement2.setErrorIdRelease(fundResponseBean.getErrorId());
+										settlement2.setErrorDescriptionRelease(fundResponseBean.getErrorDescription());
+									}
+
+									session.update(settlement2);
+									responseBean.setMessage("Success");
+									responseBean.setPsId(settlement2.getPsId());
+									responseBean.setTxnId(txnId);
+								}
+								else{
+									responseBean.setMessage("Failed");
+								}
+							}
+							else{
+								responseBean.setMessage("Failed");
+							}
+						}
 					}
-					catch(Exception e){
-						log.error("Settle went wrong : "+e);
-					}
-					
-					PaymentSettlement settlement = new PaymentSettlement();
-					if(settleResponseBean.getMessage().equals("Success")){
-						settlement.setSettlementId(settleResponseBean.getSettlementId());
-						settlement.setSettlementAmount(settlementAmount);
-						settlement.setTxnId(txnId);
+				}
+				else if(settlementsList.isEmpty()){
+					if(balanceBean.getMessage().equals("Success")){
+						if(balanceBean.getAccountBalance()>=txn.getTxnAmount()){
+							SettlementRequestBean requestBean = new SettlementRequestBean();
+							requestBean.setTrans_id(txn.getCitrusMpTxnId());
+							requestBean.setSettlement_ref("LimitlessCircle Pay");
+							requestBean.setTrans_source("CITRUS");
+							double txnAmount = txn.getTxnAmount();
+
+							EngageSeller seller = (EngageSeller) session
+									.get("com.limitless.services.engage.dao.EngageSeller", txn.getSellerId());
+							double feePercent = 0.0;
+							if (seller != null) {
+								feePercent = seller.getSellerSplitPercent();
+							}
+
+							// Calculating settlement amount and split amount
+							double feeAmount = txnAmount * (feePercent / 100);
+							// round off to 2 decimal
+							feeAmount = Math.round(feeAmount * 100) / 100D;
+
+							double settlementAmount = txnAmount - feeAmount;
+							log.debug("Settlement Amount: " + settlementAmount);
+							requestBean.setSettlement_amount(settlementAmount);
+							requestBean.setFee_amount(feeAmount);
+							requestBean.setSettlement_date_time(txn.getTxnUpdatedTime().toString());
+
+							SettlementResponseBean settleResponseBean = new SettlementResponseBean();
+							try{
+								settleResponseBean = callSettlementApi(requestBean, authToken);
+							}
+							catch(Exception e){
+								log.error("Settle went wrong : "+e);
+							}
+
+							PaymentSettlement settlement3 = new PaymentSettlement();
+							if(settleResponseBean.getMessage().equals("Success")){
+								settlement3.setSettlementId(settleResponseBean.getSettlementId());
+								settlement3.setSettlementAmount(settlementAmount);
+								settlement3.setTxnId(txnId);
+							}
+							else{
+								settlement3.setErrorIdSettle(settleResponseBean.getErrorId());
+								settlement3.setTxnId(txnId);
+								settlement3.setErrorDescriptionSettle(settleResponseBean.getErrorDescription());
+							}
+
+							int citrusSplitId = txn.getSplitId();
+							ReleaseFundsRequestBean fundBean = new ReleaseFundsRequestBean();
+							fundBean.setSplit_id(citrusSplitId);
+
+							ReleaseFundsResponseBean fundResponseBean = new ReleaseFundsResponseBean();
+							try{
+								fundResponseBean = callReleaseFundsApi(fundBean, authToken);
+							}
+							catch(Exception e){
+								log.error("Release went wrong : "+e);
+							}
+
+							if(fundResponseBean.getMessage().equals("Success")){
+								settlement3.setReleasefundRefId(fundResponseBean.getReleaseFundsRefId());
+								settlement3.setSettlementStatus("RELEASE_SUCCESS");
+							}
+							else{
+								settlement3.setErrorIdRelease(fundResponseBean.getErrorId());
+								settlement3.setErrorDescriptionRelease(fundResponseBean.getErrorDescription());
+							}
+
+							session.persist(settlement3);
+							responseBean.setMessage("Success");
+							responseBean.setPsId(settlement3.getPsId());
+							responseBean.setTxnId(txnId);
+						}
+						else{
+							responseBean.setMessage("Failed");
+						}
 					}
 					else{
-						settlement.setErrorIdSettle(settleResponseBean.getErrorId());
-						settlement.setTxnId(txnId);
-						settlement.setErrorDescriptionSettle(settleResponseBean.getErrorDescription());
+						responseBean.setMessage("Failed");
 					}
-					
-					int citrusSplitId = txn.getSplitId();
-					ReleaseFundsRequestBean fundBean = new ReleaseFundsRequestBean();
-					fundBean.setSplit_id(citrusSplitId);
-					
-					ReleaseFundsResponseBean fundResponseBean = new ReleaseFundsResponseBean();
-					try{
-						fundResponseBean = callReleaseFundsApi(fundBean, authToken);
-					}
-					catch(Exception e){
-						log.error("Release went wrong : "+e);
-					}
-					
-					if(fundResponseBean.getMessage().equals("Success")){
-						settlement.setReleasefundRefId(fundResponseBean.getReleaseFundsRefId());
-						settlement.setSettlementStatus("RELEASE_SUCCESS");
-					}
-					else{
-						settlement.setErrorIdRelease(fundResponseBean.getErrorId());
-						settlement.setErrorDescriptionRelease(fundResponseBean.getErrorDescription());
-					}
-					
-					session.persist(settlement);
-					responseBean.setMessage("Success");
-					responseBean.setPsId(settlement.getPsId());
-					responseBean.setTxnId(txnId);
 				}
-				else{
-					responseBean.setMessage("Failed");
-				}
-			}
-			else{
-				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
 

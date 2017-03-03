@@ -158,6 +158,14 @@ public class ProductManager {
 			product.setImage10(bean.getImage10());
 			
 			session.persist(product);
+			
+			ProductInventory inventory = new ProductInventory();
+			inventory.setProductId(product.getProductId());
+			inventory.setProductStock(bean.getProductInventory());
+			inventory.setProductSold(0);
+			
+			session.persist(inventory);
+			
 			responseBean.setProductId(product.getProductId());
 			responseBean.setMessage("Success");
 			

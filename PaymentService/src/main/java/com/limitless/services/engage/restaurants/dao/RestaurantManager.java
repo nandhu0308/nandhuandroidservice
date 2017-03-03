@@ -20,7 +20,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Junction;
+import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -134,6 +136,35 @@ public class RestaurantManager {
 								subcategorysList.add(scBean);
 								scBean = null;
 							}
+							List<RestaurantItemListBean> itemsList3 = new ArrayList<RestaurantItemListBean>();
+							Criteria criteria6 = session.createCriteria(RestaurantItems.class);
+							Criterion cidCriterion = Restrictions.eq("categoryId", category.getCategoryId());
+							Criterion scidCriterion = Restrictions.eq("subcategoryId", 0);
+							LogicalExpression logExp = Restrictions.and(cidCriterion, scidCriterion);
+							criteria6.add(logExp);
+							List<RestaurantItems> items4 = criteria6.list();
+							log.debug("items list size : " + items4.size());
+							if(items4.size()>0){
+								for(RestaurantItems item4 : items4){
+									RestaurantItemListBean itemBean = new RestaurantItemListBean();
+									itemBean.setItemId(item4.getItemId());
+									itemBean.setItemName(item4.getItemName());
+									itemBean.setItemPrice(item4.getItemPrice());
+									itemBean.setItemType(item4.getItemType());
+									itemBean.setItemImage(item4.getItemImage());
+									itemBean.setItemAvailable(item4.getAvailable());
+									itemBean.setItemChefSpl(item4.getChefSpl());
+									itemBean.setItemRecommended(item4.getRecommended());
+									itemBean.setItemLunch(item4.getLunch());
+									itemBean.setItemBreakfast(item4.getBreakfast());
+									itemBean.setItemDinner(item4.getDinner());
+									itemBean.setItemDiscountRate(item4.getDiscountRate());
+									
+									itemsList3.add(itemBean);
+									itemBean = null;
+								}
+								cBean.setItemsList(itemsList3);
+							}
 							cBean.setSubcategorysList(subcategorysList);
 							categorysList.add(cBean);
 						}
@@ -166,6 +197,7 @@ public class RestaurantManager {
 							}
 							categorysList.add(cBean);
 						}
+						
 						bean.setCategorysList(categorysList);
 					}
 				}
