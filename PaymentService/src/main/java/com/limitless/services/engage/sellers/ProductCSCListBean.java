@@ -2,13 +2,13 @@ package com.limitless.services.engage.sellers;
 
 import java.util.List;
 
-public class ProductListBean {
+public class ProductCSCListBean {
 	private int sellerId;
 	private String sellerName;
 	private String sellerCity;
 	private int citrusSellerId;
 	private List<ProductsCategoryListBean> categoryList;
-	private List<ProductBean> productsList;
+	//private List<ProductBean> productsList;
 	private String message;
 	public int getSellerId() {
 		return sellerId;
@@ -40,12 +40,12 @@ public class ProductListBean {
 	public void setCategoryList(List<ProductsCategoryListBean> categoryList) {
 		this.categoryList = categoryList;
 	}
-	public List<ProductBean> getProductsList() {
-		return productsList;
-	}
-	public void setProductsList(List<ProductBean> productsList) {
-		this.productsList = productsList;
-	}
+//	public List<ProductBean> getProductsList() {
+//		return productsList;
+//	}
+//	public void setProductsList(List<ProductBean> productsList) {
+//		this.productsList = productsList;
+//	}
 	public String getMessage() {
 		return message;
 	}

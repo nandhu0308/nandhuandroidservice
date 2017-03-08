@@ -24,8 +24,10 @@ import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductErrorBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
-import com.limitless.services.engage.sellers.ProductListBean;
+import com.limitless.services.engage.sellers.ProductCSCListBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
+import com.limitless.services.engage.sellers.ProductsListRequestBean;
+import com.limitless.services.engage.sellers.ProductsListResponeBean;
 import com.limitless.services.engage.sellers.SellerProductBean;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
@@ -144,8 +146,8 @@ public class ProductResource {
 	@Path("/get/seller/v2/{sellerMobileNumber}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public ProductListBean getSellerProductV2(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
-		ProductListBean listBean = new ProductListBean();
+	public ProductCSCListBean getSellerProductV2(@PathParam("sellerMobileNumber") String sellerMobileNumber) throws Exception{
+		ProductCSCListBean listBean = new ProductCSCListBean();
 		try{
 			EngageSellerManager sellerManager = new EngageSellerManager();
 			SellerLoginResponseBean loginResponseBean = sellerManager.getSellerByMobile(sellerMobileNumber);
@@ -174,6 +176,23 @@ public class ProductResource {
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
+	}
+	
+	@Path("/get")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductsListResponeBean getProductsByCriteria(ProductsListRequestBean requestBean) throws Exception{
+		ProductsListResponeBean responeBean = new ProductsListResponeBean();
+		try{
+			ProductManager manager = new ProductManager();
+			responeBean = manager.getProductsList(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responeBean;
 	}
 	
 }

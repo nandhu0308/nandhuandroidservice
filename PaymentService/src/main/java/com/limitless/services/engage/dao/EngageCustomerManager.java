@@ -36,6 +36,7 @@ import com.limitless.services.engage.AddAccountRequestBean;
 import com.limitless.services.engage.AddAccountResponseBean;
 import com.limitless.services.engage.CitrusRegistrationRequestBean;
 import com.limitless.services.engage.CitrusRegistrationResponseBean;
+import com.limitless.services.engage.CustomerAppVersionUpdateResponseBean;
 import com.limitless.services.engage.CustomerDataBean;
 import com.limitless.services.engage.CustomerDeviceIdRequestBean;
 import com.limitless.services.engage.CustomerDeviceIdResponseBean;
@@ -104,6 +105,9 @@ public class EngageCustomerManager {
 			tx = session.beginTransaction();
 			session.persist(transientInstance);
 			log.debug("persist successful");
+			
+			
+			
 			tx.commit();
 		} catch (RuntimeException re) {
 			if (tx != null) {
@@ -323,7 +327,7 @@ public class EngageCustomerManager {
 			List<EngageCustomer> userList = criteria.list();
 			if (userList.size() > 0 && userList.size() == 1) {
 				log.debug("Size: " + userList.size());
-				for (EngageCustomer user : userList) {
+				for (EngageCustomer user : userList) {		
 					loginResponseBean.setLoginStatus(1);
 					loginResponseBean.setMessage("Success");
 					loginResponseBean.setCustomerId(user.getCustomerId());
@@ -1225,6 +1229,41 @@ public class EngageCustomerManager {
 			throw re;
 		}
 		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public CustomerAppVersionUpdateResponseBean updateCustomerAppVersion(int customerId, String appVersion){
+		log.debug("updating cutomer app version");
+		CustomerAppVersionUpdateResponseBean responseBean = new CustomerAppVersionUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageCustomer customer = (EngageCustomer) session
+					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+			if(customer!=null){
+				customer.setAppVersion(appVersion);
+				session.update(customer);
+				
+				responseBean.setCustomerId(customerId);
+				responseBean.setMessage("Success");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("updating cutomer app version failed :" + re);
+			throw re;
+		}
+		finally{
 			if (session != null && session.isOpen()) {
 				session.close();
 			}

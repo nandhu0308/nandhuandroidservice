@@ -145,4 +145,13 @@ public class RestaurantResource {
 		return Response.status(200).build();
 	}
 	
+	@Path("/notify/{orderId}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sendNoification(@PathParam("orderId") int orderId){
+		RestaurantManager manager = new RestaurantManager();
+		manager.notificationToRestaurant(orderId);
+		return Response.status(200).build();
+	}
+	
 }

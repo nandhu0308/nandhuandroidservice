@@ -6,7 +6,7 @@ public class ProductSubCategoryListBean {
 	private int subcategoryId;
 	private String subcategoryName;
 	private int categoryId;
-	private List<ProductBean> productsList;
+	//private List<ProductBean> productsList;
 	public int getSubcategoryId() {
 		return subcategoryId;
 	}
@@ -25,10 +25,10 @@ public class ProductSubCategoryListBean {
 	public void setCategoryId(int categoryId) {
 		this.categoryId = categoryId;
 	}
-	public List<ProductBean> getProductsList() {
-		return productsList;
-	}
-	public void setProductsList(List<ProductBean> productsList) {
-		this.productsList = productsList;
-	}
+//	public List<ProductBean> getProductsList() {
+//		return productsList;
+//	}
+//	public void setProductsList(List<ProductBean> productsList) {
+//		this.productsList = productsList;
+//	}
 }

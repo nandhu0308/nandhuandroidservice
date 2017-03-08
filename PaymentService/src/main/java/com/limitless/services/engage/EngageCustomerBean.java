@@ -18,6 +18,7 @@ public class EngageCustomerBean {
 	private String deviceId;
 	private String zip;
 	private String countryIsoCode;
+	private String appVersion;
 	
 	public int getCustomerId() {
 		return customerId;
@@ -114,5 +115,11 @@ public class EngageCustomerBean {
 	}
 	public void setCountryIsoCode(String countryIsoCode) {
 		this.countryIsoCode = countryIsoCode;
+	}
+	public String getAppVersion() {
+		return appVersion;
+	}
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
 	}
 }

@@ -26,6 +26,7 @@ import com.limitless.services.engage.CheckEmailResponseBean;
 import com.limitless.services.engage.CustomerAddressListBean;
 import com.limitless.services.engage.CustomerAddressRequestBean;
 import com.limitless.services.engage.CustomerAddressResponseBean;
+import com.limitless.services.engage.CustomerAppVersionUpdateResponseBean;
 import com.limitless.services.engage.CustomerDeviceIdRequestBean;
 import com.limitless.services.engage.CustomerDeviceIdResponseBean;
 import com.limitless.services.engage.CustomerLocationUpdateRequestBean;
@@ -88,6 +89,7 @@ public class EngageCustomerResource {
 			customer.setDeviceId(bean.getDeviceId());
 			customer.setCustomerZip(bean.getZip());
 			customer.setCustomerCountryIsoCode(bean.getCountryIsoCode());
+			customer.setAppVersion(bean.getAppVersion());
 
 			EngageCustomerManager manager = new EngageCustomerManager();
 
@@ -97,6 +99,18 @@ public class EngageCustomerResource {
 				customerResp.setCustomerId(customer.getCustomerId());
 				customerResp.setStatus(1);
 				customerResp.setMessage("Success");
+				
+				/*LoginResponseBean loginResponseBean = manager.validateUser(customer.getCustomerMobileNumber(), customer.getCustomerPasswd99());
+				customerResp.setCustomerName(customer.getCustomerName());
+				customerResp.setCustomerEmail(customer.getCustomerEmail99());
+				customerResp.setCustomerCity(customer.getCustomerCity());
+				customerResp.setCustomerCountry(customer.getCustomerCountry());
+				customerResp.setCustomerZip(customer.getCustomerZip());
+				customerResp.setCustomerCountryCode(customer.getCustomerCountryCode());
+				customerResp.setCustomerCountryIsoCode(customer.getCustomerCountryIsoCode());
+				customerResp.setDeviceId(customer.getDeviceId());
+				customerResp.setSessionId(loginResponseBean.getSessionId());
+				customerResp.setSessionKey(loginResponseBean.getSessionKey());*/
 			} else {
 				customerResp.setStatus(-1);
 				customerResp.setMessage("Failure - Duplicate Mobile Number or Email");
@@ -521,6 +535,23 @@ public class EngageCustomerResource {
 		try{
 			EngageCustomerManager manager = new EngageCustomerManager();
 			responseBean = manager.updateCustomerLocation(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@PUT
+	@Path("/customer/version/{customerId}/{appVersion}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerAppVersionUpdateResponseBean updateAppVersion(@PathParam("customerId") int customerId,
+			@PathParam("appVersion") String appVersion) throws Exception{
+		CustomerAppVersionUpdateResponseBean responseBean = new CustomerAppVersionUpdateResponseBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			responseBean = manager.updateCustomerAppVersion(customerId, appVersion);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);

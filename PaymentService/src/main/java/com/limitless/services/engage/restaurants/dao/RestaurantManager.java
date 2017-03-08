@@ -533,6 +533,7 @@ public class RestaurantManager {
 					List<RestaurantOrderListBean> orderList = new ArrayList<RestaurantOrderListBean>();
 					for(RestaurantOrder order : orders){
 						RestaurantOrderListBean listBean = new RestaurantOrderListBean();
+						listBean.setCustomerId(customerId);
 						listBean.setOrderId(order.getOrderId());
 						listBean.setOrderStyle(order.getOrderType());
 						listBean.setOrderTotalAmount((float) order.getTotalAmount());
@@ -640,12 +641,14 @@ public class RestaurantManager {
 						.add(Restrictions.eq("restaurantId", restaurantId))
 						.add(Restrictions.ne("orderStatus", "ORDER_INITIATED"));
 				criteria.add(condition);
+				criteria.addOrder(Order.desc("orderId"));
 				List<RestaurantOrder> orders = criteria.list();
 				log.debug("order list size : " +orders.size());
 				if(orders.size()>0){
 					List<RestaurantOrderListBean> orderList = new ArrayList<RestaurantOrderListBean>();
 					for(RestaurantOrder order : orders){
 						RestaurantOrderListBean listBean = new RestaurantOrderListBean();
+						listBean.setRestaurantId(restaurantId);
 						listBean.setOrderId(order.getOrderId());
 						listBean.setOrderStyle(order.getOrderType());
 						listBean.setRestaurantOrderStatus(order.getOrderStatus());

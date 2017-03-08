@@ -4,20 +4,20 @@ import java.util.List;
 
 public class ProductsCategoryListBean {
 	private int categoryId;
-	private String productCategorName;
+	private String productCategoryName;
 	private List<ProductSubCategoryListBean> subcategoryList;
-	private List<ProductBean> productsList;
+	//private List<ProductBean> productsList;
 	public int getCategoryId() {
 		return categoryId;
 	}
 	public void setCategoryId(int categoryId) {
 		this.categoryId = categoryId;
 	}
-	public String getProductCategorName() {
-		return productCategorName;
+	public String getProductCategoryName() {
+		return productCategoryName;
 	}
-	public void setProductCategorName(String productCategorName) {
-		this.productCategorName = productCategorName;
+	public void setProductCategoryName(String productCategoryName) {
+		this.productCategoryName = productCategoryName;
 	}
 	public List<ProductSubCategoryListBean> getSubcategoryList() {
 		return subcategoryList;
@@ -25,10 +25,10 @@ public class ProductsCategoryListBean {
 	public void setSubcategoryList(List<ProductSubCategoryListBean> subcategoryList) {
 		this.subcategoryList = subcategoryList;
 	}
-	public List<ProductBean> getProductsList() {
-		return productsList;
-	}
-	public void setProductsList(List<ProductBean> productsList) {
-		this.productsList = productsList;
-	}
+//	public List<ProductBean> getProductsList() {
+//		return productsList;
+//	}
+//	public void setProductsList(List<ProductBean> productsList) {
+//		this.productsList = productsList;
+//	}
 }

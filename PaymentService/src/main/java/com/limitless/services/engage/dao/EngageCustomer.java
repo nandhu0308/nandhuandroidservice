@@ -61,6 +61,8 @@ public class EngageCustomer implements java.io.Serializable {
 	private String customerZip;
 	@Column(name="CUSTOMER_COUNTRY_ISO_CODE")
 	private String customerCountryIsoCode;
+	@Column(name="APP_VERSION")
+	private String appVersion;
 
 	public EngageCustomer() {
 	}
@@ -231,6 +233,14 @@ public class EngageCustomer implements java.io.Serializable {
 
 	public void setCustomerCountryIsoCode(String customerCountryIsoCode) {
 		this.customerCountryIsoCode = customerCountryIsoCode;
+	}
+
+	public String getAppVersion() {
+		return appVersion;
+	}
+
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
 	}
 	
 }

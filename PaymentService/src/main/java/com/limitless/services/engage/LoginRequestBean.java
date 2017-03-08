@@ -4,6 +4,7 @@ public class LoginRequestBean {
 	
 	private String phone;
 	private String passwd;
+	private String appVersion;
 	public String getPhone() {
 		return phone;
 	}
@@ -15,6 +16,12 @@ public class LoginRequestBean {
 	}
 	public void setPasswd(String passwd) {
 		this.passwd = passwd;
+	}
+	public String getAppVersion() {
+		return appVersion;
+	}
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
 	}
 	
 }
