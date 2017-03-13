@@ -376,6 +376,7 @@ public class ProductManager {
 						ProductsCategoryListBean categoryBean = new ProductsCategoryListBean();
 						categoryBean.setCategoryId(category.getProductCategoryId());
 						categoryBean.setProductCategoryName(category.getProductCategoryName());
+						categoryBean.setCategoryImageUrl(category.getProdcuctCategoryImage());
 						Criteria criteria2 = session.createCriteria(ProductSubcategory.class);
 						criteria2.add(Restrictions.eq("productCategoryId", category.getProductCategoryId()));
 						List<ProductSubcategory> subcategoryList = criteria2.list();
@@ -387,6 +388,7 @@ public class ProductManager {
 								subCategoryBean.setCategoryId(subcategory.getProductCategoryId());
 								subCategoryBean.setSubcategoryId(subcategory.getProductScId());
 								subCategoryBean.setSubcategoryName(subcategory.getProductScName());
+								subCategoryBean.setSubCategoryImageUrl(subcategory.getProductSubcategoryImage());
 //								List<ProductBean> subcategoryProductList = new ArrayList<ProductBean>();
 //								Criteria criteria3 = session.createCriteria(Product.class);
 //								criteria3.add(Restrictions.eq("subcategoryId", subcategory.getProductScId()));

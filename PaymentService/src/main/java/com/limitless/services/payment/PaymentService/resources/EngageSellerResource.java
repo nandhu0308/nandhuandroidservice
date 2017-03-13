@@ -472,6 +472,22 @@ public class EngageSellerResource {
 		return Response.status(Status.NOT_FOUND).build();
 	}
 	
+	@GET
+	@Path("/post/get/{sellerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public CustomerNotifyListBean getAllPosts(@PathParam("sellerId") int sellerId) throws Exception{
+		CustomerNotifyListBean notifyListBean = new CustomerNotifyListBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			notifyListBean = manager.getSellerPostList(sellerId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return notifyListBean;
+	}
+	
 	@PUT
 	@Path("/deviceid")
 	@Consumes(MediaType.APPLICATION_JSON)

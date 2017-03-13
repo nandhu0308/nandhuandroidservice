@@ -17,6 +17,8 @@ public class ProductCategory {
 	private String productCategoryName;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
+	@Column(name="PRODUCT_CATEGORY_IMAGE")
+	private String prodcuctCategoryImage;
 	public int getProductCategoryId() {
 		return productCategoryId;
 	}
@@ -34,5 +36,11 @@ public class ProductCategory {
 	}
 	public void setSellerId(Integer sellerId) {
 		this.sellerId = sellerId;
+	}
+	public String getProdcuctCategoryImage() {
+		return prodcuctCategoryImage;
+	}
+	public void setProdcuctCategoryImage(String prodcuctCategoryImage) {
+		this.prodcuctCategoryImage = prodcuctCategoryImage;
 	}
 }

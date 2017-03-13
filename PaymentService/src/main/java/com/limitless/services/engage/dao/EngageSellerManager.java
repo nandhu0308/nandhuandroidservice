@@ -19,6 +19,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.context.spi.CurrentSessionContext;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Junction;
@@ -1251,7 +1252,7 @@ public class EngageSellerManager {
 			transaction = session.beginTransaction();
 
 			Criteria criteria = session.createCriteria(CircleNotify.class);
-			Criterion statusNyCriterion = Restrictions.ne("status", "NOTYET");
+			Criterion statusNyCriterion = Restrictions.ne("status", "APPROVED");
 			Criterion statusCnlCriterion = Restrictions.ne("status", "CANCELLED");
 			LogicalExpression logExp = Restrictions.and(statusNyCriterion, statusCnlCriterion);
 			criteria.add(logExp);
@@ -1343,6 +1344,7 @@ public class EngageSellerManager {
 			if(transaction!=null){
 				transaction.rollback();
 			}
+			log.error("getting restaurant failed " + re);
 			throw re;
 		}
 		finally {
@@ -1351,6 +1353,63 @@ public class EngageSellerManager {
 			}
 		}
 		return restaurantsBean;
+	}
+	
+	public CustomerNotifyListBean getSellerPostList(int sellerId){
+		log.debug("getting seller post list");
+		CustomerNotifyListBean notifyListBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
+			if(seller!=null){
+				String sellerName = seller.getSellerName();
+				
+				Criteria criteria = session.createCriteria(CircleNotify.class);
+				criteria.add(Restrictions.eq("sellerId", sellerId));
+				List<CircleNotify> notifyList = criteria.list();
+				log.debug("notify size : " + notifyList.size());
+				if(notifyList.size()>0){
+					notifyListBean = new CustomerNotifyListBean();
+					notifyListBean.setSellerId(sellerId);
+					List<CustomerNotifyBean> beanList = new ArrayList<CustomerNotifyBean>();
+					for(CircleNotify notify : notifyList){
+						CustomerNotifyBean bean = new CustomerNotifyBean();
+						bean.setBody(notify.getBody());
+						bean.setImageUrl(notify.getImageUrl());
+						bean.setNotifyCreatedTime(notify.getNotifyCreatedTime());
+						bean.setNotifyId(notify.getCircleNotifyId());
+						bean.setPostType(notify.getPostType());
+						bean.setSellerId(sellerId);
+						bean.setSellerMobileNumber(notify.getSellerMobile());
+						bean.setSellerName(sellerName);
+						bean.setStatus(notify.getStatus());
+						bean.setTitle(notify.getTitle());
+						beanList.add(bean);
+						bean = null;
+					}
+					notifyListBean.setNotifyList(beanList);
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting seller post list failed " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return notifyListBean;
 	}
 
 	/*

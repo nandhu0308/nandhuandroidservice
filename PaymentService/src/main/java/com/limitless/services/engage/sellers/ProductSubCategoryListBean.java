@@ -5,6 +5,7 @@ import java.util.List;
 public class ProductSubCategoryListBean {
 	private int subcategoryId;
 	private String subcategoryName;
+	private String subCategoryImageUrl;
 	private int categoryId;
 	//private List<ProductBean> productsList;
 	public int getSubcategoryId() {
@@ -31,4 +32,10 @@ public class ProductSubCategoryListBean {
 //	public void setProductsList(List<ProductBean> productsList) {
 //		this.productsList = productsList;
 //	}
+	public String getSubCategoryImageUrl() {
+		return subCategoryImageUrl;
+	}
+	public void setSubCategoryImageUrl(String subCategoryImageUrl) {
+		this.subCategoryImageUrl = subCategoryImageUrl;
+	}
 }
