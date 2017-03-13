@@ -4,6 +4,8 @@ public class CoordinatesResponseBean {
 	
 	private int sellerId;
 	private String sellerName;
+	private String shopName;
+	private String sellerMobile;
 	private float latitude;
 	private float longitude;
 	public int getSellerId() {
@@ -30,5 +32,16 @@ public class CoordinatesResponseBean {
 	public void setLongitude(float longitude) {
 		this.longitude = longitude;
 	}
-	
+	public String getShopName() {
+		return shopName;
+	}
+	public void setShopName(String shopName) {
+		this.shopName = shopName;
+	}
+	public String getSellerMobile() {
+		return sellerMobile;
+	}
+	public void setSellerMobile(String sellerMobile) {
+		this.sellerMobile = sellerMobile;
+	}
 }

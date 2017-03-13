@@ -393,6 +393,8 @@ public class EngageSellerManager {
 				CoordinatesResponseBean bean = new CoordinatesResponseBean();
 				bean.setSellerId(seller.getSellerId());
 				bean.setSellerName(seller.getSellerName());
+				bean.setShopName(seller.getSellerShopName());
+				bean.setSellerMobile(seller.getSellerMobileNumber());
 				bean.setLatitude(seller.getSellerLocationLatitude());
 				bean.setLongitude(seller.getSellerLocationLongitude());
 				coords.add(bean);
