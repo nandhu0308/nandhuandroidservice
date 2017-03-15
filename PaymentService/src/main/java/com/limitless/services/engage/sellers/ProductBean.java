@@ -32,6 +32,8 @@ public class ProductBean {
 	private String productColor;
 	private int productInventory;
 	private List<ProductModelsBean> modelsList;
+	private boolean pod;
+	
 	
 	public String getProductName() {
 		return productName;
@@ -208,4 +210,11 @@ public class ProductBean {
 	public void setProductInventory(int productInventory) {
 		this.productInventory = productInventory;
 	}
+	public boolean getPod() {
+		return pod;
+	}
+	public void setPod(boolean pod) {
+		this.pod = pod;
+	}
+	
 }

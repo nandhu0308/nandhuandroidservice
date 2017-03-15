@@ -13,6 +13,9 @@ public class RestaurantBean {
 	private int restaurantOrderStyle;
 	private List<RestaurantItemListBean> itemsList;
 	private List<RestaurantCategoryListBean> categorysList;
+	private boolean takeAwayPod;
+	private boolean eatInPod;
+	private boolean homeDeliveryPod;
 	public int getRestaurantId() {
 		return restaurantId;
 	}
@@ -73,4 +76,23 @@ public class RestaurantBean {
 	public void setRestaurantSellerCitrusId(int restaurantSellerCitrusId) {
 		this.restaurantSellerCitrusId = restaurantSellerCitrusId;
 	}
+	public boolean getTakeAwayPod() {
+		return takeAwayPod;
+	}
+	public void setTakeAwayPod(boolean takeAwayPod) {
+		this.takeAwayPod = takeAwayPod;
+	}
+	public boolean getEatInPod() {
+		return eatInPod;
+	}
+	public void setEatInPod(boolean eatInPod) {
+		this.eatInPod = eatInPod;
+	}
+	public boolean getHomeDeliveryPod() {
+		return homeDeliveryPod;
+	}
+	public void setHomeDeliveryPod(boolean homeDeliveryPod) {
+		this.homeDeliveryPod = homeDeliveryPod;
+	}
+	
 }

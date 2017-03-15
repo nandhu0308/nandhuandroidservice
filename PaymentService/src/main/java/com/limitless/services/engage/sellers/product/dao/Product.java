@@ -66,6 +66,8 @@ public class Product {
 	private String image10;
 	@Column(name="IS_REMOVED")
 	private int isRemoved;
+	@Column(nullable = false, name="POD", columnDefinition = "TINYINT(1)")
+	private boolean pod;
 	
 	public Integer getProductId() {
 		return productId;
@@ -229,4 +231,11 @@ public class Product {
 	public void setIsRemoved(int isRemoved) {
 		this.isRemoved = isRemoved;
 	}
+	public boolean getPod() {
+		return pod;
+	}
+	public void setPod(boolean pod) {
+		this.pod = pod;
+	}
+	
 }

@@ -30,6 +30,13 @@ public class Restaurants {
 	@Column(name="RESTAURANT_PHONE")
 	private String restaurantPhone;
 	
+	@Column(nullable = false, name="TAKE_AWAY_POD", columnDefinition = "TINYINT(1)")
+	private boolean takeAwayPod;
+	@Column(nullable = false, name="EAT_IN_POD", columnDefinition = "TINYINT(1)")
+	private boolean eatInPod;
+	@Column(nullable = false, name="HOME_DELIVERY_POD", columnDefinition = "TINYINT(1)")
+	private boolean homeDeliveryPod;
+	
 	public Integer getRestaurantId() {
 		return restaurantId;
 	}
@@ -78,4 +85,24 @@ public class Restaurants {
 	public void setRestaurantPhone(String restaurantPhone) {
 		this.restaurantPhone = restaurantPhone;
 	}
+	public boolean getTakeAwayPod() {
+		return takeAwayPod;
+	}
+	public void setTakeAwayPod(boolean takeAwayPod) {
+		this.takeAwayPod = takeAwayPod;
+	}
+	public boolean getEatInPod() {
+		return eatInPod;
+	}
+	public void setEatInPod(boolean eatInPod) {
+		this.eatInPod = eatInPod;
+	}
+	public boolean getHomeDeliveryPod() {
+		return homeDeliveryPod;
+	}
+	public void setHomeDeliveryPod(boolean homeDeliveryPod) {
+		this.homeDeliveryPod = homeDeliveryPod;
+	}
+	
+	
 }

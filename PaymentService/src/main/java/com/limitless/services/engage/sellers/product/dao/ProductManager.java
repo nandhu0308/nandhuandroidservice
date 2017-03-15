@@ -35,51 +35,48 @@ public class ProductManager {
 
 	private static final Log log = LogFactory.getLog(ProductManager.class);
 
-	/*private final SessionFactory sessionFactory = getSessionFactory();
+	/*
+	 * private final SessionFactory sessionFactory = getSessionFactory();
+	 * 
+	 * protected SessionFactory getSessionFactory() { try { return
+	 * (SessionFactory) new InitialContext() .lookup("SessionFactory"); } catch
+	 * (Exception e) { log.error("Could not locate SessionFactory in JNDI", e);
+	 * throw new IllegalStateException(
+	 * "Could not locate SessionFactory in JNDI"); } }
+	 */
 
-	protected SessionFactory getSessionFactory() {
-		try {
-			return (SessionFactory) new InitialContext()
-					.lookup("SessionFactory");
-		} catch (Exception e) {
-			log.error("Could not locate SessionFactory in JNDI", e);
-			throw new IllegalStateException(
-					"Could not locate SessionFactory in JNDI");
-		}
-	}*/
-	
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-	
-	public List<ProductBean> getAllProducts(int sellerId){
+
+	public List<ProductBean> getAllProducts(int sellerId) {
 		log.debug("Getting all product ids for a seller");
 		Transaction transaction = null;
 		Session session = null;
 		Set<Integer> productIds = new HashSet<Integer>();
-		
+
 		List<ProductBean> productsList = new ArrayList<ProductBean>();
-		
-		try{
+
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(SellerProduct.class);
 			criteria.add(Restrictions.eq("sellerId", sellerId));
 			List<SellerProduct> sellerProductList = criteria.list();
 			log.debug("Size : " + sellerProductList.size());
-			if(sellerProductList.size() > 0){
-				
-				//Populate the Product Ids from Seller_Product Table
-				for(SellerProduct sellerProduct : sellerProductList){
+			if (sellerProductList.size() > 0) {
+
+				// Populate the Product Ids from Seller_Product Table
+				for (SellerProduct sellerProduct : sellerProductList) {
 					productIds.add(sellerProduct.getProductId());
 				}
-				
-				//Get All products
+
+				// Get All products
 				Criteria productcriteria = session.createCriteria(Product.class);
 				productcriteria.add(Restrictions.in("productId", productIds));
 				List<Product> products = productcriteria.list();
 				log.debug("Size : " + products.size());
-				if(products.size()>0){
-					for(Product product : products){
+				if (products.size() > 0) {
+					for (Product product : products) {
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
 						bean.setParentProductId(product.getParentProductId());
@@ -87,7 +84,8 @@ public class ProductManager {
 						bean.setProductDescription(product.getProductDescription());
 						bean.setProductPrice(product.getProductPrice());
 						bean.setDiscountRate(product.getDiscountRate());
-						float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+						float discountedPrice = (float) ((Float) product.getProductPrice()
+								- (product.getProductPrice() * (product.getDiscountRate() / 100)));
 						bean.setDiscountedPrice(discountedPrice);
 						bean.setProduct_image(product.getProduct_image());
 						bean.setProductInStock(product.getProductInStock());
@@ -107,36 +105,35 @@ public class ProductManager {
 						bean.setImage8(product.getImage8());
 						bean.setImage9(product.getImage9());
 						bean.setImage10(product.getImage10());
+						bean.setPod(product.getPod());
 						productsList.add(bean);
 						bean = null;
 					}
 				}
 			}
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("Finding deviceId failed");
 			throw re;
-		}
-		finally{
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return productsList;
 	}
-	
-	public NewProductsResponseBean addNewProducts(ProductBean bean){
+
+	public NewProductsResponseBean addNewProducts(ProductBean bean) {
 		log.debug("adding new products");
 		NewProductsResponseBean responseBean = new NewProductsResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Product product = new Product();
 			product.setProductName(bean.getProductName());
 			product.setProductPrice(bean.getProductPrice());
@@ -160,48 +157,46 @@ public class ProductManager {
 			product.setImage8(bean.getImage8());
 			product.setImage9(bean.getImage9());
 			product.setImage10(bean.getImage10());
-			
+			product.setPod(bean.getPod());
 			session.persist(product);
-			
+
 			ProductInventory inventory = new ProductInventory();
 			inventory.setProductId(product.getProductId());
 			inventory.setProductStock(bean.getProductInventory());
 			inventory.setProductSold(0);
-			
+
 			session.persist(inventory);
-			
+
 			responseBean.setProductId(product.getProductId());
 			responseBean.setMessage("Success");
-			
+
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding product failed");
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public ProductResponseBean updateProduct(ProductBean bean){
+
+	public ProductResponseBean updateProduct(ProductBean bean) {
 		log.debug("updating product");
 		ProductResponseBean responseBean = new ProductResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			Product product = (Product) session
-					.get("com.limitless.services.engage.sellers.product.dao.Product", bean.getProductId());
-			if(product != null){
+
+			Product product = (Product) session.get("com.limitless.services.engage.sellers.product.dao.Product",
+					bean.getProductId());
+			if (product != null) {
 				product.setProductName(bean.getProductName());
 				product.setProductPrice(bean.getProductPrice());
 				product.setProductDescription(bean.getProductDescription());
@@ -224,50 +219,46 @@ public class ProductManager {
 				product.setImage8(bean.getImage8());
 				product.setImage9(bean.getImage9());
 				product.setImage10(bean.getImage10());
-				
+				product.setPod(bean.getPod());
 				session.update(product);
-				
+
 				responseBean.setProductId(bean.getProductId());
 				responseBean.setMessage("Success");
-			}
-			else{
+			} else {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("updating product failed");
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public ProductInventoryResponseBean addProductInventory(ProductInventoryRequestBean requestBean){
+
+	public ProductInventoryResponseBean addProductInventory(ProductInventoryRequestBean requestBean) {
 		log.debug("adding inventory");
 		ProductInventoryResponseBean responseBean = new ProductInventoryResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			ProductInventory inventoryInstance = (ProductInventory) session
-					.get("com.limitless.services.engage.sellers.product.dao.ProductInventory", requestBean.getProductId());
-			if(inventoryInstance!=null){
+
+			ProductInventory inventoryInstance = (ProductInventory) session.get(
+					"com.limitless.services.engage.sellers.product.dao.ProductInventory", requestBean.getProductId());
+			if (inventoryInstance != null) {
 				inventoryInstance.setProductStock(inventoryInstance.getProductStock() + requestBean.getProductStock());
 				session.update(inventoryInstance);
 				responseBean.setProductId(requestBean.getProductId());
 				responseBean.setMessage("Success");
-			}
-			else if(inventoryInstance==null){
+			} else if (inventoryInstance == null) {
 				ProductInventory inventory = new ProductInventory();
 				inventory.setProductId(requestBean.getProductId());
 				inventory.setProductStock(requestBean.getProductStock());
@@ -277,34 +268,32 @@ public class ProductManager {
 				responseBean.setMessage("Success");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("updating product failed");
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public ProductBean getProductById(int productId){
+
+	public ProductBean getProductById(int productId) {
 		log.debug("Getting product by id");
 		ProductBean productBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			Product product = (Product) session
-					.get("com.limitless.services.engage.sellers.product.dao.Product", productId);
-			if(product != null && product.getIsRemoved()!=1){
+
+			Product product = (Product) session.get("com.limitless.services.engage.sellers.product.dao.Product",
+					productId);
+			if (product != null && product.getIsRemoved() != 1) {
 				productBean = new ProductBean();
 				productBean.setProductId(productId);
 				productBean.setParentProductId(product.getParentProductId());
@@ -313,7 +302,8 @@ public class ProductManager {
 				productBean.setProductDescription(product.getProductDescription());
 				productBean.setProductPrice(product.getProductPrice());
 				productBean.setProductInStock(product.getProductInStock());
-				float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+				float discountedPrice = (float) ((Float) product.getProductPrice()
+						- (product.getProductPrice() * (product.getDiscountRate() / 100)));
 				productBean.setDiscountRate(product.getDiscountRate());
 				productBean.setDiscountedPrice(discountedPrice);
 				productBean.setImage1(product.getImage1());
@@ -332,36 +322,35 @@ public class ProductManager {
 				productBean.setProductSizeText(product.getProductSizeText());
 				productBean.setProductSizeNumber(product.getProductSizeNumber());
 				productBean.setProductColor(product.getProductColor());
+				productBean.setPod(product.getPod());
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting product failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return productBean;
 	}
-	
-	public ProductCSCListBean getSellerProductsV2(int sellerId){
+
+	public ProductCSCListBean getSellerProductsV2(int sellerId) {
 		log.debug("getting seller products");
 		ProductCSCListBean listBean = new ProductCSCListBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					sellerId);
+			if (seller != null) {
 				listBean.setSellerId(sellerId);
 				listBean.setCitrusSellerId(seller.getCitrusSellerId());
 				listBean.setSellerName(seller.getSellerShopName());
@@ -389,217 +378,229 @@ public class ProductManager {
 								subCategoryBean.setSubcategoryId(subcategory.getProductScId());
 								subCategoryBean.setSubcategoryName(subcategory.getProductScName());
 								subCategoryBean.setSubCategoryImageUrl(subcategory.getProductSubcategoryImage());
-//								List<ProductBean> subcategoryProductList = new ArrayList<ProductBean>();
-//								Criteria criteria3 = session.createCriteria(Product.class);
-//								criteria3.add(Restrictions.eq("subcategoryId", subcategory.getProductScId()));
-//								List<Product> productList = criteria3.list();
-//								log.debug("products list size : " + productList.size());
-//								if (productList.size() > 0) {
-//									for (Product product : productList) {
-//										ProductBean bean = new ProductBean();
-//										bean.setProductId(product.getProductId());
-//										bean.setParentProductId(product.getParentProductId());
-//										bean.setProductName(product.getProductName());
-//										bean.setProductDescription(product.getProductDescription());
-//										bean.setProductPrice(product.getProductPrice());
-//										bean.setDiscountRate(product.getDiscountRate());
-//										float discountedPrice = (float) ((Float) product.getProductPrice()
-//												- (product.getProductPrice() * (product.getDiscountRate() / 100)));
-//										bean.setDiscountedPrice(discountedPrice);
-//										bean.setProduct_image(product.getProduct_image());
-//										bean.setProductInStock(product.getProductInStock());
-//										bean.setCategoryId(product.getCategoryId());
-//										bean.setGroupId(product.getGroupId());
-//										bean.setIsDefault(product.getIsDefault());
-//										bean.setProductColor(product.getProductColor());
-//										bean.setProductSizeText(product.getProductSizeText());
-//										bean.setProductSizeNumber(product.getProductSizeNumber());
-//										bean.setImage1(product.getImage1());
-//										bean.setImage2(product.getImage2());
-//										bean.setImage3(product.getImage3());
-//										bean.setImage4(product.getImage4());
-//										bean.setImage5(product.getImage5());
-//										bean.setImage6(product.getImage6());
-//										bean.setImage7(product.getImage7());
-//										bean.setImage8(product.getImage8());
-//										bean.setImage9(product.getImage9());
-//										bean.setImage10(product.getImage10());
-//										subcategoryProductList.add(bean);
-//										bean = null;
-//									}
-//									subCategoryBean.setProductsList(subcategoryProductList);
-//								}
+								// List<ProductBean> subcategoryProductList =
+								// new ArrayList<ProductBean>();
+								// Criteria criteria3 =
+								// session.createCriteria(Product.class);
+								// criteria3.add(Restrictions.eq("subcategoryId",
+								// subcategory.getProductScId()));
+								// List<Product> productList = criteria3.list();
+								// log.debug("products list size : " +
+								// productList.size());
+								// if (productList.size() > 0) {
+								// for (Product product : productList) {
+								// ProductBean bean = new ProductBean();
+								// bean.setProductId(product.getProductId());
+								// bean.setParentProductId(product.getParentProductId());
+								// bean.setProductName(product.getProductName());
+								// bean.setProductDescription(product.getProductDescription());
+								// bean.setProductPrice(product.getProductPrice());
+								// bean.setDiscountRate(product.getDiscountRate());
+								// float discountedPrice = (float) ((Float)
+								// product.getProductPrice()
+								// - (product.getProductPrice() *
+								// (product.getDiscountRate() / 100)));
+								// bean.setDiscountedPrice(discountedPrice);
+								// bean.setProduct_image(product.getProduct_image());
+								// bean.setProductInStock(product.getProductInStock());
+								// bean.setCategoryId(product.getCategoryId());
+								// bean.setGroupId(product.getGroupId());
+								// bean.setIsDefault(product.getIsDefault());
+								// bean.setProductColor(product.getProductColor());
+								// bean.setProductSizeText(product.getProductSizeText());
+								// bean.setProductSizeNumber(product.getProductSizeNumber());
+								// bean.setImage1(product.getImage1());
+								// bean.setImage2(product.getImage2());
+								// bean.setImage3(product.getImage3());
+								// bean.setImage4(product.getImage4());
+								// bean.setImage5(product.getImage5());
+								// bean.setImage6(product.getImage6());
+								// bean.setImage7(product.getImage7());
+								// bean.setImage8(product.getImage8());
+								// bean.setImage9(product.getImage9());
+								// bean.setImage10(product.getImage10());
+								// subcategoryProductList.add(bean);
+								// bean = null;
+								// }
+								// subCategoryBean.setProductsList(subcategoryProductList);
+								// }
 								scListBean.add(subCategoryBean);
 								subCategoryBean = null;
 							}
 							categoryBean.setSubcategoryList(scListBean);
 						} else if (subcategoryList.isEmpty()) {
-//							List<ProductBean> productList = new ArrayList<ProductBean>();
-//							Criteria criteria4 = session.createCriteria(Product.class);
-//							criteria4.add(Restrictions.eq("catergoryId", category.getProductCategoryId()));
-//							List<Product> productList2 = criteria4.list();
-//							log.debug("products list size : " + productList2.size());
-//							if (productList2.size() > 0) {
-//								for (Product product : productList2) {
-//									ProductBean bean = new ProductBean();
-//									bean.setProductId(product.getProductId());
-//									bean.setParentProductId(product.getParentProductId());
-//									bean.setProductName(product.getProductName());
-//									bean.setProductDescription(product.getProductDescription());
-//									bean.setProductPrice(product.getProductPrice());
-//									bean.setDiscountRate(product.getDiscountRate());
-//									float discountedPrice = (float) ((Float) product.getProductPrice()
-//											- (product.getProductPrice() * (product.getDiscountRate() / 100)));
-//									bean.setDiscountedPrice(discountedPrice);
-//									bean.setProduct_image(product.getProduct_image());
-//									bean.setProductInStock(product.getProductInStock());
-//									bean.setCategoryId(product.getCategoryId());
-//									bean.setGroupId(product.getGroupId());
-//									bean.setIsDefault(product.getIsDefault());
-//									bean.setProductColor(product.getProductColor());
-//									bean.setProductSizeText(product.getProductSizeText());
-//									bean.setProductSizeNumber(product.getProductSizeNumber());
-//									bean.setImage1(product.getImage1());
-//									bean.setImage2(product.getImage2());
-//									bean.setImage3(product.getImage3());
-//									bean.setImage4(product.getImage4());
-//									bean.setImage5(product.getImage5());
-//									bean.setImage6(product.getImage6());
-//									bean.setImage7(product.getImage7());
-//									bean.setImage8(product.getImage8());
-//									bean.setImage9(product.getImage9());
-//									bean.setImage10(product.getImage10());
-//									productList.add(bean);
-//									bean = null;
-//								}
-//								categoryBean.setProductsList(productList);
-//							}
+							// List<ProductBean> productList = new
+							// ArrayList<ProductBean>();
+							// Criteria criteria4 =
+							// session.createCriteria(Product.class);
+							// criteria4.add(Restrictions.eq("catergoryId",
+							// category.getProductCategoryId()));
+							// List<Product> productList2 = criteria4.list();
+							// log.debug("products list size : " +
+							// productList2.size());
+							// if (productList2.size() > 0) {
+							// for (Product product : productList2) {
+							// ProductBean bean = new ProductBean();
+							// bean.setProductId(product.getProductId());
+							// bean.setParentProductId(product.getParentProductId());
+							// bean.setProductName(product.getProductName());
+							// bean.setProductDescription(product.getProductDescription());
+							// bean.setProductPrice(product.getProductPrice());
+							// bean.setDiscountRate(product.getDiscountRate());
+							// float discountedPrice = (float) ((Float)
+							// product.getProductPrice()
+							// - (product.getProductPrice() *
+							// (product.getDiscountRate() / 100)));
+							// bean.setDiscountedPrice(discountedPrice);
+							// bean.setProduct_image(product.getProduct_image());
+							// bean.setProductInStock(product.getProductInStock());
+							// bean.setCategoryId(product.getCategoryId());
+							// bean.setGroupId(product.getGroupId());
+							// bean.setIsDefault(product.getIsDefault());
+							// bean.setProductColor(product.getProductColor());
+							// bean.setProductSizeText(product.getProductSizeText());
+							// bean.setProductSizeNumber(product.getProductSizeNumber());
+							// bean.setImage1(product.getImage1());
+							// bean.setImage2(product.getImage2());
+							// bean.setImage3(product.getImage3());
+							// bean.setImage4(product.getImage4());
+							// bean.setImage5(product.getImage5());
+							// bean.setImage6(product.getImage6());
+							// bean.setImage7(product.getImage7());
+							// bean.setImage8(product.getImage8());
+							// bean.setImage9(product.getImage9());
+							// bean.setImage10(product.getImage10());
+							// productList.add(bean);
+							// bean = null;
+							// }
+							// categoryBean.setProductsList(productList);
+							// }
 						}
 						categoryProductList.add(categoryBean);
 						categoryBean = null;
 					}
 					listBean.setCategoryList(categoryProductList);
-				} else if(categoryList.isEmpty()) {
-//					List<ProductBean> beanList = new ArrayList<ProductBean>();
-//					Criteria criteria5 = session.createCriteria(Product.class);
-//					criteria5.add(Restrictions.eq("sellerId", sellerId));
-//					List<Product> productList = criteria5.list();
-//					log.debug("product size :" + productList.size());
-//					if(productList.size()>0){
-//						for(Product product : productList){
-//							ProductBean bean = new ProductBean();
-//							bean.setProductId(product.getProductId());
-//							bean.setParentProductId(product.getParentProductId());
-//							bean.setProductName(product.getProductName());
-//							bean.setProductDescription(product.getProductDescription());
-//							bean.setProductPrice(product.getProductPrice());
-//							bean.setDiscountRate(product.getDiscountRate());
-//							float discountedPrice = (float) ((Float) product.getProductPrice()
-//									- (product.getProductPrice() * (product.getDiscountRate() / 100)));
-//							bean.setDiscountedPrice(discountedPrice);
-//							bean.setProduct_image(product.getProduct_image());
-//							bean.setProductInStock(product.getProductInStock());
-//							bean.setCategoryId(product.getCategoryId());
-//							bean.setGroupId(product.getGroupId());
-//							bean.setIsDefault(product.getIsDefault());
-//							bean.setProductColor(product.getProductColor());
-//							bean.setProductSizeText(product.getProductSizeText());
-//							bean.setProductSizeNumber(product.getProductSizeNumber());
-//							bean.setImage1(product.getImage1());
-//							bean.setImage2(product.getImage2());
-//							bean.setImage3(product.getImage3());
-//							bean.setImage4(product.getImage4());
-//							bean.setImage5(product.getImage5());
-//							bean.setImage6(product.getImage6());
-//							bean.setImage7(product.getImage7());
-//							bean.setImage8(product.getImage8());
-//							bean.setImage9(product.getImage9());
-//							bean.setImage10(product.getImage10());
-//							beanList.add(bean);
-//							bean = null;
-//						}
-//						listBean.setProductsList(beanList);
-//					}
+				} else if (categoryList.isEmpty()) {
+					// List<ProductBean> beanList = new
+					// ArrayList<ProductBean>();
+					// Criteria criteria5 =
+					// session.createCriteria(Product.class);
+					// criteria5.add(Restrictions.eq("sellerId", sellerId));
+					// List<Product> productList = criteria5.list();
+					// log.debug("product size :" + productList.size());
+					// if(productList.size()>0){
+					// for(Product product : productList){
+					// ProductBean bean = new ProductBean();
+					// bean.setProductId(product.getProductId());
+					// bean.setParentProductId(product.getParentProductId());
+					// bean.setProductName(product.getProductName());
+					// bean.setProductDescription(product.getProductDescription());
+					// bean.setProductPrice(product.getProductPrice());
+					// bean.setDiscountRate(product.getDiscountRate());
+					// float discountedPrice = (float) ((Float)
+					// product.getProductPrice()
+					// - (product.getProductPrice() * (product.getDiscountRate()
+					// / 100)));
+					// bean.setDiscountedPrice(discountedPrice);
+					// bean.setProduct_image(product.getProduct_image());
+					// bean.setProductInStock(product.getProductInStock());
+					// bean.setCategoryId(product.getCategoryId());
+					// bean.setGroupId(product.getGroupId());
+					// bean.setIsDefault(product.getIsDefault());
+					// bean.setProductColor(product.getProductColor());
+					// bean.setProductSizeText(product.getProductSizeText());
+					// bean.setProductSizeNumber(product.getProductSizeNumber());
+					// bean.setImage1(product.getImage1());
+					// bean.setImage2(product.getImage2());
+					// bean.setImage3(product.getImage3());
+					// bean.setImage4(product.getImage4());
+					// bean.setImage5(product.getImage5());
+					// bean.setImage6(product.getImage6());
+					// bean.setImage7(product.getImage7());
+					// bean.setImage8(product.getImage8());
+					// bean.setImage9(product.getImage9());
+					// bean.setImage10(product.getImage10());
+					// beanList.add(bean);
+					// bean = null;
+					// }
+					// listBean.setProductsList(beanList);
+					// }
 				}
 				listBean.setMessage("Success");
-			}
-			else{
+			} else {
 				listBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting products failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return listBean;
 	}
-	
-	public ProductResponseBean removeProductFromStore(int productId){
+
+	public ProductResponseBean removeProductFromStore(int productId) {
 		log.debug("removing product");
 		ProductResponseBean responseBean = new ProductResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			Product product = (Product) session
-					.get("com.limitless.services.engage.sellers.product.dao.Product", productId);
-			if(product!=null && product.getIsRemoved() != 1){
+
+			Product product = (Product) session.get("com.limitless.services.engage.sellers.product.dao.Product",
+					productId);
+			if (product != null && product.getIsRemoved() != 1) {
 				product.setIsRemoved(1);
 				session.update(product);
-				
+
 				responseBean.setProductId(productId);
 				responseBean.setMessage("Success");
 			}
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("removing product failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public ProductsListResponeBean getProductsList(ProductsListRequestBean requestBean){
+
+	public ProductsListResponeBean getProductsList(ProductsListRequestBean requestBean) {
 		log.debug("gettng products");
 		ProductsListResponeBean responeBean = new ProductsListResponeBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			if(requestBean.getSubcatId()>0){
-				ProductCategory category = (ProductCategory) session
-						.get("com.limitless.services.engage.sellers.product.dao.ProductCategory", requestBean.getCatId());
-				if(category!=null){
+
+			if (requestBean.getSubcatId() > 0) {
+				ProductCategory category = (ProductCategory) session.get(
+						"com.limitless.services.engage.sellers.product.dao.ProductCategory", requestBean.getCatId());
+				if (category != null) {
 					responeBean.setCategoryId(requestBean.getCatId());
 					responeBean.setCategoryName(category.getProductCategoryName());
 				}
-				ProductSubcategory subcat = (ProductSubcategory) session
-						.get("com.limitless.services.engage.sellers.product.dao.ProductSubcategory", requestBean.getSubcatId());
-				if(subcat!=null){
+				ProductSubcategory subcat = (ProductSubcategory) session.get(
+						"com.limitless.services.engage.sellers.product.dao.ProductSubcategory",
+						requestBean.getSubcatId());
+				if (subcat != null) {
 					responeBean.setSubCategoryId(requestBean.getSubcatId());
 					responeBean.setSubCategoryName(subcat.getProductScName());
 				}
-				
+
 				Criteria criteria = session.createCriteria(Product.class);
 				Criterion catIdCriterion = Restrictions.eq("categoryId", requestBean.getCatId());
 				Criterion subcatIdCRiterion = Restrictions.eq("subcategoryId", requestBean.getSubcatId());
@@ -607,9 +608,9 @@ public class ProductManager {
 				criteria.add(logExp);
 				List<Product> products = criteria.list();
 				log.debug("products size : " + products.size());
-				if(products.size()>0){
+				if (products.size() > 0) {
 					List<ProductBean> beanList = new ArrayList<ProductBean>();
-					for(Product product : products){
+					for (Product product : products) {
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
 						bean.setParentProductId(product.getParentProductId());
@@ -638,17 +639,17 @@ public class ProductManager {
 						bean.setImage8(product.getImage8());
 						bean.setImage9(product.getImage9());
 						bean.setImage10(product.getImage10());
+						bean.setPod(product.getPod());
 						beanList.add(bean);
 						bean = null;
 					}
 					responeBean.setProductsList(beanList);
 					responeBean.setMessage("Success");
 				}
-			}
-			else if(requestBean.getSubcatId()==0 || requestBean.getSubcatId()<0){
-				ProductCategory category = (ProductCategory) session
-						.get("com.limitless.services.engage.sellers.product.dao.ProductCategory", requestBean.getCatId());
-				if(category!=null){
+			} else if (requestBean.getSubcatId() == 0 || requestBean.getSubcatId() < 0) {
+				ProductCategory category = (ProductCategory) session.get(
+						"com.limitless.services.engage.sellers.product.dao.ProductCategory", requestBean.getCatId());
+				if (category != null) {
 					responeBean.setCategoryId(requestBean.getCatId());
 					responeBean.setCategoryName(category.getProductCategoryName());
 				}
@@ -656,9 +657,9 @@ public class ProductManager {
 				criteria.add(Restrictions.eq("categoryId", requestBean.getCatId()));
 				List<Product> products = criteria.list();
 				log.debug("products size : " + products.size());
-				if(products.size()>0){
+				if (products.size() > 0) {
 					List<ProductBean> beanList = new ArrayList<ProductBean>();
-					for(Product product : products){
+					for (Product product : products) {
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
 						bean.setParentProductId(product.getParentProductId());
@@ -687,40 +688,39 @@ public class ProductManager {
 						bean.setImage8(product.getImage8());
 						bean.setImage9(product.getImage9());
 						bean.setImage10(product.getImage10());
+						bean.setPod(product.getPod());
 						beanList.add(bean);
 						bean = null;
 					}
 					responeBean.setProductsList(beanList);
 					responeBean.setMessage("Success");
 				}
-			}
-			else{
+			} else {
 				responeBean.setMessage("Not Found");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("removing product failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responeBean;
 	}
-	
+
 	public static void main(String[] args) {
 		ProductManager manager = new ProductManager();
-//		List<Product> products = manager.getAllProducts(5000000);
-//		for (Iterator iterator = products.iterator(); iterator.hasNext();) {
-//			Product product = (Product) iterator.next();
-//			System.out.println(product.getProductId() + " | " + product.getProductName() + " | " + product.getProductPrice() );
-//		}
+		// List<Product> products = manager.getAllProducts(5000000);
+		// for (Iterator iterator = products.iterator(); iterator.hasNext();) {
+		// Product product = (Product) iterator.next();
+		// System.out.println(product.getProductId() + " | " +
+		// product.getProductName() + " | " + product.getProductPrice() );
+		// }
 	}
-	
+
 }
