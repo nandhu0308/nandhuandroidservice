@@ -85,7 +85,10 @@ public class EngageSeller implements java.io.Serializable {
 	private String extraEmails;
 	@Column(name="TAG")
 	private String tag;
-	
+	@Column(name="BUSINESS_CATEGORY")
+	private String businessCategory;	
+	@Column(name="MAP_MARKER_NAME")
+	private String mapMarkerName;
 	public EngageSeller() {
 	}
 
@@ -380,6 +383,21 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setTag(String tag) {
 		this.tag = tag;
+	}
+
+	public String getBusinessCategory() {
+		return businessCategory == null || businessCategory.equalsIgnoreCase("") ? "Shop" : businessCategory;
+	}
+	public void setBusinessCategory(String businessCategory) {
+		this.businessCategory = businessCategory;
+	}
+
+	public String getMapMarkerName() {
+		return mapMarkerName == null || mapMarkerName.equalsIgnoreCase("") ? "default" : mapMarkerName;
+	}
+
+	public void setMapMarkerName(String mapMarkerName) {
+		this.mapMarkerName = mapMarkerName;
 	}
 	
 }

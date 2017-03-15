@@ -11,11 +11,12 @@ public class RestaurantBean {
 	private String restaurantSellerEmail;
 	private int restaurantSellerCitrusId;
 	private int restaurantOrderStyle;
-	private List<RestaurantItemListBean> itemsList;
-	private List<RestaurantCategoryListBean> categorysList;
 	private boolean takeAwayPod;
 	private boolean eatInPod;
 	private boolean homeDeliveryPod;
+	private List<RestaurantItemListBean> itemsList;
+	private List<RestaurantCategoryListBean> categorysList;
+	
 	public int getRestaurantId() {
 		return restaurantId;
 	}

@@ -97,7 +97,8 @@ public class EngageSellerResource {
 			seller.setSellerSplitPercent(bean.getSplitPerent());
 			seller.setMobileAlias(bean.getMobileAlias());
 			seller.setAmbassadorMobile(bean.getAmbassadorMobile());
-
+			seller.setBusinessCategory(bean.getBusinessCategory());
+			seller.setMapMarkerName(bean.getMapMarkerName());
 			EngageSellerManager manager = new EngageSellerManager();
 
 			if (!manager.checkDuplicateEmail(bean.getEmailId())
@@ -216,29 +217,26 @@ public class EngageSellerResource {
 		}
 		return coords;
 	}
-	
+
 	@POST
 	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerLoginResponseBean getSeller(SellerRequestBean requestBean) 
-			throws Exception {
+	public SellerLoginResponseBean getSeller(SellerRequestBean requestBean) throws Exception {
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
 		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerBySearchString(requestBean.getSearchString());
-			
-			if(responseBean.getMessage().equals("Success")){
-				if(responseBean.getBusinessType().equals("restaurant")){
+
+			if (responseBean.getMessage().equals("Success")) {
+				if (responseBean.getBusinessType().equals("restaurant")) {
 					RestaurantManager restaurantManager = new RestaurantManager();
-					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
+							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
-				}
-				else if(responseBean.getBusinessType().equals("eCommerce")){
-					ProductManager productManager = new ProductManager();
-					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
-					responseBean.setProducts(productList);
-				}
-				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(requestBean.getCustomerId(), responseBean.getSellerId());
+				} 
+
+				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(requestBean.getCustomerId(),
+						responseBean.getSellerId());
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -251,25 +249,21 @@ public class EngageSellerResource {
 	@Path("/get/{customerId}/{sellerMobileNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SellerLoginResponseBean getSeller(@PathParam("sellerMobileNumber") String sellerMobileNumber,
-			@PathParam("customerId") int customerId)
-			throws Exception {
+			@PathParam("customerId") int customerId) throws Exception {
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
 		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerByMobile(sellerMobileNumber);
-			
-			if(responseBean.getMessage().equals("Success")){
-				if(responseBean.getBusinessType().equals("restaurant")){
+
+			if (responseBean.getMessage().equals("Success")) {
+				if (responseBean.getBusinessType().equals("restaurant")) {
 					RestaurantManager restaurantManager = new RestaurantManager();
-					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
+							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
-				}
-				else if(responseBean.getBusinessType().equals("eCommerce")){
-					ProductManager productManager = new ProductManager();
-					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
-					responseBean.setProducts(productList);
-				}
-				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(customerId, responseBean.getSellerId());
+				} 
+				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(customerId,
+						responseBean.getSellerId());
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -277,7 +271,7 @@ public class EngageSellerResource {
 		}
 		return responseBean;
 	}
-	
+
 	@GET
 	@Path("/get/{sellerMobileNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -287,18 +281,21 @@ public class EngageSellerResource {
 		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getSellerByMobile(sellerMobileNumber);
-			
-			if(responseBean.getMessage().equals("Success")){
-				if(responseBean.getBusinessType().equals("restaurant")){
+
+			if (responseBean.getMessage().equals("Success")) {
+				if (responseBean.getBusinessType().equals("restaurant")) {
 					RestaurantManager restaurantManager = new RestaurantManager();
-					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager.getSellerRestaurants(responseBean.getSellerId());
+					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
+							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
 				}
-				/*else if(responseBean.getBusinessType().equals("eCommerce")){
-					ProductManager productManager = new ProductManager();
-					List<ProductBean> productList = productManager.getAllProducts(responseBean.getSellerId());
-					responseBean.setProducts(productList);
-				}*/
+				/*
+				 * else if(responseBean.getBusinessType().equals("eCommerce")){
+				 * ProductManager productManager = new ProductManager();
+				 * List<ProductBean> productList =
+				 * productManager.getAllProducts(responseBean.getSellerId());
+				 * responseBean.setProducts(productList); }
+				 */
 			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -322,236 +319,224 @@ public class EngageSellerResource {
 		}
 		return responseBean;
 	}
-	
+
 	@GET
-    @Path("/aliascheck/{aliasNumber}")
+	@Path("/aliascheck/{aliasNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public AliasCheckResponseBean checkAlias(@PathParam("aliasNumber") String aliasNumber) throws Exception{
+	public AliasCheckResponseBean checkAlias(@PathParam("aliasNumber") String aliasNumber) throws Exception {
 		AliasCheckResponseBean responseBean = new AliasCheckResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getAliasNumber(aliasNumber);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@GET
 	@Path("/requestcount")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MerchantRequestCountBean getCounts() throws Exception{
+	public MerchantRequestCountBean getCounts() throws Exception {
 		MerchantRequestCountBean countBean = new MerchantRequestCountBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			countBean = manager.getRequestCount();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return countBean;
 	}
-	
+
 	@GET
 	@Path("/requestlist")
 	@Produces(MediaType.APPLICATION_JSON)
-	public NewMerchantsRequestBean requestNewMerchantsList() throws Exception{
+	public NewMerchantsRequestBean requestNewMerchantsList() throws Exception {
 		NewMerchantsRequestBean requestBean = new NewMerchantsRequestBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			requestBean = manager.getRequestList();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return requestBean;
 	}
-	
+
 	@GET
 	@Path("/requestseller/{sellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MerchantRequestListBean requestSeller(@PathParam("sellerId") int sellerId) throws Exception{
+	public MerchantRequestListBean requestSeller(@PathParam("sellerId") int sellerId) throws Exception {
 		MerchantRequestListBean listBean = new MerchantRequestListBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			listBean = manager.sellerRequest(sellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
 	}
-	
+
 	@PUT
 	@Path("/activate")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public SellerUpdateResponseBean activteSeller(SellerUpdateRequestBean requestBean) throws Exception{
+	public SellerUpdateResponseBean activteSeller(SellerUpdateRequestBean requestBean) throws Exception {
 		SellerUpdateResponseBean responseBean = new SellerUpdateResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.sellerActivate(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@POST
 	@Path("/sync")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerContactsResponseBean addContacts(SellerContactsRequestBean requestBean) throws Exception{
+	public SellerContactsResponseBean addContacts(SellerContactsRequestBean requestBean) throws Exception {
 		SellerContactsResponseBean responseBean = new SellerContactsResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.addSellerContacts(requestBean);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@POST
 	@Path("/post/circle")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postCircle(CustomerNotifyRequestBean requestBean) throws Exception{
+	public Response postCircle(CustomerNotifyRequestBean requestBean) throws Exception {
 		EngageSellerManager manager = new EngageSellerManager();
 		CustomerNotifyResponseBean responseBean = manager.postToCircle(requestBean);
-		if(responseBean!=null){
+		if (responseBean != null) {
 			return Response.status(200).entity(responseBean).build();
 		}
 		return Response.status(404).build();
 	}
-	
+
 	@POST
 	@Path("/post")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postAll(CustomerNotifyRequestBean requestBean) throws Exception{
+	public Response postAll(CustomerNotifyRequestBean requestBean) throws Exception {
 		EngageSellerManager manager = new EngageSellerManager();
 		CustomerNotifyResponseBean responseBean = manager.postToAll(requestBean);
-		if(responseBean!=null){
+		if (responseBean != null) {
 			return Response.status(200).entity(responseBean).build();
 		}
 		return Response.status(404).build();
 	}
-	
+
 	@PUT
 	@Path("/post/update/{notifyId}/{statusCode}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postUpdate(@PathParam("notifyId") int notifyId,
-			@PathParam("statusCode") int statusCode){
+	public Response postUpdate(@PathParam("notifyId") int notifyId, @PathParam("statusCode") int statusCode) {
 		EngageSellerManager manager = new EngageSellerManager();
-		CustomerNotifyUpdateResponseBean responseBean = manager.updateNotifyRequest(notifyId,statusCode);
-		if(responseBean!=null){
+		CustomerNotifyUpdateResponseBean responseBean = manager.updateNotifyRequest(notifyId, statusCode);
+		if (responseBean != null) {
 			return Response.status(200).entity(responseBean).build();
 		}
 		return Response.status(404).build();
 	}
-	
+
 	@GET
 	@Path("/post/list")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postList(){
+	public Response postList() {
 		EngageSellerManager manager = new EngageSellerManager();
 		CustomerNotifyListBean listBean = manager.getAllNotifyRequest();
-		if(listBean!=null){
+		if (listBean != null) {
 			return Response.status(Status.OK).entity(listBean).build();
 		}
 		return Response.status(Status.NOT_FOUND).build();
 	}
-	
+
 	@GET
 	@Path("/post/get/{sellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public CustomerNotifyListBean getAllPosts(@PathParam("sellerId") int sellerId) throws Exception{
+	public CustomerNotifyListBean getAllPosts(@PathParam("sellerId") int sellerId) throws Exception {
 		CustomerNotifyListBean notifyListBean = new CustomerNotifyListBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			notifyListBean = manager.getSellerPostList(sellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return notifyListBean;
 	}
-	
+
 	@PUT
 	@Path("/deviceid")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public MerchantDeviceIdResponseBean updateDeviceId(MerchantDeviceIdRequestBean requestBean) throws Exception{
+	public MerchantDeviceIdResponseBean updateDeviceId(MerchantDeviceIdRequestBean requestBean) throws Exception {
 		MerchantDeviceIdResponseBean responseBean = new MerchantDeviceIdResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.sellerDeviceIdUpadte(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@POST
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public MerchantLogoutResponseBean sellerLogout(MerchantLogoutRequestBean requestBean) throws Exception{
+	public MerchantLogoutResponseBean sellerLogout(MerchantLogoutRequestBean requestBean) throws Exception {
 		MerchantLogoutResponseBean responseBean = new MerchantLogoutResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.logoutSeller(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-		
+
 	@GET
 	@Path("/getsubmerchants/{sellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SubMerchantListResponseBean getSubMerchants(@PathParam("sellerId") int sellerId) throws Exception{
+	public SubMerchantListResponseBean getSubMerchants(@PathParam("sellerId") int sellerId) throws Exception {
 		SubMerchantListResponseBean listBean = new SubMerchantListResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			listBean = manager.getSubMerchants(sellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
 	}
-	
+
 	@GET
 	@Path("/restaurants/{sellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerRestaurantsBean getRestaurants(@PathParam("sellerId") int sellerId) throws Exception{
+	public SellerRestaurantsBean getRestaurants(@PathParam("sellerId") int sellerId) throws Exception {
 		SellerRestaurantsBean restaurantsBean = new SellerRestaurantsBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			restaurantsBean = manager.getSellerRestaurants(sellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return restaurantsBean;
 	}
-	
+
 }

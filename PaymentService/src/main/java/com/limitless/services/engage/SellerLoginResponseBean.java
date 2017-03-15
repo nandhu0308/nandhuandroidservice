@@ -21,6 +21,8 @@ public class SellerLoginResponseBean {
 	private String brandingUrl;
 	private String sessionKey;
 	private int sessionId;
+	private String businessCategory;
+	private String mapMarkerName;
 	private List<ProductBean> products;
 	private List<SellerRestaurantListBean> restaurants;
 	
@@ -119,5 +121,20 @@ public class SellerLoginResponseBean {
 	}
 	public void setRestaurants(List<SellerRestaurantListBean> restaurants) {
 		this.restaurants = restaurants;
+	}
+	public String getBusinessCategory() {
+		return businessCategory == null || businessCategory.equalsIgnoreCase("") ? "Shop" : businessCategory;
+	}
+
+	public void setBusinessCategory(String businessCategory) {
+		this.businessCategory = businessCategory;
+	}
+
+	public String getMapMarkerName() {
+		return mapMarkerName == null || mapMarkerName.equalsIgnoreCase("") ? "default" : mapMarkerName;
+	}
+
+	public void setMapMarkerName(String mapMarkerName) {
+		this.mapMarkerName = mapMarkerName;
 	}
 }

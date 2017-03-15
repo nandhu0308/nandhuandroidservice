@@ -283,6 +283,8 @@ public class EngageSellerManager {
 					respBean.setSellerType(seller.getSellerType());
 					respBean.setSellerRole(seller.getSellerRole());
 					respBean.setBusinessType(seller.getBusinessType());
+					respBean.setBusinessCategory(seller.getBusinessCategory());
+					respBean.setMapMarkerName(seller.getMapMarkerName());
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 
@@ -397,6 +399,8 @@ public class EngageSellerManager {
 				bean.setSellerMobile(seller.getSellerMobileNumber());
 				bean.setLatitude(seller.getSellerLocationLatitude());
 				bean.setLongitude(seller.getSellerLocationLongitude());
+				bean.setBusinessCategory(seller.getBusinessCategory());
+				bean.setMapMarkerName(seller.getMapMarkerName());
 				coords.add(bean);
 				bean = null;
 			}
@@ -465,6 +469,8 @@ public class EngageSellerManager {
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
 					responseBean.setBusinessType(seller.getBusinessType());
+					responseBean.setBusinessCategory(seller.getBusinessCategory());
+					responseBean.setMapMarkerName(seller.getMapMarkerName());
 					responseBean.setMessage("Success");
 				}
 			} else {
@@ -497,8 +503,7 @@ public class EngageSellerManager {
 			Junction condition1 = Restrictions.disjunction().add(Restrictions.eq("sellerMobileNumber", searchString))
 					.add(Restrictions.eq("mobileAlias", searchString)).add(Restrictions.eq("sellerName", searchString))
 					.add(Restrictions.eq("sellerShopName", searchString))
-					.add(Restrictions.eq("sellerEmail99", searchString))
-					.add(Restrictions.like("tag", searchString));
+					.add(Restrictions.eq("sellerEmail99", searchString)).add(Restrictions.like("tag", searchString));
 			Junction condition2 = Restrictions.conjunction().add(condition1).add(Restrictions.ne("isDeleted", 1));
 			criteria.add(condition2);
 			List<EngageSeller> sellerList = criteria.list();
@@ -513,6 +518,8 @@ public class EngageSellerManager {
 					responseBean.setBrandingUrl(seller.getBranding_url());
 					responseBean.setBusinessType(seller.getBusinessType());
 					responseBean.setMobileNumber(seller.getSellerMobileNumber());
+					responseBean.setBusinessCategory(seller.getBusinessCategory());
+					responseBean.setMapMarkerName(seller.getMapMarkerName());
 					responseBean.setMessage("Success");
 				}
 			} else {
@@ -1297,20 +1304,20 @@ public class EngageSellerManager {
 		}
 		return notifyBeanList;
 	}
-	
-	public SellerRestaurantsBean getSellerRestaurants(int sellerId){
+
+	public SellerRestaurantsBean getSellerRestaurants(int sellerId) {
 		log.debug("getting restaurant");
 		SellerRestaurantsBean restaurantsBean = new SellerRestaurantsBean();
 		List<SellerRestaurantListBean> listBean = new ArrayList<SellerRestaurantListBean>();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					sellerId);
+			if (seller != null) {
 				restaurantsBean.setSellerId(sellerId);
 				restaurantsBean.setCitrusSellerId(seller.getCitrusSellerId());
 				restaurantsBean.setSellerName(seller.getSellerName());
@@ -1321,8 +1328,8 @@ public class EngageSellerManager {
 				criteria.add(Restrictions.eq("sellerId", sellerId));
 				List<Restaurants> restaurantsList = criteria.list();
 				log.debug("restaurant size : " + restaurantsList.size());
-				if(restaurantsList.size()>0){
-					for(Restaurants restaurant : restaurantsList){
+				if (restaurantsList.size() > 0) {
+					for (Restaurants restaurant : restaurantsList) {
 						SellerRestaurantListBean bean = new SellerRestaurantListBean();
 						bean.setRestaurantId(restaurant.getRestaurantId());
 						bean.setRestaurantName(restaurant.getRestaurantName());
@@ -1332,54 +1339,50 @@ public class EngageSellerManager {
 					}
 					restaurantsBean.setRestaurantList(listBean);
 					restaurantsBean.setMessage("Success");
-				}
-				else if(restaurantsList.isEmpty()){
+				} else if (restaurantsList.isEmpty()) {
 					restaurantsBean.setMessage("Failed");
 				}
-			}
-			else if(seller==null){
+			} else if (seller == null) {
 				restaurantsBean.setMessage("Failed");
 			}
-			
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting restaurant failed " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return restaurantsBean;
 	}
-	
-	public CustomerNotifyListBean getSellerPostList(int sellerId){
+
+	public CustomerNotifyListBean getSellerPostList(int sellerId) {
 		log.debug("getting seller post list");
 		CustomerNotifyListBean notifyListBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					sellerId);
+			if (seller != null) {
 				String sellerName = seller.getSellerName();
-				
+
 				Criteria criteria = session.createCriteria(CircleNotify.class);
 				criteria.add(Restrictions.eq("sellerId", sellerId));
 				List<CircleNotify> notifyList = criteria.list();
 				log.debug("notify size : " + notifyList.size());
-				if(notifyList.size()>0){
+				if (notifyList.size() > 0) {
 					notifyListBean = new CustomerNotifyListBean();
 					notifyListBean.setSellerId(sellerId);
 					List<CustomerNotifyBean> beanList = new ArrayList<CustomerNotifyBean>();
-					for(CircleNotify notify : notifyList){
+					for (CircleNotify notify : notifyList) {
 						CustomerNotifyBean bean = new CustomerNotifyBean();
 						bean.setBody(notify.getBody());
 						bean.setImageUrl(notify.getImageUrl());
@@ -1398,16 +1401,14 @@ public class EngageSellerManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting seller post list failed " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
