@@ -89,6 +89,9 @@ public class EngageSeller implements java.io.Serializable {
 	private String businessCategory;	
 	@Column(name="MAP_MARKER_NAME")
 	private String mapMarkerName;
+	@Column(name="ABOUT_SELLER")
+	private String aboutSeller;
+	
 	public EngageSeller() {
 	}
 
@@ -398,6 +401,14 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setMapMarkerName(String mapMarkerName) {
 		this.mapMarkerName = mapMarkerName;
+	}
+
+	public String getAboutSeller() {
+		return aboutSeller;
+	}
+
+	public void setAboutSeller(String aboutSeller) {
+		this.aboutSeller = aboutSeller;
 	}
 	
 }

@@ -471,6 +471,7 @@ public class EngageSellerManager {
 					responseBean.setBusinessType(seller.getBusinessType());
 					responseBean.setBusinessCategory(seller.getBusinessCategory());
 					responseBean.setMapMarkerName(seller.getMapMarkerName());
+					responseBean.setAboutSeller(seller.getAboutSeller());
 					responseBean.setMessage("Success");
 				}
 			} else {
@@ -503,6 +504,7 @@ public class EngageSellerManager {
 			Junction condition1 = Restrictions.disjunction().add(Restrictions.eq("sellerMobileNumber", searchString))
 					.add(Restrictions.eq("mobileAlias", searchString)).add(Restrictions.eq("sellerName", searchString))
 					.add(Restrictions.eq("sellerShopName", searchString))
+					.add(Restrictions.eq("sellerId", Integer.parseInt(searchString)))
 					.add(Restrictions.eq("sellerEmail99", searchString)).add(Restrictions.like("tag", searchString));
 			Junction condition2 = Restrictions.conjunction().add(condition1).add(Restrictions.ne("isDeleted", 1));
 			criteria.add(condition2);
@@ -520,6 +522,7 @@ public class EngageSellerManager {
 					responseBean.setMobileNumber(seller.getSellerMobileNumber());
 					responseBean.setBusinessCategory(seller.getBusinessCategory());
 					responseBean.setMapMarkerName(seller.getMapMarkerName());
+					responseBean.setAboutSeller(seller.getAboutSeller());
 					responseBean.setMessage("Success");
 				}
 			} else {
@@ -1131,6 +1134,16 @@ public class EngageSellerManager {
 				mapper.setCustomerId(customerId);
 				mapper.setSellerId(sellerId);
 				session.persist(mapper);
+			}
+			else if(mapperList.size()==1){
+				for(SellerCustomerMapper mapper : mapperList){
+					SellerCustomerMapper instance = (SellerCustomerMapper) session
+							.get("com.limitless.services.engage.dao.SellerCustomerMapper", mapper.getScmId());
+					if(instance!=null){
+						instance.setVisitCount(instance.getVisitCount()+1);
+						session.update(instance);
+					}
+				}
 			}
 			transaction.commit();
 		} catch (RuntimeException re) {

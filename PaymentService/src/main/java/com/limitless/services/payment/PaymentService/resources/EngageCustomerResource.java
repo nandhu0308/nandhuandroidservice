@@ -51,6 +51,7 @@ import com.limitless.services.engage.PasswdRequestBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
+import com.limitless.services.engage.SellerCustomerMapperListBean;
 import com.limitless.services.engage.dao.CustomerAddressBookManager;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
@@ -558,6 +559,23 @@ public class EngageCustomerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
+	}
+	
+	@GET
+	@Path("/customer/visit/{count}/{customerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerCustomerMapperListBean getMapperList(@PathParam("customerId") int customerId,
+			@PathParam("count") int count) throws Exception{
+		SellerCustomerMapperListBean listBean = new SellerCustomerMapperListBean();
+		try{
+			EngageCustomerManager manager = new EngageCustomerManager();
+			listBean = manager.getCustomerMapperList(customerId, count);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
 	}
 	
 }

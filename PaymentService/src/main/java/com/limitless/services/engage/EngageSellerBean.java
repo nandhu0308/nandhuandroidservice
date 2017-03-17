@@ -7,6 +7,7 @@ public class EngageSellerBean {
 	private int citrusSellerId;
 	private String sellerName;
 	private String sellerShopName;
+	private String aboutSeller;
 	private String emailId;
 	private String passwd;
 	private String countryCode;
@@ -297,4 +298,13 @@ public class EngageSellerBean {
 	public void setMapMarkerName(String mapMarkerName) {
 		this.mapMarkerName = mapMarkerName;
 	}
+
+	public String getAboutSeller() {
+		return aboutSeller;
+	}
+
+	public void setAboutSeller(String aboutSeller) {
+		this.aboutSeller = aboutSeller;
+	}
+	
 }

@@ -25,6 +25,7 @@ public class SellerLoginResponseBean {
 	private String mapMarkerName;
 	private List<ProductBean> products;
 	private List<SellerRestaurantListBean> restaurants;
+	private String aboutSeller;
 	
 	public String getSellerName() {
 		return sellerName;
@@ -136,5 +137,13 @@ public class SellerLoginResponseBean {
 
 	public void setMapMarkerName(String mapMarkerName) {
 		this.mapMarkerName = mapMarkerName;
+	}
+	
+	public String getAboutSeller() {
+		return aboutSeller;
+	}
+	
+	public void setAboutSeller(String aboutSeller) {
+		this.aboutSeller = aboutSeller;
 	}
 }

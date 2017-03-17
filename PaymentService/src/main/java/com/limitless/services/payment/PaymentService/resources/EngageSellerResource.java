@@ -221,6 +221,7 @@ public class EngageSellerResource {
 	@POST
 	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	public SellerLoginResponseBean getSeller(SellerRequestBean requestBean) throws Exception {
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
 		try {

@@ -7,6 +7,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,6 +29,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,6 +62,8 @@ import com.limitless.services.engage.P2PCustomerVerificationResponseBean;
 import com.limitless.services.engage.PasswdResponseBean;
 import com.limitless.services.engage.ProfileChangeRequestBean;
 import com.limitless.services.engage.ProfileChangeResponseBean;
+import com.limitless.services.engage.SellerCustomerMapperBean;
+import com.limitless.services.engage.SellerCustomerMapperListBean;
 import com.limitless.services.engage.order.dao.Cart;
 import com.limitless.services.engage.sellers.CitrusSellerResponseBean;
 import com.limitless.services.engage.sellers.dao.CitrusSeller;
@@ -1269,6 +1273,70 @@ public class EngageCustomerManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public SellerCustomerMapperListBean getCustomerMapperList(int customerId, int count){
+		log.debug("getting customer seller mappers");
+		SellerCustomerMapperListBean listBean = new SellerCustomerMapperListBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			List<SellerCustomerMapperBean> beanList = new ArrayList<SellerCustomerMapperBean>();
+			
+			Criteria criteria = session.createCriteria(SellerCustomerMapper.class);
+			criteria.add(Restrictions.eq("customerId", customerId));
+			criteria.addOrder(Order.desc("lastVisitTime"));
+			criteria.setMaxResults(count);
+			List<SellerCustomerMapper> mapperList = criteria.list();
+			log.debug("mapper size : " + mapperList.size());
+			if(mapperList.size()>0){
+				for(SellerCustomerMapper mapper : mapperList){
+					SellerCustomerMapperBean bean = new SellerCustomerMapperBean();
+					bean.setCustomerId(customerId);
+					EngageCustomer customer = (EngageCustomer) session
+							.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
+					if(customer!=null){
+						bean.setCustomerName(customer.getCustomerName());
+						bean.setCustomerMobile(customer.getCustomerMobileNumber());
+					}
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", mapper.getSellerId());
+					if(seller!=null){
+						bean.setSellerId(seller.getSellerId());
+						bean.setSellerName(seller.getSellerName());
+						bean.setSellerShopName(seller.getSellerShopName());
+						bean.setSellerCity(seller.getSellerCity());
+						bean.setSellerMobile(seller.getSellerMobileNumber());
+					}
+					bean.setVisitCount(mapper.getVisitCount());
+					bean.setLastVisit(mapper.getLastVisitTime().toString());
+					beanList.add(bean);
+					bean = null;
+				}
+				listBean.setMapperList(beanList);
+				listBean.setMessage("Success");
+			}
+			else if(mapperList.isEmpty()){
+				listBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.debug("getting customer seller mapper failed : " + re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return listBean;
 	}
 	
 }
