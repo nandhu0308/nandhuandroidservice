@@ -524,7 +524,7 @@ public class EngageSellerManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			int sellerId = 0;
-			if (searchString != null && isInteger(searchString))
+			if (searchString != null && isInteger(searchString) && searchString.length() <= 7)
 				sellerId = Integer.parseInt(searchString);
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			Junction condition1 = Restrictions.disjunction().add(Restrictions.eq("sellerMobileNumber", searchString))
