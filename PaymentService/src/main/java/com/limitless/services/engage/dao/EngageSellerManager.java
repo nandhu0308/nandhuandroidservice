@@ -492,19 +492,44 @@ public class EngageSellerManager {
 		return responseBean;
 	}
 
+	public static boolean isInteger(String s) {
+		return isInteger(s, 10);
+	}
+
+	public static boolean isInteger(String s, int radix) {
+		if (s.isEmpty())
+			return false;
+		for (int i = 0; i < s.length(); i++) {
+			if (i == 0 && s.charAt(i) == '-') {
+				if (s.length() == 1)
+					return false;
+				else
+					continue;
+			}
+			if (Character.digit(s.charAt(i), radix) < 0)
+				return false;
+		}
+		return true;
+	}
+
 	public SellerLoginResponseBean getSellerBySearchString(String searchString) {
 		log.debug("Getting seller details by mobile");
 		SellerLoginResponseBean responseBean = new SellerLoginResponseBean();
 		Transaction transaction = null;
 		Session session = null;
 		try {
+			if(searchString!=null){
+				searchString = searchString.trim();
+			}
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
+			int sellerId = 0;
+			if (searchString != null && isInteger(searchString))
+				sellerId = Integer.parseInt(searchString);
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			Junction condition1 = Restrictions.disjunction().add(Restrictions.eq("sellerMobileNumber", searchString))
 					.add(Restrictions.eq("mobileAlias", searchString)).add(Restrictions.eq("sellerName", searchString))
-					.add(Restrictions.eq("sellerShopName", searchString))
-					.add(Restrictions.eq("sellerId", Integer.parseInt(searchString)))
+					.add(Restrictions.eq("sellerShopName", searchString)).add(Restrictions.eq("sellerId", sellerId))
 					.add(Restrictions.eq("sellerEmail99", searchString)).add(Restrictions.like("tag", searchString));
 			Junction condition2 = Restrictions.conjunction().add(condition1).add(Restrictions.ne("isDeleted", 1));
 			criteria.add(condition2);
@@ -1134,13 +1159,12 @@ public class EngageSellerManager {
 				mapper.setCustomerId(customerId);
 				mapper.setSellerId(sellerId);
 				session.persist(mapper);
-			}
-			else if(mapperList.size()==1){
-				for(SellerCustomerMapper mapper : mapperList){
+			} else if (mapperList.size() == 1) {
+				for (SellerCustomerMapper mapper : mapperList) {
 					SellerCustomerMapper instance = (SellerCustomerMapper) session
 							.get("com.limitless.services.engage.dao.SellerCustomerMapper", mapper.getScmId());
-					if(instance!=null){
-						instance.setVisitCount(instance.getVisitCount()+1);
+					if (instance != null) {
+						instance.setVisitCount(instance.getVisitCount() + 1);
 						session.update(instance);
 					}
 				}
