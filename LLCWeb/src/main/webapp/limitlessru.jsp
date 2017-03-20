@@ -17,6 +17,7 @@
 <%@page import="com.limitless.services.payment.PaymentService.util.RestClientUtil" %>
 <%@page import="org.json.*" %>
 <%@page import="com.sun.jersey.api.client.ClientResponse" %>
+<%@page import="java.util.List" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>  
 <% 
 String secretKey = "bc3fb974fd550bd26083862dda1591c80cf5da8f";   	
@@ -91,32 +92,35 @@ if(respCode.equals("0")){
 	
 	System.out.println("Split Id" + splitRespBean.getSplitId());
 	
-	String sellerDeviceId = splitRespBean.getSellerDeviceId();
-	String customerName = splitRespBean.getName();
-	double amount = splitRespBean.getAmount();
-	String date = splitRespBean.getDate();
-	String msg = splitRespBean.getMessage();
+	List<String> sellerDeviceIds = splitRespBean.getSellerDeviceIds();
 	
-	String body = "Recieved Rs. "+amount+" from "+customerName;
-	
-	JSONObject notification = new JSONObject();
-	notification.put("title", msg);
-	notification.put("body", body);
-	
-	JSONObject data = new JSONObject();
-	data.put("customerName", customerName);
-	data.put("amount", amount);
-	data.put("date", date);
-	
-	JSONObject payload = new JSONObject();
-	payload.put("to", sellerDeviceId);
-	payload.put("notification", notification);
-	payload.put("data", data);
-	
-	WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
-	ClientResponse clientResponse = webResource2.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
-    System.out.println(clientResponse.getStatus());
-    System.out.println(clientResponse.getEntity(String.class));
+	for(String deviceId : sellerDeviceIds){
+		String customerName = splitRespBean.getName();
+		double amount = splitRespBean.getAmount();
+		String date = splitRespBean.getDate();
+		String msg = splitRespBean.getMessage();
+		
+		String body = "Recieved Rs. "+amount+" from "+customerName;
+		
+		JSONObject notification = new JSONObject();
+		notification.put("title", msg);
+		notification.put("body", body);
+		
+		JSONObject data = new JSONObject();
+		data.put("customerName", customerName);
+		data.put("amount", amount);
+		data.put("date", date);
+		
+		JSONObject payload = new JSONObject();
+		payload.put("to", deviceId);
+		payload.put("notification", notification);
+		payload.put("data", data);
+		
+		WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+		ClientResponse clientResponse = webResource2.type("application/json").header("Authorization","key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos").post(ClientResponse.class, payload.toString());
+	    System.out.println(clientResponse.getStatus());
+	    System.out.println(clientResponse.getEntity(String.class));
+	}
 	
 } else {
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans");

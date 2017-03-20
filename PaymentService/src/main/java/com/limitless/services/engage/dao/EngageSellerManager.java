@@ -322,6 +322,29 @@ public class EngageSellerManager {
 						sellerId);
 				seller.setSellerDeviceId(reqBean.getSellerDeviceId());
 				session.update(seller);
+				
+				Criteria criteria2 = session.createCriteria(SellerDeviceIdMapper.class);
+				criteria2.add(Restrictions.eq("sellerDeviceId", reqBean.getSellerDeviceId()));
+				List<SellerDeviceIdMapper> mapperList = criteria2.list();
+				log.debug("sdm list size : " + mapperList.size());
+				if(mapperList.isEmpty()){
+					SellerDeviceIdMapper mapper = new SellerDeviceIdMapper();
+					mapper.setSellerId(respBean.getSellerId());
+					mapper.setSellerDeviceId(reqBean.getSellerDeviceId());
+					mapper.setDeviceActive(1);
+					session.persist(mapper);
+				}
+				else if(mapperList.size()>0){
+					for(SellerDeviceIdMapper sdMapper : mapperList){
+						SellerDeviceIdMapper instance = (SellerDeviceIdMapper) session
+								.get("com.limitless.services.engage.dao.SellerDeviceIdMapper", sdMapper.getSdmId());
+						if(instance!=null){
+							instance.setDeviceActive(1);
+							session.update(instance);
+						}
+					}
+				}
+				
 			} else {
 				respBean.setMessage("Login Failed/Account Not Activated");
 				respBean.setStatus(-1);
@@ -1040,6 +1063,29 @@ public class EngageSellerManager {
 				session.update(seller);
 				responseBean.setSellerId(requestBean.getSellerId());
 				responseBean.setMessage("Success");
+				
+				Criteria criteria = session.createCriteria(SellerDeviceIdMapper.class);
+				criteria.add(Restrictions.eq("sellerDeviceId", requestBean.getDeviceId()));
+				List<SellerDeviceIdMapper> mapperList = criteria.list();
+				log.debug("sdmMapperList size : " + mapperList.size());
+				if(mapperList.size()>0){
+					for(SellerDeviceIdMapper mapper : mapperList){
+						SellerDeviceIdMapper updateInstance = (SellerDeviceIdMapper) session
+								.get("com.limitless.services.engage.dao.SellerDeviceIdMapper", mapper.getSdmId());
+						if(updateInstance!=null){
+							updateInstance.setDeviceActive(1);
+							session.update(updateInstance);
+						}
+					}
+				}
+				else if(mapperList.isEmpty()){
+					SellerDeviceIdMapper insertInstance = new SellerDeviceIdMapper();
+					insertInstance.setSellerId(requestBean.getSellerId());
+					insertInstance.setSellerDeviceId(requestBean.getDeviceId());
+					insertInstance.setDeviceActive(1);
+					session.persist(insertInstance);
+				}
+				
 			} else if (seller == null) {
 				responseBean.setMessage("Failed");
 			}
@@ -1074,6 +1120,22 @@ public class EngageSellerManager {
 				session.update(key);
 				responseBean.setSellerId(requestBean.getSellerId());
 				responseBean.setMessage("Success");
+				
+				Criteria criteria = session.createCriteria(SellerDeviceIdMapper.class);
+				criteria.add(Restrictions.eq("sellerDeviceId", requestBean.getSellerDeviceId()));
+				List<SellerDeviceIdMapper> mapperList = criteria.list();
+				log.debug("mapper size : " + mapperList.size());
+				if(mapperList.size()>0){
+					for(SellerDeviceIdMapper mapper : mapperList){
+						SellerDeviceIdMapper instance = (SellerDeviceIdMapper) session
+								.get("com.limitless.services.engage.dao.SellerDeviceIdMapper", mapper.getSdmId());
+						if(instance!=null){
+							instance.setDeviceActive(0);
+							session.update(instance);
+						}
+					}
+				}
+				
 			} else {
 				responseBean.setMessage("Failed");
 			}
@@ -1450,6 +1512,46 @@ public class EngageSellerManager {
 			}
 		}
 		return notifyListBean;
+	}
+	
+	public List<String> getAllSellerDeviceId(int sellerId){
+		log.debug("getting seller deviceIds");
+		List<String> deviceIdList = new ArrayList<String>();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(SellerDeviceIdMapper.class);
+			Criterion sidCriterion = Restrictions.eq("sellerId", sellerId);
+			Criterion daCRiterion = Restrictions.eq("deviceActive", 1);
+			LogicalExpression logExp = Restrictions.and(sidCriterion, daCRiterion);
+			criteria.add(logExp);
+			List<SellerDeviceIdMapper> mapperList = criteria.list();
+			log.debug("mapper size : " + mapperList.size());
+			if(mapperList.size()>0){
+				for(SellerDeviceIdMapper mapper : mapperList){
+					String deviceId = mapper.getSellerDeviceId();
+					deviceIdList.add(deviceId);
+					deviceId = null;
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting devicesid failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return deviceIdList;
 	}
 
 	/*

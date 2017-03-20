@@ -381,6 +381,8 @@ public class PaymentResource {
 			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
 			int orderId = paymentTxn.getOrderId();
 			String txnType = paymentTxn.getTxnType();
+			
+			List<String> sellerDeviceIds = sellerMgr.getAllSellerDeviceId(paymentTxn.getSellerId());
 
 			PaymentCreditManager creditManager = new PaymentCreditManager();
 			CreditRespBean respBean = creditManager.updateCreditDebitTrans(id);
@@ -455,7 +457,7 @@ public class PaymentResource {
 			splitResp.setName(customerName);
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
-			splitResp.setSellerDeviceId(sellerDeviceId);
+			splitResp.setSellerDeviceIds(sellerDeviceIds);
 			
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
 			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();

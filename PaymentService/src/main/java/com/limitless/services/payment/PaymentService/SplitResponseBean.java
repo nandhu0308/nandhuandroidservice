@@ -1,5 +1,7 @@
 package com.limitless.services.payment.PaymentService;
 
+import java.util.List;
+
 /*
  * @author veejay.developer@gmail.com
  * ©www.limitlesscircle.com 
@@ -12,7 +14,7 @@ public class SplitResponseBean {
 	private double amount;
 	private String name;
 	private String date;
-	private String sellerDeviceId;
+	private List<String> sellerDeviceIds;
 	
 	public String getMessage() {
 		return message;
@@ -54,12 +56,12 @@ public class SplitResponseBean {
 		this.date = date;
 	}
 
-	public String getSellerDeviceId() {
-		return sellerDeviceId;
+	public List<String> getSellerDeviceIds() {
+		return sellerDeviceIds;
 	}
 
-	public void setSellerDeviceId(String sellerDeviceId) {
-		this.sellerDeviceId = sellerDeviceId;
+	public void setSellerDeviceIds(List<String> sellerDeviceIds) {
+		this.sellerDeviceIds = sellerDeviceIds;
 	}
 
 }
