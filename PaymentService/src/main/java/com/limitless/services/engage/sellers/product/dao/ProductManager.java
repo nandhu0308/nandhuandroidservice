@@ -201,6 +201,7 @@ public class ProductManager {
 			Product product = (Product) session.get("com.limitless.services.engage.sellers.product.dao.Product",
 					bean.getProductId());
 			if (product != null) {
+				product.setSellerId(bean.getSellerId());
 				product.setProductName(bean.getProductName());
 				product.setProductPrice(bean.getProductPrice());
 				product.setProductDescription(bean.getProductDescription());

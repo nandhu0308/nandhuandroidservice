@@ -51,9 +51,9 @@ public class RestaurantResource {
 		RestaurantManager manager = new RestaurantManager();
 		RestaurantOrderResponseBean responseBean = manager.createOrder(requestBean);
 		if(responseBean!=null){
-			manager.notificationToRestaurant(responseBean.getRestaurantOrderId());
-			manager.notificationToCustomer(responseBean.getRestaurantOrderId());
 			if(requestBean.getPaymentMode()!=null && requestBean.getPaymentMode().equals("POD")){
+				manager.notificationToRestaurant(responseBean.getRestaurantOrderId());
+				manager.notificationToCustomer(responseBean.getRestaurantOrderId());
 				RestaurantOrderStatusUpdateResponseBean statusUpdateResponseBean = manager.orderStatusUpdate(responseBean.getRestaurantOrderId(), 3);
 				manager.sendOrderMail(responseBean.getRestaurantOrderId());
 			}

@@ -481,6 +481,8 @@ public class PaymentResource {
 					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(orderId,1);
 					System.out.println("Restaurant Order Id :" + restaurantOrderStatusUpdateResponseBean.getOrderId());
 					restaurantManager.sendOrderMail(orderId);
+					restaurantManager.notificationToCustomer(orderId);
+					restaurantManager.notificationToRestaurant(orderId);
 				}
 			}
 
