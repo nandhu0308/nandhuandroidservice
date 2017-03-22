@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ProductBean {
 	private int productId;
-	private int parentProductId;
+	private int sellerId;
 	private String productName;
 	private float productPrice;
 	private String product_image;
@@ -23,17 +23,17 @@ public class ProductBean {
 	private String image8;
 	private String image9;
 	private String image10;
+	private int groupId;
 	private int categoryId;
 	private int subcategoryId;
 	private int isDefault;
-	private int groupId;
 	private String productSizeText;
 	private int productSizeNumber;
 	private String productColor;
 	private int productInventory;
 	private List<ProductModelsBean> modelsList;
 	private boolean pod;
-	
+	private boolean addToCart;
 	
 	public String getProductName() {
 		return productName;
@@ -64,13 +64,6 @@ public class ProductBean {
 	}
 	public void setProductId(int productId) {
 		this.productId = productId;
-	}
-	
-	public int getParentProductId() {
-		return parentProductId;
-	}
-	public void setParentProductId(int parentProductId) {
-		this.parentProductId = parentProductId;
 	}
 	public String getProductStock() {
 		return productStock;
@@ -174,12 +167,6 @@ public class ProductBean {
 	public void setIsDefault(int isDefault) {
 		this.isDefault = isDefault;
 	}
-	public int getGroupId() {
-		return groupId;
-	}
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
 	public String getProductSizeText() {
 		return productSizeText;
 	}
@@ -216,5 +203,22 @@ public class ProductBean {
 	public void setPod(boolean pod) {
 		this.pod = pod;
 	}
-	
+	public boolean isAddToCart() {
+		return addToCart;
+	}
+	public void setAddToCart(boolean addToCart) {
+		this.addToCart = addToCart;
+	}
+	public int getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+	public int getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(int sellerId) {
+		this.sellerId = sellerId;
+	}
 }

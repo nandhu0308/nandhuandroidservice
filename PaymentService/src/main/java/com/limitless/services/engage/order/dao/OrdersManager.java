@@ -30,6 +30,7 @@ import com.limitless.services.engage.AddressListBean;
 import com.limitless.services.engage.dao.CustomerAddressBook;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.SellerDeviceIdMapper;
 import com.limitless.services.engage.order.OrderDetailResponseBean;
 import com.limitless.services.engage.order.OrderFcmBean;
 import com.limitless.services.engage.order.OrderMailResponseBean;
@@ -42,6 +43,8 @@ import com.limitless.services.engage.order.OrderResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
 import com.limitless.services.engage.order.OrderSummaryResponseBean;
 import com.limitless.services.engage.order.OrdersListBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderDataBean;
+import com.limitless.services.engage.restaurants.RestaurantOrderFcmRequestBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductInventory;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
@@ -733,26 +736,33 @@ public class OrdersManager {
 					String customerMobile = customer.getCustomerMobileNumber();
 					
 					EngageSeller seller = (EngageSeller) session
-							.get("com.limitless.services.engage.dao", sellerId);
+							.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
 					if(seller!=null){
-						String to = seller.getSellerDeviceId();
-						OrderFcmBean fcmBean = new OrderFcmBean();
-						fcmBean.setTo(to);
-						fcmBean.setPriority("high");
-						OrderNotificationDataBean data = new OrderNotificationDataBean();
-						data.setTitle("Order Received Successfully");
-						data.setBody(customerName+" placed order for Rs."+order.getTotalAmount());
-						data.setBussinessType("eCommerce");
-						data.setOrderId(orderId);
-						data.setCustomerName(customerName);
-						data.setCustomerMobile(customerMobile);
-						fcmBean.setData(data);
-						WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
-						ClientResponse clientResponse = webResource2.type("application/json")
-								.header("Authorization", "key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos")
-								.post(ClientResponse.class, fcmBean);
-						System.out.println(clientResponse.getStatus());
-						System.out.println(clientResponse.getEntity(String.class));
+						Criteria criteria = session.createCriteria(SellerDeviceIdMapper.class);
+						criteria.add(Restrictions.eq("sellerId", sellerId));
+						List<SellerDeviceIdMapper> mapperList = criteria.list();
+						log.debug("mapperlist size : " + mapperList.size());
+						if(mapperList.size()>0){
+							for(SellerDeviceIdMapper mapper : mapperList){
+								String to = mapper.getSellerDeviceId();
+								RestaurantOrderFcmRequestBean fcmBean = new RestaurantOrderFcmRequestBean();
+								fcmBean.setTo(to);
+								fcmBean.setPriority("high");
+								RestaurantOrderDataBean data = new RestaurantOrderDataBean();
+								data.setBussinessType("restaurant");
+								data.setTitle("Order Received Successfully");
+								data.setBody(customerName + " placed order for Rs." + order.getTotalAmount());
+								data.setOrderId(orderId);
+								data.setCustomerMobile(customerMobile);
+								fcmBean.setData(data);
+								WebResource webResource2 = client.resource("https://fcm.googleapis.com/fcm/send");
+								ClientResponse clientResponse = webResource2.type("application/json")
+										.header("Authorization", "key=AIzaSyCE49LX2u8Op-LbqidMJfcKlH4Bh5opUos")
+										.post(ClientResponse.class, fcmBean);
+								System.out.println(clientResponse.getStatus());
+								System.out.println(clientResponse.getEntity(String.class));
+							}
+						}
 					}
 				}
 			}
@@ -791,9 +801,9 @@ public class OrdersManager {
 					String customerMobile = customer.getCustomerMobileNumber();
 					
 					EngageSeller seller = (EngageSeller) session
-							.get("com.limitless.services.engage.dao", sellerId);
+							.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
 					if(seller!=null){
-						String to = seller.getSellerDeviceId();
+						String to = customer.getDeviceId();
 						String sellerShopName = seller.getSellerShopName();
 						OrderFcmBean fcmBean = new OrderFcmBean();
 						fcmBean.setTo(to);

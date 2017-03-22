@@ -23,9 +23,12 @@ import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
 import com.limitless.services.engage.sellers.ProductCSCListBean;
+import com.limitless.services.engage.sellers.ProductCategoryRequestBean;
+import com.limitless.services.engage.sellers.ProductCategoryResponseBean;
 import com.limitless.services.engage.sellers.ProductModelsBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
 import com.limitless.services.engage.sellers.ProductSubCategoryListBean;
+import com.limitless.services.engage.sellers.ProductSubcategoryRequestBean;
 import com.limitless.services.engage.sellers.ProductsCategoryListBean;
 import com.limitless.services.engage.sellers.ProductsListRequestBean;
 import com.limitless.services.engage.sellers.ProductsListResponeBean;
@@ -79,7 +82,6 @@ public class ProductManager {
 					for (Product product : products) {
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
-						bean.setParentProductId(product.getParentProductId());
 						bean.setProductName(product.getProductName());
 						bean.setProductDescription(product.getProductDescription());
 						bean.setProductPrice(product.getProductPrice());
@@ -90,7 +92,6 @@ public class ProductManager {
 						bean.setProduct_image(product.getProduct_image());
 						bean.setProductInStock(product.getProductInStock());
 						bean.setCategoryId(product.getCategoryId());
-						bean.setGroupId(product.getGroupId());
 						bean.setIsDefault(product.getIsDefault());
 						bean.setProductColor(product.getProductColor());
 						bean.setProductSizeText(product.getProductSizeText());
@@ -106,6 +107,7 @@ public class ProductManager {
 						bean.setImage9(product.getImage9());
 						bean.setImage10(product.getImage10());
 						bean.setPod(product.getPod());
+						bean.setAddToCart(product.isAddToCart());
 						productsList.add(bean);
 						bean = null;
 					}
@@ -135,17 +137,17 @@ public class ProductManager {
 			transaction = session.beginTransaction();
 
 			Product product = new Product();
+			product.setSellerId(bean.getSellerId());
 			product.setProductName(bean.getProductName());
 			product.setProductPrice(bean.getProductPrice());
 			product.setProductDescription(bean.getProductDescription());
+			product.setProduct_image(bean.getProduct_image());
 			product.setProductInStock(1);
 			product.setProductColor(bean.getProductColor());
 			product.setProductSizeText(bean.getProductSizeText());
 			product.setProductSizeNumber(bean.getProductSizeNumber());
-			product.setGroupId(bean.getGroupId());
 			product.setCategoryId(bean.getCategoryId());
 			product.setSubcategoryId(bean.getSubcategoryId());
-			product.setParentProductId(bean.getParentProductId());
 			product.setIsDefault(bean.getIsDefault());
 			product.setImage1(bean.getImage1());
 			product.setImage2(bean.getImage2());
@@ -158,6 +160,8 @@ public class ProductManager {
 			product.setImage9(bean.getImage9());
 			product.setImage10(bean.getImage10());
 			product.setPod(bean.getPod());
+			product.setAddToCart(bean.isAddToCart());
+			product.setGroupId(bean.getGroupId());
 			session.persist(product);
 
 			ProductInventory inventory = new ProductInventory();
@@ -204,10 +208,8 @@ public class ProductManager {
 				product.setProductColor(bean.getProductColor());
 				product.setProductSizeText(bean.getProductSizeText());
 				product.setProductSizeNumber(bean.getProductSizeNumber());
-				product.setGroupId(bean.getGroupId());
 				product.setCategoryId(bean.getCategoryId());
 				product.setSubcategoryId(bean.getSubcategoryId());
-				product.setParentProductId(bean.getParentProductId());
 				product.setIsDefault(bean.getIsDefault());
 				product.setImage1(bean.getImage1());
 				product.setImage2(bean.getImage2());
@@ -220,6 +222,8 @@ public class ProductManager {
 				product.setImage9(bean.getImage9());
 				product.setImage10(bean.getImage10());
 				product.setPod(bean.getPod());
+				product.setAddToCart(bean.isAddToCart());
+				product.setGroupId(bean.getGroupId());
 				session.update(product);
 
 				responseBean.setProductId(bean.getProductId());
@@ -296,7 +300,6 @@ public class ProductManager {
 			if (product != null && product.getIsRemoved() != 1) {
 				productBean = new ProductBean();
 				productBean.setProductId(productId);
-				productBean.setParentProductId(product.getParentProductId());
 				productBean.setProductName(product.getProductName());
 				productBean.setProduct_image(product.getProduct_image());
 				productBean.setProductDescription(product.getProductDescription());
@@ -318,11 +321,12 @@ public class ProductManager {
 				productBean.setImage10(product.getImage10());
 				productBean.setCategoryId(product.getCategoryId());
 				productBean.setSubcategoryId(product.getSubcategoryId());
-				productBean.setGroupId(product.getGroupId());
 				productBean.setProductSizeText(product.getProductSizeText());
 				productBean.setProductSizeNumber(product.getProductSizeNumber());
 				productBean.setProductColor(product.getProductColor());
 				productBean.setPod(product.getPod());
+				productBean.setAddToCart(product.isAddToCart());
+				productBean.setGroupId(product.getGroupId());
 			}
 			transaction.commit();
 		} catch (RuntimeException re) {
@@ -613,7 +617,6 @@ public class ProductManager {
 					for (Product product : products) {
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
-						bean.setParentProductId(product.getParentProductId());
 						bean.setProductName(product.getProductName());
 						bean.setProductDescription(product.getProductDescription());
 						bean.setProductPrice(product.getProductPrice());
@@ -624,7 +627,6 @@ public class ProductManager {
 						bean.setProduct_image(product.getProduct_image());
 						bean.setProductInStock(product.getProductInStock());
 						bean.setCategoryId(product.getCategoryId());
-						bean.setGroupId(product.getGroupId());
 						bean.setIsDefault(product.getIsDefault());
 						bean.setProductColor(product.getProductColor());
 						bean.setProductSizeText(product.getProductSizeText());
@@ -640,6 +642,8 @@ public class ProductManager {
 						bean.setImage9(product.getImage9());
 						bean.setImage10(product.getImage10());
 						bean.setPod(product.getPod());
+						bean.setAddToCart(product.isAddToCart());
+						bean.setGroupId(product.getGroupId());
 						beanList.add(bean);
 						bean = null;
 					}
@@ -662,7 +666,6 @@ public class ProductManager {
 					for (Product product : products) {
 						ProductBean bean = new ProductBean();
 						bean.setProductId(product.getProductId());
-						bean.setParentProductId(product.getParentProductId());
 						bean.setProductName(product.getProductName());
 						bean.setProductDescription(product.getProductDescription());
 						bean.setProductPrice(product.getProductPrice());
@@ -673,7 +676,6 @@ public class ProductManager {
 						bean.setProduct_image(product.getProduct_image());
 						bean.setProductInStock(product.getProductInStock());
 						bean.setCategoryId(product.getCategoryId());
-						bean.setGroupId(product.getGroupId());
 						bean.setIsDefault(product.getIsDefault());
 						bean.setProductColor(product.getProductColor());
 						bean.setProductSizeText(product.getProductSizeText());
@@ -689,6 +691,8 @@ public class ProductManager {
 						bean.setImage9(product.getImage9());
 						bean.setImage10(product.getImage10());
 						bean.setPod(product.getPod());
+						bean.setAddToCart(product.isAddToCart());
+						bean.setGroupId(product.getGroupId());
 						beanList.add(bean);
 						bean = null;
 					}
@@ -711,6 +715,53 @@ public class ProductManager {
 			}
 		}
 		return responeBean;
+	}
+	
+	public ProductCategoryResponseBean addNewCategory(ProductCategoryRequestBean requestBean){
+		log.debug("adding new category");
+		ProductCategoryResponseBean responseBean = new ProductCategoryResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				ProductCategory category = new ProductCategory();
+				category.setSellerId(requestBean.getSellerId());
+				category.setProductCategoryName(requestBean.getCategoryName());
+				category.setProdcuctCategoryImage(requestBean.getCategoryImageUrl());
+				session.persist(category);
+				
+				int categoryId = category.getProductCategoryId();
+				if(requestBean.isHasSubcategory()){
+					List<ProductSubcategoryRequestBean> subcategoryList = requestBean.getSubcategoryList();
+					for(ProductSubcategoryRequestBean scReqBean : subcategoryList){
+						ProductSubcategory subcategory = new ProductSubcategory();
+						subcategory.setProductCategoryId(categoryId);
+						subcategory.setProductScName(scReqBean.getSubcategoryName());
+						subcategory.setProductSubcategoryImage(scReqBean.getSubcategoryImageUrl());
+						session.persist(subcategory);
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding new category failed : " + re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 	public static void main(String[] args) {

@@ -91,6 +91,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String mapMarkerName;
 	@Column(name="ABOUT_SELLER")
 	private String aboutSeller;
+	@Column(name="COBRANDING", nullable=false, columnDefinition="TINYINT(1)")
+	private boolean cobranding = true;
 	
 	public EngageSeller() {
 	}
@@ -409,6 +411,14 @@ public class EngageSeller implements java.io.Serializable {
 
 	public void setAboutSeller(String aboutSeller) {
 		this.aboutSeller = aboutSeller;
+	}
+
+	public boolean isCobranding() {
+		return cobranding;
+	}
+
+	public void setCobranding(boolean cobranding) {
+		this.cobranding = cobranding;
 	}
 	
 }

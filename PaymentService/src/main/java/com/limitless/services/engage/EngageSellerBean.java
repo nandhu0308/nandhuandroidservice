@@ -42,6 +42,13 @@ public class EngageSellerBean {
 
 	private String businessCategory;
 	private String mapMarkerName;
+	
+	private String sellerBusinessType;
+	private boolean podAvailable;
+	private float deliveryMinAmount;
+	private int deliveryRadius;
+	private float deliveryFee;
+	private boolean convenienceFee;
 
 	public int getCitrusSellerId() {
 		return citrusSellerId;
@@ -306,5 +313,52 @@ public class EngageSellerBean {
 	public void setAboutSeller(String aboutSeller) {
 		this.aboutSeller = aboutSeller;
 	}
-	
+
+	public String getSellerBusinessType() {
+		return sellerBusinessType;
+	}
+
+	public void setSellerBusinessType(String sellerBusinessType) {
+		this.sellerBusinessType = sellerBusinessType;
+	}
+
+	public boolean isPodAvailable() {
+		return podAvailable;
+	}
+
+	public void setPodAvailable(boolean podAvailable) {
+		this.podAvailable = podAvailable;
+	}
+
+	public float getDeliveryMinAmount() {
+		return deliveryMinAmount;
+	}
+
+	public void setDeliveryMinAmount(float deliveryMinAmount) {
+		this.deliveryMinAmount = deliveryMinAmount;
+	}
+
+	public int getDeliveryRadius() {
+		return deliveryRadius;
+	}
+
+	public void setDeliveryRadius(int deliveryRadius) {
+		this.deliveryRadius = deliveryRadius;
+	}
+
+	public float getDeliveryFee() {
+		return deliveryFee;
+	}
+
+	public void setDeliveryFee(float deliveryFee) {
+		this.deliveryFee = deliveryFee;
+	}
+
+	public boolean isConvenienceFee() {
+		return convenienceFee;
+	}
+
+	public void setConvenienceFee(boolean convenienceFee) {
+		this.convenienceFee = convenienceFee;
+	}
 }

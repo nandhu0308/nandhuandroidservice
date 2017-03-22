@@ -59,6 +59,7 @@
   <mapping class="com.limitless.services.engage.sellers.product.dao.ProductCategory"/>
   <mapping class="com.limitless.services.engage.sellers.product.dao.ProductSubcategory"/>
   <mapping class="com.limitless.services.engage.dao.SellerDeviceIdMapper"/>
+  <mapping class="com.limitless.services.engage.dao.SellerPayamentsConfiguration"/>
   
  </session-factory>
 </hibernate-configuration>

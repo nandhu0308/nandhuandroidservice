@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
@@ -33,6 +34,10 @@ public class OrderResource {
 		try{
 			OrdersManager manager = new OrdersManager();
 			responseBean = manager.addOrder(requestBean);
+			if(responseBean.getOrderId()>0){
+				manager.notificationToCustomer(responseBean.getOrderId());
+				manager.notificationToSeller(responseBean.getOrderId());
+			}
 			if(requestBean.getPaymentMode()!=null){
 				if(requestBean.getPaymentMode().equals("POD")){
 					OrderStatusResponseBean statusResponseBean = manager.orderStatusUpdate(responseBean.getOrderId(), 1);
@@ -148,6 +153,15 @@ public class OrderResource {
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
+	}
+	
+	@GET
+	@Path("/notify/{orderId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response notifySellerForOrder(@PathParam("orderId") int orderId){
+		OrdersManager manager = new OrdersManager();
+		manager.notificationToSeller(orderId);
+		return Response.status(200).build();
 	}
 	
 }

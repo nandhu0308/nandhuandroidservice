@@ -26,6 +26,12 @@ public class SellerLoginResponseBean {
 	private List<ProductBean> products;
 	private List<SellerRestaurantListBean> restaurants;
 	private String aboutSeller;
+	private boolean podAvailable;
+	private boolean convenienceFee;
+	private float deliveryMinAmount;
+	private float deliveryFee;
+	private int deliveryRadius;
+	private boolean cobranding;
 	
 	public String getSellerName() {
 		return sellerName;
@@ -145,5 +151,41 @@ public class SellerLoginResponseBean {
 	
 	public void setAboutSeller(String aboutSeller) {
 		this.aboutSeller = aboutSeller;
+	}
+	public boolean isPodAvailable() {
+		return podAvailable;
+	}
+	public void setPodAvailable(boolean podAvailable) {
+		this.podAvailable = podAvailable;
+	}
+	public boolean isConvenienceFee() {
+		return convenienceFee;
+	}
+	public void setConvenienceFee(boolean convenienceFee) {
+		this.convenienceFee = convenienceFee;
+	}
+	public float getDeliveryMinAmount() {
+		return deliveryMinAmount;
+	}
+	public void setDeliveryMinAmount(float deliveryMinAmount) {
+		this.deliveryMinAmount = deliveryMinAmount;
+	}
+	public float getDeliveryFee() {
+		return deliveryFee;
+	}
+	public void setDeliveryFee(float deliveryFee) {
+		this.deliveryFee = deliveryFee;
+	}
+	public int getDeliveryRadius() {
+		return deliveryRadius;
+	}
+	public void setDeliveryRadius(int deliveryRadius) {
+		this.deliveryRadius = deliveryRadius;
+	}
+	public boolean isCobranding() {
+		return cobranding;
+	}
+	public void setCobranding(boolean cobranding) {
+		this.cobranding = cobranding;
 	}
 }

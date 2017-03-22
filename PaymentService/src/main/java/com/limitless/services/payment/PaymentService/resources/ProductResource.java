@@ -25,6 +25,8 @@ import com.limitless.services.engage.sellers.ProductErrorBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
 import com.limitless.services.engage.sellers.ProductCSCListBean;
+import com.limitless.services.engage.sellers.ProductCategoryRequestBean;
+import com.limitless.services.engage.sellers.ProductCategoryResponseBean;
 import com.limitless.services.engage.sellers.ProductResponseBean;
 import com.limitless.services.engage.sellers.ProductsListRequestBean;
 import com.limitless.services.engage.sellers.ProductsListResponeBean;
@@ -194,5 +196,24 @@ public class ProductResource {
 		}
 		return responeBean;
 	}
+	
+	@Path("/category")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductCategoryResponseBean newCategory(ProductCategoryRequestBean requestBean) throws Exception{
+		ProductCategoryResponseBean responseBean = new ProductCategoryResponseBean();
+		try{
+			ProductManager manager = new ProductManager();
+			responseBean = manager.addNewCategory(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	
 	
 }

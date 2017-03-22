@@ -48,6 +48,7 @@ import com.limitless.services.engage.SellerUpdateResponseBean;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.dao.SellerTempManager;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.limitless.services.engage.sellers.ProductBean;
@@ -108,6 +109,27 @@ public class EngageSellerResource {
 				System.out.println("Seller Id: " + seller.getSellerId());
 				sellerResp.setStatus(1);
 				sellerResp.setMessage("Success");
+				
+				SellerPayamentsConfiguration payConfig = new SellerPayamentsConfiguration();
+				payConfig.setSellerId(seller.getSellerId());
+				payConfig.setCitrusSellerId(bean.getCitrusSellerId());
+				payConfig.setSplitPercent(bean.getSplitPerent());
+				if(bean.isPodAvailable()){
+					payConfig.setPayOnDelivery(1);
+				}
+				else if(!bean.isPodAvailable()){
+					payConfig.setPayOnDelivery(0);
+				}
+				payConfig.setDevliveryMInAmt(bean.getDeliveryMinAmount());
+				payConfig.setDeliveryRadius(bean.getDeliveryRadius());
+				payConfig.setDeliveryFee(bean.getDeliveryFee());
+				if(bean.isConvenienceFee()){
+					payConfig.setConvenienceFee(1);
+				}
+				else if(!bean.isConvenienceFee()){
+					payConfig.setConvenienceFee(0);
+				}
+				manager.sellerPaymentConfigAdd(payConfig);
 
 				if (bean.getIsActive() == 0) {
 					SellerTempRequestBean tempRequestBean = new SellerTempRequestBean();

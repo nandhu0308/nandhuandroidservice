@@ -28,10 +28,6 @@ public class Product {
 	private double discountRate;
 	@Column(name="PRODUCT_IN_STOCK")
 	private Integer productInStock;
-	@Column(name="PARENT_PRODUCT_ID")
-	private Integer parentProductId;
-	@Column(name="GROUPID")
-	private Integer groupId;
 	@Column(name="CATEGORYID")
 	private Integer categoryId;
 	@Column(name="SUBCATERGORYID")
@@ -68,18 +64,16 @@ public class Product {
 	private int isRemoved;
 	@Column(nullable = false, name="POD", columnDefinition = "TINYINT(1)")
 	private boolean pod;
+	@Column(name="ADD_TO_CART", nullable=false, columnDefinition="TINYINT(1)")
+	private boolean addToCart;
+	@Column(name="GROUP_ID")
+	private Integer groupId;
 	
 	public Integer getProductId() {
 		return productId;
 	}
 	public void setProductId(Integer productId) {
 		this.productId = productId;
-	}
-	public Integer getParentProductId() {
-		return parentProductId;
-	}
-	public void setParentProductId(Integer parentProductId) {
-		this.parentProductId = parentProductId;
 	}
 	public String getProductName() {
 		return productName;
@@ -116,12 +110,6 @@ public class Product {
 	}
 	public void setProductInStock(Integer productInStock) {
 		this.productInStock = productInStock;
-	}
-	public Integer getGroupId() {
-		return groupId;
-	}
-	public void setGroupId(Integer groupId) {
-		this.groupId = groupId;
 	}
 	public Integer getCategoryId() {
 		return categoryId;
@@ -237,5 +225,16 @@ public class Product {
 	public void setPod(boolean pod) {
 		this.pod = pod;
 	}
-	
+	public boolean isAddToCart() {
+		return addToCart;
+	}
+	public void setAddToCart(boolean addToCart) {
+		this.addToCart = addToCart;
+	}
+	public Integer getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(Integer groupId) {
+		this.groupId = groupId;
+	}
 }

@@ -279,12 +279,36 @@ public class EngageSellerManager {
 					respBean.setMobileNumber(seller.getSellerMobileNumber());
 					respBean.setSellerAddress(seller.getSellerAddress());
 					respBean.setSellerCity(seller.getSellerCity());
-					respBean.setCitrusSellerId(seller.getCitrusSellerId());
 					respBean.setSellerType(seller.getSellerType());
 					respBean.setSellerRole(seller.getSellerRole());
 					respBean.setBusinessType(seller.getBusinessType());
 					respBean.setBusinessCategory(seller.getBusinessCategory());
 					respBean.setMapMarkerName(seller.getMapMarkerName());
+					respBean.setCobranding(seller.isCobranding());
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					log.debug("configs size : " + configList.size());
+					if(configList.size()>0){
+						for(SellerPayamentsConfiguration config : configList){
+							respBean.setCitrusSellerId(config.getCitrusSellerId());
+							if(config.getPayOnDelivery()==1){
+								respBean.setPodAvailable(true);
+							}
+							else if(config.getPayOnDelivery()==0){
+								respBean.setPodAvailable(false);
+							}
+							respBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
+							respBean.setDeliveryFee(config.getConvenienceFee());
+							respBean.setDeliveryRadius(config.getDeliveryRadius());
+							if(config.getConvenienceFee()==1){
+								respBean.setConvenienceFee(true);
+							}
+							else if(config.getConvenienceFee()==0){
+								respBean.setConvenienceFee(false);
+							}
+						}
+					}
 					respBean.setMessage("Success");
 					respBean.setStatus(1);
 
@@ -339,6 +363,7 @@ public class EngageSellerManager {
 						SellerDeviceIdMapper instance = (SellerDeviceIdMapper) session
 								.get("com.limitless.services.engage.dao.SellerDeviceIdMapper", sdMapper.getSdmId());
 						if(instance!=null){
+							instance.setSellerId(sellerId);
 							instance.setDeviceActive(1);
 							session.update(instance);
 						}
@@ -487,7 +512,6 @@ public class EngageSellerManager {
 			if (sellerList.size() == 1) {
 				for (EngageSeller seller : sellerList) {
 					responseBean.setSellerId(seller.getSellerId());
-					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
 					responseBean.setSellerName(seller.getSellerShopName());
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
@@ -495,6 +519,31 @@ public class EngageSellerManager {
 					responseBean.setBusinessCategory(seller.getBusinessCategory());
 					responseBean.setMapMarkerName(seller.getMapMarkerName());
 					responseBean.setAboutSeller(seller.getAboutSeller());
+					responseBean.setCobranding(seller.isCobranding());
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					log.debug("configs size : " + configList.size());
+					if(configList.size()>0){
+						for(SellerPayamentsConfiguration config : configList){
+							responseBean.setCitrusSellerId(config.getCitrusSellerId());
+							if(config.getPayOnDelivery()==1){
+								responseBean.setPodAvailable(true);
+							}
+							else if(config.getPayOnDelivery()==0){
+								responseBean.setPodAvailable(false);
+							}
+							responseBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
+							responseBean.setDeliveryFee(config.getConvenienceFee());
+							responseBean.setDeliveryRadius(config.getDeliveryRadius());
+							if(config.getConvenienceFee()==1){
+								responseBean.setConvenienceFee(true);
+							}
+							else if(config.getConvenienceFee()==0){
+								responseBean.setConvenienceFee(false);
+							}
+						}
+					}
 					responseBean.setMessage("Success");
 				}
 			} else {
@@ -562,7 +611,6 @@ public class EngageSellerManager {
 				EngageSeller seller = sellerList.get(0);
 				{
 					responseBean.setSellerId(seller.getSellerId());
-					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
 					responseBean.setSellerName(seller.getSellerShopName());
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
@@ -571,6 +619,31 @@ public class EngageSellerManager {
 					responseBean.setBusinessCategory(seller.getBusinessCategory());
 					responseBean.setMapMarkerName(seller.getMapMarkerName());
 					responseBean.setAboutSeller(seller.getAboutSeller());
+					responseBean.setCobranding(seller.isCobranding());
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					log.debug("configs size : " + configList.size());
+					if(configList.size()>0){
+						for(SellerPayamentsConfiguration config : configList){
+							responseBean.setCitrusSellerId(config.getCitrusSellerId());
+							if(config.getPayOnDelivery()==1){
+								responseBean.setPodAvailable(true);
+							}
+							else if(config.getPayOnDelivery()==0){
+								responseBean.setPodAvailable(false);
+							}
+							responseBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
+							responseBean.setDeliveryFee(config.getConvenienceFee());
+							responseBean.setDeliveryRadius(config.getDeliveryRadius());
+							if(config.getConvenienceFee()==1){
+								responseBean.setConvenienceFee(true);
+							}
+							else if(config.getConvenienceFee()==0){
+								responseBean.setConvenienceFee(false);
+							}
+						}
+					}
 					responseBean.setMessage("Success");
 				}
 			} else {
@@ -1418,7 +1491,7 @@ public class EngageSellerManager {
 					sellerId);
 			if (seller != null) {
 				restaurantsBean.setSellerId(sellerId);
-				restaurantsBean.setCitrusSellerId(seller.getCitrusSellerId());
+				
 				restaurantsBean.setSellerName(seller.getSellerName());
 				restaurantsBean.setSellerCity(seller.getSellerCity());
 				restaurantsBean.setSellerMobileNumber(seller.getSellerMobileNumber());
@@ -1440,6 +1513,30 @@ public class EngageSellerManager {
 					restaurantsBean.setMessage("Success");
 				} else if (restaurantsList.isEmpty()) {
 					restaurantsBean.setMessage("Failed");
+				}
+				Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+				criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+				List<SellerPayamentsConfiguration> configList = criteria2.list();
+				log.debug("configs size : " + configList.size());
+				if(configList.size()>0){
+					for(SellerPayamentsConfiguration config : configList){
+						restaurantsBean.setCitrusSellerId(config.getCitrusSellerId());
+						if(config.getPayOnDelivery()==1){
+							restaurantsBean.setPodAvailable(true);
+						}
+						else if(config.getPayOnDelivery()==0){
+							restaurantsBean.setPodAvailable(false);
+						}
+						restaurantsBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
+						restaurantsBean.setDeliveryFee(config.getConvenienceFee());
+						restaurantsBean.setDeliveryRadius(config.getDeliveryRadius());
+						if(config.getConvenienceFee()==1){
+							restaurantsBean.setConvenienceFee(true);
+						}
+						else if(config.getConvenienceFee()==0){
+							restaurantsBean.setConvenienceFee(false);
+						}
+					}
 				}
 			} else if (seller == null) {
 				restaurantsBean.setMessage("Failed");
@@ -1552,6 +1649,33 @@ public class EngageSellerManager {
 			}
 		}
 		return deviceIdList;
+	}
+	
+	public void sellerPaymentConfigAdd(SellerPayamentsConfiguration payConfig){
+		log.debug("adding configuration");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			session.persist(payConfig);
+			log.debug("spc id : " + payConfig.getSpcId());
+			
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("adding configuration failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
 	}
 
 	/*

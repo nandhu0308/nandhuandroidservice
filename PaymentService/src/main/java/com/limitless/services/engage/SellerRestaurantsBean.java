@@ -11,6 +11,12 @@ public class SellerRestaurantsBean {
 	private int citrusSellerId;
 	private List<SellerRestaurantListBean> restaurantList;
 	private String message;
+	private boolean podAvailable;
+	private boolean convenienceFee;
+	private float deliveryMinAmount;
+	private float deliveryFee;
+	private int deliveryRadius;
+	
 	public int getSellerId() {
 		return sellerId;
 	}
@@ -58,5 +64,35 @@ public class SellerRestaurantsBean {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public boolean isPodAvailable() {
+		return podAvailable;
+	}
+	public void setPodAvailable(boolean podAvailable) {
+		this.podAvailable = podAvailable;
+	}
+	public boolean isConvenienceFee() {
+		return convenienceFee;
+	}
+	public void setConvenienceFee(boolean convenienceFee) {
+		this.convenienceFee = convenienceFee;
+	}
+	public float getDeliveryMinAmount() {
+		return deliveryMinAmount;
+	}
+	public void setDeliveryMinAmount(float deliveryMinAmount) {
+		this.deliveryMinAmount = deliveryMinAmount;
+	}
+	public float getDeliveryFee() {
+		return deliveryFee;
+	}
+	public void setDeliveryFee(float deliveryFee) {
+		this.deliveryFee = deliveryFee;
+	}
+	public int getDeliveryRadius() {
+		return deliveryRadius;
+	}
+	public void setDeliveryRadius(int deliveryRadius) {
+		this.deliveryRadius = deliveryRadius;
 	}
 }
