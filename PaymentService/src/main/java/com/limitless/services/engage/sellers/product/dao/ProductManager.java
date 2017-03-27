@@ -19,6 +19,8 @@ import org.hibernate.criterion.Restrictions;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.sellers.NewProductsRequestBean;
 import com.limitless.services.engage.sellers.NewProductsResponseBean;
+import com.limitless.services.engage.sellers.ProductAvailabilityUpdateRequestBean;
+import com.limitless.services.engage.sellers.ProductAvailabilityUpdateResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
 import com.limitless.services.engage.sellers.ProductInventoryResponseBean;
@@ -164,12 +166,12 @@ public class ProductManager {
 			product.setGroupId(bean.getGroupId());
 			session.persist(product);
 
-			ProductInventory inventory = new ProductInventory();
+			/*ProductInventory inventory = new ProductInventory();
 			inventory.setProductId(product.getProductId());
 			inventory.setProductStock(bean.getProductInventory());
 			inventory.setProductSold(0);
 
-			session.persist(inventory);
+			session.persist(inventory);*/
 
 			responseBean.setProductId(product.getProductId());
 			responseBean.setMessage("Success");
@@ -212,16 +214,6 @@ public class ProductManager {
 				product.setCategoryId(bean.getCategoryId());
 				product.setSubcategoryId(bean.getSubcategoryId());
 				product.setIsDefault(bean.getIsDefault());
-				product.setImage1(bean.getImage1());
-				product.setImage2(bean.getImage2());
-				product.setImage3(bean.getImage3());
-				product.setImage4(bean.getImage4());
-				product.setImage5(bean.getImage5());
-				product.setImage6(bean.getImage6());
-				product.setImage7(bean.getImage7());
-				product.setImage8(bean.getImage8());
-				product.setImage9(bean.getImage9());
-				product.setImage10(bean.getImage10());
 				product.setPod(bean.getPod());
 				product.setAddToCart(bean.isAddToCart());
 				product.setGroupId(bean.getGroupId());
@@ -747,6 +739,9 @@ public class ProductManager {
 						session.persist(subcategory);
 					}
 				}
+				responseBean.setCategoryId(categoryId);
+				responseBean.setMessage("Success");
+				responseBean.setSellerId(requestBean.getSellerId());
 			}
 			transaction.commit();
 		}
@@ -759,6 +754,176 @@ public class ProductManager {
 		}
 		finally {
 			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public ProductCategoryResponseBean editProductCateory(ProductCategoryRequestBean requestBean){
+		log.debug("editing product category");
+		ProductCategoryResponseBean responseBean = new  ProductCategoryResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				ProductCategory category = (ProductCategory) session
+						.get("com.limitless.services.engage.sellers.product.dao.ProductCategory", requestBean.getCategoryId());
+				if(category!=null){
+					category.setProductCategoryName(requestBean.getCategoryName());
+					category.setProdcuctCategoryImage(requestBean.getCategoryImageUrl());
+					session.update(category);
+					
+					List<ProductSubcategoryRequestBean> subcategoryList = requestBean.getSubcategoryList();
+					if(subcategoryList.size()>0){
+						for(ProductSubcategoryRequestBean scReqBean : subcategoryList){
+							ProductSubcategory subcategory = (ProductSubcategory) session
+									.get("com.limitless.services.engage.sellers.product.dao.ProductSubcategory", scReqBean.getSubcategoryId());
+							if(subcategory!=null){
+								subcategory.setProductCategoryId(scReqBean.getCategoryId());
+								subcategory.setProductScName(scReqBean.getSubcategoryName());
+								subcategory.setProductSubcategoryImage(scReqBean.getSubcategoryImageUrl());
+								session.update(subcategory);
+							}
+						}
+					}
+				}
+				responseBean.setCategoryId(requestBean.getCategoryId());
+				responseBean.setMessage("Success");
+				responseBean.setSellerId(requestBean.getSellerId());
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("edit product category failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public ProductAvailabilityUpdateResponseBean markProductAvailability(ProductAvailabilityUpdateRequestBean requestBean){
+		log.debug("marking products availability");
+		ProductAvailabilityUpdateResponseBean responseBean = new ProductAvailabilityUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				List<Integer> productIdList = requestBean.getProductIds();
+				if(productIdList.size()>0 && !productIdList.isEmpty()){
+					for(Integer productId : productIdList){
+						Product product = (Product) session
+								.get("com.limitless.services.engage.sellers.product.dao.Product", productId);
+						if(product!=null){
+							if(product.getSellerId()==requestBean.getSellerId()){
+								product.setProductInStock(1);
+								session.update(product);
+								
+								responseBean.setMessage("Success");
+								responseBean.setSellerId(requestBean.getSellerId());
+							}
+							else{
+								responseBean.setMessage("Failed");
+							}
+						}
+						else{
+							responseBean.setMessage("Failed");
+						}
+					}
+				}
+				else{
+					responseBean.setMessage("Failed");
+				}
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("marking products availability failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public ProductAvailabilityUpdateResponseBean markProductUnavailability(ProductAvailabilityUpdateRequestBean requestBean){
+		log.debug("marking products availability");
+		ProductAvailabilityUpdateResponseBean responseBean = new ProductAvailabilityUpdateResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				List<Integer> productIdList = requestBean.getProductIds();
+				if(productIdList.size()>0 && !productIdList.isEmpty()){
+					for(Integer productId : productIdList){
+						Product product = (Product) session
+								.get("com.limitless.services.engage.sellers.product.dao.Product", productId);
+						if(product!=null){
+							if(product.getSellerId()==requestBean.getSellerId()){
+								product.setProductInStock(0);
+								session.update(product);
+								
+								responseBean.setMessage("Success");
+								responseBean.setSellerId(requestBean.getSellerId());
+							}
+							else{
+								responseBean.setMessage("Failed");
+							}
+						}
+						else{
+							responseBean.setMessage("Failed");
+						}
+					}
+				}
+				else{
+					responseBean.setMessage("Failed");
+				}
+			}
+			else{
+				responseBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("marking products availability failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
 				session.close();
 			}
 		}

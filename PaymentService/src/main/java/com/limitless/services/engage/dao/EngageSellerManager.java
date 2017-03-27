@@ -1293,6 +1293,7 @@ public class EngageSellerManager {
 				SellerCustomerMapper mapper = new SellerCustomerMapper();
 				mapper.setCustomerId(customerId);
 				mapper.setSellerId(sellerId);
+				mapper.setVisitCount(1);
 				session.persist(mapper);
 			} else if (mapperList.size() == 1) {
 				for (SellerCustomerMapper mapper : mapperList) {

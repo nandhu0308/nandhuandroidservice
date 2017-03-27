@@ -9,6 +9,8 @@ public class SellerCustomerMapperBean {
 	private String sellerShopName;
 	private String sellerCity;
 	private String sellerMobile;
+	private String businessType;
+	private String businessCategory;
 	private int visitCount;
 	private String lastVisit;
 	
@@ -71,5 +73,17 @@ public class SellerCustomerMapperBean {
 	}
 	public void setSellerMobile(String sellerMobile) {
 		this.sellerMobile = sellerMobile;
+	}
+	public String getBusinessType() {
+		return businessType;
+	}
+	public void setBusinessType(String businessType) {
+		this.businessType = businessType;
+	}
+	public String getBusinessCategory() {
+		return businessCategory;
+	}
+	public void setBusinessCategory(String businessCategory) {
+		this.businessCategory = businessCategory;
 	}
 }

@@ -20,6 +20,8 @@ import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.order.dao.OrdersManager;
 import com.limitless.services.engage.sellers.NewProductsRequestBean;
 import com.limitless.services.engage.sellers.NewProductsResponseBean;
+import com.limitless.services.engage.sellers.ProductAvailabilityUpdateRequestBean;
+import com.limitless.services.engage.sellers.ProductAvailabilityUpdateResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.ProductErrorBean;
 import com.limitless.services.engage.sellers.ProductInventoryRequestBean;
@@ -214,6 +216,55 @@ public class ProductResource {
 		return responseBean;
 	}
 	
+	@Path("/category/edit")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductCategoryResponseBean editCategory(ProductCategoryRequestBean requestBean) throws Exception{
+		ProductCategoryResponseBean responseBean = new ProductCategoryResponseBean();
+		try{
+			ProductManager manager = new ProductManager();
+			responseBean = manager.editProductCateory(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
 	
+	@Path("/mark/availability")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductAvailabilityUpdateResponseBean markAvailability(ProductAvailabilityUpdateRequestBean requestBean) throws Exception{
+		ProductAvailabilityUpdateResponseBean responseBean = new ProductAvailabilityUpdateResponseBean();
+		try{
+			ProductManager manager = new ProductManager();
+			responseBean = manager.markProductAvailability(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@Path("/mark/unavailability")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProductAvailabilityUpdateResponseBean markUnavailability(ProductAvailabilityUpdateRequestBean requestBean) throws Exception{
+		ProductAvailabilityUpdateResponseBean responseBean = new ProductAvailabilityUpdateResponseBean();
+		try{
+			ProductManager manager = new ProductManager();
+			responseBean = manager.markProductUnavailability(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
 	
 }

@@ -1310,6 +1310,8 @@ public class EngageCustomerManager {
 						bean.setSellerShopName(seller.getSellerShopName());
 						bean.setSellerCity(seller.getSellerCity());
 						bean.setSellerMobile(seller.getSellerMobileNumber());
+						bean.setBusinessType(seller.getBusinessType());
+						bean.setBusinessCategory(seller.getBusinessCategory());
 					}
 					bean.setVisitCount(mapper.getVisitCount());
 					bean.setLastVisit(mapper.getLastVisitTime().toString());
