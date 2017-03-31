@@ -1,7 +1,5 @@
 package com.limitless.services.engage;
 
-import javax.persistence.Column;
-
 public class CoordinatesResponseBean {
 
 	private int sellerId;

@@ -33,6 +33,9 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.SellerDeviceIdMapper;
 import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
+import com.limitless.services.engage.restaurants.NewRestaurantCategoryRequestBean;
+import com.limitless.services.engage.restaurants.NewRestaurantCategoryResponseBean;
+import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryRequestBean;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantCategoryListBean;
 import com.limitless.services.engage.restaurants.RestaurantItemListBean;
@@ -1107,6 +1110,62 @@ public class RestaurantManager {
 				session.close();
 			}
 		}
+	}
+	
+	public NewRestaurantCategoryResponseBean addNewCategory(NewRestaurantCategoryRequestBean requestBean){
+		log.debug("adding new category");
+		NewRestaurantCategoryResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				Restaurants restaurants = (Restaurants) session
+						.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
+				if(restaurants!=null){
+					if(restaurants.getSellerId()==requestBean.getSellerId()){
+						RestaurantCategory category = new RestaurantCategory();
+						category.setCategoryName(requestBean.getCategoryName());
+						category.setRestaurantId(requestBean.getRestaurantId());
+						session.persist(category);
+						log.debug("category id : " + category.getCategoryId());
+						
+						if(!requestBean.getSubcategoryRequestList().isEmpty() || requestBean.getSubcategoryRequestList() != null){
+							List<NewRestaurantSubcategoryRequestBean> subcategoryRequestList = requestBean.getSubcategoryRequestList();
+							for(NewRestaurantSubcategoryRequestBean reqBean : subcategoryRequestList){
+								RestaurantSubCategory subCategory = new RestaurantSubCategory();
+								subCategory.setSubcategoryName(reqBean.getSubcategoryName());
+								subCategory.setCategoryId(category.getCategoryId());
+								session.persist(subCategory);
+								log.debug("sub category id : " + subCategory.getCategoryId());
+							}
+						}
+						responseBean = new NewRestaurantCategoryResponseBean();
+						responseBean.setCategoryId(category.getCategoryId());
+						responseBean.setRestaurantId(requestBean.getRestaurantId());
+						responseBean.setSellerId(requestBean.getSellerId());
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding new category failed");
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 }

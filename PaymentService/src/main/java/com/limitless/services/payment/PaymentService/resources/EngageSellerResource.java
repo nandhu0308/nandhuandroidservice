@@ -50,6 +50,9 @@ import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.dao.SellerTempManager;
+import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
+import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
+import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
@@ -256,7 +259,14 @@ public class EngageSellerResource {
 					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
 							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
-				} 
+				}
+				else if(responseBean.getBusinessType().equals("broadcaster")){
+					BroadcasterChannelRequestBean channelRequestBean = new BroadcasterChannelRequestBean();
+					channelRequestBean.setBroadcasterName(responseBean.getSellerName());
+					BroadcasterManager broadcasterManager = new BroadcasterManager();
+					BroadcasterChannelResponseBean channelResponseBean = broadcasterManager.getBroadcasterChannel(channelRequestBean);
+					responseBean.setChannelBean(channelResponseBean);
+				}
 
 				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(requestBean.getCustomerId(),
 						responseBean.getSellerId());

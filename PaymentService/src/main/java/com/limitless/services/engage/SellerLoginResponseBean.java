@@ -2,8 +2,8 @@ package com.limitless.services.engage;
 
 import java.util.List;
 
+import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.sellers.ProductBean;
-import com.limitless.services.engage.sellers.product.dao.Product;
 
 public class SellerLoginResponseBean {
 	
@@ -32,6 +32,7 @@ public class SellerLoginResponseBean {
 	private float deliveryFee;
 	private int deliveryRadius;
 	private boolean cobranding;
+	private BroadcasterChannelResponseBean channelBean;
 	
 	public String getSellerName() {
 		return sellerName;
@@ -187,5 +188,11 @@ public class SellerLoginResponseBean {
 	}
 	public void setCobranding(boolean cobranding) {
 		this.cobranding = cobranding;
+	}
+	public BroadcasterChannelResponseBean getChannelBean() {
+		return channelBean;
+	}
+	public void setChannelBean(BroadcasterChannelResponseBean channelBean) {
+		this.channelBean = channelBean;
 	}
 }
