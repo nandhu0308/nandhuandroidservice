@@ -375,6 +375,7 @@ public class ProductManager {
 								subCategoryBean.setSubcategoryId(subcategory.getProductScId());
 								subCategoryBean.setSubcategoryName(subcategory.getProductScName());
 								subCategoryBean.setSubCategoryImageUrl(subcategory.getProductSubcategoryImage());
+								subCategoryBean.setTarget(subcategory.getTarget());
 								// List<ProductBean> subcategoryProductList =
 								// new ArrayList<ProductBean>();
 								// Criteria criteria3 =

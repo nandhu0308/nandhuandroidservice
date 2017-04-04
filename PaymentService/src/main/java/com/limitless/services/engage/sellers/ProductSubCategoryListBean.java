@@ -7,9 +7,17 @@ public class ProductSubCategoryListBean {
 	private String subcategoryName;
 	private String subCategoryImageUrl;
 	private int categoryId;
+	private String target;
 	//private List<ProductBean> productsList;
+	
 	public int getSubcategoryId() {
 		return subcategoryId;
+	}
+	public String getTarget() {
+		return target;
+	}
+	public void setTarget(String target) {
+		this.target = target;
 	}
 	public void setSubcategoryId(int subcategoryId) {
 		this.subcategoryId = subcategoryId;

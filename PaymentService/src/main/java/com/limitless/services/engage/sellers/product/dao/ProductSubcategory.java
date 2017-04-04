@@ -19,6 +19,15 @@ public class ProductSubcategory {
 	private Integer productCategoryId;
 	@Column(name="PRODUCT_SUBCATEGORY_IMAGE")
 	private String productSubcategoryImage;
+	@Column(name="TARGET")
+	private String target;
+	
+	public String getTarget() {
+		return target;
+	}
+	public void setTarget(String target) {
+		this.target = target;
+	}
 	public Integer getProductScId() {
 		return productScId;
 	}

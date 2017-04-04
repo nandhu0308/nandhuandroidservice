@@ -254,13 +254,15 @@ public class EngageSellerResource {
 			responseBean = manager.getSellerBySearchString(requestBean.getSearchString());
 
 			if (responseBean.getMessage().equals("Success")) {
-				if (responseBean.getBusinessType().equals("restaurant")) {
+				if (responseBean.getBusinessType().equalsIgnoreCase("restaurant")
+						|| responseBean.getBusinessCategory().equalsIgnoreCase("restaurant")
+						|| responseBean.getBusinessCategory().equalsIgnoreCase("hotel")) {
 					RestaurantManager restaurantManager = new RestaurantManager();
 					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
 							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
 				}
-				else if(responseBean.getBusinessType().equals("broadcaster")){
+				else if(responseBean.getBusinessType().equalsIgnoreCase("broadcaster")){
 					BroadcasterChannelRequestBean channelRequestBean = new BroadcasterChannelRequestBean();
 					channelRequestBean.setBroadcasterName(responseBean.getSellerName());
 					BroadcasterManager broadcasterManager = new BroadcasterManager();
