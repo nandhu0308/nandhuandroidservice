@@ -62,6 +62,7 @@ public class BroadcasterManager {
 							bean.setAlbumName(album.getAlbumName());
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
+							bean.setAlbumThumbnail(album.getAlbumThumbnail());
 							albumList.add(bean);
 							bean=null;
 						}
