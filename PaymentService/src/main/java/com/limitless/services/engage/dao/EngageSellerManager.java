@@ -45,6 +45,8 @@ import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
 import com.limitless.services.engage.PhoneNumber;
+import com.limitless.services.engage.SellerAdBean;
+import com.limitless.services.engage.SellerAdsListBean;
 import com.limitless.services.engage.SellerContactsRequestBean;
 import com.limitless.services.engage.SellerContactsResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
@@ -1677,6 +1679,58 @@ public class EngageSellerManager {
 				session.close();
 			}
 		}
+	}
+	
+	public SellerAdsListBean getSellerAds(){
+		log.debug("getting seller ads");
+		SellerAdsListBean listBean = new SellerAdsListBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			List<SellerAdBean> adList = new ArrayList<SellerAdBean>();
+			
+			EngageSeller seller1 = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", 5000140);
+			if(seller1!=null){
+				SellerAdBean bean1 = new SellerAdBean();
+				bean1.setSellerBannerUrl(seller1.getBranding_url());
+				bean1.setSellerId(seller1.getSellerId());
+				bean1.setSellerMobile(seller1.getSellerMobileNumber());
+				bean1.setSellerName(seller1.getSellerName());
+				bean1.setSellerShopName(seller1.getSellerShopName());
+				adList.add(bean1);
+			}
+			EngageSeller seller2 = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", 5000145);
+			if(seller2!=null){
+				SellerAdBean bean2 = new SellerAdBean();
+				bean2.setSellerBannerUrl(seller2.getBranding_url());
+				bean2.setSellerId(seller2.getSellerId());
+				bean2.setSellerMobile(seller2.getSellerMobileNumber());
+				bean2.setSellerName(seller2.getSellerName());
+				bean2.setSellerShopName(seller2.getSellerShopName());
+				adList.add(bean2);
+			}
+			listBean.setAdBean(adList);
+			listBean.setMessage("Success");
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting seller ads failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return listBean;
 	}
 
 	/*

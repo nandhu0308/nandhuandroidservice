@@ -1,7 +1,5 @@
 package com.limitless.services.payment.PaymentService.resources;
 
-import java.lang.Thread.State;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,6 +14,8 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryRequestBean;
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryResponseBean;
+import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryRequestBean;
+import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantErrorResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderBean;
@@ -176,4 +176,19 @@ public class RestaurantResource {
 		return Response.status(Status.NOT_FOUND).entity(errorResponseBean).build();
 	}
 	
+	@Path("/new/subcategory")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response newSubcategory(NewRestaurantSubcategoryRequestBean requestBean){
+		RestaurantManager manager = new RestaurantManager();
+		NewRestaurantSubcategoryResponseBean responseBean = manager.addNewSubcategory(requestBean);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		RestaurantErrorResponseBean errorResponseBean = new RestaurantErrorResponseBean();
+		errorResponseBean.setMessage("Failed");
+		errorResponseBean.setRestaurantId(requestBean.getRestaurantId());
+		return Response.status(Status.NOT_FOUND).entity(errorResponseBean).build();
+	}
 }

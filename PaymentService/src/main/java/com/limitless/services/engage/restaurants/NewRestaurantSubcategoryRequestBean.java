@@ -1,6 +1,7 @@
 package com.limitless.services.engage.restaurants;
 
 public class NewRestaurantSubcategoryRequestBean {
+	private int restaurantId;
 	private int categoryId;
 	private String subcategoryName;
 
@@ -19,4 +20,13 @@ public class NewRestaurantSubcategoryRequestBean {
 	public void setCategoryId(int categoryId) {
 		this.categoryId = categoryId;
 	}
+
+	public int getRestaurantId() {
+		return restaurantId;
+	}
+
+	public void setRestaurantId(int restaurantId) {
+		this.restaurantId = restaurantId;
+	}
+	
 }

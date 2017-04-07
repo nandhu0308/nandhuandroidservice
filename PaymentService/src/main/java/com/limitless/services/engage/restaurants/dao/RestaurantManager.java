@@ -36,6 +36,7 @@ import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryRequestBean;
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryResponseBean;
 import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryRequestBean;
+import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantBean;
 import com.limitless.services.engage.restaurants.RestaurantCategoryListBean;
 import com.limitless.services.engage.restaurants.RestaurantItemListBean;
@@ -1167,5 +1168,42 @@ public class RestaurantManager {
 		}
 		return responseBean;
 	}
-
+	
+	public NewRestaurantSubcategoryResponseBean addNewSubcategory(NewRestaurantSubcategoryRequestBean requestBean){
+		log.debug("adding new subcategory");
+		NewRestaurantSubcategoryResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			RestaurantCategory category = (RestaurantCategory) session
+					.get("com.limitless.services.engage.restaurants.dao.RestaurantCategory", requestBean.getCategoryId());
+			if(category!=null){
+				RestaurantSubCategory subCategory = new RestaurantSubCategory();
+				subCategory.setSubcategoryName(requestBean.getSubcategoryName());
+				subCategory.setSubCategoryId(requestBean.getCategoryId());
+				session.persist(subCategory);
+				
+				responseBean = new NewRestaurantSubcategoryResponseBean();
+				responseBean.setCategoryId(requestBean.getCategoryId());
+				responseBean.setSubcategoryId(subCategory.getSubCategoryId());
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("adding new subcategory failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
 }

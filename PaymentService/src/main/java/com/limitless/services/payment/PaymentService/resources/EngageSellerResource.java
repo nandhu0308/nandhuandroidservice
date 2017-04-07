@@ -31,6 +31,7 @@ import com.limitless.services.engage.MerchantLogoutResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
+import com.limitless.services.engage.SellerAdsListBean;
 import com.limitless.services.engage.SellerContactsRequestBean;
 import com.limitless.services.engage.SellerContactsResponseBean;
 import com.limitless.services.engage.SellerDeviceIdRespBean;
@@ -572,6 +573,22 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return restaurantsBean;
+	}
+	
+	@GET
+	@Path("/ads")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerAdsListBean getSellerAds() throws Exception{
+		SellerAdsListBean listBean = new SellerAdsListBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.getSellerAds();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
 	}
 
 }
