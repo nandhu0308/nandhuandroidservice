@@ -35,6 +35,8 @@ import com.limitless.services.engage.dao.SellerDeviceIdMapper;
 import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryRequestBean;
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryResponseBean;
+import com.limitless.services.engage.restaurants.NewRestaurantItemRequestBean;
+import com.limitless.services.engage.restaurants.NewRestaurantItemResponseBean;
 import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryRequestBean;
 import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantBean;
@@ -1206,4 +1208,65 @@ public class RestaurantManager {
 		}
 		return responseBean;
 	}
+	
+	public NewRestaurantItemResponseBean addNewItem(NewRestaurantItemRequestBean requestBean){
+		log.debug("adding new item");
+		NewRestaurantItemResponseBean responseBean = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Restaurants restaurants = (Restaurants) session
+					.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
+			if(restaurants!=null){
+				RestaurantCategory category = (RestaurantCategory) session
+						.get("com.limitless.services.engage.restaurants.dao.RestaurantCategory", requestBean.getCategoryId());
+				if(category!=null){
+					RestaurantSubCategory subCategory = (RestaurantSubCategory) session
+							.get("com.limitless.services.engage.restaurants.dao.RestaurantSubCategory", requestBean.getSubcategoryId());
+					if(subCategory!=null){
+						RestaurantItems item = new RestaurantItems();
+						item.setRestaurantId(requestBean.getRestaurantId());
+						item.setCategoryId(requestBean.getCategoryId());
+						item.setSubcategoryId(requestBean.getSubcategoryId());
+						item.setItemName(requestBean.getItemName());
+						item.setItemImage(requestBean.getItemImage());
+						item.setItemType(requestBean.getItemType());
+						item.setItemPrice(requestBean.getItemPrice());
+						item.setAvailable(requestBean.getItemAvailable());
+						item.setBreakfast(requestBean.getItemBreakfast());
+						item.setLunch(requestBean.getItemLunch());
+						item.setDinner(requestBean.getItemDinner());
+						item.setChefSpl(requestBean.getItemChefSpl());
+						item.setRecommended(requestBean.getItemRecommended());
+						item.setDiscountRate(requestBean.getItemDiscountRate());
+						session.persist(item);
+						responseBean = new NewRestaurantItemResponseBean();
+						responseBean.setItemId(item.getItemId());
+						responseBean.setRestaurantId(item.getRestaurantId());
+						responseBean.setCategoryId(item.getCategoryId());
+						responseBean.setSubcategoryId(item.getSubcategoryId());
+						responseBean.setMessage("Success");
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.commit();
+			}
+			log.error("adding item failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
 }

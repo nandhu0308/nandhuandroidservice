@@ -1412,6 +1412,10 @@ public class EngageSellerManager {
 					}
 				}
 			}
+			else{
+				responseBean = new CustomerNotifyUpdateResponseBean();
+				responseBean.setMessage("Failed");
+			}
 			transaction.commit();
 		} catch (RuntimeException re) {
 			if (transaction != null) {
@@ -1459,6 +1463,7 @@ public class EngageSellerManager {
 					bean.setImageUrl(notify.getImageUrl());
 					bean.setPostType(notify.getPostType());
 					bean.setNotifyCreatedTime(notify.getNotifyCreatedTime());
+					bean.setStatus(notify.getStatus());
 
 					beanList.add(bean);
 					bean = null;
@@ -1693,10 +1698,10 @@ public class EngageSellerManager {
 			List<SellerAdBean> adList = new ArrayList<SellerAdBean>();
 			
 			EngageSeller seller1 = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", 5000140);
+					.get("com.limitless.services.engage.dao.EngageSeller", 5000149);
 			if(seller1!=null){
 				SellerAdBean bean1 = new SellerAdBean();
-				bean1.setSellerBannerUrl(seller1.getBranding_url());
+				bean1.setSellerBannerUrl("https://s3-us-west-2.amazonaws.com/limitlesscircle-images/ProductImages/s5000149/BannerAdJugniz.jpg");
 				bean1.setSellerId(seller1.getSellerId());
 				bean1.setSellerMobile(seller1.getSellerMobileNumber());
 				bean1.setSellerName(seller1.getSellerName());
@@ -1707,7 +1712,7 @@ public class EngageSellerManager {
 					.get("com.limitless.services.engage.dao.EngageSeller", 5000145);
 			if(seller2!=null){
 				SellerAdBean bean2 = new SellerAdBean();
-				bean2.setSellerBannerUrl(seller2.getBranding_url());
+				bean2.setSellerBannerUrl("https://s3-us-west-2.amazonaws.com/limitlesscircle-images/ProductImages/s5000145/BannerAdSugarRush.jpg");
 				bean2.setSellerId(seller2.getSellerId());
 				bean2.setSellerMobile(seller2.getSellerMobileNumber());
 				bean2.setSellerName(seller2.getSellerName());

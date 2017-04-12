@@ -14,6 +14,8 @@ import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryRequestBean;
 import com.limitless.services.engage.restaurants.NewRestaurantCategoryResponseBean;
+import com.limitless.services.engage.restaurants.NewRestaurantItemRequestBean;
+import com.limitless.services.engage.restaurants.NewRestaurantItemResponseBean;
 import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryRequestBean;
 import com.limitless.services.engage.restaurants.NewRestaurantSubcategoryResponseBean;
 import com.limitless.services.engage.restaurants.RestaurantBean;
@@ -188,6 +190,22 @@ public class RestaurantResource {
 		}
 		RestaurantErrorResponseBean errorResponseBean = new RestaurantErrorResponseBean();
 		errorResponseBean.setMessage("Failed");
+		errorResponseBean.setRestaurantId(requestBean.getRestaurantId());
+		return Response.status(Status.NOT_FOUND).entity(errorResponseBean).build();
+	}
+	
+	@Path("/new/item")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response newRestaurantItem(NewRestaurantItemRequestBean requestBean){
+		RestaurantManager manager = new RestaurantManager();
+		NewRestaurantItemResponseBean responseBean = manager.addNewItem(requestBean);
+		if(responseBean!=null){
+			return Response.status(200).entity(responseBean).build();
+		}
+		RestaurantErrorResponseBean errorResponseBean = new RestaurantErrorResponseBean();
+		errorResponseBean.setMessage("Failed-Something Went Wrong");
 		errorResponseBean.setRestaurantId(requestBean.getRestaurantId());
 		return Response.status(Status.NOT_FOUND).entity(errorResponseBean).build();
 	}

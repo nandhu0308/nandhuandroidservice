@@ -46,7 +46,9 @@ import com.limitless.services.engage.order.OrdersListBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderDataBean;
 import com.limitless.services.engage.restaurants.RestaurantOrderFcmRequestBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
+import com.limitless.services.engage.sellers.product.dao.ProductCategory;
 import com.limitless.services.engage.sellers.product.dao.ProductInventory;
+import com.limitless.services.engage.sellers.product.dao.ProductSubcategory;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
@@ -581,10 +583,30 @@ public class OrdersManager {
 							}
 							double productPrice = product.getProductPrice();
 							float discountedPrice = (float) ((Float) product.getProductPrice() - (product.getProductPrice()*(product.getDiscountRate()/100)));
+							int categoryId = 0;
+							int subcategoryId = 0;
+							if(product.getCategoryId()>0){
+								categoryId = product.getCategoryId();
+							}
+							if(product.getSubcategoryId()>0){
+								subcategoryId = product.getSubcategoryId();
+							}
+							String categoryName = "";
+							String subcategoryName = "";
+							ProductCategory category = (ProductCategory) session
+									.get("com.limitless.services.engage.sellers.product.dao.ProductCategory", categoryId);
+							if(category!=null){
+								categoryName = category.getProductCategoryName();
+							}
+							ProductSubcategory subcategory = (ProductSubcategory) session
+									.get("com.limitless.services.engage.sellers.product.dao.ProductSubcategory", subcategoryId);
+							if(subcategory!=null){
+								subcategoryName = subcategory.getProductScName();
+							}
 							
 							mailContent += "<table><tr><td rowspan=3>"
 									+"<img src="+productImage+" height=100 width=100>"
-									+"</td><td><b>"+productName+"</b>&nbsp;MRP Rs:"+productPrice+"</td>"
+									+"</td><td><b>"+categoryName+"-"+subcategoryName+"-"+productName+"</b>&nbsp;MRP Rs:"+productPrice+"</td>"
 									+"<td>Specs:<br>Color:"+productColor+"<br>Size:"+productSize
 									+"<td>Quantity:&nbsp;"+quantity+"</td>"
 									+"<td>Discounted Price:&nbsp;"+discountedPrice+"</td>"

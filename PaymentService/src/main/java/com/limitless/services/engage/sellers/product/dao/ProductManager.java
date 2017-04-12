@@ -621,6 +621,7 @@ public class ProductManager {
 						bean.setProduct_image(product.getProduct_image());
 						bean.setProductInStock(product.getProductInStock());
 						bean.setCategoryId(product.getCategoryId());
+						bean.setSubcategoryId(product.getSubcategoryId());
 						bean.setIsDefault(product.getIsDefault());
 						bean.setProductColor(product.getProductColor());
 						bean.setProductSizeText(product.getProductSizeText());

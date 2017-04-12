@@ -1,7 +1,7 @@
 package com.limitless.services.engage.restaurants;
 
 public class NewRestaurantItemRequestBean {
-	private int restuarantId;
+	private int restaurantId;
 	private int categoryId;
 	private int subcategoryId;
 	private String itemName;
@@ -14,11 +14,13 @@ public class NewRestaurantItemRequestBean {
 	private int itemLunch;
 	private int itemBreakfast;
 	private int itemDinner;
-	public int getRestuarantId() {
-		return restuarantId;
+	private float itemDiscountRate;
+	
+	public int getRestaurantId() {
+		return restaurantId;
 	}
-	public void setRestuarantId(int restuarantId) {
-		this.restuarantId = restuarantId;
+	public void setRestaurantId(int restaurantId) {
+		this.restaurantId = restaurantId;
 	}
 	public int getCategoryId() {
 		return categoryId;
@@ -91,5 +93,11 @@ public class NewRestaurantItemRequestBean {
 	}
 	public void setItemDinner(int itemDinner) {
 		this.itemDinner = itemDinner;
+	}
+	public float getItemDiscountRate() {
+		return itemDiscountRate;
+	}
+	public void setItemDiscountRate(float itemDiscountRate) {
+		this.itemDiscountRate = itemDiscountRate;
 	}
 }
