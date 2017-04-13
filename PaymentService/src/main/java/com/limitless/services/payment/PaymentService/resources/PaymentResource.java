@@ -20,6 +20,8 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.MerchantRequestListBean;
+import com.limitless.services.engage.bills.BillPaymentStatusUpdateResponseBean;
+import com.limitless.services.engage.bills.dao.BillsManager;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
@@ -483,6 +485,14 @@ public class PaymentResource {
 					restaurantManager.sendOrderMail(orderId);
 					restaurantManager.notificationToCustomer(orderId);
 					restaurantManager.notificationToRestaurant(orderId);
+				}
+			}
+			else if(txnType.equals("bill")){
+				if(orderId>0){
+					BillsManager billsManager = new BillsManager();
+					BillPaymentStatusUpdateResponseBean billPaymentStatusUpdateResponseBean = billsManager.updateBillStatus(orderId, 1);
+					System.out.println("Update status : "+billPaymentStatusUpdateResponseBean.getMessage());
+					billsManager.sendBillMail(orderId);
 				}
 			}
 
