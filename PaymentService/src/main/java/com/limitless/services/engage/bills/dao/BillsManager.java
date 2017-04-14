@@ -38,23 +38,23 @@ public class BillsManager {
 	private static final Log log = LogFactory.getLog(BillsManager.class);
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 	Client client = RestClientUtil.createClient();
-	
-	public CustomerBillsListBean getCustomerBills(int customerId, String statusCode){
+
+	public CustomerBillsListBean getCustomerBills(int customerId, String statusCode) {
 		log.debug("getting customer bills");
 		CustomerBillsListBean listBean = new CustomerBillsListBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			statusCode = statusCode.toUpperCase();
-			
+
 			List<BillBean> billsList = new ArrayList<BillBean>();
-			
-			EngageCustomer customer = (EngageCustomer) session
-					.get("com.limitless.services.engage.dao.EngageCustomer", customerId);
-			if(customer!=null){
+
+			EngageCustomer customer = (EngageCustomer) session.get("com.limitless.services.engage.dao.EngageCustomer",
+					customerId);
+			if (customer != null) {
 				listBean.setCustomerId(customerId);
 				listBean.setCustomerName(customer.getCustomerName());
 				listBean.setCustomerMobile(customer.getCustomerMobileNumber());
@@ -65,8 +65,8 @@ public class BillsManager {
 				criteria.add(logExp);
 				List<Bills> billList = criteria.list();
 				log.debug("bill list size : " + billList.size());
-				if(billList.size()>0){
-					for(Bills bill : billList){
+				if (billList.size() > 0) {
+					for (Bills bill : billList) {
 						BillBean bean = new BillBean();
 						bean.setBillId(bill.getBillId());
 						bean.setCustomerId(customerId);
@@ -74,8 +74,9 @@ public class BillsManager {
 						bean.setSellerId(bill.getSellerId());
 						EngageSeller seller = (EngageSeller) session
 								.get("com.limitless.services.engage.dao.EngageSeller", bill.getSellerId());
-						if(seller!=null){
+						if (seller != null) {
 							bean.setSellerName(seller.getSellerShopName());
+							bean.setCitrusSellerId(seller.getCitrusSellerId());
 						}
 						bean.setBillDate(bill.getBillDate());
 						bean.setBillDueDate(bill.getBillDueDate());
@@ -89,43 +90,39 @@ public class BillsManager {
 					}
 					listBean.setBillList(billsList);
 					listBean.setMessage("Success");
-				}
-				else if(billList.isEmpty()){
+				} else if (billList.isEmpty()) {
 					listBean.setMessage("Failed");
 				}
-			}
-			else if(customer==null){
+			} else if (customer == null) {
 				listBean.setMessage("Failed - Customer Not Found");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return listBean;
 	}
-	
-	public SellerBillsListBean getSellerBills(int sellerId){
+
+	public SellerBillsListBean getSellerBills(int sellerId) {
 		log.debug("getting seller bills");
 		SellerBillsListBean listBean = new SellerBillsListBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			List<BillBean> billsList = new ArrayList<BillBean>();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					sellerId);
+			if (seller != null) {
 				listBean.setSellerId(sellerId);
 				listBean.setSellerName(seller.getSellerName());
 				listBean.setSellerShopName(seller.getSellerShopName());
@@ -134,14 +131,14 @@ public class BillsManager {
 				criteria.add(Restrictions.eq("sellerId", sellerId));
 				List<Bills> billList = criteria.list();
 				log.debug("bill size : " + billList.size());
-				if(billList.size()>0){
-					for(Bills bill : billList){
+				if (billList.size() > 0) {
+					for (Bills bill : billList) {
 						BillBean bean = new BillBean();
 						bean.setBillId(bill.getBillId());
 						bean.setCustomerId(bill.getCustomerId());
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", bill.getCustomerId());
-						if(customer!=null){
+						if (customer != null) {
 							bean.setCustomerName(customer.getCustomerName());
 						}
 						bean.setSellerId(sellerId);
@@ -150,6 +147,7 @@ public class BillsManager {
 						bean.setBillDueDate(bill.getBillDueDate());
 						bean.setBillPaidDate(bill.getBillPaidDate());
 						bean.setBillAmount(bill.getBillAmount());
+						bean.setCitrusSellerId(seller.getCitrusSellerId());
 						bean.setAdjustmentAmount(bill.getBillAdjustment());
 						bean.setPayableAmount(Math.max(0, (bill.getBillAmount() - bill.getBillAdjustment())));
 						bean.setBillStatus(bill.getBillStatus());
@@ -159,42 +157,39 @@ public class BillsManager {
 					listBean.setBillList(billsList);
 					listBean.setMessage("Success");
 				}
-			}
-			else if(seller==null){
+			} else if (seller == null) {
 				listBean.setMessage("Failed - Seller Not Found");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			log.error("getting seller bills failed : " + re);
-			if(transaction!=null){
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return listBean;
 	}
-	
-	public BillResponseBean newBill(BillRequestBean requestBean){
+
+	public BillResponseBean newBill(BillRequestBean requestBean) {
 		log.debug("adding new bill");
 		BillResponseBean responseBean = new BillResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
 				EngageCustomer customer = (EngageCustomer) session
 						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
-				if(customer!=null){
+				if (customer != null) {
 					Bills bill = new Bills();
 					bill.setCustomerId(requestBean.getCustomerId());
 					bill.setSellerId(requestBean.getSellerId());
@@ -209,166 +204,151 @@ public class BillsManager {
 					responseBean.setMessage("Success");
 					responseBean.setCustomerId(requestBean.getCustomerId());
 					responseBean.setSellerId(requestBean.getSellerId());
-				}
-				else if(customer==null){
+				} else if (customer == null) {
 					responseBean.setMessage("Failed - Customer Not Found");
 				}
-			}
-			else if(seller==null){
+			} else if (seller == null) {
 				responseBean.setMessage("Failed - Seller Not Found");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding new bill failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public BillPaymentStatusUpdateResponseBean updateBillStatus(int billId, int statusCode){
+
+	public BillPaymentStatusUpdateResponseBean updateBillStatus(int billId, int statusCode) {
 		log.debug("updating bill status");
 		BillPaymentStatusUpdateResponseBean responseBean = new BillPaymentStatusUpdateResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Bills bill = (Bills) session.get("com.limitless.services.engage.bills.dao.Bills", billId);
-			if(bill!=null){
-				if(bill.getBillId()==billId){
-					if(statusCode==1){
+			if (bill != null) {
+				if (bill.getBillId() == billId) {
+					if (statusCode == 1) {
 						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 						Date date = new Date();
 						String billPaidDate = sdf.format(date);
 						bill.setBillPaidDate(billPaidDate);
 						bill.setBillStatus("PAID");
 						session.update(bill);
-					}
-					else if(statusCode==2){
+					} else if (statusCode == 2) {
 						bill.setBillStatus("PENDING");
 						session.update(bill);
 					}
 					responseBean.setBillId(billId);
 					responseBean.setMessage("Success");
-				}
-				else{
+				} else {
 					responseBean.setMessage("Failed");
 				}
-			}
-			else if(bill==null){
+			} else if (bill == null) {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("updating bill status failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public void sendBillMail(int billId){
+
+	public void sendBillMail(int billId) {
 		log.debug("sending mail for bill payment");
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			String customerName = "";
 			String customerEmail = "";
 			String sellerName = "";
 			String sellerMobile = "";
 			String sellerEmail = "";
 			String mailContent = "";
-			
-			Bills bill = (Bills) session
-					.get("com.limitless.services.engage.bills.dao.Bills", billId);
-			if(bill!=null){
+
+			Bills bill = (Bills) session.get("com.limitless.services.engage.bills.dao.Bills", billId);
+			if (bill != null) {
 				EngageCustomer customer = (EngageCustomer) session
 						.get("com.limitless.services.engage.dao.EngageCustomer", bill.getCustomerId());
-				if(customer!=null){
+				if (customer != null) {
 					customerName = customer.getCustomerName();
 					customerEmail = customer.getCustomerEmail99();
-					EngageSeller seller = (EngageSeller) session
-							.get("com.limitless.services.engage.dao.EngageSeller", bill.getSellerId());
-					if(seller!=null){
+					EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+							bill.getSellerId());
+					if (seller != null) {
 						sellerName = seller.getSellerShopName();
 						sellerMobile = seller.getSellerMobileNumber();
 						sellerEmail = seller.getSellerEmail99();
 						final String username = "transactions@limitlesscircle.com";
 						final String password = "Engage@12E";
-						String sendMailTo = customerEmail+","+sellerEmail;
+						String sendMailTo = customerEmail + "," + sellerEmail;
 						log.debug("Mailing to : " + sendMailTo);
 						Properties properties = new Properties();
 						properties.put("mail.smtp.host", "smtp.zoho.com");
 						properties.put("mail.smtp.socketFactory.port", "465");
-						properties.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+						properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 						properties.put("mail.smtp.auth", "true");
 						properties.put("mail.smtp.port", "465");
 						javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(properties,
 								new javax.mail.Authenticator() {
-							protected PasswordAuthentication getPasswordAuthentication() {
-								return new PasswordAuthentication(username, password);
-							}
-						  });
-						
-						try{
+									protected PasswordAuthentication getPasswordAuthentication() {
+										return new PasswordAuthentication(username, password);
+									}
+								});
+
+						try {
 							javax.mail.Message message = new MimeMessage(mailSession);
 							message.setFrom(new InternetAddress("transactions@limitlesscircle.com"));
 							message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(sendMailTo));
-							message.addRecipients(Message.RecipientType.BCC, InternetAddress.parse("orders@limitlesscircle.com"));
-							message.setSubject("Bill Payment Done Successfully. Reference BillId :"+billId);
-							mailContent = "Hello "+customerName+",<br>"
-									+ "<table>"
-									+ "<tr><td>Bill Id</td><td>"+billId+"</td></tr>"
-									+ "<tr><td>Seller Name</td><td>"+sellerName+"</td></tr>"
-									+ "<tr><td>Bill Amount</td><td>"+bill.getBillAmount()+"</td></tr>"
-									+ "<tr><td>Adjustment</td><td>"+bill.getBillAdjustment()+"</td></tr>"
-									+ "<tr><td>Amount Paid</td><td>"+Math.max(0, (bill.getBillAmount() - bill.getBillAdjustment()))+"</td></tr>"
-									+ "</table>"
-									+ "<br>"
-									+ "For other queries contact seller:"+sellerMobile;
+							message.addRecipients(Message.RecipientType.BCC,
+									InternetAddress.parse("orders@limitlesscircle.com"));
+							message.setSubject("Bill Payment Done Successfully. Reference BillId :" + billId);
+							mailContent = "Hello " + customerName + ",<br>" + "<table>" + "<tr><td>Bill Id</td><td>"
+									+ billId + "</td></tr>" + "<tr><td>Seller Name</td><td>" + sellerName + "</td></tr>"
+									+ "<tr><td>Bill Amount</td><td>" + bill.getBillAmount() + "</td></tr>"
+									+ "<tr><td>Adjustment</td><td>" + bill.getBillAdjustment() + "</td></tr>"
+									+ "<tr><td>Amount Paid</td><td>"
+									+ Math.max(0, (bill.getBillAmount() - bill.getBillAdjustment())) + "</td></tr>"
+									+ "</table>" + "<br>" + "For other queries contact seller:" + sellerMobile;
 							message.setContent(mailContent, "text/html");
 							Transport.send(message, message.getAllRecipients());
-						}
-						catch(Exception e){
-							log.error("something went wrong : "+e);
+						} catch (Exception e) {
+							log.error("something went wrong : " + e);
 						}
 					}
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
-				
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+
 			}
 			log.error("sending mail failed : " + re);
-		}
-		finally {
-			if(session!=null & session.isOpen()){
+		} finally {
+			if (session != null & session.isOpen()) {
 				session.close();
 			}
 		}
 	}
-	
+
 }

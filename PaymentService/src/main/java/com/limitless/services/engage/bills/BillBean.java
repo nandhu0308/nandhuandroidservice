@@ -13,7 +13,16 @@ public class BillBean {
 	private float adjustmentAmount;
 	private float payableAmount;
 	private String billStatus;
+	private int citrusSellerId;
 	
+	
+	
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
+	}
 	public int getBillId() {
 		return billId;
 	}
