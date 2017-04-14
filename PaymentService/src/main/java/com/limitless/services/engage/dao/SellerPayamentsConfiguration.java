@@ -44,6 +44,8 @@ public class SellerPayamentsConfiguration {
 	private float convenienceFeeAmount;
 	@Column(name="CONVENIENCE_FEE_RATE")
 	private float convenienceFeeRate;
+	@Column(name="PAYMENT_ALERT")
+	private String paymentAlert;
 	
 	public Integer getSpcId() {
 		return spcId;
@@ -122,5 +124,11 @@ public class SellerPayamentsConfiguration {
 	}
 	public void setConvenienceFeeRate(float convenienceFeeRate) {
 		this.convenienceFeeRate = convenienceFeeRate;
+	}
+	public String getPaymentAlert() {
+		return paymentAlert;
+	}
+	public void setPaymentAlert(String paymentAlert) {
+		this.paymentAlert = paymentAlert;
 	}
 }

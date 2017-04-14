@@ -31,6 +31,7 @@ public class SellerLoginResponseBean {
 	private float deliveryMinAmount;
 	private float deliveryFee;
 	private int deliveryRadius;
+	private String paymentAlert;
 	private boolean cobranding;
 	private BroadcasterChannelResponseBean channelBean;
 	
@@ -194,5 +195,11 @@ public class SellerLoginResponseBean {
 	}
 	public void setChannelBean(BroadcasterChannelResponseBean channelBean) {
 		this.channelBean = channelBean;
+	}
+	public String getPaymentAlert() {
+		return paymentAlert;
+	}
+	public void setPaymentAlert(String paymentAlert) {
+		this.paymentAlert = paymentAlert;
 	}
 }

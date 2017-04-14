@@ -6,6 +6,7 @@ public class BillBean {
 	private String customerName;
 	private int sellerId;
 	private String sellerName;
+	private int citrusSellerId;
 	private String billDate;
 	private String billDueDate;
 	private String billPaidDate;
@@ -85,5 +86,11 @@ public class BillBean {
 	}
 	public void setPayableAmount(float payableAmount) {
 		this.payableAmount = payableAmount;
+	}
+	public int getCitrusSellerId() {
+		return citrusSellerId;
+	}
+	public void setCitrusSellerId(int citrusSellerId) {
+		this.citrusSellerId = citrusSellerId;
 	}
 }

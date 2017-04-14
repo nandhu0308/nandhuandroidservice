@@ -629,6 +629,7 @@ public class EngageSellerManager {
 					if(configList.size()>0){
 						for(SellerPayamentsConfiguration config : configList){
 							responseBean.setCitrusSellerId(config.getCitrusSellerId());
+							responseBean.setPaymentAlert(config.getPaymentAlert());
 							if(config.getPayOnDelivery()==1){
 								responseBean.setPodAvailable(true);
 							}

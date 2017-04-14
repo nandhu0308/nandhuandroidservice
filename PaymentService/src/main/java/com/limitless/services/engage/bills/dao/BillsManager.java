@@ -76,6 +76,7 @@ public class BillsManager {
 								.get("com.limitless.services.engage.dao.EngageSeller", bill.getSellerId());
 						if(seller!=null){
 							bean.setSellerName(seller.getSellerShopName());
+							bean.setCitrusSellerId(seller.getCitrusSellerId());
 						}
 						bean.setBillDate(bill.getBillDate());
 						bean.setBillDueDate(bill.getBillDueDate());
