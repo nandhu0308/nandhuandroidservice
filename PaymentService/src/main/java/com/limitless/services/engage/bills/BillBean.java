@@ -2,6 +2,7 @@ package com.limitless.services.engage.bills;
 
 public class BillBean {
 	private int billId;
+	private String clientInvoiceId;
 	private int customerId;
 	private String customerName;
 	private int sellerId;
@@ -92,5 +93,11 @@ public class BillBean {
 	}
 	public void setPayableAmount(float payableAmount) {
 		this.payableAmount = payableAmount;
+	}
+	public String getClientInvoiceId() {
+		return clientInvoiceId;
+	}
+	public void setClientInvoiceId(String clientInvoiceId) {
+		this.clientInvoiceId = clientInvoiceId;
 	}
 }

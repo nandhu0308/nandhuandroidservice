@@ -9,6 +9,7 @@ public class VideoBean {
 	private String videoDescription;
 	private String videoThumbnail;
 	private String videoUrl;
+	private boolean isYoutube;
 	private String videoCreated;
 	
 	public int getVideoId() {
@@ -64,5 +65,11 @@ public class VideoBean {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public boolean isYoutube() {
+		return isYoutube;
+	}
+	public void setYoutube(boolean isYoutube) {
+		this.isYoutube = isYoutube;
 	}
 }

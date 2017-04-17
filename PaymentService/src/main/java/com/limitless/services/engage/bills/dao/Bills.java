@@ -18,6 +18,8 @@ public class Bills {
 	@GeneratedValue
 	@Column(name="BILL_ID")
 	private Integer billId;
+	@Column(name="CLIENT_INVOICE_ID")
+	private String clientInvoiceId;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
 	@Column(name="CUSTOMER_ID")
@@ -106,5 +108,11 @@ public class Bills {
 	}
 	public void setBillUpdatedTime(Date billUpdatedTime) {
 		this.billUpdatedTime = billUpdatedTime;
+	}
+	public String getClientInvoiceId() {
+		return clientInvoiceId;
+	}
+	public void setClientInvoiceId(String clientInvoiceId) {
+		this.clientInvoiceId = clientInvoiceId;
 	}
 }

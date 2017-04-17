@@ -69,6 +69,7 @@ public class BillsManager {
 					for (Bills bill : billList) {
 						BillBean bean = new BillBean();
 						bean.setBillId(bill.getBillId());
+						bean.setClientInvoiceId(bill.getClientInvoiceId());
 						bean.setCustomerId(customerId);
 						bean.setCustomerName(customer.getCustomerName());
 						bean.setSellerId(bill.getSellerId());
@@ -91,7 +92,7 @@ public class BillsManager {
 					listBean.setBillList(billsList);
 					listBean.setMessage("Success");
 				} else if (billList.isEmpty()) {
-					listBean.setMessage("Failed");
+					listBean.setMessage("No Bills Found");
 				}
 			} else if (customer == null) {
 				listBean.setMessage("Failed - Customer Not Found");
@@ -135,6 +136,7 @@ public class BillsManager {
 					for (Bills bill : billList) {
 						BillBean bean = new BillBean();
 						bean.setBillId(bill.getBillId());
+						bean.setClientInvoiceId(bill.getClientInvoiceId());
 						bean.setCustomerId(bill.getCustomerId());
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", bill.getCustomerId());
@@ -156,6 +158,9 @@ public class BillsManager {
 					}
 					listBean.setBillList(billsList);
 					listBean.setMessage("Success");
+				}
+				else{
+					listBean.setMessage("No Bills Found");
 				}
 			} else if (seller == null) {
 				listBean.setMessage("Failed - Seller Not Found");
@@ -191,6 +196,7 @@ public class BillsManager {
 						.get("com.limitless.services.engage.dao.EngageCustomer", requestBean.getCustomerId());
 				if (customer != null) {
 					Bills bill = new Bills();
+					bill.setClientInvoiceId(requestBean.getClientInvoiceId());
 					bill.setCustomerId(requestBean.getCustomerId());
 					bill.setSellerId(requestBean.getSellerId());
 					bill.setBillDate(requestBean.getBillDate());
@@ -323,7 +329,9 @@ public class BillsManager {
 							message.addRecipients(Message.RecipientType.BCC,
 									InternetAddress.parse("orders@limitlesscircle.com"));
 							message.setSubject("Bill Payment Done Successfully. Reference BillId :" + billId);
-							mailContent = "Hello " + customerName + ",<br>" + "<table>" + "<tr><td>Bill Id</td><td>"
+							mailContent = "Hello " + customerName + ",<br>" + "<table>"
+									+ "<tr><td>Invoice Number</td><td>"+bill.getClientInvoiceId()+"</td></tr>"
+									+ "<tr><td>Bill Id</td><td>"
 									+ billId + "</td></tr>" + "<tr><td>Seller Name</td><td>" + sellerName + "</td></tr>"
 									+ "<tr><td>Bill Amount</td><td>" + bill.getBillAmount() + "</td></tr>"
 									+ "<tr><td>Adjustment</td><td>" + bill.getBillAdjustment() + "</td></tr>"

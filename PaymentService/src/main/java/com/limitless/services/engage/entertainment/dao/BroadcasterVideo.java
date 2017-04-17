@@ -34,6 +34,9 @@ public class BroadcasterVideo {
 	@Version
 	@Column(name="VIDEO_UPDATED_TIME")
 	private Date videoUpdatedTime;
+	@Column(name="IS_YOUTUBE", nullable=false, columnDefinition="TINYINT(1)")
+	private boolean isYoutube;
+	
 	public Integer getVideosId() {
 		return videosId;
 	}
@@ -82,4 +85,11 @@ public class BroadcasterVideo {
 	public void setVideoThumbnail(String videoThumbnail) {
 		this.videoThumbnail = videoThumbnail;
 	}
+	public boolean isYoutube() {
+		return isYoutube;
+	}
+	public void setYoutube(boolean isYoutube) {
+		this.isYoutube = isYoutube;
+	}
+	
 }

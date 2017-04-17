@@ -1,6 +1,7 @@
 package com.limitless.services.engage.bills;
 
 public class BillRequestBean {
+	private String clientInvoiceId;
 	private int customerId;
 	private int sellerId;
 	private String billDate;
@@ -43,5 +44,11 @@ public class BillRequestBean {
 	}
 	public void setBillAdjustment(float billAdjustment) {
 		this.billAdjustment = billAdjustment;
+	}
+	public String getClientInvoiceId() {
+		return clientInvoiceId;
+	}
+	public void setClientInvoiceId(String clientInvoiceId) {
+		this.clientInvoiceId = clientInvoiceId;
 	}
 }

@@ -123,6 +123,7 @@ public class BroadcasterManager {
 						videoBean.setVideoDescription(video.getVideoDescription());
 						videoBean.setVideoThumbnail(video.getVideoThumbnail());
 						videoBean.setVideoUrl(video.getVideoUrl());
+						videoBean.setYoutube(video.isYoutube());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 						videoList.add(videoBean);
 						videoBean = null;
@@ -167,6 +168,7 @@ public class BroadcasterManager {
 				videoBean.setVideoDescription(video.getVideoDescription());
 				videoBean.setVideoThumbnail(video.getVideoThumbnail());
 				videoBean.setVideoUrl(video.getVideoUrl());
+				videoBean.setYoutube(video.isYoutube());
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
 			}
