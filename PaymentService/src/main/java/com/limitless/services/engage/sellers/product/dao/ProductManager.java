@@ -14,6 +14,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageSeller;
@@ -355,6 +356,7 @@ public class ProductManager {
 				List<ProductsCategoryListBean> categoryProductList = new ArrayList<ProductsCategoryListBean>();
 				Criteria criteria = session.createCriteria(ProductCategory.class);
 				criteria.add(Restrictions.eq("sellerId", sellerId));
+				criteria.addOrder(Order.asc("productCategoryName"));
 				List<ProductCategory> categoryList = criteria.list();
 				log.debug("category size : " + categoryList.size());
 				if (categoryList.size() > 0) {
@@ -365,6 +367,7 @@ public class ProductManager {
 						categoryBean.setCategoryImageUrl(category.getProdcuctCategoryImage());
 						Criteria criteria2 = session.createCriteria(ProductSubcategory.class);
 						criteria2.add(Restrictions.eq("productCategoryId", category.getProductCategoryId()));
+						criteria2.addOrder(Order.asc("productScName"));
 						List<ProductSubcategory> subcategoryList = criteria2.list();
 						log.debug("sub category size : " + subcategoryList.size());
 						if (subcategoryList.size() > 0) {

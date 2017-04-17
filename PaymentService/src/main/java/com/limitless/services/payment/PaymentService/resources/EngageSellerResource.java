@@ -32,6 +32,8 @@ import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
 import com.limitless.services.engage.SellerAdsListBean;
+import com.limitless.services.engage.SellerBusinessCategoryBean;
+import com.limitless.services.engage.SellerBusinessCategoryListBean;
 import com.limitless.services.engage.SellerContactsRequestBean;
 import com.limitless.services.engage.SellerContactsResponseBean;
 import com.limitless.services.engage.SellerDeviceIdRespBean;
@@ -589,6 +591,38 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
+	}
+	
+	@GET
+	@Path("/list/business/category")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerBusinessCategoryListBean getBusinessCategoryList() throws Exception{
+		SellerBusinessCategoryListBean listBean = new SellerBusinessCategoryListBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.getSellerBusinessCategoryList();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
+	}
+	
+	@GET
+	@Path("/get/business/category/{categoryName}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerBusinessCategoryBean getBusinessCategorySellerList(@PathParam("categoryName") String categoryName) throws Exception{
+		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			categoryBean = manager.getBusinessCategorySellerList(categoryName);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return categoryBean;
 	}
 
 }

@@ -24,6 +24,8 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.json.JSONObject;
 
@@ -47,10 +49,13 @@ import com.limitless.services.engage.NewMerchantsRequestBean;
 import com.limitless.services.engage.PhoneNumber;
 import com.limitless.services.engage.SellerAdBean;
 import com.limitless.services.engage.SellerAdsListBean;
+import com.limitless.services.engage.SellerBusinessCategoryBean;
+import com.limitless.services.engage.SellerBusinessCategoryListBean;
 import com.limitless.services.engage.SellerContactsRequestBean;
 import com.limitless.services.engage.SellerContactsResponseBean;
 import com.limitless.services.engage.SellerLoginRequestBean;
 import com.limitless.services.engage.SellerLoginResponseBean;
+import com.limitless.services.engage.SellerMinBean;
 import com.limitless.services.engage.SellerPasswdRequestBean;
 import com.limitless.services.engage.SellerPasswdResponseBean;
 import com.limitless.services.engage.SellerRestaurantListBean;
@@ -1737,6 +1742,90 @@ public class EngageSellerManager {
 			}
 		}
 		return listBean;
+	}
+	
+	public SellerBusinessCategoryListBean getSellerBusinessCategoryList(){
+		log.debug("getting seller business category");
+		SellerBusinessCategoryListBean listBean = new SellerBusinessCategoryListBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.ne("businessCategory", "")).setProjection(Projections.distinct(Projections.property("businessCategory")));
+			criteria.addOrder(Order.asc("businessCategory"));
+			List<String> categoryList = criteria.list();
+			log.debug("category list : " + categoryList.size());
+			listBean.setBusinessCategoryList(categoryList);
+			listBean.setMessage("Success");
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting seller business category failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return listBean;
+	}
+	
+	public SellerBusinessCategoryBean getBusinessCategorySellerList(String categoryName){
+		log.debug("getting seller list");
+		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			List<SellerMinBean> sellerList = new ArrayList<SellerMinBean>();
+			
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.eq("businessCategory", categoryName));
+			criteria.addOrder(Order.asc("sellerShopName"));
+			List<EngageSeller> sellersList = criteria.list();
+			log.debug("seller list size : " + sellersList.size());
+			if(sellersList.size()>0){
+				categoryBean.setSellerBusinessCategory(categoryName);
+				categoryBean.setMessage("Success");
+				for(EngageSeller seller : sellersList){
+					SellerMinBean bean = new SellerMinBean();
+					bean.setSellerId(seller.getSellerId());
+					bean.setSellerName(seller.getSellerName());
+					bean.setSellerShopName(seller.getSellerShopName());
+					bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+					bean.setSellerBrandingUrl(seller.getBranding_url());
+					sellerList.add(bean);
+					bean = null;
+				}
+				categoryBean.setSellerList(sellerList);
+			}
+			else if(sellersList.isEmpty()){
+				categoryBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting seller list failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return categoryBean;
 	}
 
 	/*
