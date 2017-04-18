@@ -3,15 +3,8 @@ package com.limitless.services.engage;
 import java.util.List;
 
 public class SellerBusinessCategoryBean {
-	private String message;
 	private String sellerBusinessCategory;
 	private List<SellerMinBean> sellerList;
-	public String getMessage() {
-		return message;
-	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
 	public String getSellerBusinessCategory() {
 		return sellerBusinessCategory;
 	}

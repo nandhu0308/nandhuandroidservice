@@ -32,6 +32,7 @@ import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
 import com.limitless.services.engage.SellerAdsListBean;
+import com.limitless.services.engage.SellerBrandPromotionListBean;
 import com.limitless.services.engage.SellerBusinessCategoryBean;
 import com.limitless.services.engage.SellerBusinessCategoryListBean;
 import com.limitless.services.engage.SellerContactsRequestBean;
@@ -623,6 +624,34 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return categoryBean;
+	}
+	
+	@GET
+	@Path("/list/seller/business/category")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSellerBusinessCategoryList(){
+		EngageSellerManager manager = new EngageSellerManager();
+		List<SellerBusinessCategoryBean> categoryList = manager.getSellerCategoryList();
+		if(categoryList!=null || !(categoryList.isEmpty())){
+			return Response.status(200).entity(categoryList).build();
+		}
+		return Response.status(404).build();
+	}
+	
+	@GET
+	@Path("/brand/promotion")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerBrandPromotionListBean getSellerPromotionList() throws Exception{
+		SellerBrandPromotionListBean listBean = new SellerBrandPromotionListBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.getSellerBrandPromotionsList();
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return listBean;
 	}
 
 }

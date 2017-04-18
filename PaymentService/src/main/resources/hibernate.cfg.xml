@@ -64,6 +64,7 @@
   <mapping class="com.limitless.services.engage.entertainment.dao.BroadcasterAlbum"/>
   <mapping class="com.limitless.services.engage.entertainment.dao.BroadcasterVideo"/>
   <mapping class="com.limitless.services.engage.bills.dao.Bills"/>
+  <mapping class="com.limitless.services.engage.dao.SellerBrandPromotion"/>
   
  </session-factory>
 </hibernate-configuration>

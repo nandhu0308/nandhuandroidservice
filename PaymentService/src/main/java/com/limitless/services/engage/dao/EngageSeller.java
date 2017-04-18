@@ -93,6 +93,8 @@ public class EngageSeller implements java.io.Serializable {
 	private String aboutSeller;
 	@Column(name="COBRANDING", nullable=false, columnDefinition="TINYINT(1)")
 	private boolean cobranding = true;
+	@Column(name="SELLER_ICON_URL")
+	private String sellerIconURL;
 	
 	public EngageSeller() {
 	}
@@ -420,5 +422,12 @@ public class EngageSeller implements java.io.Serializable {
 	public void setCobranding(boolean cobranding) {
 		this.cobranding = cobranding;
 	}
-	
+
+	public String getSellerIconURL() {
+		return sellerIconURL;
+	}
+
+	public void setSellerIconURL(String sellerIconURL) {
+		this.sellerIconURL = sellerIconURL;
+	}
 }

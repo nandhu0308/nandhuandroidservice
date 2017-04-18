@@ -1,13 +1,19 @@
 package com.limitless.services.engage;
 
-public class SellerMinBean {
+public class SellerBrandPromotionBean {
+	private int sbpId;
 	private int sellerId;
 	private String sellerName;
 	private String sellerShopName;
-	private String sellerMobileNumber;
 	private String sellerBrandingUrl;
-	private String sellerIconUrl;
-	private String sellerTags;
+	private String sellerMobileNumber;
+	
+	public int getSbpId() {
+		return sbpId;
+	}
+	public void setSbpId(int sbpId) {
+		this.sbpId = sbpId;
+	}
 	public int getSellerId() {
 		return sellerId;
 	}
@@ -26,28 +32,16 @@ public class SellerMinBean {
 	public void setSellerShopName(String sellerShopName) {
 		this.sellerShopName = sellerShopName;
 	}
-	public String getSellerMobileNumber() {
-		return sellerMobileNumber;
-	}
-	public void setSellerMobileNumber(String sellerMobileNumber) {
-		this.sellerMobileNumber = sellerMobileNumber;
-	}
 	public String getSellerBrandingUrl() {
 		return sellerBrandingUrl;
 	}
 	public void setSellerBrandingUrl(String sellerBrandingUrl) {
 		this.sellerBrandingUrl = sellerBrandingUrl;
 	}
-	public String getSellerTags() {
-		return sellerTags;
+	public String getSellerMobileNumber() {
+		return sellerMobileNumber;
 	}
-	public void setSellerTags(String sellerTags) {
-		this.sellerTags = sellerTags;
-	}
-	public String getSellerIconUrl() {
-		return sellerIconUrl;
-	}
-	public void setSellerIconUrl(String sellerIconUrl) {
-		this.sellerIconUrl = sellerIconUrl;
+	public void setSellerMobileNumber(String sellerMobileNumber) {
+		this.sellerMobileNumber = sellerMobileNumber;
 	}
 }

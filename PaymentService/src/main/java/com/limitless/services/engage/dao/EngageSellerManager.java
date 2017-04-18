@@ -49,6 +49,8 @@ import com.limitless.services.engage.NewMerchantsRequestBean;
 import com.limitless.services.engage.PhoneNumber;
 import com.limitless.services.engage.SellerAdBean;
 import com.limitless.services.engage.SellerAdsListBean;
+import com.limitless.services.engage.SellerBrandPromotionBean;
+import com.limitless.services.engage.SellerBrandPromotionListBean;
 import com.limitless.services.engage.SellerBusinessCategoryBean;
 import com.limitless.services.engage.SellerBusinessCategoryListBean;
 import com.limitless.services.engage.SellerContactsRequestBean;
@@ -1754,7 +1756,8 @@ public class EngageSellerManager {
 			transaction = session.beginTransaction();
 			
 			Criteria criteria = session.createCriteria(EngageSeller.class);
-			criteria.add(Restrictions.ne("businessCategory", "")).setProjection(Projections.distinct(Projections.property("businessCategory")));
+			criteria.add(Restrictions.ne("businessCategory", ""))
+				.setProjection(Projections.distinct(Projections.property("businessCategory")));
 			criteria.addOrder(Order.asc("businessCategory"));
 			List<String> categoryList = criteria.list();
 			log.debug("category list : " + categoryList.size());
@@ -1795,7 +1798,6 @@ public class EngageSellerManager {
 			log.debug("seller list size : " + sellersList.size());
 			if(sellersList.size()>0){
 				categoryBean.setSellerBusinessCategory(categoryName);
-				categoryBean.setMessage("Success");
 				for(EngageSeller seller : sellersList){
 					SellerMinBean bean = new SellerMinBean();
 					bean.setSellerId(seller.getSellerId());
@@ -1809,7 +1811,7 @@ public class EngageSellerManager {
 				categoryBean.setSellerList(sellerList);
 			}
 			else if(sellersList.isEmpty()){
-				categoryBean.setMessage("Failed");
+				
 			}
 			transaction.commit();
 		}
@@ -1826,6 +1828,122 @@ public class EngageSellerManager {
 			}
 		}
 		return categoryBean;
+	}
+	
+	public List<SellerBusinessCategoryBean> getSellerCategoryList(){
+		log.debug("getting seller business list");
+		List<SellerBusinessCategoryBean> sellerCategoryList = null;
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			criteria.add(Restrictions.ne("businessCategory", ""))
+					.setProjection(Projections.distinct(Projections.property("businessCategory")));
+			criteria.addOrder(Order.asc("businessCategory"));
+			List<String> categoryList = criteria.list();
+			log.debug("category list : " + categoryList.size());
+			if(categoryList.size()>0){
+				sellerCategoryList = new ArrayList<SellerBusinessCategoryBean>();
+				for(String category : categoryList){
+					SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+					log.debug("category name : " + category);
+					categoryBean.setSellerBusinessCategory(category);
+					List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
+					Criteria criteria2 = session.createCriteria(EngageSeller.class);
+					Criterion bcCriterion = Restrictions.eq("businessCategory", category);
+					Criterion activeCriterion = Restrictions.eq("isActive", 1);
+					LogicalExpression logExp = Restrictions.and(bcCriterion, activeCriterion);
+					criteria2.add(logExp);
+					List<EngageSeller> sellerList = criteria2.list();
+					log.debug("seller size : " + sellerList.size());
+					if(sellerList.size()>0){
+						for(EngageSeller seller : sellerList){
+							SellerMinBean bean = new SellerMinBean();
+							bean.setSellerId(seller.getSellerId());
+							bean.setSellerName(seller.getSellerName());
+							bean.setSellerShopName(seller.getSellerShopName());
+							bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+							bean.setSellerBrandingUrl(seller.getBranding_url());
+							bean.setSellerIconUrl(seller.getSellerIconURL());
+							bean.setSellerTags(seller.getTag());
+							beanList.add(bean);
+							bean = null;
+						}
+						categoryBean.setSellerList(beanList);
+					}
+					sellerCategoryList.add(categoryBean);
+					categoryBean = null;
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting seller list failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return sellerCategoryList;
+	}
+	
+	public SellerBrandPromotionListBean getSellerBrandPromotionsList(){
+		log.debug("getting promotion list");
+		SellerBrandPromotionListBean listBean = new SellerBrandPromotionListBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(SellerBrandPromotion.class);
+			List<SellerBrandPromotion> promotionList = criteria.list();
+			log.debug("promo size : " + promotionList.size());
+			if(promotionList.size()>0){
+				List<SellerBrandPromotionBean> beanList = new ArrayList<SellerBrandPromotionBean>();
+				for(SellerBrandPromotion promo : promotionList){
+					SellerBrandPromotionBean bean = new SellerBrandPromotionBean();
+					bean.setSbpId(promo.getSbpId());
+					bean.setSellerId(promo.getSellerId());
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller", promo.getSellerId());
+					if(seller!=null){
+						bean.setSellerName(seller.getSellerName());
+						bean.setSellerShopName(seller.getSellerShopName());
+						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+						bean.setSellerBrandingUrl(seller.getBranding_url());
+					}
+					beanList.add(bean);
+					bean = null;
+				}
+				listBean.setPromotionList(beanList);
+				listBean.setMessage("Succes");
+			}
+			else if(promotionList.isEmpty()){
+				listBean.setMessage("Failed");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting promotion list failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return listBean;
 	}
 
 	/*
