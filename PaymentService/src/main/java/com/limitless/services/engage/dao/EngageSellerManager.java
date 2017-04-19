@@ -68,6 +68,7 @@ import com.limitless.services.engage.restaurants.dao.Restaurants;
 import com.limitless.services.engage.sellers.SubMerchantBean;
 import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.dao.SellerVersion;
+import com.limitless.services.engage.sellers.product.dao.ProductCategory;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
@@ -629,6 +630,7 @@ public class EngageSellerManager {
 					responseBean.setMapMarkerName(seller.getMapMarkerName());
 					responseBean.setAboutSeller(seller.getAboutSeller());
 					responseBean.setCobranding(seller.isCobranding());
+					responseBean.setEcomPayment(seller.getEcomPayment());
 					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 					List<SellerPayamentsConfiguration> configList = criteria2.list();
@@ -1790,28 +1792,55 @@ public class EngageSellerManager {
 			transaction = session.beginTransaction();
 			
 			List<SellerMinBean> sellerList = new ArrayList<SellerMinBean>();
-			
-			Criteria criteria = session.createCriteria(EngageSeller.class);
-			criteria.add(Restrictions.eq("businessCategory", categoryName));
-			criteria.addOrder(Order.asc("sellerShopName"));
-			List<EngageSeller> sellersList = criteria.list();
-			log.debug("seller list size : " + sellersList.size());
-			if(sellersList.size()>0){
-				categoryBean.setSellerBusinessCategory(categoryName);
-				for(EngageSeller seller : sellersList){
-					SellerMinBean bean = new SellerMinBean();
-					bean.setSellerId(seller.getSellerId());
-					bean.setSellerName(seller.getSellerName());
-					bean.setSellerShopName(seller.getSellerShopName());
-					bean.setSellerMobileNumber(seller.getSellerMobileNumber());
-					bean.setSellerBrandingUrl(seller.getBranding_url());
-					sellerList.add(bean);
-					bean = null;
+
+			if (categoryName.equalsIgnoreCase("TV")) {
+				Criteria criteria = session.createCriteria(EngageSeller.class);
+				criteria.add(Restrictions.eq("businessCategory", "TV"));
+				criteria.addOrder(Order.asc("sellerShopName"));
+				List<EngageSeller> sellersList = criteria.list();
+				log.debug("seller list size : " + sellersList.size());
+				if (sellersList.size() > 0) {
+					categoryBean.setSellerBusinessCategory(categoryName);
+					for (EngageSeller seller : sellersList) {
+						SellerMinBean bean = new SellerMinBean();
+						bean.setSellerId(seller.getSellerId());
+						bean.setSellerName(seller.getSellerName());
+						bean.setSellerShopName(seller.getSellerShopName());
+						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+						bean.setSellerCity(seller.getSellerCity());
+						bean.setSellerBrandingUrl(seller.getBranding_url());
+						bean.setSellerIconUrl(seller.getSellerIconURL());
+						sellerList.add(bean);
+						bean = null;
+					}
+					categoryBean.setSellerList(sellerList);
 				}
-				categoryBean.setSellerList(sellerList);
-			}
-			else if(sellersList.isEmpty()){
-				
+			} else {
+
+				Criteria criteria = session.createCriteria(EngageSeller.class);
+				Junction condition = Restrictions.conjunction().add(Restrictions.eq("businessCategory", categoryName))
+						.add(Restrictions.eq("isActive", 1)).add(Restrictions.eq("isDeleted", 0))
+						.add(Restrictions.eq("sellerRole", "admin")).add(Restrictions.eq("ecomPayment", 1));
+				criteria.add(condition);
+				criteria.addOrder(Order.asc("sellerShopName"));
+				List<EngageSeller> sellersList = criteria.list();
+				log.debug("seller list size : " + sellersList.size());
+				if (sellersList.size() > 0) {
+					categoryBean.setSellerBusinessCategory(categoryName);
+					for (EngageSeller seller : sellersList) {
+						SellerMinBean bean = new SellerMinBean();
+						bean.setSellerId(seller.getSellerId());
+						bean.setSellerName(seller.getSellerName());
+						bean.setSellerShopName(seller.getSellerShopName());
+						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+						bean.setSellerCity(seller.getSellerCity());
+						bean.setSellerBrandingUrl(seller.getBranding_url());
+						bean.setSellerIconUrl(seller.getSellerIconURL());
+						sellerList.add(bean);
+						bean = null;
+					}
+					categoryBean.setSellerList(sellerList);
+				}
 			}
 			transaction.commit();
 		}
@@ -1848,24 +1877,28 @@ public class EngageSellerManager {
 			if(categoryList.size()>0){
 				sellerCategoryList = new ArrayList<SellerBusinessCategoryBean>();
 				for(String category : categoryList){
-					SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
 					log.debug("category name : " + category);
-					categoryBean.setSellerBusinessCategory(category);
 					List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
 					Criteria criteria2 = session.createCriteria(EngageSeller.class);
-					Criterion bcCriterion = Restrictions.eq("businessCategory", category);
-					Criterion activeCriterion = Restrictions.eq("isActive", 1);
-					LogicalExpression logExp = Restrictions.and(bcCriterion, activeCriterion);
-					criteria2.add(logExp);
+					Junction condition = Restrictions.conjunction()
+							.add(Restrictions.eq("businessCategory", category))
+							.add(Restrictions.eq("isActive", 1))
+							.add(Restrictions.eq("isDeleted", 0))
+							.add(Restrictions.eq("sellerRole", "admin"))
+							.add(Restrictions.eq("ecomPayment", 1));
+					criteria2.add(condition);
 					List<EngageSeller> sellerList = criteria2.list();
 					log.debug("seller size : " + sellerList.size());
 					if(sellerList.size()>0){
-						for(EngageSeller seller : sellerList){
+						SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+						categoryBean.setSellerBusinessCategory(category);
+						for (EngageSeller seller : sellerList) {
 							SellerMinBean bean = new SellerMinBean();
 							bean.setSellerId(seller.getSellerId());
 							bean.setSellerName(seller.getSellerName());
 							bean.setSellerShopName(seller.getSellerShopName());
 							bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+							bean.setSellerCity(seller.getSellerCity());
 							bean.setSellerBrandingUrl(seller.getBranding_url());
 							bean.setSellerIconUrl(seller.getSellerIconURL());
 							bean.setSellerTags(seller.getTag());
@@ -1873,9 +1906,9 @@ public class EngageSellerManager {
 							bean = null;
 						}
 						categoryBean.setSellerList(beanList);
+						sellerCategoryList.add(categoryBean);
+						categoryBean = null;
 					}
-					sellerCategoryList.add(categoryBean);
-					categoryBean = null;
 				}
 			}
 			transaction.commit();
@@ -1924,7 +1957,7 @@ public class EngageSellerManager {
 					bean = null;
 				}
 				listBean.setPromotionList(beanList);
-				listBean.setMessage("Succes");
+				listBean.setMessage("Success");
 			}
 			else if(promotionList.isEmpty()){
 				listBean.setMessage("Failed");

@@ -22,6 +22,7 @@ public class SellerLoginResponseBean {
 	private String sessionKey;
 	private int sessionId;
 	private String businessCategory;
+	private int ecomPayment;
 	private String mapMarkerName;
 	private List<ProductBean> products;
 	private List<SellerRestaurantListBean> restaurants;
@@ -201,5 +202,11 @@ public class SellerLoginResponseBean {
 	}
 	public void setPaymentAlert(String paymentAlert) {
 		this.paymentAlert = paymentAlert;
+	}
+	public int getEcomPayment() {
+		return ecomPayment;
+	}
+	public void setEcomPayment(int ecomPayment) {
+		this.ecomPayment = ecomPayment;
 	}
 }

@@ -95,6 +95,8 @@ public class EngageSeller implements java.io.Serializable {
 	private boolean cobranding = true;
 	@Column(name="SELLER_ICON_URL")
 	private String sellerIconURL;
+	@Column(name="ECOM_PAYMENT")
+	private Integer ecomPayment;
 	
 	public EngageSeller() {
 	}
@@ -430,4 +432,13 @@ public class EngageSeller implements java.io.Serializable {
 	public void setSellerIconURL(String sellerIconURL) {
 		this.sellerIconURL = sellerIconURL;
 	}
+
+	public Integer getEcomPayment() {
+		return ecomPayment;
+	}
+
+	public void setEcomPayment(Integer ecomPayment) {
+		this.ecomPayment = ecomPayment;
+	}
+	
 }

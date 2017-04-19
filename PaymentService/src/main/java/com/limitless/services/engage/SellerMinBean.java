@@ -5,6 +5,7 @@ public class SellerMinBean {
 	private String sellerName;
 	private String sellerShopName;
 	private String sellerMobileNumber;
+	private String sellerCity;
 	private String sellerBrandingUrl;
 	private String sellerIconUrl;
 	private String sellerTags;
@@ -49,5 +50,11 @@ public class SellerMinBean {
 	}
 	public void setSellerIconUrl(String sellerIconUrl) {
 		this.sellerIconUrl = sellerIconUrl;
+	}
+	public String getSellerCity() {
+		return sellerCity;
+	}
+	public void setSellerCity(String sellerCity) {
+		this.sellerCity = sellerCity;
 	}
 }
