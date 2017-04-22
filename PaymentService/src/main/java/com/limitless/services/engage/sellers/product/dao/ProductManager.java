@@ -208,7 +208,7 @@ public class ProductManager {
 				product.setProductName(bean.getProductName());
 				product.setProductPrice(bean.getProductPrice());
 				product.setProductDescription(bean.getProductDescription());
-				product.setProductInStock(1);
+				product.setProductInStock(bean.getProductInStock());
 				product.setProductColor(bean.getProductColor());
 				product.setProductSizeText(bean.getProductSizeText());
 				product.setProductSizeNumber(bean.getProductSizeNumber());

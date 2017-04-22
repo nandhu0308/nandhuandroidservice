@@ -42,7 +42,7 @@ public class OrderResource {
 				if(requestBean.getPaymentMode().equals("POD")){
 					OrderStatusResponseBean statusResponseBean = manager.orderStatusUpdate(responseBean.getOrderId(), 1);
 					if(responseBean.getOrderId()!=0 || responseBean!=null){
-						OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(responseBean.getOrderId());
+						OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(responseBean.getOrderId(), 0);
 					}
 				}
 			}
@@ -64,7 +64,7 @@ public class OrderResource {
 			OrdersManager manager = new OrdersManager();
 			responseBean = manager.orderStatusUpdate(orderId, statusCode);
 			if(responseBean.getMessage().equals("Success")){
-				OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(orderId);
+				OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(orderId, 0);
 			}
 		}
 		catch(Exception e){
@@ -129,7 +129,7 @@ public class OrderResource {
 		OrderMailResponseBean responseBean = new OrderMailResponseBean();
 		try{
 			OrdersManager manager = new OrdersManager();
-			responseBean = manager.sendMailOrderTxn(orderId);
+			responseBean = manager.sendMailOrderTxn(orderId, 1045);
 		}
 		catch (Exception e) {
 			logger.error("API Error", e);

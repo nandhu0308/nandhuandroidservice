@@ -50,6 +50,7 @@ import com.limitless.services.engage.sellers.product.dao.ProductCategory;
 import com.limitless.services.engage.sellers.product.dao.ProductInventory;
 import com.limitless.services.engage.sellers.product.dao.ProductSubcategory;
 import com.limitless.services.payment.PaymentService.InventoryUpdateResponseBean;
+import com.limitless.services.payment.PaymentService.dao.PaymentTxn;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
@@ -472,7 +473,7 @@ public class OrdersManager {
 		return responseBean;
 	}
 	
-	public OrderMailResponseBean sendMailOrderTxn(int orderId) throws Exception{
+	public OrderMailResponseBean sendMailOrderTxn(int orderId, int txnId) throws Exception{
 		log.debug("Sending email");
 		OrderMailResponseBean responseBean = new OrderMailResponseBean();
 		Session session = null;
@@ -511,6 +512,16 @@ public class OrdersManager {
 			String zip = "";
 			String landmark = "";
 			String receiverMobile = "";
+			String txnNotes = "";
+			if(txnId!=0){
+				PaymentTxn txn = (PaymentTxn) session
+						.get("com.limitless.services.payment.PaymentService.dao.PaymentTxn", txnId);
+				if(txn!=null){
+					if(txn.getTxnNotes()!=null || !(txn.getTxnNotes().equals(""))){
+						txnNotes = txn.getTxnNotes();
+					}
+				}
+			}
 			
 			CustomerAddressBook address = (CustomerAddressBook) session
 					.get("com.limitless.services.engage.dao.CustomerAddressBook", addressId);
@@ -614,13 +625,24 @@ public class OrdersManager {
 						}
 					}
 					if(order.getPaymentMode()!=null && order.getPaymentMode().equals("PAID")){
-						mailContent +="<br><h2>Total Amount Paid Rs. "+totalAmount+"</h2>";
+						mailContent +="<br><h2>Total Amount Paid Rs. "+totalAmount+"</h2>"
+								+ "<br>"
+								+ "Notes: "+txnNotes
+								+ "<br><br><b>Buyer Info:</b>"
+								+ "<br><i>Name: "+customer.getCustomerName()+"</i>"
+								+ "<br><i>Mobile Number: "+customerMobile+"</i>"
+								+ "<br><i>Email: "+customerEmail+"</i>";
 					}
 					else if(order.getPaymentMode()!=null && order.getPaymentMode().equals("POD")){
 						mailContent +="<br><h2>Total Amount To Be Paid Rs. "+totalAmount+"<sup>*</sup></h2>"
-								+ "<br>";
+								+ "<br>"
+								+ "<br>"
+								+ "<br><br><b>Buyer Info:</b>"
+								+ "<br><i>Name: "+customer.getCustomerName()+"</i>"
+								+ "<br><i>Mobile Number: "+customerMobile+"</i>"
+								+ "<br><i>Email: "+customerEmail+"</i>";
 					}
-					mailContent += "<br>"
+					mailContent += "<br><br>"
 							+ "<b>Delivery Address</b><br>";
 					if(order.getDeliveryAddress() == 0){
 						mailContent += "NA / IN-SHOP - DELIVERY AT THE SHOP";
@@ -628,10 +650,10 @@ public class OrdersManager {
 					else if(order.getDeliveryAddress() != 0){
 						mailContent += receiverName+"<br>"+addressLine1
 								+ "<br>"+addressLine2+"<br>"+city+"<br>"+state+"<br>ZIP:"+zip+"<br>Mobile:"+receiverMobile+"<sup>**</sup>";
+						mailContent += "<br><br><font color=red><sup>*</sup>You have opted for Pay-On-Delivery.</font>"
+								+ "<br>"
+								+ "<font color=red><sup>**</sup>For delivery related queries to customer call this number.</font>";
 					}
-					mailContent += "<br><br><font color=red><sup>*</sup>You have opted for Pay-On-Delivery.</font>"
-							+ "<br>"
-							+ "<font color=red><sup>**</sup>For delivery related queries to customer call this number.</font>";
 					message.setContent(mailContent,"text/html");
 				}
 				else if(order.getOrderStatus().equals("PROCESS_FAILED") || order.getOrderStatus().equals("ORDER_CANCELED")){

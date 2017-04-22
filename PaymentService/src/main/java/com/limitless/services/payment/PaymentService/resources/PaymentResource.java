@@ -192,7 +192,7 @@ public class PaymentResource {
 					OrdersManager ordersManager = new OrdersManager();
 					orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
 					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
-					orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId());
+					orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(), paymentTxn.getTxnId());
 					System.out.println("Status: " + orderMailResponseBean.getMessage());
 					updateResponseBean = ordersManager.updatePaymentMode(paymentTxn.getOrderId(), "FAILED");
 				}
@@ -473,7 +473,7 @@ public class PaymentResource {
 					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
 					//InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
 					//System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
-					orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId);
+					orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
 					System.out.println("Status: " + orderMailResponseBean.getMessage());
 				}
 			}

@@ -47,6 +47,7 @@ public class EngageSellerBean {
 	private int deliveryRadius;
 	private float deliveryFee;
 	private boolean convenienceFee;
+	private int ecomPayment;
 
 	public int getCitrusSellerId() {
 		return citrusSellerId;
@@ -358,5 +359,13 @@ public class EngageSellerBean {
 
 	public void setConvenienceFee(boolean convenienceFee) {
 		this.convenienceFee = convenienceFee;
+	}
+
+	public int getEcomPayment() {
+		return ecomPayment;
+	}
+
+	public void setEcomPayment(int ecomPayment) {
+		this.ecomPayment = ecomPayment;
 	}
 }

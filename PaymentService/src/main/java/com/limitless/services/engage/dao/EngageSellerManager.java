@@ -1792,7 +1792,6 @@ public class EngageSellerManager {
 			transaction = session.beginTransaction();
 			
 			List<SellerMinBean> sellerList = new ArrayList<SellerMinBean>();
-
 			if (categoryName.equalsIgnoreCase("TV")) {
 				Criteria criteria = session.createCriteria(EngageSeller.class);
 				criteria.add(Restrictions.eq("businessCategory", "TV"));
@@ -1816,13 +1815,13 @@ public class EngageSellerManager {
 					categoryBean.setSellerList(sellerList);
 				}
 			} else {
-
 				Criteria criteria = session.createCriteria(EngageSeller.class);
 				Junction condition = Restrictions.conjunction().add(Restrictions.eq("businessCategory", categoryName))
 						.add(Restrictions.eq("isActive", 1)).add(Restrictions.eq("isDeleted", 0))
 						.add(Restrictions.eq("sellerRole", "admin")).add(Restrictions.eq("ecomPayment", 1));
 				criteria.add(condition);
 				criteria.addOrder(Order.asc("sellerShopName"));
+				criteria.setMaxResults(10);
 				List<EngageSeller> sellersList = criteria.list();
 				log.debug("seller list size : " + sellersList.size());
 				if (sellersList.size() > 0) {
@@ -1841,6 +1840,58 @@ public class EngageSellerManager {
 					}
 					categoryBean.setSellerList(sellerList);
 				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting seller list failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return categoryBean;
+	}
+	
+	public SellerBusinessCategoryBean getSellerBusinessCategoryPagination(String categoryName, int count){
+		log.debug("getting seller list");
+		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			List<SellerMinBean> sellerList = new ArrayList<SellerMinBean>();
+			Criteria criteria = session.createCriteria(EngageSeller.class);
+			Junction condition = Restrictions.conjunction().add(Restrictions.eq("businessCategory", categoryName))
+					.add(Restrictions.eq("isActive", 1)).add(Restrictions.eq("isDeleted", 0))
+					.add(Restrictions.eq("sellerRole", "admin")).add(Restrictions.eq("ecomPayment", 1));
+			criteria.add(condition);
+			criteria.addOrder(Order.asc("sellerShopName"));
+			criteria.setFirstResult(count);
+			criteria.setMaxResults(10);
+			List<EngageSeller> sellersList = criteria.list();
+			log.debug("seller list size : " + sellersList.size());
+			if (sellersList.size() > 0) {
+				categoryBean.setSellerBusinessCategory(categoryName);
+				for (EngageSeller seller : sellersList) {
+					SellerMinBean bean = new SellerMinBean();
+					bean.setSellerId(seller.getSellerId());
+					bean.setSellerName(seller.getSellerName());
+					bean.setSellerShopName(seller.getSellerShopName());
+					bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+					bean.setSellerCity(seller.getSellerCity());
+					bean.setSellerBrandingUrl(seller.getBranding_url());
+					bean.setSellerIconUrl(seller.getSellerIconURL());
+					sellerList.add(bean);
+					bean = null;
+				}
+				categoryBean.setSellerList(sellerList);
 			}
 			transaction.commit();
 		}

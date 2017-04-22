@@ -107,6 +107,7 @@ public class EngageSellerResource {
 			seller.setAmbassadorMobile(bean.getAmbassadorMobile());
 			seller.setBusinessCategory(bean.getBusinessCategory());
 			seller.setMapMarkerName(bean.getMapMarkerName());
+			seller.setEcomPayment(bean.getEcomPayment());
 			EngageSellerManager manager = new EngageSellerManager();
 
 			if (!manager.checkDuplicateEmail(bean.getEmailId())
@@ -618,6 +619,23 @@ public class EngageSellerResource {
 		try{
 			EngageSellerManager manager = new EngageSellerManager();
 			categoryBean = manager.getBusinessCategorySellerList(categoryName);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return categoryBean;
+	}
+	
+	@GET
+	@Path("/get/business/category/{categoryName}/{count}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SellerBusinessCategoryBean getBusinessCategorySellerListPagination(@PathParam("categoryName") String categoryName,
+			@PathParam("count") int count) throws Exception{
+		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			categoryBean = manager.getSellerBusinessCategoryPagination(categoryName, count);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
