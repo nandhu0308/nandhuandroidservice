@@ -30,6 +30,7 @@ import com.limitless.services.engage.bills.CustomerBillsListBean;
 import com.limitless.services.engage.bills.SellerBillsListBean;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
@@ -77,7 +78,14 @@ public class BillsManager {
 								.get("com.limitless.services.engage.dao.EngageSeller", bill.getSellerId());
 						if (seller != null) {
 							bean.setSellerName(seller.getSellerShopName());
-							bean.setCitrusSellerId(seller.getCitrusSellerId());
+							Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+							criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+							List<SellerPayamentsConfiguration> configList = criteria2.list();
+							if(configList.size()==1){
+								for(SellerPayamentsConfiguration config : configList){
+									bean.setCitrusSellerId(config.getCitrusSellerId());
+								}
+							}
 						}
 						bean.setBillDate(bill.getBillDate());
 						bean.setBillDueDate(bill.getBillDueDate());
@@ -149,7 +157,14 @@ public class BillsManager {
 						bean.setBillDueDate(bill.getBillDueDate());
 						bean.setBillPaidDate(bill.getBillPaidDate());
 						bean.setBillAmount(bill.getBillAmount());
-						bean.setCitrusSellerId(seller.getCitrusSellerId());
+						Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+						criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+						List<SellerPayamentsConfiguration> configList = criteria2.list();
+						if(configList.size()==1){
+							for(SellerPayamentsConfiguration config : configList){
+								bean.setCitrusSellerId(config.getCitrusSellerId());
+							}
+						}
 						bean.setAdjustmentAmount(bill.getBillAdjustment());
 						bean.setPayableAmount(Math.max(0, (bill.getBillAmount() - bill.getBillAdjustment())));
 						bean.setBillStatus(bill.getBillStatus());

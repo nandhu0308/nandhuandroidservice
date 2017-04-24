@@ -80,7 +80,6 @@ public class EngageSellerResource {
 
 		try {
 			EngageSeller seller = new EngageSeller();
-			seller.setCitrusSellerId(bean.getCitrusSellerId());
 			seller.setSellerName(bean.getSellerName());
 			seller.setSellerEmail99(bean.getEmailId());
 			seller.setSellerMobileNumber(bean.getMobileNumber());
@@ -102,7 +101,6 @@ public class EngageSellerResource {
 			seller.setSellerLocationLongitude(bean.getLongitude());
 			seller.setIsActive(bean.getIsActive());
 
-			seller.setSellerSplitPercent(bean.getSplitPerent());
 			seller.setMobileAlias(bean.getMobileAlias());
 			seller.setAmbassadorMobile(bean.getAmbassadorMobile());
 			seller.setBusinessCategory(bean.getBusinessCategory());

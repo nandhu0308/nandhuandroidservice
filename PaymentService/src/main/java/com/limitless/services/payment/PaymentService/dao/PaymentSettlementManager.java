@@ -22,6 +22,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.payment.PaymentService.CitrusAccountBalanceBean;
 import com.limitless.services.payment.PaymentService.PaymentsSettlementResponseBean;
 import com.limitless.services.payment.PaymentService.ReleaseFundsRequestBean;
@@ -87,13 +89,16 @@ public class PaymentSettlementManager {
 				requestBean.setTrans_source("CITRUS");
 				double txnAmount = txn.getTxnAmount();
 				int sellerId = txn.getSellerId();
+				double feePercent = 0.0;
 
 				// Getting seller split percent
-				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
-						sellerId);
-				double feePercent = 0.0;
-				if (seller != null) {
-					feePercent = seller.getSellerSplitPercent();
+				Criteria criteria3 = session.createCriteria(SellerPayamentsConfiguration.class);
+				criteria3.add(Restrictions.eq("sellerId", txn.getSellerId()));
+				List<SellerPayamentsConfiguration> configList = criteria3.list();
+				if(configList.size()==1){
+					for(SellerPayamentsConfiguration config : configList){
+						feePercent = config.getSplitPercent();
+					}
 				}
 
 				// Calculating settlement amount and split amount
@@ -390,12 +395,15 @@ public class PaymentSettlementManager {
 									requestBean.setSettlement_ref("LimitlessCircle Pay");
 									requestBean.setTrans_source("CITRUS");
 									double txnAmount = txn.getTxnAmount();
-
-									EngageSeller seller = (EngageSeller) session
-											.get("com.limitless.services.engage.dao.EngageSeller", txn.getSellerId());
+									int sellerId = txn.getSellerId();
 									double feePercent = 0.0;
-									if (seller != null) {
-										feePercent = seller.getSellerSplitPercent();
+									Criteria criteria3 = session.createCriteria(SellerPayamentsConfiguration.class);
+									criteria3.add(Restrictions.eq("sellerId", txn.getSellerId()));
+									List<SellerPayamentsConfiguration> configList = criteria3.list();
+									if(configList.size()==1){
+										for(SellerPayamentsConfiguration config : configList){
+											feePercent = config.getSplitPercent();
+										}
 									}
 
 									// Calculating settlement amount and split amount
@@ -474,12 +482,15 @@ public class PaymentSettlementManager {
 							requestBean.setSettlement_ref("LimitlessCircle Pay");
 							requestBean.setTrans_source("CITRUS");
 							double txnAmount = txn.getTxnAmount();
+							int sellerId = txn.getSellerId();
 
-							EngageSeller seller = (EngageSeller) session
-									.get("com.limitless.services.engage.dao.EngageSeller", txn.getSellerId());
+							EngageSellerManager sellerManager = new EngageSellerManager();
+							SellerPayamentsConfiguration spc = sellerManager.getSellerPaymentConfig(sellerId);
 							double feePercent = 0.0;
-							if (seller != null) {
-								feePercent = seller.getSellerSplitPercent();
+							if (spc != null) {
+								if(spc.getSplitPercent()>0){
+									feePercent = spc.getSplitPercent();
+								}
 							}
 
 							// Calculating settlement amount and split amount

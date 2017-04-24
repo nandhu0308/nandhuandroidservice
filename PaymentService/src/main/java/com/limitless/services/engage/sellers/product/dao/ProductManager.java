@@ -18,6 +18,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.sellers.NewProductsRequestBean;
 import com.limitless.services.engage.sellers.NewProductsResponseBean;
 import com.limitless.services.engage.sellers.ProductAvailabilityUpdateRequestBean;
@@ -350,7 +351,14 @@ public class ProductManager {
 					sellerId);
 			if (seller != null) {
 				listBean.setSellerId(sellerId);
-				listBean.setCitrusSellerId(seller.getCitrusSellerId());
+				Criteria criteria3 = session.createCriteria(SellerPayamentsConfiguration.class);
+				criteria3.add(Restrictions.eq("sellerId", seller.getSellerId()));
+				List<SellerPayamentsConfiguration> configList = criteria3.list();
+				if(configList.size()==1){
+					for(SellerPayamentsConfiguration config : configList){
+						listBean.setCitrusSellerId(config.getCitrusSellerId());
+					}
+				}
 				listBean.setSellerName(seller.getSellerShopName());
 				listBean.setSellerCity(seller.getSellerCity());
 				List<ProductsCategoryListBean> categoryProductList = new ArrayList<ProductsCategoryListBean>();

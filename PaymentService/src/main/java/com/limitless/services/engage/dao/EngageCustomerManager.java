@@ -713,7 +713,16 @@ public class EngageCustomerManager {
 			log.debug("Seller size : " + sellerList.size());
 			if (sellerList.size() > 0) {
 				for (EngageSeller seller : sellerList) {
-					int citrusSellerId = seller.getCitrusSellerId();
+					int citrusSellerId = 0;
+					
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					if(configList.size()==1){
+						for(SellerPayamentsConfiguration config : configList){
+							citrusSellerId = config.getCitrusSellerId();
+						}
+					}
 
 					CitrusSeller cseller = (CitrusSeller) session
 							.get("com.limitless.services.engage.sellers.dao.CitrusSeller", citrusSellerId);

@@ -31,6 +31,7 @@ import com.limitless.services.engage.dao.CustomerAddressBook;
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.SellerDeviceIdMapper;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.order.OrderDetailResponseBean;
 import com.limitless.services.engage.order.OrderFcmBean;
 import com.limitless.services.engage.order.OrderMailResponseBean;
@@ -248,7 +249,16 @@ public class OrdersManager {
 			if(seller!=null){
 				String sellerName = seller.getSellerShopName();
 				String sellerMobileNumber = seller.getSellerMobileNumber();
-				int citrusSellerId = seller.getCitrusSellerId();
+				int citrusSellerId = 0;
+				
+				Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+				criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+				List<SellerPayamentsConfiguration> configList = criteria2.list();
+				if(configList.size()==1){
+					for(SellerPayamentsConfiguration config : configList){
+						citrusSellerId = config.getCitrusSellerId();
+					}
+				}
 
 				Criteria criteria = session.createCriteria(Orders.class);
 				Criterion sidCriterion = Restrictions.eq("sellerId", sellerId);
@@ -364,7 +374,14 @@ public class OrdersManager {
 								.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 						listBean.setSellerName(seller.getSellerShopName());
 						listBean.setSellerMobileNumber(seller.getSellerMobileNumber());
-						listBean.setCitrusSellerId(seller.getCitrusSellerId());
+						Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+						criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+						List<SellerPayamentsConfiguration> configList = criteria2.list();
+						if(configList.size()==1){
+							for(SellerPayamentsConfiguration config : configList){
+								listBean.setCitrusSellerId(config.getCitrusSellerId());
+							}
+						}
 						listBean.setTotalAmount(order.getTotalAmount());
 						listBean.setPaymentMode(order.getPaymentMode());
 						String gmtTime = order.getOrderCreatedTime().toString();

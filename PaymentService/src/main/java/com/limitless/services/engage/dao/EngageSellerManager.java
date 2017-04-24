@@ -935,9 +935,25 @@ public class EngageSellerManager {
 			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 					requestBean.getSellerId());
 			if (seller != null) {
-				seller.setCitrusSellerId(requestBean.getCitrusSellerId());
+				
 				seller.setIsActive(1);
 				session.update(seller);
+				
+				Criteria criteria = session.createCriteria(SellerPayamentsConfiguration.class);
+				criteria.add(Restrictions.eq("sellerId", requestBean.getSellerId()));
+				List<SellerPayamentsConfiguration> configList = criteria.list();
+				log.debug("config list size : " + configList.size());
+				if(configList.size()==1){
+					for(SellerPayamentsConfiguration config : configList){
+						SellerPayamentsConfiguration spc = (SellerPayamentsConfiguration) session
+								.get("com.limitless.services.engage.dao.SellerPayamentsConfiguration", config.getSpcId());
+						if(spc!=null){
+							spc.setCitrusSellerId(requestBean.getCitrusSellerId());
+							session.update(spc);
+						}
+					}
+				}
+				
 				responseBean.setCitrusSellerId(requestBean.getCitrusSellerId());
 				responseBean.setSellerId(requestBean.getSellerId());
 				responseBean.setMessage("Success");
@@ -1250,7 +1266,16 @@ public class EngageSellerManager {
 			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 					sellerId);
 			if (seller != null) {
-				int citrusSellerId = seller.getCitrusSellerId();
+				int citrusSellerId = 0;
+				Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+				criteria2.add(Restrictions.eq("sellerId", sellerId));
+				List<SellerPayamentsConfiguration> configList = criteria2.list();
+				log.debug("config list size : " + configList.size());
+				if(configList.size()==1){
+					for(SellerPayamentsConfiguration config : configList){
+						citrusSellerId = config.getCitrusSellerId();
+					}
+				}
 
 				Criteria criteria = session.createCriteria(EngageSeller.class);
 				criteria.add(Restrictions.eq("citrusSellerId", citrusSellerId));
@@ -2028,6 +2053,39 @@ public class EngageSellerManager {
 			}
 		}
 		return listBean;
+	}
+	
+	public SellerPayamentsConfiguration getSellerPaymentConfig(int sellerId){
+		log.debug("getting seller payment config");
+		SellerPayamentsConfiguration config = new SellerPayamentsConfiguration();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction =  session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(SellerPayamentsConfiguration.class);
+			criteria.add(Restrictions.eq("sellerId", sellerId));
+			List<SellerPayamentsConfiguration> configList = criteria.list();
+			log.debug("config list size : " + configList.size());
+			if(configList.size()==1){
+				config = configList.get(0);
+				System.out.println("config : " + config.getCitrusSellerId());
+			}
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("getting promotion list failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session != null && session.isOpen()){
+				session.close();
+			}
+		}
+		return config;
 	}
 
 	/*

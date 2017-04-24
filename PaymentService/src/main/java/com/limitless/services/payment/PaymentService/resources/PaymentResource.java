@@ -26,6 +26,7 @@ import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageCustomerManager;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.engage.order.OrderMailResponseBean;
 import com.limitless.services.engage.order.OrderPaymentModeUpdateResponseBean;
 import com.limitless.services.engage.order.OrderStatusResponseBean;
@@ -381,6 +382,7 @@ public class PaymentResource {
 			PaymentTxn paymentTxn = manager.findById(id);
 			EngageSellerManager sellerMgr = new EngageSellerManager();
 			EngageSeller seller = sellerMgr.findById(paymentTxn.getSellerId());
+			SellerPayamentsConfiguration payConfig = sellerMgr.getSellerPaymentConfig(seller.getSellerId());
 			int orderId = paymentTxn.getOrderId();
 			String txnType = paymentTxn.getTxnType();
 			
@@ -396,7 +398,7 @@ public class PaymentResource {
 			}
 
 			int txnId = paymentTxn.getTxnId();
-			int citrusSellerId = paymentTxn.getCitrusSellerId();
+			int citrusSellerId = payConfig.getCitrusSellerId();
 
 			String sellerDeviceId = paymentTxn.getSellerDeviceId();
 			int customerId = paymentTxn.getEngageCustomerId();
@@ -410,7 +412,7 @@ public class PaymentResource {
 			String merchantSplitRef = paymentTxn.getSellerName() + "_" + System.currentTimeMillis();
 
 			if (seller != null) {
-				feePercent = seller.getSellerSplitPercent();
+				feePercent = payConfig.getSplitPercent();
 				txnAmount = paymentTxn.getTxnAmount();
 				feeAmount = txnAmount * (feePercent / 100);
 				// round off to 2 decimal
@@ -641,11 +643,13 @@ public class PaymentResource {
 
 			EngageSellerManager sellerManager = new EngageSellerManager();
 			EngageSeller seller = sellerManager.findById(requestBean.getSellerId());
+			SellerPayamentsConfiguration payamentsConfiguration = sellerManager.getSellerPaymentConfig(requestBean.getSellerId());
+			int citrusSellerId = payamentsConfiguration.getCitrusSellerId();
 
 			PaymentTxn trans = new PaymentTxn();
 			trans.setEngageCustomerId(requestBean.getCustomerId());
 			trans.setSellerId(requestBean.getSellerId());
-			trans.setCitrusSellerId(seller.getCitrusSellerId());
+			trans.setCitrusSellerId(citrusSellerId);
 			trans.setSellerName(requestBean.getSellerName());
 			trans.setSellerDeviceId(seller.getSellerDeviceId());
 			trans.setTxnStatus(requestBean.getStatus());
@@ -659,7 +663,7 @@ public class PaymentResource {
 			credits.setMerchantId(requestBean.getSellerId());
 			credits.setCreditAmount(requestBean.getCreditAmount());
 			credits.setDebitAmount(requestBean.getDebitAmount());
-			credits.setSellerId(seller.getCitrusSellerId());
+			credits.setSellerId(citrusSellerId);
 			credits.setTxnId(trans.getTxnId());
 			credits.setCustomerId(requestBean.getCustomerId());
 

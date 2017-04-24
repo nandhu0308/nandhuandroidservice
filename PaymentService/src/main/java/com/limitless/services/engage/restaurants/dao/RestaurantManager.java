@@ -83,7 +83,14 @@ public class RestaurantManager {
 				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 						restaurant.getSellerId());
 				if (seller != null) {
-					bean.setRestaurantSellerCitrusId(seller.getCitrusSellerId());
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					if(configList.size()==1){
+						for(SellerPayamentsConfiguration config : configList){
+							bean.setRestaurantSellerCitrusId(config.getCitrusSellerId());
+						}
+					}
 					bean.setRestaurantSellerName(seller.getSellerName());
 					bean.setRestaurantSellerEmail(seller.getSellerEmail99());
 				}
@@ -360,9 +367,16 @@ public class RestaurantManager {
 							sellerId);
 					if (seller != null) {
 						sellerName = seller.getSellerName();
-						citrusSellerId = seller.getCitrusSellerId();
 						sellerEmail = seller.getSellerEmail99();
 						sellerMobileNumber = seller.getSellerMobileNumber();
+						Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+						criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+						List<SellerPayamentsConfiguration> configList = criteria2.list();
+						if(configList.size()==1){
+							for(SellerPayamentsConfiguration config : configList){
+								citrusSellerId = config.getCitrusSellerId();
+							}
+						}
 					}
 					responseBean = new RestaurantOrderResponseBean();
 					responseBean.setRestaurantOrderId(orderId);
@@ -647,7 +661,14 @@ public class RestaurantManager {
 						sellerId);
 				if (seller != null) {
 					sellerName = seller.getSellerName();
-					citrusSellerId = seller.getCitrusSellerId();
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					if(configList.size()==1){
+						for(SellerPayamentsConfiguration config : configList){
+							citrusSellerId = config.getCitrusSellerId();
+						}
+					}
 				}
 
 				Criteria criteria = session.createCriteria(RestaurantOrder.class);
@@ -799,11 +820,18 @@ public class RestaurantManager {
 					responseBean = new RestaurantSellerResponseBean();
 					responseBean.setRestaurantId(restaurantId);
 					responseBean.setSellerId(seller.getSellerId());
-					responseBean.setCitrusSellerId(seller.getCitrusSellerId());
 					responseBean.setSellerName(seller.getSellerName());
 					responseBean.setSellerMobile(seller.getSellerMobileNumber());
 					responseBean.setSellerEmail(seller.getSellerEmail99());
 					responseBean.setSellerDeviceId(seller.getSellerDeviceId());
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					if(configList.size()==1){
+						for(SellerPayamentsConfiguration config : configList){
+							responseBean.setCitrusSellerId(config.getCitrusSellerId());
+						}
+					}
 				}
 			}
 			transaction.commit();
