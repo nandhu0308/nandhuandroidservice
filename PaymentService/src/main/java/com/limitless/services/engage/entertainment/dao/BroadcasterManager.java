@@ -1,6 +1,8 @@
 package com.limitless.services.engage.entertainment.dao;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -17,6 +19,7 @@ import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
+import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.sun.jersey.api.client.Client;
@@ -151,7 +154,7 @@ public class BroadcasterManager {
 		return albumBean;
 	}
 	
-	public VideoBean getVideoById(int videoId){
+	public VideoBean getVideoById(VideoRequestBean requestBean){
 		log.debug("getting video");
 		VideoBean videoBean = new VideoBean();
 		Session session = null;
@@ -161,9 +164,9 @@ public class BroadcasterManager {
 			transaction = session.beginTransaction();
 			
 			BroadcasterVideo video = (BroadcasterVideo) session
-					.get("com.limitless.services.engage.entertainment.dao.BroadcasterVideo", videoId);
+					.get("com.limitless.services.engage.entertainment.dao.BroadcasterVideo", requestBean.getVideoId());
 			if(video!=null){
-				videoBean.setVideoId(videoId);
+				videoBean.setVideoId(requestBean.getVideoId());
 				videoBean.setVideoName(video.getVideoName());
 				videoBean.setVideoDescription(video.getVideoDescription());
 				videoBean.setVideoThumbnail(video.getVideoThumbnail());
@@ -171,6 +174,24 @@ public class BroadcasterManager {
 				videoBean.setYoutube(video.isYoutube());
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
+				
+				int customerId = 0;
+				if(requestBean.getCustomerId()>0){
+					customerId = requestBean.getCustomerId();
+				} else if(requestBean.getGuestId()>0) {
+					customerId = requestBean.getGuestId();
+				}
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				Date date = new Date();
+				String viewDate = sdf.format(date);
+				
+				ViewersTrack track = new ViewersTrack();
+				track.setVideoId(requestBean.getVideoId());
+				track.setCustomerId(customerId);
+				track.setViewDate(viewDate);
+				session.persist(track);
+				log.debug("vt id : " + track.getVtId());
 			}
 			else{
 				videoBean.setMessage("Failed");

@@ -30,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.dao.EngageCustomer;
 import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.SellerPayamentsConfiguration;
 import com.limitless.services.payment.PaymentService.CreditReminderRequestBean;
 import com.limitless.services.payment.PaymentService.CreditReminderResponseBean;
 import com.limitless.services.payment.PaymentService.CreditRespBean;
@@ -225,40 +226,46 @@ public class PaymentCreditManager {
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(PaymentCredit.class);
 			criteria.add(Restrictions.eq("customerId", customerId))
-					.setProjection(Projections.distinct(Projections.property("sellerId")));
+					.setProjection(Projections.distinct(Projections.property("merchantId")));
 			List<Integer> credits = criteria.list();
 			log.debug("Credits size:" + credits.size());
 			if (credits != null && credits.size() > 0) {
 				for (Integer credit : credits) {
 					int sellerId = (Integer) credit;
 					Query query = session.createQuery(
-							"select sum(PC.creditAmount) from PaymentCredit PC where PC.sellerId = :sellerId and PC.customerId = :customerId");
+							"select sum(PC.creditAmount) from PaymentCredit PC where PC.merchantId = :sellerId and PC.customerId = :customerId");
 					query.setParameter("sellerId", sellerId);
 					query.setParameter("customerId", customerId);
 					List amountList = query.list();
 					log.debug("Amount :" + amountList.toString());
 					double creditAmt = (Double) amountList.get(0);
 					Query query2 = session.createQuery(
-							"select sum(PC.debitAmount) from PaymentCredit PC where PC.sellerId = :sellerId and PC.customerId = :customerId");
+							"select sum(PC.debitAmount) from PaymentCredit PC where PC.merchantId = :sellerId and PC.customerId = :customerId");
 					query2.setParameter("sellerId", sellerId);
 					query2.setParameter("customerId", customerId);
 					List amountList2 = query2.list();
 					log.debug("Amount :" + amountList2.toString());
 					double debitAmt = (Double) amountList2.get(0);
 					double netCredit = creditAmt - debitAmt;
-					Criteria criteria2 = session.createCriteria(EngageSeller.class);
-					criteria2.add(Restrictions.eq("citrusSellerId", sellerId));
-					List<EngageSeller> sellerList = criteria2.list();
-					EngageSeller seller = sellerList.get(0);
+					EngageSeller seller = (EngageSeller) session
+							.get("com.limitless.services.engage.dao.EngageSeller",sellerId);
 					String sellerName = seller.getSellerName();
 					String sellerPhone = seller.getSellerMobileNumber();
-					int merchantId = seller.getSellerId();
+					int citrusSellerId = 0;
+					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
+					criteria2.add(Restrictions.eq("sellerId", sellerId));
+					List<SellerPayamentsConfiguration> configList = criteria2.list();
+					if(configList.size()==1){
+						for(SellerPayamentsConfiguration config : configList){
+							citrusSellerId = config.getCitrusSellerId();
+						}
+					}
 					CustomerCreditResponseBean bean = new CustomerCreditResponseBean();
-					bean.setSellerId(sellerId);
+					bean.setSellerId(citrusSellerId);
 					bean.setSellerName(sellerName);
 					bean.setSellerPhone(sellerPhone);
 					bean.setTotalCredits(netCredit);
-					bean.setMerchantId(merchantId);
+					bean.setMerchantId(sellerId);
 					creditsList.add(bean);
 					bean = null;
 				}

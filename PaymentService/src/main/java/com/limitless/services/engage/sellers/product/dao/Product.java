@@ -68,6 +68,8 @@ public class Product {
 	private boolean addToCart;
 	@Column(name="GROUP_ID")
 	private Integer groupId;
+	@Column(name="MOBILE_NUMBER")
+	private String mobileNumber;
 	
 	public Integer getProductId() {
 		return productId;
@@ -236,5 +238,11 @@ public class Product {
 	}
 	public void setGroupId(Integer groupId) {
 		this.groupId = groupId;
+	}
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
 	}
 }

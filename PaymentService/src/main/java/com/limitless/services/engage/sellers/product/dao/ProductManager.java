@@ -650,6 +650,12 @@ public class ProductManager {
 						bean.setPod(product.getPod());
 						bean.setAddToCart(product.isAddToCart());
 						bean.setGroupId(product.getGroupId());
+						if(product.getMobileNumber()!=null){
+							bean.setMobileNumber(product.getMobileNumber());
+						}
+						else{
+							bean.setMobileNumber("");
+						}
 						beanList.add(bean);
 						bean = null;
 					}

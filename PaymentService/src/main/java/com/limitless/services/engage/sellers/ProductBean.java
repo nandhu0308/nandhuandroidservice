@@ -34,6 +34,7 @@ public class ProductBean {
 	private List<ProductModelsBean> modelsList;
 	private boolean pod;
 	private boolean addToCart;
+	private String mobileNumber;
 	
 	public String getProductName() {
 		return productName;
@@ -220,5 +221,11 @@ public class ProductBean {
 	}
 	public void setSellerId(int sellerId) {
 		this.sellerId = sellerId;
+	}
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
 	}
 }

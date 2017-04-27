@@ -810,7 +810,7 @@ public class OrdersManager {
 								fcmBean.setTo(to);
 								fcmBean.setPriority("high");
 								RestaurantOrderDataBean data = new RestaurantOrderDataBean();
-								data.setBussinessType("restaurant");
+								data.setBussinessType("eCommerce");
 								data.setTitle("Order Received Successfully");
 								data.setBody(customerName + " placed order for Rs." + order.getTotalAmount());
 								data.setOrderId(orderId);

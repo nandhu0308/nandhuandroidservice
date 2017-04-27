@@ -14,6 +14,7 @@ import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
+import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
 
 @Path("/broadcast")
@@ -54,15 +55,15 @@ public class BroadcasterResource {
 		return albumBean;
 	}
 	
-	@Path("/video/get/{videoId}")
-	@GET
+	@Path("/video/get")
+	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public VideoBean getVideo(@PathParam("videoId") int videoId) throws Exception{
+	public VideoBean getVideo(VideoRequestBean requestBean) throws Exception{
 		VideoBean videoBean = new VideoBean();
 		try{
 			BroadcasterManager manager = new BroadcasterManager();
-			videoBean = manager.getVideoById(videoId);
+			videoBean = manager.getVideoById(requestBean);
 		}
 		catch(Exception e){
 			logger.error("API Error", e);
