@@ -2013,6 +2013,7 @@ public class EngageSellerManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(SellerBrandPromotion.class);
+			criteria.add(Restrictions.eq("isActive", true));
 			List<SellerBrandPromotion> promotionList = criteria.list();
 			log.debug("promo size : " + promotionList.size());
 			if(promotionList.size()>0){

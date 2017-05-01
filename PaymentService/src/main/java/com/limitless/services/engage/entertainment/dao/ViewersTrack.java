@@ -23,6 +23,8 @@ public class ViewersTrack {
 	private String viewDate;
 	@Column(name="VT_CREATED_TIME", insertable=false, updatable=false)
 	private Date vtCreatedTime;
+	@Column(name="IS_WATCHING")
+	private Integer isWatching;
 	
 	public Integer getVtId() {
 		return vtId;
@@ -53,5 +55,11 @@ public class ViewersTrack {
 	}
 	public void setVtCreatedTime(Date vtCreatedTime) {
 		this.vtCreatedTime = vtCreatedTime;
+	}
+	public Integer getIsWatching() {
+		return isWatching;
+	}
+	public void setIsWatching(Integer isWatching) {
+		this.isWatching = isWatching;
 	}
 }

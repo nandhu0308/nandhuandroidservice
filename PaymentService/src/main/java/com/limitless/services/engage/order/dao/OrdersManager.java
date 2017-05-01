@@ -515,6 +515,7 @@ public class OrdersManager {
 					.get("com.limitless.services.engage.dao.EngageSeller", sellerId);	
 			String sellerEmail = seller.getSellerEmail99();
 			String sellerMobile = seller.getSellerMobileNumber();
+			String sellerShopName = seller.getSellerShopName();
 			log.debug("seller mail : " + sellerEmail);
 			String sellerExtraEmail = "";
 			if(seller.getExtraEmails()!= null){
@@ -648,7 +649,12 @@ public class OrdersManager {
 								+ "<br><br><b>Buyer Info:</b>"
 								+ "<br><i>Name: "+customer.getCustomerName()+"</i>"
 								+ "<br><i>Mobile Number: "+customerMobile+"</i>"
-								+ "<br><i>Email: "+customerEmail+"</i>";
+								+ "<br><i>Email: "+customerEmail+"</i>"
+								+ "<br><br>"
+								+ "<b>Seller Info:</b>"
+								+ "<br><i>Shop Name: "+sellerShopName+"</i>"
+								+ "<br><i>Phone Number: "+sellerMobile+"</i>"
+								+ "<br><i>Email: "+sellerEmail+"</i>";
 					}
 					else if(order.getPaymentMode()!=null && order.getPaymentMode().equals("POD")){
 						mailContent +="<br><h2>Total Amount To Be Paid Rs. "+totalAmount+"<sup>*</sup></h2>"
@@ -657,7 +663,12 @@ public class OrdersManager {
 								+ "<br><br><b>Buyer Info:</b>"
 								+ "<br><i>Name: "+customer.getCustomerName()+"</i>"
 								+ "<br><i>Mobile Number: "+customerMobile+"</i>"
-								+ "<br><i>Email: "+customerEmail+"</i>";
+								+ "<br><i>Email: "+customerEmail+"</i>"
+								+ "<br><br>"
+								+ "<b>Seller Info:</b>"
+								+ "<br><i>Shop Name: "+sellerShopName+"</i>"
+								+ "<br><i>Phone Number: "+sellerMobile+"</i>"
+								+ "<br><i>Email: "+sellerEmail+"</i>";
 					}
 					mailContent += "<br><br>"
 							+ "<b>Delivery Address</b><br>";

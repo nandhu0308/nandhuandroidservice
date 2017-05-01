@@ -190,8 +190,25 @@ public class BroadcasterManager {
 				track.setVideoId(requestBean.getVideoId());
 				track.setCustomerId(customerId);
 				track.setViewDate(viewDate);
+				track.setIsWatching(1);
 				session.persist(track);
 				log.debug("vt id : " + track.getVtId());
+				videoBean.setVtId(track.getVtId());
+				
+				Criteria criteria = session.createCriteria(ViewersTrack.class);
+				Criterion vidCriterion = Restrictions.eq("videoId", requestBean.getVideoId());
+				Criterion iwCriterion = Restrictions.eq("isWatching", 1);
+				LogicalExpression logExp = Restrictions.and(vidCriterion, iwCriterion);
+				criteria.add(logExp);
+				List<ViewersTrack> trackList = criteria.list();
+				log.debug("live view count : " + trackList.size());
+				videoBean.setLiveViewCount(trackList.size());
+				
+				Criteria criteria2 = session.createCriteria(ViewersTrack.class);
+				criteria2.add(Restrictions.eq("videoId", requestBean.getVideoId()));
+				List<ViewersTrack> trackList2 = criteria2.list();
+				log.debug("total view count :" + trackList2.size());
+				videoBean.setTotalViewCount(trackList2.size());
 			}
 			else{
 				videoBean.setMessage("Failed");
@@ -211,6 +228,38 @@ public class BroadcasterManager {
 			}
 		}
 		return videoBean;
+	}
+	
+	public void markVideoStopped(int vtId, int videoId){
+		log.debug("marking video");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			ViewersTrack track = (ViewersTrack) session
+					.get("com.limitless.services.engage.entertainment.dao.ViewersTrack", vtId);
+			if(track != null){
+				if(track.getVideoId() == videoId){
+					track.setIsWatching(0);
+					session.update(track);
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if(transaction!=null){
+				transaction.rollback();
+			}
+			log.error("marking video failed : " + re);
+			throw re;
+		}
+		finally {
+			if(session!=null && session.isOpen()){
+				session.close();
+			}
+		}
 	}
 	
 }

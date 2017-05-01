@@ -11,6 +11,9 @@ public class VideoBean {
 	private String videoUrl;
 	private boolean isYoutube;
 	private String videoCreated;
+	private int vtId;
+	private long liveViewCount;
+	private long totalViewCount;
 	
 	public int getVideoId() {
 		return videoId;
@@ -71,5 +74,23 @@ public class VideoBean {
 	}
 	public void setYoutube(boolean isYoutube) {
 		this.isYoutube = isYoutube;
+	}
+	public long getLiveViewCount() {
+		return liveViewCount;
+	}
+	public void setLiveViewCount(long liveViewCount) {
+		this.liveViewCount = liveViewCount;
+	}
+	public long getTotalViewCount() {
+		return totalViewCount;
+	}
+	public void setTotalViewCount(long totalViewCount) {
+		this.totalViewCount = totalViewCount;
+	}
+	public int getVtId() {
+		return vtId;
+	}
+	public void setVtId(int vtId) {
+		this.vtId = vtId;
 	}
 }

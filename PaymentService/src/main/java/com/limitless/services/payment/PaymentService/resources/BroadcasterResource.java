@@ -3,10 +3,12 @@ package com.limitless.services.payment.PaymentService.resources;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
@@ -70,6 +72,23 @@ public class BroadcasterResource {
 			throw new Exception("Internal Server Error");
 		}
 		return videoBean;
+	}
+	
+	@Path("/video/stop/{vtId}/{videoId}")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response stopVideo(@PathParam("vtId") int vtId,
+			@PathParam("videoId") int videoId) throws Exception{
+		try{
+			BroadcasterManager manager = new BroadcasterManager();
+			manager.markVideoStopped(vtId, videoId);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return Response.status(200).build();
 	}
 	
 }
