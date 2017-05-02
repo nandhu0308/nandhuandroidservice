@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import com.limitless.services.engage.AliasCheckResponseBean;
 import com.limitless.services.engage.AmbassadorResponseBean;
 import com.limitless.services.engage.CoordinatesResponseBean;
+import com.limitless.services.engage.CustomerCoordsBean;
 import com.limitless.services.engage.CustomerNotifyListBean;
 import com.limitless.services.engage.CustomerNotifyRequestBean;
 import com.limitless.services.engage.CustomerNotifyResponseBean;
@@ -668,6 +669,18 @@ public class EngageSellerResource {
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
+	}
+	
+	@POST
+	@Path("/list/seller/business/category")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSellerBusinessCategoryListLocation(CustomerCoordsBean coordsBean) throws Exception{
+		EngageSellerManager manager = new EngageSellerManager();
+		List<SellerBusinessCategoryBean> categoryList = manager.getSellerCategoryWithLocation(coordsBean);
+		if(categoryList!=null || !(categoryList.isEmpty())){
+			return Response.status(200).entity(categoryList).build();
+		}
+		return Response.status(404).build();
 	}
 
 }
