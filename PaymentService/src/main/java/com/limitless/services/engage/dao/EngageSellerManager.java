@@ -1984,126 +1984,135 @@ public class EngageSellerManager {
 		return sellerCategoryList;
 	}
 
-	public SellerBrandPromotionListBean getSellerBrandPromotionsList(){
+	public SellerBrandPromotionListBean getSellerBrandPromotionsList() {
 		log.debug("getting promotion list");
 		SellerBrandPromotionListBean listBean = new SellerBrandPromotionListBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(SellerBrandPromotion.class);
 			criteria.add(Restrictions.eq("isActive", true));
 			List<SellerBrandPromotion> promotionList = criteria.list();
 			log.debug("promo size : " + promotionList.size());
-			if(promotionList.size()>0){
+			if (promotionList.size() > 0) {
 				List<SellerBrandPromotionBean> beanList = new ArrayList<SellerBrandPromotionBean>();
-				for(SellerBrandPromotion promo : promotionList){
+				for (SellerBrandPromotion promo : promotionList) {
 					SellerBrandPromotionBean bean = new SellerBrandPromotionBean();
 					bean.setSbpId(promo.getSbpId());
 					bean.setSellerId(promo.getSellerId());
 					bean.setSellerBrandingUrl(promo.getAdUrl());
-					EngageSeller seller = (EngageSeller) session
-							.get("com.limitless.services.engage.dao.EngageSeller", promo.getSellerId());
-					if(seller!=null){
+					EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+							promo.getSellerId());
+					if (seller != null) {
 						bean.setSellerName(seller.getSellerName());
 						bean.setSellerShopName(seller.getSellerShopName());
 						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
-						if(bean.getSellerBrandingUrl() == null || bean.getSellerBrandingUrl().equalsIgnoreCase(""))
-						{
+						if (bean.getSellerBrandingUrl() == null || bean.getSellerBrandingUrl().equalsIgnoreCase("")) {
 							bean.setSellerBrandingUrl(seller.getBranding_url());
 						}
 					}
-						
-					}
+
 					beanList.add(bean);
 					bean = null;
 				}
 				listBean.setPromotionList(beanList);
 				listBean.setMessage("Success");
-			}
-			else if(promotionList.isEmpty()){
+			} else if (promotionList.isEmpty()) {
 				listBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}catch(
+		} catch (
 
-	RuntimeException re)
-	{
-		if (transaction != null) {
-			transaction.rollback();
-		}
-		log.error("getting promotion list failed : " + re);
-		throw re;
-	}finally
-	{
-		if (session != null && session.isOpen()) {
-			session.close();
-		}
-	}return listBean;
-	}
-
-	public SellerPayamentsConfiguration getSellerPaymentConfig(int sellerId){
-		log.debug("getting seller payment config");
-		SellerPayamentsConfiguration config = new SellerPayamentsConfiguration();
-		Session session = null;
-		Transaction transaction = null;
-		try{
-			session = sessionFactory.getCurrentSession();
-			transaction =  session.beginTransaction();
-			
-			Criteria criteria = session.createCriteria(SellerPayamentsConfiguration.class);
-			criteria.add(Restrictions.eq("sellerId", sellerId));
-			List<SellerPayamentsConfiguration> configList = criteria.list();
-			log.debug("config list size : " + configList.size());
-			if(configList.size()==1){
-				config = configList.get(0);
-				System.out.println("config : " + config.getCitrusSellerId());
-			}
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting promotion list failed : " + re);
 			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
 		}
-		finally {
-			if(session != null && session.isOpen()){
+		return listBean;
+	}
+
+	public SellerPayamentsConfiguration getSellerPaymentConfig(int sellerId) {
+		log.debug("getting seller payment config");
+		SellerPayamentsConfiguration config = new SellerPayamentsConfiguration();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+
+			Criteria criteria = session.createCriteria(SellerPayamentsConfiguration.class);
+			criteria.add(Restrictions.eq("sellerId", sellerId));
+			List<SellerPayamentsConfiguration> configList = criteria.list();
+			log.debug("config list size : " + configList.size());
+			if (configList.size() == 1) {
+				config = configList.get(0);
+				System.out.println("config : " + config.getCitrusSellerId());
+			}
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting promotion list failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return config;
 	}
 
-	public List<SellerBusinessCategoryBean> getSellerCategoryWithLocation(CustomerCoordsBean coordsBean) throws Exception{
+	public List<SellerBusinessCategoryBean> getSellerCategoryWithLocation(CustomerCoordsBean coordsBean)
+			throws Exception {
 		log.debug("getting seller category");
 		List<SellerBusinessCategoryBean> sellerCategoryList = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			criteria.add(Restrictions.ne("businessCategory", ""))
 					.setProjection(Projections.distinct(Projections.property("businessCategory")));
 			criteria.addOrder(Order.asc("businessCategory"));
 			List<String> categoryList = criteria.list();
 			log.debug("category list : " + categoryList.size());
-			if(categoryList.size()>0){
+			if (categoryList.size() > 0) {
 				sellerCategoryList = new ArrayList<SellerBusinessCategoryBean>();
-				for(String category : categoryList){
+				for (String category : categoryList) {
 					List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
 					Class.forName("com.mysql.jdbc.Driver");
-					Connection connection = DriverManager
-							.getConnection("jdbc:mysql://limitless-engage.cchjaguu68a3.us-west-2.rds.amazonaws.com:3306/llcdb?autoReconnect=true&useSSL=false", "root", "pmt11cd3");
+					Connection connection = DriverManager.getConnection(
+							"jdbc:mysql://limitless-engage.cchjaguu68a3.us-west-2.rds.amazonaws.com:3306/llcdb?autoReconnect=true&useSSL=false",
+							"root", "pmt11cd3");
 					Statement statement = connection.createStatement();
 					ResultSet resultSet = statement
-							.executeQuery("SELECT *,ACOS( SIN( RADIANS( `seller_location_latitude` ) ) * SIN( RADIANS( "+coordsBean.getLatitude()+" ) ) + COS( RADIANS( `seller_location_latitude` ) )* COS( RADIANS( "+coordsBean.getLatitude()+" )) * COS( RADIANS( `seller_location_longitude` ) - RADIANS( "+coordsBean.getLongitude()+" )) ) * 6380 AS `distance` FROM llcdb.engage_seller WHERE ACOS( SIN( RADIANS( `seller_location_latitude` ) ) * SIN( RADIANS( "+coordsBean.getLatitude()+" ) ) + COS( RADIANS( `seller_location_latitude` ) ) * COS( RADIANS( "+coordsBean.getLatitude()+" )) * COS( RADIANS( `seller_location_longitude` ) - RADIANS( "+coordsBean.getLongitude()+" )) ) * 6380 < "+coordsBean.getRadius()+" and business_category='"+category+"' and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY `distance` limit 10;");
+							.executeQuery("SELECT *,ACOS( SIN( RADIANS( `seller_location_latitude` ) ) * SIN( RADIANS( "
+									+ coordsBean.getLatitude()
+									+ " ) ) + COS( RADIANS( `seller_location_latitude` ) )* COS( RADIANS( "
+									+ coordsBean.getLatitude()
+									+ " )) * COS( RADIANS( `seller_location_longitude` ) - RADIANS( "
+									+ coordsBean.getLongitude()
+									+ " )) ) * 6380 AS `distance` FROM llcdb.engage_seller WHERE ACOS( SIN( RADIANS( `seller_location_latitude` ) ) * SIN( RADIANS( "
+									+ coordsBean.getLatitude()
+									+ " ) ) + COS( RADIANS( `seller_location_latitude` ) ) * COS( RADIANS( "
+									+ coordsBean.getLatitude()
+									+ " )) * COS( RADIANS( `seller_location_longitude` ) - RADIANS( "
+									+ coordsBean.getLongitude() + " )) ) * 6380 < " + coordsBean.getRadius()
+									+ " and business_category='" + category
+									+ "' and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY `distance` limit 10;");
 					SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
 					categoryBean.setSellerBusinessCategory(category);
-					while(resultSet.next()){
+					while (resultSet.next()) {
 						SellerMinBean bean = new SellerMinBean();
 						bean.setSellerId(resultSet.getInt("seller_id"));
 						bean.setSellerName(resultSet.getString("seller_name"));
@@ -2116,23 +2125,23 @@ public class EngageSellerManager {
 						beanList.add(bean);
 						bean = null;
 					}
-					categoryBean.setSellerList(beanList);
-					sellerCategoryList.add(categoryBean);
+					if (beanList != null && beanList.size() > 0) {
+						categoryBean.setSellerList(beanList);
+						sellerCategoryList.add(categoryBean);
+					}
 					categoryBean = null;
 					connection.close();
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting seller list failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session != null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
