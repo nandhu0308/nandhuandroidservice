@@ -313,7 +313,7 @@ public class EngageSellerManager {
 								respBean.setPodAvailable(false);
 							}
 							respBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
-							respBean.setDeliveryFee(config.getConvenienceFee());
+							respBean.setDeliveryFee(config.getDeliveryFee());
 							respBean.setDeliveryRadius(config.getDeliveryRadius());
 							if (config.getConvenienceFee() == 1) {
 								respBean.setConvenienceFee(true);
@@ -545,7 +545,7 @@ public class EngageSellerManager {
 								responseBean.setPodAvailable(false);
 							}
 							responseBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
-							responseBean.setDeliveryFee(config.getConvenienceFee());
+							responseBean.setDeliveryFee(config.getDeliveryFee());
 							responseBean.setDeliveryRadius(config.getDeliveryRadius());
 							if (config.getConvenienceFee() == 1) {
 								responseBean.setConvenienceFee(true);
@@ -645,7 +645,7 @@ public class EngageSellerManager {
 								responseBean.setPodAvailable(false);
 							}
 							responseBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
-							responseBean.setDeliveryFee(config.getConvenienceFee());
+							responseBean.setDeliveryFee(config.getDeliveryFee());
 							responseBean.setDeliveryRadius(config.getDeliveryRadius());
 							if (config.getConvenienceFee() == 1) {
 								responseBean.setConvenienceFee(true);
@@ -1566,7 +1566,7 @@ public class EngageSellerManager {
 							restaurantsBean.setPodAvailable(false);
 						}
 						restaurantsBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
-						restaurantsBean.setDeliveryFee(config.getConvenienceFee());
+						restaurantsBean.setDeliveryFee(config.getDeliveryFee());
 						restaurantsBean.setDeliveryRadius(config.getDeliveryRadius());
 						if (config.getConvenienceFee() == 1) {
 							restaurantsBean.setConvenienceFee(true);
