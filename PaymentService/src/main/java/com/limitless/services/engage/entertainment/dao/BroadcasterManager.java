@@ -13,6 +13,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.entertainment.AlbumBean;
@@ -28,16 +30,16 @@ public class BroadcasterManager {
 	private static final Log log = LogFactory.getLog(BroadcasterManager.class);
 	Client client = RestClientUtil.createClient();
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-	
-	public BroadcasterChannelResponseBean getBroadcasterChannel(BroadcasterChannelRequestBean requestBean){
+
+	public BroadcasterChannelResponseBean getBroadcasterChannel(BroadcasterChannelRequestBean requestBean) {
 		log.debug("getting channles");
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(Broadcaster.class);
 			Criterion bcName = Restrictions.eq("broadcasterName", requestBean.getBroadcasterName());
 			Criterion channelName = Restrictions.eq("broadcasterChannelName", requestBean.getBroadcasterName());
@@ -45,8 +47,8 @@ public class BroadcasterManager {
 			criteria.add(logExp);
 			List<Broadcaster> broadcasterList = criteria.list();
 			log.debug("broadcaster size : " + broadcasterList.size());
-			if(broadcasterList.size()>0){
-				for(Broadcaster broadcaster : broadcasterList){
+			if (broadcasterList.size() > 0) {
+				for (Broadcaster broadcaster : broadcasterList) {
 					responseBean.setBroadcasterId(broadcaster.getBroadcasterId());
 					responseBean.setBroadcasterName(broadcaster.getBroadcasterName());
 					responseBean.setChannelName(broadcaster.getBroadcasterChannelName());
@@ -58,8 +60,8 @@ public class BroadcasterManager {
 					criteria2.add(Restrictions.eq("broadcasterId", broadcaster.getBroadcasterId()));
 					List<BroadcasterAlbum> albumsList = criteria2.list();
 					log.debug("album size : " + albumsList.size());
-					if(albumsList.size()>0){
-						for(BroadcasterAlbum album : albumsList){
+					if (albumsList.size() > 0) {
+						for (BroadcasterAlbum album : albumsList) {
 							AlbumBean bean = new AlbumBean();
 							bean.setAlbumId(album.getAlbumId());
 							bean.setAlbumName(album.getAlbumName());
@@ -67,57 +69,54 @@ public class BroadcasterManager {
 							bean.setAlbumVideoCount(album.getAlbumVideos());
 							bean.setAlbumThumbnail(album.getAlbumThumbnail());
 							albumList.add(bean);
-							bean=null;
+							bean = null;
 						}
 						responseBean.setAlbumList(albumList);
 					}
 				}
-			}
-			else if(broadcasterList.isEmpty()){
+			} else if (broadcasterList.isEmpty()) {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting channels failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public AlbumBean getBroadcasterAlbumVideoList(int albumId){
+
+	public AlbumBean getBroadcasterAlbumVideoList(int albumId) {
 		log.debug("getting album video list");
 		AlbumBean albumBean = new AlbumBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			BroadcasterAlbum album = (BroadcasterAlbum) session
 					.get("com.limitless.services.engage.entertainment.dao.BroadcasterAlbum", albumId);
-			if(album!=null){
+			if (album != null) {
 				albumBean.setMessage("Success");
 				albumBean.setAlbumId(albumId);
 				albumBean.setAlbumName(album.getAlbumName());
 				albumBean.setAlbumDescription(album.getAlbumDescription());
 				albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
 				albumBean.setAlbumVideoCount(album.getAlbumVideos());
-				List<VideoBean> videoList = new ArrayList<VideoBean>();				
+				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
 				criteria.add(Restrictions.eq("albumId", albumId));
 				List<BroadcasterVideo> videosList = criteria.list();
 				log.debug("video size : " + videosList.size());
-				if(videosList.size()>0){
-					for(BroadcasterVideo video : videosList){
+				if (videosList.size() > 0) {
+					for (BroadcasterVideo video : videosList) {
 						VideoBean videoBean = new VideoBean();
 						videoBean.setVideoId(video.getVideosId());
 						videoBean.setVideoName(video.getVideoName());
@@ -133,39 +132,36 @@ public class BroadcasterManager {
 					}
 					albumBean.setVideoList(videoList);
 				}
-			}
-			else{
+			} else {
 				albumBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting album failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return albumBean;
 	}
-	
-	public VideoBean getVideoById(VideoRequestBean requestBean){
+
+	public VideoBean getVideoById(VideoRequestBean requestBean) {
 		log.debug("getting video");
 		VideoBean videoBean = new VideoBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			BroadcasterVideo video = (BroadcasterVideo) session
 					.get("com.limitless.services.engage.entertainment.dao.BroadcasterVideo", requestBean.getVideoId());
-			if(video!=null){
+			if (video != null) {
 				videoBean.setVideoId(requestBean.getVideoId());
 				videoBean.setVideoName(video.getVideoName());
 				videoBean.setVideoDescription(video.getVideoDescription());
@@ -174,18 +170,18 @@ public class BroadcasterManager {
 				videoBean.setYoutube(video.isYoutube());
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
-				
+
 				int customerId = 0;
-				if(requestBean.getCustomerId()>0){
+				if (requestBean.getCustomerId() > 0) {
 					customerId = requestBean.getCustomerId();
-				} else if(requestBean.getGuestId()>0) {
+				} else if (requestBean.getGuestId() > 0) {
 					customerId = requestBean.getGuestId();
 				}
-				
+
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				Date date = new Date();
 				String viewDate = sdf.format(date);
-				
+
 				ViewersTrack track = new ViewersTrack();
 				track.setVideoId(requestBean.getVideoId());
 				track.setCustomerId(customerId);
@@ -194,72 +190,72 @@ public class BroadcasterManager {
 				session.persist(track);
 				log.debug("vt id : " + track.getVtId());
 				videoBean.setVtId(track.getVtId());
-				
+
 				Criteria criteria = session.createCriteria(ViewersTrack.class);
 				Criterion vidCriterion = Restrictions.eq("videoId", requestBean.getVideoId());
 				Criterion iwCriterion = Restrictions.eq("isWatching", 1);
 				LogicalExpression logExp = Restrictions.and(vidCriterion, iwCriterion);
+
 				criteria.add(logExp);
 				List<ViewersTrack> trackList = criteria.list();
 				log.debug("live view count : " + trackList.size());
 				videoBean.setLiveViewCount(trackList.size());
-				
-				Criteria criteria2 = session.createCriteria(ViewersTrack.class);
+
+				Criteria criteria2 = session.createCriteria(ViewersTrack.class);				
 				criteria2.add(Restrictions.eq("videoId", requestBean.getVideoId()));
+				ProjectionList projectionList = Projections.projectionList();
+				projectionList.add(Projections.groupProperty("viewDate"));
+				projectionList.add(Projections.groupProperty("customerId"));
+				criteria2.setProjection(projectionList);
 				List<ViewersTrack> trackList2 = criteria2.list();
 				log.debug("total view count :" + trackList2.size());
 				videoBean.setTotalViewCount(trackList2.size());
-			}
-			else{
+			} else {
 				videoBean.setMessage("Failed");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("getting video failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return videoBean;
 	}
-	
-	public void markVideoStopped(int vtId, int videoId){
+
+	public void markVideoStopped(int vtId, int videoId) {
 		log.debug("marking video");
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			ViewersTrack track = (ViewersTrack) session
 					.get("com.limitless.services.engage.entertainment.dao.ViewersTrack", vtId);
-			if(track != null){
-				if(track.getVideoId() == videoId){
+			if (track != null) {
+				if (track.getVideoId() == videoId) {
 					track.setIsWatching(0);
 					session.update(track);
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("marking video failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 	}
-	
+
 }
