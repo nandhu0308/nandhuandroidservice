@@ -1807,8 +1807,10 @@ public class EngageSellerManager {
 			List<SellerMinBean> sellerList = new ArrayList<SellerMinBean>();
 			if (categoryName.equalsIgnoreCase("TV")) {
 				Criteria criteria = session.createCriteria(EngageSeller.class);
-				criteria.add(Restrictions.eq("businessCategory", "TV"));
-				criteria.addOrder(Order.asc("sellerShopName"));
+				Junction condition = Restrictions.conjunction().add(Restrictions.eq("businessCategory", "TV"))
+						.add(Restrictions.eq("isActive", 1)).add(Restrictions.eq("isDeleted", 0))
+						.add(Restrictions.eq("businessCategory", "TV"));
+				criteria.add(condition).addOrder(Order.asc("sellerShopName"));
 				List<EngageSeller> sellersList = criteria.list();
 				log.debug("seller list size : " + sellersList.size());
 				if (sellersList.size() > 0) {

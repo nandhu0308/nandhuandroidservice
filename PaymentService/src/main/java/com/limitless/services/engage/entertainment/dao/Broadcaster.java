@@ -41,6 +41,34 @@ public class Broadcaster {
 	@Column(name="BROADCASTER_UPDATED_TIME")
 	private Date broadcasterUPdatedTime;
 	
+	@Column(name="SELLER_ID")
+	private Integer sellerId;
+	
+	@Column(name="CATEGORY_ID")
+	private Integer categoryId;
+	
+	@Column(name="RANK")
+	private Integer rank;
+	
+	
+	public Integer getCategoryId() {
+		return categoryId;
+	}
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
+	}
+	public Integer getRank() {
+		return rank;
+	}
+	public void setRank(Integer rank) {
+		this.rank = rank;
+	}
+	public Integer getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(Integer sellerId) {
+		this.sellerId = sellerId;
+	}
 	public Integer getBroadcasterId() {
 		return broadcasterId;
 	}

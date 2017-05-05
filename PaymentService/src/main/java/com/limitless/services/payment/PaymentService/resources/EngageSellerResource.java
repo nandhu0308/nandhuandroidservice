@@ -649,7 +649,7 @@ public class EngageSellerResource {
 	public Response getSellerBusinessCategoryList(){
 		EngageSellerManager manager = new EngageSellerManager();
 		List<SellerBusinessCategoryBean> categoryList = manager.getSellerCategoryList();
-		if(categoryList!=null || !(categoryList.isEmpty())){
+		if(categoryList!=null && !(categoryList.isEmpty())){
 			return Response.status(200).entity(categoryList).build();
 		}
 		return Response.status(404).build();
@@ -677,7 +677,7 @@ public class EngageSellerResource {
 	public Response getSellerBusinessCategoryListLocation(CustomerCoordsBean coordsBean) throws Exception{
 		EngageSellerManager manager = new EngageSellerManager();
 		List<SellerBusinessCategoryBean> categoryList = manager.getSellerCategoryWithLocation(coordsBean);
-		if(categoryList!=null || !(categoryList.isEmpty())){
+		if(categoryList!=null && !(categoryList.isEmpty())){
 			return Response.status(200).entity(categoryList).build();
 		}
 		return Response.status(404).build();

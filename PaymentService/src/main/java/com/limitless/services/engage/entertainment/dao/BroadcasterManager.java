@@ -13,11 +13,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import com.limitless.services.engage.entertainment.AlbumBean;
+import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
@@ -90,6 +92,68 @@ public class BroadcasterManager {
 			}
 		}
 		return responseBean;
+	}
+
+	public List<BroadcasterChannelCategoryResponseBean> getAllBroadcasters() {
+		log.debug("getting categories and channels");
+		List<BroadcasterChannelCategoryResponseBean> categories = new ArrayList<BroadcasterChannelCategoryResponseBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(BroadcasterCategory.class);
+			// criteria.addOrder(Order.asc("rank"));
+			// criteria.addOrder(Order.asc("name"));
+			List<BroadcasterCategory> businessCategories = criteria.list();
+			if (businessCategories.size() > 0) {
+				List<BroadcasterChannelResponseBean> channels = null;
+				for (BroadcasterCategory category : businessCategories) {
+					Criteria broadcasterCriteria = session.createCriteria(Broadcaster.class);
+					broadcasterCriteria.add(Restrictions.eq("categoryId", category.getId()));
+					broadcasterCriteria.addOrder(Order.asc("rank"));
+					broadcasterCriteria.addOrder(Order.asc("broadcasterChannelName"));
+					List<Broadcaster> broadcasters = broadcasterCriteria.list();
+					if (broadcasters.size() > 0) {
+						channels = new ArrayList<BroadcasterChannelResponseBean>();
+						for (Broadcaster broadcaster : broadcasters) {
+							BroadcasterChannelResponseBean bean = new BroadcasterChannelResponseBean();
+							bean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
+							bean.setBroadcasterId(broadcaster.getBroadcasterId());
+							bean.setBroadcasterName(broadcaster.getBroadcasterName());
+							bean.setChannelName(broadcaster.getBroadcasterChannelName());
+							bean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
+							bean.setSellerId(broadcaster.getSellerId());
+							bean.setBroadcasterImage(broadcaster.getBroadcasterImage());
+							channels.add(bean);
+							bean = null;
+						}
+						BroadcasterChannelCategoryResponseBean responseBean = new BroadcasterChannelCategoryResponseBean();
+						responseBean.setCategoryName(category.getName());
+						responseBean.setChannelList(channels);
+						categories.add(responseBean);
+					}
+				}
+			}
+
+			transaction.commit();
+
+		} catch (
+
+		RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting channels failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+
+		return categories;
+
 	}
 
 	public AlbumBean getBroadcasterAlbumVideoList(int albumId) {
@@ -201,7 +265,7 @@ public class BroadcasterManager {
 				log.debug("live view count : " + trackList.size());
 				videoBean.setLiveViewCount(trackList.size());
 
-				Criteria criteria2 = session.createCriteria(ViewersTrack.class);				
+				Criteria criteria2 = session.createCriteria(ViewersTrack.class);
 				criteria2.add(Restrictions.eq("videoId", requestBean.getVideoId()));
 				ProjectionList projectionList = Projections.projectionList();
 				projectionList.add(Projections.groupProperty("viewDate"));

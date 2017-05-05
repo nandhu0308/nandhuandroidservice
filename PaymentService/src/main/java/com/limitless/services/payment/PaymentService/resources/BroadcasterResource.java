@@ -1,5 +1,8 @@
 package com.limitless.services.payment.PaymentService.resources;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +16,7 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.entertainment.AlbumBean;
+import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
@@ -22,73 +26,87 @@ import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
 @Path("/broadcast")
 public class BroadcasterResource {
 	final static Logger logger = Logger.getLogger(BroadcasterResource.class);
-	
+
 	@Path("/channel/get")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public BroadcasterChannelResponseBean getChannel(BroadcasterChannelRequestBean requestBean) throws Exception{
+	public BroadcasterChannelResponseBean getChannel(BroadcasterChannelRequestBean requestBean) throws Exception {
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
-		try{
+		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			responseBean = manager.getBroadcasterChannel(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@Path("/video/list/{albumId}")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public AlbumBean getAlbumVideoList(@PathParam("albumId") int albumId) throws Exception{
+	public AlbumBean getAlbumVideoList(@PathParam("albumId") int albumId) throws Exception {
 		AlbumBean albumBean = new AlbumBean();
-		try{
+		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			albumBean = manager.getBroadcasterAlbumVideoList(albumId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return albumBean;
 	}
-	
+
 	@Path("/video/get")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public VideoBean getVideo(VideoRequestBean requestBean) throws Exception{
+	public VideoBean getVideo(VideoRequestBean requestBean) throws Exception {
 		VideoBean videoBean = new VideoBean();
-		try{
+		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			videoBean = manager.getVideoById(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return videoBean;
 	}
-	
+
 	@Path("/video/stop/{vtId}/{videoId}")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response stopVideo(@PathParam("vtId") int vtId,
-			@PathParam("videoId") int videoId) throws Exception{
-		try{
+	public Response stopVideo(@PathParam("vtId") int vtId, @PathParam("videoId") int videoId) throws Exception {
+		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			manager.markVideoStopped(vtId, videoId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return Response.status(200).build();
 	}
-	
+
+	@Path("/channel/category/get")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCategories() throws Exception {
+		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.getAllBroadcasters();
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			responseBean.clear();
+		}
+		if (responseBean != null && !(responseBean.isEmpty())) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+
+	}
 }
