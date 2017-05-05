@@ -111,6 +111,7 @@ public class BroadcasterManager {
 				for (BroadcasterCategory category : businessCategories) {
 					Criteria broadcasterCriteria = session.createCriteria(Broadcaster.class);
 					broadcasterCriteria.add(Restrictions.eq("categoryId", category.getId()));
+					broadcasterCriteria.add(Restrictions.eq("isActive", true));
 					broadcasterCriteria.addOrder(Order.asc("rank"));
 					broadcasterCriteria.addOrder(Order.asc("broadcasterChannelName"));
 					List<Broadcaster> broadcasters = broadcasterCriteria.list();
