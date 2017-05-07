@@ -144,16 +144,16 @@ public class PaymentResource {
 
 			txnResp.setTxnId(paymentTxn.getTxnId());
 			txnResp.setMessage("Success");
-			
+
 			MasterTxnRequestBean masterTxnRequestBean = new MasterTxnRequestBean();
 			masterTxnRequestBean.setCitrusTxnId(paymentTxn.getTxnId());
 			masterTxnRequestBean.setIciciUorderId(0);
 			masterTxnRequestBean.setSellerId(paymentTxn.getSellerId());
 			masterTxnRequestBean.setCustomerId(paymentTxn.getEngageCustomerId());
-			
+
 			MasterTxnManager masterManager = new MasterTxnManager();
 			MasterTxnResponseBean masterTxnResponseBean = masterManager.createMasterTxn(masterTxnRequestBean);
-			
+
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -183,25 +183,27 @@ public class PaymentResource {
 			txnResp.setDate(paymentTxn.getTxnUpdatedTime().toString());
 			txnResp.setName(customer.getCustomerName());
 			txnResp.setSellerDeviceId(paymentTxn.getSellerDeviceId());
-			
+
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
 			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
 			RestaurantOrderStatusUpdateResponseBean restaurantOrderStatusUpdateResponseBean = new RestaurantOrderStatusUpdateResponseBean();
 			OrderPaymentModeUpdateResponseBean updateResponseBean = new OrderPaymentModeUpdateResponseBean();
-			if(paymentTxn.getTxnType().equals("eCommerce")){
-				if(paymentTxn.getOrderId()>0){
+			if (paymentTxn.getTxnType().equals("eCommerce")) {
+				if (paymentTxn.getOrderId() > 0) {
 					OrdersManager ordersManager = new OrdersManager();
 					orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
-					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
-					orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(), paymentTxn.getTxnId());
+					System.out.println("Order status : " + orderStatusResponseBean.getCurrentStatus()
+							+ " for order id : " + orderStatusResponseBean.getOrderId());
+					orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(),
+							paymentTxn.getTxnId());
 					System.out.println("Status: " + orderMailResponseBean.getMessage());
 					updateResponseBean = ordersManager.updatePaymentMode(paymentTxn.getOrderId(), "FAILED");
 				}
-			}
-			else if(paymentTxn.getTxnType().equals("restaurant")){
-				if(paymentTxn.getOrderId()>0){
+			} else if (paymentTxn.getTxnType().equals("restaurant")) {
+				if (paymentTxn.getOrderId() > 0) {
 					RestaurantManager restaurantManager = new RestaurantManager();
-					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(paymentTxn.getOrderId(),2);
+					restaurantOrderStatusUpdateResponseBean = restaurantManager
+							.orderStatusUpdate(paymentTxn.getOrderId(), 2);
 					System.out.println("Restaurant Order Id :" + restaurantOrderStatusUpdateResponseBean.getOrderId());
 					restaurantManager.sendOrderMail(paymentTxn.getOrderId());
 				}
@@ -385,7 +387,7 @@ public class PaymentResource {
 			SellerPayamentsConfiguration payConfig = sellerMgr.getSellerPaymentConfig(seller.getSellerId());
 			int orderId = paymentTxn.getOrderId();
 			String txnType = paymentTxn.getTxnType();
-			
+
 			List<String> sellerDeviceIds = sellerMgr.getAllSellerDeviceId(paymentTxn.getSellerId());
 
 			PaymentCreditManager creditManager = new PaymentCreditManager();
@@ -439,10 +441,10 @@ public class PaymentResource {
 			PaymentConstants constants = PaymentConstants.getInstance();
 
 			WebResource webResource = client.resource("https://splitpay.citruspay.com/marketplace/split");
-
+			logger.info("PR: Calling Split API");
 			ClientResponse splitResponse = webResource.accept("application/json").type("application/json")
 					.header("auth_token", constants.getAuth_Token()).post(ClientResponse.class, splitRequest);
-
+			logger.info("PR: Received Split response");
 			String splitResponseStr = splitResponse.getEntity(Object.class).toString();
 			System.out.println("Slipt Response: " + splitResponseStr);
 
@@ -453,56 +455,64 @@ public class PaymentResource {
 			if (splitArr[0].equals("split_id")) {
 				splitId = Integer.parseInt(splitArr[1]);
 			}
-			//int splitId = 0;
+			// int splitId = 0;
+			logger.info("PR: Extracted details from response");
 			paymentTxn = manager.updateSplitId(txnId, citrusMpTxnId, splitId, TxnStatus.PAYMENT_SUCCESSFUL.toString());
-
+			logger.info("PR: updated split details to DB");
 			splitResp.setSplitId(paymentTxn.getSplitId());
 			splitResp.setMessage("Success");
 			splitResp.setName(customerName);
 			splitResp.setAmount(txnAmount);
 			splitResp.setDate(txnDate);
 			splitResp.setSellerDeviceIds(sellerDeviceIds);
-			
+			logger.info("PR: created splitResp");
 			OrderStatusResponseBean orderStatusResponseBean = new OrderStatusResponseBean();
 			OrderMailResponseBean orderMailResponseBean = new OrderMailResponseBean();
 			RestaurantOrderStatusUpdateResponseBean restaurantOrderStatusUpdateResponseBean = new RestaurantOrderStatusUpdateResponseBean();
 			OrderPaymentModeUpdateResponseBean updateResponseBean = new OrderPaymentModeUpdateResponseBean();
-			if(txnType.equals("eCommerce")){
-				if(orderId>0){
+			if (txnType.equals("eCommerce")) {
+				if (orderId > 0) {
+					logger.info("PR: updating ecommerce order." + String.valueOf(orderId));
 					OrdersManager ordersManager = new OrdersManager();
 					updateResponseBean = ordersManager.updatePaymentMode(orderId, "PAID");
 					orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
-					System.out.println("Order status : "+orderStatusResponseBean.getCurrentStatus()+" for order id : " + orderStatusResponseBean.getOrderId());
-					//InventoryUpdateResponseBean inventoryUpdateResponseBean = ordersManager.updateInventory(orderId);
-					//System.out.println("Inventory updated : " + inventoryUpdateResponseBean.getOrderId());
+					System.out.println("Order status : " + orderStatusResponseBean.getCurrentStatus()
+							+ " for order id : " + orderStatusResponseBean.getOrderId());
+					// InventoryUpdateResponseBean inventoryUpdateResponseBean =
+					// ordersManager.updateInventory(orderId);
+					// System.out.println("Inventory updated : " +
+					// inventoryUpdateResponseBean.getOrderId());
 					orderMailResponseBean = ordersManager.sendMailOrderTxn(orderId, txnId);
 					System.out.println("Status: " + orderMailResponseBean.getMessage());
 				}
-			}
-			else if(txnType.equals("restaurant")){
-				if(orderId>0){
+			} else if (txnType.equals("restaurant")) {
+				if (orderId > 0) {
+					logger.info("PR: updating restaurant order." + String.valueOf(orderId));
 					RestaurantManager restaurantManager = new RestaurantManager();
-					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(orderId,1);
+					restaurantOrderStatusUpdateResponseBean = restaurantManager.orderStatusUpdate(orderId, 1);
 					System.out.println("Restaurant Order Id :" + restaurantOrderStatusUpdateResponseBean.getOrderId());
 					restaurantManager.sendOrderMail(orderId);
 					restaurantManager.notificationToCustomer(orderId);
 					restaurantManager.notificationToRestaurant(orderId);
 				}
-			}
-			else if(txnType.equals("bill")){
-				if(orderId>0){
+			} else if (txnType.equals("bill")) {
+				if (orderId > 0) {
+					logger.info("PR: updating bill order." + String.valueOf(orderId));
 					BillsManager billsManager = new BillsManager();
-					BillPaymentStatusUpdateResponseBean billPaymentStatusUpdateResponseBean = billsManager.updateBillStatus(orderId, 1);
-					System.out.println("Update status : "+billPaymentStatusUpdateResponseBean.getMessage());
+					BillPaymentStatusUpdateResponseBean billPaymentStatusUpdateResponseBean = billsManager
+							.updateBillStatus(orderId, 1);
+					System.out.println("Update status : " + billPaymentStatusUpdateResponseBean.getMessage());
 					billsManager.sendBillMail(orderId);
 				}
 			}
 
 			TxnSettlementResponseBean txnSettlementResponseBean = new TxnSettlementResponseBean();
 			if (sellerSettlePref == 1) {
+				logger.info("PR: Starting immediate settlement");
 				PaymentSettlementManager settlementManager = new PaymentSettlementManager();
 				txnSettlementResponseBean = settlementManager.settleTxnById(txnId);
 				System.out.println("Settle Id : " + txnSettlementResponseBean.getPsId());
+				logger.info("PR: Completed immediate settlement");
 			}
 
 			MessageBean messageBean = new MessageBean();
@@ -512,8 +522,9 @@ public class PaymentResource {
 			messageBean.setTxnAmount(paymentTxn.getTxnAmount());
 			messageBean.setTxnStatus(paymentTxn.getTxnStatus());
 			messageBean.setTxnId(paymentTxn.getTxnId());
-
+			logger.info("PR: Sending Message");
 			MessageResponseBean messageResponseBean = manager.sendMessage(messageBean);
+			logger.info("PR: Sent Message");
 			System.out.println("Message : " + messageResponseBean.getMessage());
 
 			TxnMailRequestBean mailBean = new TxnMailRequestBean();
@@ -521,8 +532,9 @@ public class PaymentResource {
 			mailBean.setSellerId(paymentTxn.getSellerId());
 			mailBean.setTxnId(paymentTxn.getTxnId());
 			mailBean.setTxnAmount(paymentTxn.getTxnAmount());
-
+			logger.info("PR: Sending EMAIL");
 			TxnMailResponseBean mailResponseBean = manager.sendMail(mailBean);
+			logger.info("PR: Sent EMAIL");
 
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -610,7 +622,7 @@ public class PaymentResource {
 			System.out.println(clientResponse.getEntity(String.class));
 			response.setMessage(String.valueOf(clientResponse.getStatus()));
 		} catch (Exception e) {
-			logger.error("API Error", e);			
+			logger.error("API Error", e);
 
 		}
 
@@ -643,7 +655,8 @@ public class PaymentResource {
 
 			EngageSellerManager sellerManager = new EngageSellerManager();
 			EngageSeller seller = sellerManager.findById(requestBean.getSellerId());
-			SellerPayamentsConfiguration payamentsConfiguration = sellerManager.getSellerPaymentConfig(requestBean.getSellerId());
+			SellerPayamentsConfiguration payamentsConfiguration = sellerManager
+					.getSellerPaymentConfig(requestBean.getSellerId());
 			int citrusSellerId = payamentsConfiguration.getCitrusSellerId();
 
 			PaymentTxn trans = new PaymentTxn();
@@ -850,34 +863,32 @@ public class PaymentResource {
 		}
 		return responseBean;
 	}
-	
+
 	@POST
 	@Path("/credit/reminder")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public CreditReminderResponseBean creditReminder(CreditReminderRequestBean requestBean) throws Exception{
+	public CreditReminderResponseBean creditReminder(CreditReminderRequestBean requestBean) throws Exception {
 		CreditReminderResponseBean responseBean = new CreditReminderResponseBean();
-		try{
+		try {
 			PaymentCreditManager manager = new PaymentCreditManager();
 			responseBean = manager.sendCreditReminder(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@GET
 	@Path("/getSubMerchants/{sellerId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MerchantRequestListBean requestSeller(@PathParam("sellerId") int sellerId) throws Exception{
+	public MerchantRequestListBean requestSeller(@PathParam("sellerId") int sellerId) throws Exception {
 		MerchantRequestListBean listBean = new MerchantRequestListBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			listBean = manager.sellerRequest(sellerId);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
