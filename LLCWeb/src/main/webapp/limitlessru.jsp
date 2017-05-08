@@ -85,6 +85,7 @@ if(respCode.equals("0")){
 	SplitRequestBean splitReqbean = new SplitRequestBean();
 	String citrusMpTxnIdStr = request.getParameter("marketplaceTxId");
 	int citrusMpTxnId = Integer.parseInt(citrusMpTxnIdStr);
+	System.out.println("citrusMpTxnId : " + citrusMpTxnId);
 	splitReqbean.setCitrusMpTxnId(citrusMpTxnId);
 
 	WebResource webResource = client.resource("https://services.beinglimitless.in/engage/payment/trans").path(txnIdStr).path("split");
