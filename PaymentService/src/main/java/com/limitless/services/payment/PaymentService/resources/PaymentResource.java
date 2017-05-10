@@ -138,6 +138,7 @@ public class PaymentResource {
 			paymentTxn.setTxnNotes(bean.getTxnNotes());
 			paymentTxn.setOrderId(bean.getOrderId());
 			paymentTxn.setTxnType(bean.getTxnType());
+			paymentTxn.setPromoCodeId(bean.getPromoCodeId());
 
 			PaymentTxnManager manager = new PaymentTxnManager();
 			manager.persist(paymentTxn);

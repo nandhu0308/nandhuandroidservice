@@ -7,6 +7,7 @@ public class OrderRequestBean {
 	private int sellerId;
 	private String paymentMode;
 	private int addressId;
+	private float orderDeliveryFee;
 	private List<OrderProductsBean> orderList;
 	public int getCustomerId() {
 		return customerId;
@@ -37,5 +38,11 @@ public class OrderRequestBean {
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public float getOrderDeliveryFee() {
+		return orderDeliveryFee;
+	}
+	public void setOrderDeliveryFee(float orderDeliveryFee) {
+		this.orderDeliveryFee = orderDeliveryFee;
 	}
 }

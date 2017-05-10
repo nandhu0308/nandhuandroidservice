@@ -58,6 +58,8 @@ public class PaymentTxn implements java.io.Serializable {
 	private Integer orderId;
 	@Column(name="TXN_TYPE")
 	private String txnType;
+	@Column(name="PROMO_CODE_ID")
+	private int promoCodeId;
 
 	public PaymentTxn() {
 	}
@@ -206,6 +208,14 @@ public class PaymentTxn implements java.io.Serializable {
 
 	public void setTxnType(String txnType) {
 		this.txnType = txnType;
+	}
+
+	public int getPromoCodeId() {
+		return promoCodeId;
+	}
+
+	public void setPromoCodeId(int promoCodeId) {
+		this.promoCodeId = promoCodeId;
 	}
 
 	@Override

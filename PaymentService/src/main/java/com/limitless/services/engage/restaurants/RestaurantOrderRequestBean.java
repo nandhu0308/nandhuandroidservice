@@ -8,7 +8,9 @@ public class RestaurantOrderRequestBean {
 	private String orderStyle;
 	private int deliveryAddressId;
 	private String paymentMode;
+	private float orderDeliveryFee;
 	private List<RestaurantOrderItemsBean> itemsList;
+	
 	public int getCustomerId() {
 		return customerId;
 	}
@@ -44,5 +46,11 @@ public class RestaurantOrderRequestBean {
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public float getOrderDeliveryFee() {
+		return orderDeliveryFee;
+	}
+	public void setOrderDeliveryFee(float orderDeliveryFee) {
+		this.orderDeliveryFee = orderDeliveryFee;
 	}
 }

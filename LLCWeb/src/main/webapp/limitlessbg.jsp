@@ -53,6 +53,11 @@ if(txnType==null){
 	txnType = "none";
 }
 
+String promoCodeId = request.getParameter("promoCodeId");
+if(promoCodeId == null){
+	promoCodeId = "0";
+}
+
 //Make Add Txn API call
 //ClientConfig clientConfig = new DefaultClientConfig();              
 //clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);     
@@ -79,6 +84,7 @@ bean.setTxnAmount(Float.parseFloat(amount));
 bean.setTxnStatus(TxnStatus.PAYMENT_INITIATED);
 bean.setSellerDeviceId(sellerDeviceId);
 bean.setOrderId(Integer.parseInt(orderId));
+bean.setPromoCodeId(Integer.parseInt(promoCodeId));
 bean.setTxnType(txnType);
 if(txnNotes.equals("NA")){
 	bean.setTxnNotes("NA");

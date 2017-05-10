@@ -3,6 +3,7 @@ package com.limitless.services.engage.order;
 public class OrderResponseBean {
 	private int orderId;
 	private double totalAmount;
+	private float orderDeliveryFee;
 	private String paymentMode;
 	private String message;
 	public int getOrderId() {
@@ -28,5 +29,11 @@ public class OrderResponseBean {
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public float getOrderDeliveryFee() {
+		return orderDeliveryFee;
+	}
+	public void setOrderDeliveryFee(float orderDeliveryFee) {
+		this.orderDeliveryFee = orderDeliveryFee;
 	}
 }

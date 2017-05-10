@@ -36,6 +36,8 @@ public class Orders {
 	private Date orderUpdatedTime;
 	@Column(name="PAYMENT_MODE")
 	private String paymentMode;
+	@Column(name="DELIVERY_FEE")
+	private float deliveryFee;
 	
 	public Integer getOrderId() {
 		return orderId;
@@ -93,5 +95,11 @@ public class Orders {
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public float getDeliveryFee() {
+		return deliveryFee;
+	}
+	public void setDeliveryFee(float deliveryFee) {
+		this.deliveryFee = deliveryFee;
 	}
 }

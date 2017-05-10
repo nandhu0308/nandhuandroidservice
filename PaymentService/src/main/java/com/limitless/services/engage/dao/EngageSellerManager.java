@@ -1,4 +1,4 @@
-package com.limitless.services.engage.dao;
+ package com.limitless.services.engage.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -51,7 +51,11 @@ import com.limitless.services.engage.MerchantLogoutResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
+import com.limitless.services.engage.NewPromoCodeRequestBean;
+import com.limitless.services.engage.NewPromoCodeResponseBean;
 import com.limitless.services.engage.PhoneNumber;
+import com.limitless.services.engage.PromoCodeRequestBean;
+import com.limitless.services.engage.PromoCodeResponseBean;
 import com.limitless.services.engage.SellerAdBean;
 import com.limitless.services.engage.SellerAdsListBean;
 import com.limitless.services.engage.SellerBrandPromotionBean;
@@ -2148,6 +2152,100 @@ public class EngageSellerManager {
 			}
 		}
 		return sellerCategoryList;
+	}
+	
+	public NewPromoCodeResponseBean addNewPromoCode(NewPromoCodeRequestBean requestBean){
+		log.debug("adding new promo code");
+		NewPromoCodeResponseBean responseBean = new NewPromoCodeResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			SellerPromoCode promoCode = new SellerPromoCode();
+			promoCode.setSellerId(requestBean.getSellerId());
+			promoCode.setPromoCode(requestBean.getPromoCode());
+			promoCode.setRate(requestBean.getRate());
+			promoCode.setRateType(requestBean.getRateType());
+			promoCode.setExpiryDate(requestBean.getExpiryDate());
+			promoCode.setActive(true);
+			session.persist(promoCode);
+			log.debug("promocode id : " + promoCode.getPromoCodeId());
+			responseBean.setPromoCodeId(promoCode.getPromoCodeId());
+			responseBean.setSellerId(promoCode.getSellerId());
+			responseBean.setMessage("Success");
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding new promo code failed : " + re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+	}
+	
+	public PromoCodeResponseBean getPromoCode(PromoCodeRequestBean requestBean){
+		log.debug("getting promo code");
+		PromoCodeResponseBean responseBean = new PromoCodeResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			EngageSeller seller = (EngageSeller) session
+					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
+			if(seller!=null){
+				Criteria criteria = session.createCriteria(SellerPromoCode.class);
+				Junction condition = Restrictions.conjunction()
+						.add(Restrictions.eq("promoCode", requestBean.getPromoCode()))
+						.add(Restrictions.eq("sellerId", requestBean.getSellerId()))
+						.add(Restrictions.eq("isActive", true));
+				criteria.add(condition);
+				List<SellerPromoCode> promoCodeList = criteria.list();
+				log.debug("promocode list size : " + promoCodeList.size());
+				if(promoCodeList.size()==1){
+					for(SellerPromoCode promoCode : promoCodeList){
+						responseBean.setMessage("Success");
+						responseBean.setPromoCodeId(promoCode.getPromoCodeId());
+						responseBean.setSellerId(promoCode.getSellerId());
+						responseBean.setPromoCode(promoCode.getPromoCode());
+						responseBean.setRate(promoCode.getRate());
+						responseBean.setRateType(promoCode.getRateType());
+						responseBean.setExpiryDate(promoCode.getExpiryDate());
+						responseBean.setActive(promoCode.isActive());
+					}
+				}
+				else{
+					responseBean.setMessage("Invalid Promo Code");
+				}
+			}
+			else{
+				responseBean.setMessage("Invalid Promo Code");
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("adding new promo code failed : " + re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 	/*

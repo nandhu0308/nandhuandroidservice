@@ -87,6 +87,7 @@ public class OrdersManager {
 			order.setCustomerId(requestBean.getCustomerId());
 			order.setSellerId(requestBean.getSellerId());
 			order.setTotalAmount(totalAmount);
+			order.setDeliveryFee(requestBean.getOrderDeliveryFee());
 			order.setOrderStatus("ORDER_INITIATED");
 			order.setPaymentMode(requestBean.getPaymentMode());
 			order.setDeliveryAddress(requestBean.getAddressId());
@@ -112,6 +113,7 @@ public class OrdersManager {
 			}
 			responseBean.setOrderId(orderId);
 			responseBean.setTotalAmount(totalAmount);
+			responseBean.setOrderDeliveryFee(requestBean.getOrderDeliveryFee());
 			responseBean.setMessage("Success");
 			transaction.commit();
 		}
@@ -282,6 +284,7 @@ public class OrdersManager {
 						listBean.setCitrusSellerId(citrusSellerId);
 						listBean.setSellerMobileNumber(sellerMobileNumber);
 						listBean.setTotalAmount(order.getTotalAmount());
+						listBean.setOrderDeliveryFee(order.getDeliveryFee());
 						listBean.setPaymentMode(order.getPaymentMode());
 						String gmtTime = order.getOrderCreatedTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -383,6 +386,7 @@ public class OrdersManager {
 							}
 						}
 						listBean.setTotalAmount(order.getTotalAmount());
+						listBean.setOrderDeliveryFee(order.getDeliveryFee());
 						listBean.setPaymentMode(order.getPaymentMode());
 						String gmtTime = order.getOrderCreatedTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

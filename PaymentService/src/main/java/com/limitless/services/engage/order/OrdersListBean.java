@@ -12,6 +12,7 @@ public class OrdersListBean {
 	private int citrusSellerId;
 	private String sellerMobileNumber;
 	private double totalAmount;
+	private float orderDeliveryFee;
 	private String time;
 	private String orderStatus;
 	private String paymentMode;
@@ -93,5 +94,11 @@ public class OrdersListBean {
 	}
 	public void setCitrusSellerId(int citrusSellerId) {
 		this.citrusSellerId = citrusSellerId;
+	}
+	public float getOrderDeliveryFee() {
+		return orderDeliveryFee;
+	}
+	public void setOrderDeliveryFee(float orderDeliveryFee) {
+		this.orderDeliveryFee = orderDeliveryFee;
 	}
 }

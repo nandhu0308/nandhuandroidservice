@@ -32,6 +32,10 @@ import com.limitless.services.engage.MerchantLogoutResponseBean;
 import com.limitless.services.engage.MerchantRequestCountBean;
 import com.limitless.services.engage.MerchantRequestListBean;
 import com.limitless.services.engage.NewMerchantsRequestBean;
+import com.limitless.services.engage.NewPromoCodeRequestBean;
+import com.limitless.services.engage.NewPromoCodeResponseBean;
+import com.limitless.services.engage.PromoCodeRequestBean;
+import com.limitless.services.engage.PromoCodeResponseBean;
 import com.limitless.services.engage.SellerAdsListBean;
 import com.limitless.services.engage.SellerBrandPromotionListBean;
 import com.limitless.services.engage.SellerBusinessCategoryBean;
@@ -682,5 +686,39 @@ public class EngageSellerResource {
 		}
 		return Response.status(404).build();
 	}
-
+	
+	@POST
+	@Path("/promo/new")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public NewPromoCodeResponseBean newPromoCode(NewPromoCodeRequestBean requestBean) throws Exception{
+		NewPromoCodeResponseBean responseBean = new NewPromoCodeResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.addNewPromoCode(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
+	@POST
+	@Path("/promo/get")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public PromoCodeResponseBean getPromoCode(PromoCodeRequestBean requestBean) throws Exception{
+		PromoCodeResponseBean responseBean = new PromoCodeResponseBean();
+		try{
+			EngageSellerManager manager = new EngageSellerManager();
+			responseBean = manager.getPromoCode(requestBean);
+		}
+		catch(Exception e){
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+	
 }

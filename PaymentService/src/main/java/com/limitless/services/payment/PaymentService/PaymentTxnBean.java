@@ -23,6 +23,7 @@ public class PaymentTxnBean {
 	private String txnNotes;
 	private int orderId;
 	private String txnType;
+	private int promoCodeId;
 	
 	public TxnStatus getTxnStatus() {
 		return txnStatus;
@@ -103,4 +104,11 @@ public class PaymentTxnBean {
 	public void setTxnType(String txnType) {
 		this.txnType = txnType;
 	}
+	public int getPromoCodeId() {
+		return promoCodeId;
+	}
+	public void setPromoCodeId(int promoCodeId) {
+		this.promoCodeId = promoCodeId;
+	}
+	
 }
