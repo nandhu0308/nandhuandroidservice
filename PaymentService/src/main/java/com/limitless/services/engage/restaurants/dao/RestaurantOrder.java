@@ -21,6 +21,8 @@ public class RestaurantOrder {
 	private Integer restaurantId;
 	@Column(name="TOTAL_AMOUNT")
 	private double totalAmount;
+	@Column(name="DELIVERY_FEE")
+	private float deliveryFee;
 	@Column(name="ORDER_TYPE")
 	private String orderType;
 	@Column(name="ORDER_TIME", insertable = false, updatable = false)
@@ -85,5 +87,11 @@ public class RestaurantOrder {
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public float getDeliveryFee() {
+		return deliveryFee;
+	}
+	public void setDeliveryFee(float deliveryFee) {
+		this.deliveryFee = deliveryFee;
 	}
 }

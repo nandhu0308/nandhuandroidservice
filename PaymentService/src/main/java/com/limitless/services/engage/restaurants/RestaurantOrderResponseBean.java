@@ -3,6 +3,7 @@ package com.limitless.services.engage.restaurants;
 public class RestaurantOrderResponseBean {
 	private int restaurantOrderId;
 	private float totalAmount;
+	private float orderDeliveryFee;
 	private String paymentMode;
 	private int sellerId;
 	private int citrusSellerId;
@@ -56,5 +57,11 @@ public class RestaurantOrderResponseBean {
 	}
 	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
+	}
+	public float getOrderDeliveryFee() {
+		return orderDeliveryFee;
+	}
+	public void setOrderDeliveryFee(float orderDeliveryFee) {
+		this.orderDeliveryFee = orderDeliveryFee;
 	}
 }

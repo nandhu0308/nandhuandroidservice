@@ -2208,7 +2208,8 @@ public class EngageSellerManager {
 				Junction condition = Restrictions.conjunction()
 						.add(Restrictions.eq("promoCode", requestBean.getPromoCode()))
 						.add(Restrictions.eq("sellerId", requestBean.getSellerId()))
-						.add(Restrictions.eq("isActive", true));
+						.add(Restrictions.eq("isActive", true))
+						.add(Restrictions.eq("customerId", requestBean.getCustomerId()));
 				criteria.add(condition);
 				List<SellerPromoCode> promoCodeList = criteria.list();
 				log.debug("promocode list size : " + promoCodeList.size());
@@ -2246,6 +2247,49 @@ public class EngageSellerManager {
 			}
 		}
 		return responseBean;
+	}
+	
+	public void deactivatePromoCodes() throws Exception{
+		log.debug("deactivating promo codes");
+		Session session = null;
+		Transaction transaction = null;
+		try{
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			
+			Criteria criteria = session.createCriteria(SellerPromoCode.class);
+			criteria.add(Restrictions.eq("isActive", true));
+			List<SellerPromoCode> promoCodeList = criteria.list();
+			log.debug("promo code list size : " + promoCodeList.size());
+			if(promoCodeList.size()>0){
+				for(SellerPromoCode promoCode : promoCodeList){
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date expiryDate = sdf.parse(promoCode.getExpiryDate());
+					Date todayDate = new Date();
+					if(expiryDate.before(todayDate)){
+						SellerPromoCode code = (SellerPromoCode) session
+								.get("com.limitless.services.engage.dao.SellerPromoCode", promoCode.getPromoCodeId());
+						if(code!=null){
+							code.setActive(false);
+							session.update(code);
+						}
+					}
+				}
+			}
+			transaction.commit();
+		}
+		catch(RuntimeException re){
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("deactivating promo codes failed : " + re);
+			throw re;
+		}
+		finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
 	}
 
 	/*

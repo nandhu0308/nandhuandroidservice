@@ -20,6 +20,8 @@ public class SellerPromoCode {
 	private Integer promoCodeId;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
+	@Column(name="CUSTOMER_ID")
+	private Integer customerId;
 	@Column(name="PROMO_CODE")
 	private String promoCode;
 	@Column(name="RATE")
@@ -90,5 +92,11 @@ public class SellerPromoCode {
 	}
 	public void setPcUpdatedTime(Date pcUpdatedTime) {
 		this.pcUpdatedTime = pcUpdatedTime;
+	}
+	public Integer getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(Integer customerId) {
+		this.customerId = customerId;
 	}
 }

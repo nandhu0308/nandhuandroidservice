@@ -721,4 +721,14 @@ public class EngageSellerResource {
 		return responseBean;
 	}
 	
+	@PUT
+	@Path("/promo/deactivate")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deactivatePromos() throws Exception{
+		EngageSellerManager manager = new EngageSellerManager();
+		manager.deactivatePromoCodes();
+		return Response.status(200).build();
+	}
+	
 }

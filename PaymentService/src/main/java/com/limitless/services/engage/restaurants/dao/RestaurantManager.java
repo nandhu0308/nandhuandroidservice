@@ -343,7 +343,7 @@ public class RestaurantManager {
 				}
 				order.setOrderStatus("ORDER_INITIATED");
 				order.setTotalAmount(totalAmount);
-
+				order.setDeliveryFee(requestBean.getOrderDeliveryFee());
 				session.persist(order);
 				log.debug("order id : " + order.getOrderId());
 				int orderId = order.getOrderId();
@@ -381,6 +381,7 @@ public class RestaurantManager {
 					responseBean = new RestaurantOrderResponseBean();
 					responseBean.setRestaurantOrderId(orderId);
 					responseBean.setTotalAmount(totalAmount);
+					responseBean.setOrderDeliveryFee(requestBean.getOrderDeliveryFee());
 					if (requestBean.getPaymentMode() != null) {
 						responseBean.setPaymentMode(requestBean.getPaymentMode());
 					}
