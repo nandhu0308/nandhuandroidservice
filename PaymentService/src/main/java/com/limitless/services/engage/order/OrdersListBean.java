@@ -11,8 +11,11 @@ public class OrdersListBean {
 	private String sellerName;
 	private int citrusSellerId;
 	private String sellerMobileNumber;
+	private String sellerAddress;
+	private String sellerCity;
 	private double totalAmount;
 	private float orderDeliveryFee;
+	private float packagingFee;
 	private String time;
 	private String orderStatus;
 	private String paymentMode;
@@ -100,5 +103,23 @@ public class OrdersListBean {
 	}
 	public void setOrderDeliveryFee(float orderDeliveryFee) {
 		this.orderDeliveryFee = orderDeliveryFee;
+	}
+	public float getPackagingFee() {
+		return packagingFee;
+	}
+	public void setPackagingFee(float packagingFee) {
+		this.packagingFee = packagingFee;
+	}
+	public String getSellerAddress() {
+		return sellerAddress;
+	}
+	public void setSellerAddress(String sellerAddress) {
+		this.sellerAddress = sellerAddress;
+	}
+	public String getSellerCity() {
+		return sellerCity;
+	}
+	public void setSellerCity(String sellerCity) {
+		this.sellerCity = sellerCity;
 	}
 }

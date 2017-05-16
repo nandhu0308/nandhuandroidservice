@@ -38,6 +38,8 @@ public class Orders {
 	private String paymentMode;
 	@Column(name="DELIVERY_FEE")
 	private float deliveryFee;
+	@Column(name="PACKAGING_FEE")
+	private float packagingFee;
 	
 	public Integer getOrderId() {
 		return orderId;
@@ -101,5 +103,11 @@ public class Orders {
 	}
 	public void setDeliveryFee(float deliveryFee) {
 		this.deliveryFee = deliveryFee;
+	}
+	public float getPackagingFee() {
+		return packagingFee;
+	}
+	public void setPackagingFee(float packagingFee) {
+		this.packagingFee = packagingFee;
 	}
 }

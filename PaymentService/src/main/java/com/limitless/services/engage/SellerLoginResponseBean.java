@@ -32,6 +32,7 @@ public class SellerLoginResponseBean {
 	private float deliveryMinAmount;
 	private float deliveryFee;
 	private int deliveryRadius;
+	private float packagingFee;
 	private String paymentAlert;
 	private boolean cobranding;
 	private BroadcasterChannelResponseBean channelBean;
@@ -208,5 +209,11 @@ public class SellerLoginResponseBean {
 	}
 	public void setEcomPayment(int ecomPayment) {
 		this.ecomPayment = ecomPayment;
+	}
+	public float getPackagingFee() {
+		return packagingFee;
+	}
+	public void setPackagingFee(float packagingFee) {
+		this.packagingFee = packagingFee;
 	}
 }

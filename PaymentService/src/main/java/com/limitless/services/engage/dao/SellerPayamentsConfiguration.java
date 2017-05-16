@@ -46,6 +46,8 @@ public class SellerPayamentsConfiguration {
 	private float convenienceFeeRate;
 	@Column(name="PAYMENT_ALERT")
 	private String paymentAlert;
+	@Column(name="PACKAGING_FEE")
+	private float packagingFee;
 	
 	public Integer getSpcId() {
 		return spcId;
@@ -130,5 +132,11 @@ public class SellerPayamentsConfiguration {
 	}
 	public void setPaymentAlert(String paymentAlert) {
 		this.paymentAlert = paymentAlert;
+	}
+	public float getPackagingFee() {
+		return packagingFee;
+	}
+	public void setPackagingFee(float packagingFee) {
+		this.packagingFee = packagingFee;
 	}
 }

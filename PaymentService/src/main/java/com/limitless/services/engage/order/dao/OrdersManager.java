@@ -88,6 +88,7 @@ public class OrdersManager {
 			order.setSellerId(requestBean.getSellerId());
 			order.setTotalAmount(totalAmount);
 			order.setDeliveryFee(requestBean.getOrderDeliveryFee());
+			order.setPackagingFee(requestBean.getPackagingFee());
 			order.setOrderStatus("ORDER_INITIATED");
 			order.setPaymentMode(requestBean.getPaymentMode());
 			order.setDeliveryAddress(requestBean.getAddressId());
@@ -114,6 +115,7 @@ public class OrdersManager {
 			responseBean.setOrderId(orderId);
 			responseBean.setTotalAmount(totalAmount);
 			responseBean.setOrderDeliveryFee(requestBean.getOrderDeliveryFee());
+			responseBean.setPackagingFee(requestBean.getPackagingFee());
 			responseBean.setMessage("Success");
 			transaction.commit();
 		}
@@ -251,6 +253,8 @@ public class OrdersManager {
 			if(seller!=null){
 				String sellerName = seller.getSellerShopName();
 				String sellerMobileNumber = seller.getSellerMobileNumber();
+				String sellerAddress = seller.getSellerAddress();
+				String sellerCity = seller.getSellerCity();
 				int citrusSellerId = 0;
 				
 				Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
@@ -283,12 +287,15 @@ public class OrdersManager {
 						listBean.setSellerName(sellerName);
 						listBean.setCitrusSellerId(citrusSellerId);
 						listBean.setSellerMobileNumber(sellerMobileNumber);
+						listBean.setSellerAddress(sellerAddress);
+						listBean.setSellerCity(sellerCity);
 						listBean.setTotalAmount(order.getTotalAmount());
 						listBean.setOrderDeliveryFee(order.getDeliveryFee());
+						listBean.setPackagingFee(order.getPackagingFee());
 						listBean.setPaymentMode(order.getPaymentMode());
-						String gmtTime = order.getOrderCreatedTime().toString();
-						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						Date dateTxn = sdf3.parse(gmtTime);
+						//String gmtTime = order.getOrderCreatedTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat("dd MMM yyyy HH:mm");
+						Date dateTxn = order.getOrderCreatedTime();
 						Calendar calendar = Calendar.getInstance();
 						calendar.setTime(dateTxn);
 						calendar.add(Calendar.HOUR, 5);
@@ -377,6 +384,8 @@ public class OrdersManager {
 								.get("com.limitless.services.engage.dao.EngageSeller", order.getSellerId());
 						listBean.setSellerName(seller.getSellerShopName());
 						listBean.setSellerMobileNumber(seller.getSellerMobileNumber());
+						listBean.setSellerAddress(seller.getSellerAddress());
+						listBean.setSellerCity(seller.getSellerCity());
 						Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 						criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 						List<SellerPayamentsConfiguration> configList = criteria2.list();
@@ -387,10 +396,11 @@ public class OrdersManager {
 						}
 						listBean.setTotalAmount(order.getTotalAmount());
 						listBean.setOrderDeliveryFee(order.getDeliveryFee());
+						listBean.setPackagingFee(order.getPackagingFee());
 						listBean.setPaymentMode(order.getPaymentMode());
-						String gmtTime = order.getOrderCreatedTime().toString();
-						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						Date dateTxn = sdf3.parse(gmtTime);
+						//String gmtTime = order.getOrderCreatedTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat("dd MMM yyyy HH:mm");
+						Date dateTxn = order.getOrderCreatedTime();
 						Calendar calendar = Calendar.getInstance();
 						calendar.setTime(dateTxn);
 						calendar.add(Calendar.HOUR, 5);

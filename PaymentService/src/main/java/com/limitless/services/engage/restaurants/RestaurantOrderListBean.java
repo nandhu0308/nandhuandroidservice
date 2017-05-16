@@ -7,6 +7,7 @@ public class RestaurantOrderListBean {
 	private int restaurantId;
 	private String restaurantName;
 	private String restaurantCity;
+	private String restaurantAddress;
 	private String restaurantMobileNumber;
 	private String sellerName;
 	private int sellerId;
@@ -15,7 +16,10 @@ public class RestaurantOrderListBean {
 	private String customerName;
 	private String customerMobileNumber;
 	private float orderTotalAmount;
+	private float orderDeliveryFee;
+	private float packagingFee;
 	private String orderStyle;
+	private String orderItemNames;
 	private String restaurantOrderStatus;
 	private String restaurantOrderTime;
 	private String paymentMode;
@@ -157,5 +161,29 @@ public class RestaurantOrderListBean {
 	}
 	public void setDeliveryRadius(int deliveryRadius) {
 		this.deliveryRadius = deliveryRadius;
+	}
+	public float getOrderDeliveryFee() {
+		return orderDeliveryFee;
+	}
+	public void setOrderDeliveryFee(float orderDeliveryFee) {
+		this.orderDeliveryFee = orderDeliveryFee;
+	}
+	public float getPackagingFee() {
+		return packagingFee;
+	}
+	public void setPackagingFee(float packagingFee) {
+		this.packagingFee = packagingFee;
+	}
+	public String getOrderItemNames() {
+		return orderItemNames;
+	}
+	public void setOrderItemNames(String orderItemNames) {
+		this.orderItemNames = orderItemNames;
+	}
+	public String getRestaurantAddress() {
+		return restaurantAddress;
+	}
+	public void setRestaurantAddress(String restaurantAddress) {
+		this.restaurantAddress = restaurantAddress;
 	}
 }

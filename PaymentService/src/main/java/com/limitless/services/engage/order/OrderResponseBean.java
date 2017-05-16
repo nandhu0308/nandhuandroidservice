@@ -4,6 +4,7 @@ public class OrderResponseBean {
 	private int orderId;
 	private double totalAmount;
 	private float orderDeliveryFee;
+	private float packagingFee;
 	private String paymentMode;
 	private String message;
 	public int getOrderId() {
@@ -35,5 +36,11 @@ public class OrderResponseBean {
 	}
 	public void setOrderDeliveryFee(float orderDeliveryFee) {
 		this.orderDeliveryFee = orderDeliveryFee;
+	}
+	public float getPackagingFee() {
+		return packagingFee;
+	}
+	public void setPackagingFee(float packagingFee) {
+		this.packagingFee = packagingFee;
 	}
 }

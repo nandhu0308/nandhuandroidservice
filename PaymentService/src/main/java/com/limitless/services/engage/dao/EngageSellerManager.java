@@ -643,6 +643,7 @@ public class EngageSellerManager {
 						for (SellerPayamentsConfiguration config : configList) {
 							responseBean.setCitrusSellerId(config.getCitrusSellerId());
 							responseBean.setPaymentAlert(config.getPaymentAlert());
+							responseBean.setPackagingFee(config.getPackagingFee());
 							if (config.getPayOnDelivery() == 1) {
 								responseBean.setPodAvailable(true);
 							} else if (config.getPayOnDelivery() == 0) {

@@ -86,8 +86,8 @@ public class RestaurantManager {
 					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 					List<SellerPayamentsConfiguration> configList = criteria2.list();
-					if(configList.size()==1){
-						for(SellerPayamentsConfiguration config : configList){
+					if (configList.size() == 1) {
+						for (SellerPayamentsConfiguration config : configList) {
 							bean.setRestaurantSellerCitrusId(config.getCitrusSellerId());
 						}
 					}
@@ -344,6 +344,7 @@ public class RestaurantManager {
 				order.setOrderStatus("ORDER_INITIATED");
 				order.setTotalAmount(totalAmount);
 				order.setDeliveryFee(requestBean.getOrderDeliveryFee());
+				order.setPackagingFee(requestBean.getPackagingFee());
 				session.persist(order);
 				log.debug("order id : " + order.getOrderId());
 				int orderId = order.getOrderId();
@@ -372,8 +373,8 @@ public class RestaurantManager {
 						Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 						criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 						List<SellerPayamentsConfiguration> configList = criteria2.list();
-						if(configList.size()==1){
-							for(SellerPayamentsConfiguration config : configList){
+						if (configList.size() == 1) {
+							for (SellerPayamentsConfiguration config : configList) {
 								citrusSellerId = config.getCitrusSellerId();
 							}
 						}
@@ -450,6 +451,12 @@ public class RestaurantManager {
 					} else if (requestBean.getOrderStatus() == 9) {
 						order.setOrderStatus("PICKUP_FAILED");
 						responseBean.setCurrentStatus("PICKUP_FAILED");
+					} else if (requestBean.getOrderStatus() == 10) {
+						order.setOrderStatus("IN_PROCESS");
+						responseBean.setCurrentStatus("IN_PROCESS");
+					} else if (requestBean.getOrderStatus() == 11) {
+						order.setOrderStatus("CONFIRMED");
+						responseBean.setCurrentStatus("CONFIRMED");
 					}
 					session.update(order);
 				}
@@ -545,6 +552,8 @@ public class RestaurantManager {
 						listBean.setOrderId(order.getOrderId());
 						listBean.setOrderStyle(order.getOrderType());
 						listBean.setOrderTotalAmount((float) order.getTotalAmount());
+						listBean.setOrderDeliveryFee(order.getDeliveryFee());
+						listBean.setPackagingFee(order.getPackagingFee());
 						listBean.setCustomerId(order.getCustomerId());
 						listBean.setCustomerName(customerName);
 						listBean.setCustomerMobileNumber(customerPhone);
@@ -552,11 +561,12 @@ public class RestaurantManager {
 						if (order.getPaymentMode() != null) {
 							listBean.setPaymentMode(order.getPaymentMode());
 						}
-						String gmtTime = order.getOrderTime().toString();
-						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						Date dateTxn = sdf3.parse(gmtTime);
+						//String gmtTime = order.getOrderTime().toString();
+						SimpleDateFormat sdf3 = new SimpleDateFormat(" dd MMM yyyy HH:mm:ss");
+						Date gmtDate = order.getOrderTime();
+						//Date dateTxn = sdf3.parse(gmtDate);
 						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(dateTxn);
+						calendar.setTime(gmtDate);
 						calendar.add(Calendar.HOUR, 5);
 						calendar.add(Calendar.MINUTE, 30);
 						String localTime = sdf3.format(calendar.getTime());
@@ -571,32 +581,47 @@ public class RestaurantManager {
 							listBean.setRestaurantMobileNumber(restaurant.getRestaurantPhone());
 							sellerId = restaurant.getSellerId();
 						}
+						
+						Criteria criteria3 = session.createCriteria(RestaurantOrderDetails.class);
+						criteria3.add(Restrictions.eq("orderId", order.getOrderId()));
+						List<RestaurantOrderDetails> detailsList = criteria3.list();
+						log.debug("details size : " + detailsList.size());
+						if(detailsList.size()>0){
+							String itemNames = "";
+							for(RestaurantOrderDetails details : detailsList){
+								RestaurantItems item = (RestaurantItems) session
+										.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", details.getItemId());
+								if(item!=null){
+									itemNames = itemNames + item.getItemName()+"["+details.getQuantity()+"]. ";
+								}
+							}
+							listBean.setOrderItemNames(itemNames);
+						}
 
 						EngageSeller seller = (EngageSeller) session
 								.get("com.limitless.services.engage.dao.EngageSeller", sellerId);
 						if (seller != null) {
 							listBean.setSellerId(sellerId);
 							listBean.setSellerName(seller.getSellerName());
+							listBean.setRestaurantAddress(seller.getSellerAddress());
 							Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 							criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 							List<SellerPayamentsConfiguration> configList = criteria2.list();
 							log.debug("configs size : " + configList.size());
-							if(configList.size()>0){
-								for(SellerPayamentsConfiguration config : configList){
+							if (configList.size() > 0) {
+								for (SellerPayamentsConfiguration config : configList) {
 									listBean.setCitrusSellerId(config.getCitrusSellerId());
-									if(config.getPayOnDelivery()==1){
+									if (config.getPayOnDelivery() == 1) {
 										listBean.setPodAvailable(true);
-									}
-									else if(config.getPayOnDelivery()==0){
+									} else if (config.getPayOnDelivery() == 0) {
 										listBean.setPodAvailable(false);
 									}
 									listBean.setDeliveryMinAmount(config.getDevliveryMInAmt());
 									listBean.setDeliveryFee(config.getConvenienceFee());
 									listBean.setDeliveryRadius(config.getDeliveryRadius());
-									if(config.getConvenienceFee()==1){
+									if (config.getConvenienceFee() == 1) {
 										listBean.setConvenienceFee(true);
-									}
-									else if(config.getConvenienceFee()==0){
+									} else if (config.getConvenienceFee() == 0) {
 										listBean.setConvenienceFee(false);
 									}
 								}
@@ -657,16 +682,18 @@ public class RestaurantManager {
 				String restaurantPhone = restaurant.getRestaurantPhone();
 				int sellerId = restaurant.getSellerId();
 				String sellerName = "";
+				String restaurantAddress = "";
 				int citrusSellerId = 0;
 				EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
 						sellerId);
 				if (seller != null) {
 					sellerName = seller.getSellerName();
+					restaurantAddress = seller.getSellerAddress();
 					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 					List<SellerPayamentsConfiguration> configList = criteria2.list();
-					if(configList.size()==1){
-						for(SellerPayamentsConfiguration config : configList){
+					if (configList.size() == 1) {
+						for (SellerPayamentsConfiguration config : configList) {
 							citrusSellerId = config.getCitrusSellerId();
 						}
 					}
@@ -690,16 +717,17 @@ public class RestaurantManager {
 						if (order.getPaymentMode() != null) {
 							listBean.setPaymentMode(order.getPaymentMode());
 						}
-						String gmtTime = order.getOrderTime().toString();
-						SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						Date dateTxn = sdf3.parse(gmtTime);
+						SimpleDateFormat sdf3 = new SimpleDateFormat(" dd MMM yyyy HH:mm:ss");
+						Date gmtDate = order.getOrderTime();
 						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(dateTxn);
+						calendar.setTime(gmtDate);
 						calendar.add(Calendar.HOUR, 5);
 						calendar.add(Calendar.MINUTE, 30);
 						String localTime = sdf3.format(calendar.getTime());
 						listBean.setRestaurantOrderTime(localTime);
 						listBean.setOrderTotalAmount((float) order.getTotalAmount());
+						listBean.setOrderDeliveryFee(order.getDeliveryFee());
+						listBean.setPackagingFee(order.getPackagingFee());
 						EngageCustomer customer = (EngageCustomer) session
 								.get("com.limitless.services.engage.dao.EngageCustomer", order.getCustomerId());
 						if (customer != null) {
@@ -710,6 +738,7 @@ public class RestaurantManager {
 						listBean.setRestaurantId(order.getRestaurantId());
 						listBean.setRestaurantName(restaurantName);
 						listBean.setRestaurantCity(restaurantCity);
+						listBean.setRestaurantAddress(restaurantAddress);
 						listBean.setRestaurantMobileNumber(restaurantPhone);
 						listBean.setCitrusSellerId(citrusSellerId);
 						listBean.setSellerId(sellerId);
@@ -828,8 +857,8 @@ public class RestaurantManager {
 					Criteria criteria2 = session.createCriteria(SellerPayamentsConfiguration.class);
 					criteria2.add(Restrictions.eq("sellerId", seller.getSellerId()));
 					List<SellerPayamentsConfiguration> configList = criteria2.list();
-					if(configList.size()==1){
-						for(SellerPayamentsConfiguration config : configList){
+					if (configList.size() == 1) {
+						for (SellerPayamentsConfiguration config : configList) {
 							responseBean.setCitrusSellerId(config.getCitrusSellerId());
 						}
 					}
@@ -1046,8 +1075,8 @@ public class RestaurantManager {
 						criteria.add(Restrictions.eq("sellerId", sellerId));
 						List<SellerDeviceIdMapper> mapperList = criteria.list();
 						log.debug("mapperlist size : " + mapperList.size());
-						if(mapperList.size()>0){
-							for(SellerDeviceIdMapper mapper : mapperList){
+						if (mapperList.size() > 0) {
+							for (SellerDeviceIdMapper mapper : mapperList) {
 								String to = mapper.getSellerDeviceId();
 								RestaurantOrderFcmRequestBean fcmBean = new RestaurantOrderFcmRequestBean();
 								fcmBean.setTo(to);
@@ -1143,32 +1172,34 @@ public class RestaurantManager {
 			}
 		}
 	}
-	
-	public NewRestaurantCategoryResponseBean addNewCategory(NewRestaurantCategoryRequestBean requestBean){
+
+	public NewRestaurantCategoryResponseBean addNewCategory(NewRestaurantCategoryRequestBean requestBean) {
 		log.debug("adding new category");
 		NewRestaurantCategoryResponseBean responseBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
-				Restaurants restaurants = (Restaurants) session
-						.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
-				if(restaurants!=null){
-					if(restaurants.getSellerId()==requestBean.getSellerId()){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
+				Restaurants restaurants = (Restaurants) session.get(
+						"com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
+				if (restaurants != null) {
+					if (restaurants.getSellerId() == requestBean.getSellerId()) {
 						RestaurantCategory category = new RestaurantCategory();
 						category.setCategoryName(requestBean.getCategoryName());
 						category.setRestaurantId(requestBean.getRestaurantId());
 						session.persist(category);
 						log.debug("category id : " + category.getCategoryId());
-						
-						if(!requestBean.getSubcategoryRequestList().isEmpty() || requestBean.getSubcategoryRequestList() != null){
-							List<NewRestaurantSubcategoryRequestBean> subcategoryRequestList = requestBean.getSubcategoryRequestList();
-							for(NewRestaurantSubcategoryRequestBean reqBean : subcategoryRequestList){
+
+						if (!requestBean.getSubcategoryRequestList().isEmpty()
+								|| requestBean.getSubcategoryRequestList() != null) {
+							List<NewRestaurantSubcategoryRequestBean> subcategoryRequestList = requestBean
+									.getSubcategoryRequestList();
+							for (NewRestaurantSubcategoryRequestBean reqBean : subcategoryRequestList) {
 								RestaurantSubCategory subCategory = new RestaurantSubCategory();
 								subCategory.setSubcategoryName(reqBean.getSubcategoryName());
 								subCategory.setCategoryId(category.getCategoryId());
@@ -1184,78 +1215,76 @@ public class RestaurantManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding new category failed");
 			throw re;
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public NewRestaurantSubcategoryResponseBean addNewSubcategory(NewRestaurantSubcategoryRequestBean requestBean){
+
+	public NewRestaurantSubcategoryResponseBean addNewSubcategory(NewRestaurantSubcategoryRequestBean requestBean) {
 		log.debug("adding new subcategory");
 		NewRestaurantSubcategoryResponseBean responseBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			RestaurantCategory category = (RestaurantCategory) session
-					.get("com.limitless.services.engage.restaurants.dao.RestaurantCategory", requestBean.getCategoryId());
-			if(category!=null){
+
+			RestaurantCategory category = (RestaurantCategory) session.get(
+					"com.limitless.services.engage.restaurants.dao.RestaurantCategory", requestBean.getCategoryId());
+			if (category != null) {
 				RestaurantSubCategory subCategory = new RestaurantSubCategory();
 				subCategory.setSubcategoryName(requestBean.getSubcategoryName());
 				subCategory.setSubCategoryId(requestBean.getCategoryId());
 				session.persist(subCategory);
-				
+
 				responseBean = new NewRestaurantSubcategoryResponseBean();
 				responseBean.setCategoryId(requestBean.getCategoryId());
 				responseBean.setSubcategoryId(subCategory.getSubCategoryId());
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding new subcategory failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public NewRestaurantItemResponseBean addNewItem(NewRestaurantItemRequestBean requestBean){
+
+	public NewRestaurantItemResponseBean addNewItem(NewRestaurantItemRequestBean requestBean) {
 		log.debug("adding new item");
 		NewRestaurantItemResponseBean responseBean = null;
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Restaurants restaurants = (Restaurants) session
 					.get("com.limitless.services.engage.restaurants.dao.Restaurants", requestBean.getRestaurantId());
-			if(restaurants!=null){
-				RestaurantCategory category = (RestaurantCategory) session
-						.get("com.limitless.services.engage.restaurants.dao.RestaurantCategory", requestBean.getCategoryId());
-				if(category!=null){
-					RestaurantSubCategory subCategory = (RestaurantSubCategory) session
-							.get("com.limitless.services.engage.restaurants.dao.RestaurantSubCategory", requestBean.getSubcategoryId());
-					if(subCategory!=null){
+			if (restaurants != null) {
+				RestaurantCategory category = (RestaurantCategory) session.get(
+						"com.limitless.services.engage.restaurants.dao.RestaurantCategory",
+						requestBean.getCategoryId());
+				if (category != null) {
+					RestaurantSubCategory subCategory = (RestaurantSubCategory) session.get(
+							"com.limitless.services.engage.restaurants.dao.RestaurantSubCategory",
+							requestBean.getSubcategoryId());
+					if (subCategory != null) {
 						RestaurantItems item = new RestaurantItems();
 						item.setRestaurantId(requestBean.getRestaurantId());
 						item.setCategoryId(requestBean.getCategoryId());
@@ -1282,20 +1311,18 @@ public class RestaurantManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
-			if(transaction!=null){
+		} catch (RuntimeException re) {
+			if (transaction != null) {
 				transaction.commit();
 			}
 			log.error("adding item failed : " + re);
 			throw re;
-		}
-		finally {
-			if(session!=null && session.isOpen()){
+		} finally {
+			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
+
 }
