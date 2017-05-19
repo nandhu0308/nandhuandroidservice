@@ -3,7 +3,15 @@ package com.limitless.services.engage.order;
 public class OrderPaymentModeUpdateResponseBean {
 	private int orderId;
 	private String paymentMode;
+	private String prevPaymentMode;
+	public String getPrevPaymentMode() {
+		return prevPaymentMode;
+	}
+	public void setPrevPaymentMode(String prevPaymentMode) {
+		this.prevPaymentMode = prevPaymentMode;
+	}
 	private String message;
+	
 	public int getOrderId() {
 		return orderId;
 	}

@@ -40,7 +40,7 @@ public class OrderResource {
 			}
 			if(requestBean.getPaymentMode()!=null){
 				if(requestBean.getPaymentMode().equals("POD")){
-					OrderStatusResponseBean statusResponseBean = manager.orderStatusUpdate(responseBean.getOrderId(), 1);
+					OrderStatusResponseBean statusResponseBean = manager.orderStatusUpdate(responseBean.getOrderId(), "ORDER_RECEIVED");
 					if(responseBean.getOrderId()!=0 || responseBean!=null){
 						OrderMailResponseBean mailResponseBean = manager.sendMailOrderTxn(responseBean.getOrderId(), 0);
 					}
@@ -58,7 +58,7 @@ public class OrderResource {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	public OrderStatusResponseBean updateStatus(@PathParam("orderId") int orderId,
-			@PathParam("statusCode") int statusCode) throws Exception{
+			@PathParam("statusCode") String statusCode) throws Exception{
 		OrderStatusResponseBean responseBean = new OrderStatusResponseBean();
 		try{
 			OrdersManager manager = new OrdersManager();

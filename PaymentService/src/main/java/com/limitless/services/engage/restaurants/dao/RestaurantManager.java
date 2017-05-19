@@ -430,34 +430,9 @@ public class RestaurantManager {
 					responseBean.setOrderId(requestBean.getOrderId());
 					responseBean.setRestaurantId(requestBean.getRestaurantId());
 					responseBean.setPreviousStatus(order.getOrderStatus());
-					if (requestBean.getOrderStatus() == 3) {
-						order.setOrderStatus("READY_FOR_SERVE");
-						responseBean.setCurrentStatus("READY_FOR_SERVE");
-					} else if (requestBean.getOrderStatus() == 4) {
-						order.setOrderStatus("READY_FOR_PICKUP");
-						responseBean.setCurrentStatus("READY_FOR_PICKUP");
-					} else if (requestBean.getOrderStatus() == 5) {
-						order.setOrderStatus("OUT_FOR_DELIVERY");
-						responseBean.setCurrentStatus("OUT_FOR_DELIVERY");
-					} else if (requestBean.getOrderStatus() == 6) {
-						order.setOrderStatus("DELIEVERED");
-						responseBean.setCurrentStatus("DELIEVERED");
-					} else if (requestBean.getOrderStatus() == 7) {
-						order.setOrderStatus("ORDER_FAILED");
-						responseBean.setCurrentStatus("ORDER_FAILED");
-					} else if (requestBean.getOrderStatus() == 8) {
-						order.setOrderStatus("DELIVERY_FAILED");
-						responseBean.setCurrentStatus("DELIVERY_FAILED");
-					} else if (requestBean.getOrderStatus() == 9) {
-						order.setOrderStatus("PICKUP_FAILED");
-						responseBean.setCurrentStatus("PICKUP_FAILED");
-					} else if (requestBean.getOrderStatus() == 10) {
-						order.setOrderStatus("IN_PROCESS");
-						responseBean.setCurrentStatus("IN_PROCESS");
-					} else if (requestBean.getOrderStatus() == 11) {
-						order.setOrderStatus("CONFIRMED");
-						responseBean.setCurrentStatus("CONFIRMED");
-					}
+					order.setOrderStatus(requestBean.getOrderStatusString());
+					responseBean.setCurrentStatus(requestBean.getOrderStatusString());
+					
 					session.update(order);
 				}
 			}

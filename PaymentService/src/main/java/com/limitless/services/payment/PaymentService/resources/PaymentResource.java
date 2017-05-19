@@ -192,7 +192,8 @@ public class PaymentResource {
 			if (paymentTxn.getTxnType().equals("eCommerce")) {
 				if (paymentTxn.getOrderId() > 0) {
 					OrdersManager ordersManager = new OrdersManager();
-					orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(), 5);
+					orderStatusResponseBean = ordersManager.orderStatusUpdate(paymentTxn.getOrderId(),
+							"PROCESS_FAILED");
 					System.out.println("Order status : " + orderStatusResponseBean.getCurrentStatus()
 							+ " for order id : " + orderStatusResponseBean.getOrderId());
 					orderMailResponseBean = ordersManager.sendMailOrderTxn(paymentTxn.getOrderId(),
@@ -476,7 +477,9 @@ public class PaymentResource {
 					logger.info("PR: updating ecommerce order." + String.valueOf(orderId));
 					OrdersManager ordersManager = new OrdersManager();
 					updateResponseBean = ordersManager.updatePaymentMode(orderId, "PAID");
-					orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, 1);
+					String status = updateResponseBean.getPrevPaymentMode().equalsIgnoreCase("POD") ? "ORDER_DELIVERED"
+							: "ORDER_RECEIVED";
+					orderStatusResponseBean = ordersManager.orderStatusUpdate(orderId, status);
 					System.out.println("Order status : " + orderStatusResponseBean.getCurrentStatus()
 							+ " for order id : " + orderStatusResponseBean.getOrderId());
 					// InventoryUpdateResponseBean inventoryUpdateResponseBean =

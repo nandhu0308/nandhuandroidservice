@@ -33,8 +33,17 @@ public class BroadcasterAlbum {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	@Column(name="ALBUM_UPDATED_TIME")
-	private Date albumUpdatedTime;
+	private Date albumUpdatedTime;	
+	@Column(name="BROADCASTER_ALBUM_CATEGORY_ID")
+	private int broadcasterAlbumCategoryId;
 	
+	
+	public int getBroadcasterAlbumCategoryId() {
+		return broadcasterAlbumCategoryId;
+	}
+	public void setBroadcasterAlbumCategoryId(int broadcasterAlbumCategoryId) {
+		this.broadcasterAlbumCategoryId = broadcasterAlbumCategoryId;
+	}
 	public Integer getAlbumId() {
 		return albumId;
 	}

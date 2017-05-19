@@ -4,6 +4,14 @@ public class RestaurantOrderStatusUpdateRequestBean {
 	private int restaurantId;
 	private int orderId;
 	private int orderStatus;
+	private String orderStatusString;
+	
+	public String getOrderStatusString() {
+		return orderStatusString;
+	}
+	public void setOrderStatusString(String orderStatusString) {
+		this.orderStatusString = orderStatusString;
+	}
 	public int getRestaurantId() {
 		return restaurantId;
 	}
