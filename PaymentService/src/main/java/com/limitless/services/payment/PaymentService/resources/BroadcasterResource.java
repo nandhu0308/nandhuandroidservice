@@ -16,6 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.entertainment.AlbumBean;
+import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryRequestBean;
+import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
@@ -41,6 +43,25 @@ public class BroadcasterResource {
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
+	}
+
+	@Path("/album/category/get")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAlbums(BroadcasterAlbumCategoryRequestBean requestBean) throws Exception {
+		List<BroadcasterAlbumCategoryResponseBean> responseBean = new ArrayList<BroadcasterAlbumCategoryResponseBean>();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.getAllBroadcasterAlbumCategoryList(requestBean);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		if (responseBean != null && !(responseBean.isEmpty())) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
 	}
 
 	@Path("/video/list/{albumId}")

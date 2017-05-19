@@ -36,8 +36,26 @@ public class BroadcasterAlbum {
 	private Date albumUpdatedTime;	
 	@Column(name="BROADCASTER_ALBUM_CATEGORY_ID")
 	private int broadcasterAlbumCategoryId;
+	@Column(name = "RANK")
+	private Integer rank;
+
+	@Column(name = "isActive")
+	private boolean isActive;
 	
 	
+	
+	public Integer getRank() {
+		return rank;
+	}
+	public void setRank(Integer rank) {
+		this.rank = rank;
+	}
+	public boolean isActive() {
+		return isActive;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
 	public int getBroadcasterAlbumCategoryId() {
 		return broadcasterAlbumCategoryId;
 	}

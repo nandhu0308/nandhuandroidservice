@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "broadcaster_category", catalog = "llcdb")
+@Table(name = "broadcaster_album_category", catalog = "llcdb")
 public class BroadcasterAlbumCategory {
 	@Id
 	@GeneratedValue
