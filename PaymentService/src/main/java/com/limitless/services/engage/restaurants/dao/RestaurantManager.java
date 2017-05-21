@@ -424,15 +424,14 @@ public class RestaurantManager {
 			if (restaurant != null) {
 				RestaurantOrder order = (RestaurantOrder) session
 						.get("com.limitless.services.engage.restaurants.dao.RestaurantOrder", requestBean.getOrderId());
-				if (order != null && requestBean.getRestaurantId() == order.getRestaurantId()
-						&& requestBean.getOrderStatus() >= 3) {
+				if (order != null && requestBean.getRestaurantId() == order.getRestaurantId()) {
 					responseBean = new RestaurantOrderStatusUpdateResponseBean();
 					responseBean.setOrderId(requestBean.getOrderId());
 					responseBean.setRestaurantId(requestBean.getRestaurantId());
 					responseBean.setPreviousStatus(order.getOrderStatus());
 					order.setOrderStatus(requestBean.getOrderStatusString());
 					responseBean.setCurrentStatus(requestBean.getOrderStatusString());
-					
+
 					session.update(order);
 				}
 			}
@@ -536,10 +535,10 @@ public class RestaurantManager {
 						if (order.getPaymentMode() != null) {
 							listBean.setPaymentMode(order.getPaymentMode());
 						}
-						//String gmtTime = order.getOrderTime().toString();
+						// String gmtTime = order.getOrderTime().toString();
 						SimpleDateFormat sdf3 = new SimpleDateFormat(" dd MMM yyyy HH:mm:ss");
 						Date gmtDate = order.getOrderTime();
-						//Date dateTxn = sdf3.parse(gmtDate);
+						// Date dateTxn = sdf3.parse(gmtDate);
 						Calendar calendar = Calendar.getInstance();
 						calendar.setTime(gmtDate);
 						calendar.add(Calendar.HOUR, 5);
@@ -556,18 +555,19 @@ public class RestaurantManager {
 							listBean.setRestaurantMobileNumber(restaurant.getRestaurantPhone());
 							sellerId = restaurant.getSellerId();
 						}
-						
+
 						Criteria criteria3 = session.createCriteria(RestaurantOrderDetails.class);
 						criteria3.add(Restrictions.eq("orderId", order.getOrderId()));
 						List<RestaurantOrderDetails> detailsList = criteria3.list();
 						log.debug("details size : " + detailsList.size());
-						if(detailsList.size()>0){
+						if (detailsList.size() > 0) {
 							String itemNames = "";
-							for(RestaurantOrderDetails details : detailsList){
-								RestaurantItems item = (RestaurantItems) session
-										.get("com.limitless.services.engage.restaurants.dao.RestaurantItems", details.getItemId());
-								if(item!=null){
-									itemNames = itemNames + item.getItemName()+"["+details.getQuantity()+"]. ";
+							for (RestaurantOrderDetails details : detailsList) {
+								RestaurantItems item = (RestaurantItems) session.get(
+										"com.limitless.services.engage.restaurants.dao.RestaurantItems",
+										details.getItemId());
+								if (item != null) {
+									itemNames = itemNames + item.getItemName() + "[" + details.getQuantity() + "]. ";
 								}
 							}
 							listBean.setOrderItemNames(itemNames);

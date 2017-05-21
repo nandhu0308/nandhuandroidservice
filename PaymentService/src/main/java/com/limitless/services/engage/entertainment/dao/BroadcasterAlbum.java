@@ -38,7 +38,6 @@ public class BroadcasterAlbum {
 	private int broadcasterAlbumCategoryId;
 	@Column(name = "RANK")
 	private Integer rank;
-
 	@Column(name = "isActive")
 	private boolean isActive;
 	

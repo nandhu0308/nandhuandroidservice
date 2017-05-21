@@ -67,7 +67,7 @@ public class BroadcasterManager {
 					int count = 0;
 					if (albumsList.size() > 0) {
 						for (BroadcasterAlbum album : albumsList) {
-							if(count > 10)
+							if (count > 10)
 								break;
 							AlbumBean bean = new AlbumBean();
 							bean.setAlbumId(album.getAlbumId());
@@ -163,8 +163,8 @@ public class BroadcasterManager {
 
 	}
 
-	public List<BroadcasterAlbumCategoryResponseBean> getAllBroadcasterAlbumCategoryList(BroadcasterAlbumCategoryRequestBean requestBean)
-	{
+	public List<BroadcasterAlbumCategoryResponseBean> getAllBroadcasterAlbumCategoryList(
+			BroadcasterAlbumCategoryRequestBean requestBean) {
 		log.debug("getting categories and Albums");
 		List<BroadcasterAlbumCategoryResponseBean> categories = new ArrayList<BroadcasterAlbumCategoryResponseBean>();
 		Session session = null;
@@ -173,8 +173,8 @@ public class BroadcasterManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			Criteria criteria = session.createCriteria(BroadcasterAlbumCategory.class);
-			 criteria.addOrder(Order.asc("rank"));
-			 criteria.addOrder(Order.asc("name"));
+			criteria.addOrder(Order.asc("rank"));
+			criteria.addOrder(Order.asc("name"));
 			List<BroadcasterAlbumCategory> albumCategories = criteria.list();
 			if (albumCategories.size() > 0) {
 				List<AlbumBean> albumsBean = null;
@@ -190,11 +190,11 @@ public class BroadcasterManager {
 						albumsBean = new ArrayList<AlbumBean>();
 						for (BroadcasterAlbum album : albums) {
 							AlbumBean bean = new AlbumBean();
-							bean.setAlbumId(album.getAlbumId());						
+							bean.setAlbumId(album.getAlbumId());
 							bean.setAlbumName(album.getAlbumName());
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
-							bean.setAlbumThumbnail(album.getAlbumThumbnail());	
+							bean.setAlbumThumbnail(album.getAlbumThumbnail());
 							albumsBean.add(bean);
 							bean = null;
 						}
@@ -225,7 +225,7 @@ public class BroadcasterManager {
 		return categories;
 	}
 
-	public AlbumBean getBroadcasterAlbumVideoList(int albumId) {
+	public AlbumBean getBroadcasterAlbumVideoList(int albumId, int beginingVideoId) {
 		log.debug("getting album video list");
 		AlbumBean albumBean = new AlbumBean();
 		Session session = null;
@@ -246,6 +246,14 @@ public class BroadcasterManager {
 				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
 				criteria.add(Restrictions.eq("albumId", albumId));
+				criteria.add(Restrictions.eq("isActive", true));
+				if (beginingVideoId > -1) {
+					criteria.add(Restrictions.gt("videosId", beginingVideoId));
+					criteria.setMaxResults(15);
+				}
+				criteria.addOrder(Order.asc("rank"));
+				
+
 				List<BroadcasterVideo> videosList = criteria.list();
 				log.debug("video size : " + videosList.size());
 				if (videosList.size() > 0) {

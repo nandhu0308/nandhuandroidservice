@@ -36,7 +36,25 @@ public class BroadcasterVideo {
 	private Date videoUpdatedTime;
 	@Column(name="IS_YOUTUBE", nullable=false, columnDefinition="TINYINT(1)")
 	private boolean isYoutube;
+	@Column(name = "RANK")
+	private Integer rank;
+	@Column(name = "isActive")
+	private boolean isActive;
 	
+	
+	
+	public Integer getRank() {
+		return rank;
+	}
+	public void setRank(Integer rank) {
+		this.rank = rank;
+	}
+	public boolean isActive() {
+		return isActive;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
 	public Integer getVideosId() {
 		return videosId;
 	}
