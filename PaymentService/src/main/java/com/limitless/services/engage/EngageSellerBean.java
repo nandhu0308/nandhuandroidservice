@@ -17,8 +17,8 @@ public class EngageSellerBean {
 	private String sellerType;
 	private String sellerRole;
 
-	private float latitude;
-	private float longitude;
+	private double latitude;
+	private double longitude;
 
 	private String kycDocType;
 	private String kycDocValue;
@@ -121,19 +121,19 @@ public class EngageSellerBean {
 		this.mobileNumber = mobileNumber;
 	}
 
-	public float getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(float latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 
-	public float getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(float longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 

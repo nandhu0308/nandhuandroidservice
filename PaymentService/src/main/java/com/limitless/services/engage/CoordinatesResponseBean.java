@@ -6,8 +6,8 @@ public class CoordinatesResponseBean {
 	private String sellerName;
 	private String shopName;
 	private String sellerMobile;
-	private float latitude;
-	private float longitude;
+	private double latitude;
+	private double longitude;
 	private String businessCategory;
 	private String mapMarkerName;
 
@@ -27,19 +27,19 @@ public class CoordinatesResponseBean {
 		this.sellerName = sellerName;
 	}
 
-	public float getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(float latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 
-	public float getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(float longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 

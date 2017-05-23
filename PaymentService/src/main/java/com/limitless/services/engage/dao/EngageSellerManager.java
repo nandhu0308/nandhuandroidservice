@@ -1,4 +1,4 @@
- package com.limitless.services.engage.dao;
+package com.limitless.services.engage.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -31,6 +32,8 @@ import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.transform.Transformers;
+import org.hibernate.type.LongType;
 import org.json.JSONObject;
 
 import com.limitless.services.engage.AliasCheckResponseBean;
@@ -2086,7 +2089,6 @@ public class EngageSellerManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-
 			Criteria criteria = session.createCriteria(EngageSeller.class);
 			criteria.add(Restrictions.ne("businessCategory", ""))
 					.setProjection(Projections.distinct(Projections.property("businessCategory")));
@@ -2097,47 +2099,51 @@ public class EngageSellerManager {
 				sellerCategoryList = new ArrayList<SellerBusinessCategoryBean>();
 				for (String category : categoryList) {
 					List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
-					Class.forName("com.mysql.jdbc.Driver");
-					Connection connection = DriverManager.getConnection(
-							"jdbc:mysql://limitless-engage.cchjaguu68a3.us-west-2.rds.amazonaws.com:3306/llcdb?autoReconnect=true&useSSL=false",
-							"root", "pmt11cd3");
-					Statement statement = connection.createStatement();
-					ResultSet resultSet = statement
-							.executeQuery("SELECT *,ACOS( SIN( RADIANS( `seller_location_latitude` ) ) * SIN( RADIANS( "
-									+ coordsBean.getLatitude()
-									+ " ) ) + COS( RADIANS( `seller_location_latitude` ) )* COS( RADIANS( "
-									+ coordsBean.getLatitude()
-									+ " )) * COS( RADIANS( `seller_location_longitude` ) - RADIANS( "
-									+ coordsBean.getLongitude()
-									+ " )) ) * 6380 AS `distance` FROM llcdb.engage_seller WHERE ACOS( SIN( RADIANS( `seller_location_latitude` ) ) * SIN( RADIANS( "
-									+ coordsBean.getLatitude()
-									+ " ) ) + COS( RADIANS( `seller_location_latitude` ) ) * COS( RADIANS( "
-									+ coordsBean.getLatitude()
-									+ " )) * COS( RADIANS( `seller_location_longitude` ) - RADIANS( "
-									+ coordsBean.getLongitude() + " )) ) * 6380 < " + coordsBean.getRadius()
-									+ " and business_category='" + category
-									+ "' and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY `distance` limit 10;");
+
+					SQLQuery query = session.createSQLQuery(
+							"SELECT * , ACOS( SIN( RADIANS( 'seller_location_latitude' ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( 'seller_location_latitude' ) )* COS( RADIANS( :lon )) * COS( RADIANS( 'seller_location_longitude' ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
+					// query.setEntity("alias", EngageSeller.class);
+					query.setParameter("lat", "'" + String.valueOf(coordsBean.getLatitude()) + "'");
+					query.setParameter("lon", "'" + String.valueOf(coordsBean.getLongitude()) + "'");
+					query.setParameter("cat", category);
+					query.addEntity(EngageSeller.class);
+					query.setResultSetMapping("engage_seller");
+					query.setFirstResult(coordsBean.getIndex());
+					query.setMaxResults(15);
+
+					List<EngageSeller> sellersList = query.list();
 					SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
-					categoryBean.setSellerBusinessCategory(category);
-					while (resultSet.next()) {
-						SellerMinBean bean = new SellerMinBean();
-						bean.setSellerId(resultSet.getInt("seller_id"));
-						bean.setSellerName(resultSet.getString("seller_name"));
-						bean.setSellerShopName(resultSet.getString("seller_shop_name"));
-						bean.setSellerMobileNumber(resultSet.getString("seller_mobile_number"));
-						bean.setSellerCity(resultSet.getString("seller_city"));
-						bean.setSellerBrandingUrl(resultSet.getString("branding_url"));
-						bean.setSellerIconUrl(resultSet.getString("seller_icon_url"));
-						bean.setSellerTags(resultSet.getString("tag"));
-						beanList.add(bean);
-						bean = null;
+					if (sellersList.size() > 0) {
+						categoryBean.setSellerBusinessCategory(category);
+						for (EngageSeller seller : sellersList) {
+							SellerMinBean bean = new SellerMinBean();
+							// bean.setSellerId(Integer.valueOf((String)
+							// seller[0]));
+							// bean.setSellerName((String) seller[1]);
+							// bean.setSellerShopName((String) seller[2]);
+							// bean.setSellerMobileNumber((String) seller[3]);
+							// bean.setSellerCity((String) seller[4]);
+							// bean.setSellerBrandingUrl((String) seller[5]);
+							// bean.setSellerIconUrl((String) seller[6]);
+							// bean.setSellerTags((String) seller[7]);
+
+							bean.setSellerId(seller.getSellerId());
+							bean.setSellerName(seller.getSellerName());
+							bean.setSellerShopName(seller.getSellerShopName());
+							bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+							bean.setSellerCity(seller.getSellerCity());
+							bean.setSellerBrandingUrl(seller.getBranding_url());
+							bean.setSellerIconUrl(seller.getSellerIconURL());
+							bean.setSellerTags(seller.getTag());
+							beanList.add(bean);
+							bean = null;
+						}
 					}
 					if (beanList != null && beanList.size() > 0) {
 						categoryBean.setSellerList(beanList);
 						sellerCategoryList.add(categoryBean);
 					}
 					categoryBean = null;
-					connection.close();
 				}
 			}
 			transaction.commit();
@@ -2154,16 +2160,16 @@ public class EngageSellerManager {
 		}
 		return sellerCategoryList;
 	}
-	
-	public NewPromoCodeResponseBean addNewPromoCode(NewPromoCodeRequestBean requestBean){
+
+	public NewPromoCodeResponseBean addNewPromoCode(NewPromoCodeRequestBean requestBean) {
 		log.debug("adding new promo code");
 		NewPromoCodeResponseBean responseBean = new NewPromoCodeResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			SellerPromoCode promoCode = new SellerPromoCode();
 			promoCode.setSellerId(requestBean.getSellerId());
 			promoCode.setPromoCode(requestBean.getPromoCode());
@@ -2177,34 +2183,32 @@ public class EngageSellerManager {
 			responseBean.setSellerId(promoCode.getSellerId());
 			responseBean.setMessage("Success");
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding new promo code failed : " + re);
 			throw re;
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public PromoCodeResponseBean getPromoCode(PromoCodeRequestBean requestBean){
+
+	public PromoCodeResponseBean getPromoCode(PromoCodeRequestBean requestBean) {
 		log.debug("getting promo code");
 		PromoCodeResponseBean responseBean = new PromoCodeResponseBean();
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
-			EngageSeller seller = (EngageSeller) session
-					.get("com.limitless.services.engage.dao.EngageSeller", requestBean.getSellerId());
-			if(seller!=null){
+
+			EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+					requestBean.getSellerId());
+			if (seller != null) {
 				Criteria criteria = session.createCriteria(SellerPromoCode.class);
 				Junction condition = Restrictions.conjunction()
 						.add(Restrictions.eq("promoCode", requestBean.getPromoCode()))
@@ -2214,8 +2218,8 @@ public class EngageSellerManager {
 				criteria.add(condition);
 				List<SellerPromoCode> promoCodeList = criteria.list();
 				log.debug("promocode list size : " + promoCodeList.size());
-				if(promoCodeList.size()==1){
-					for(SellerPromoCode promoCode : promoCodeList){
+				if (promoCodeList.size() == 1) {
+					for (SellerPromoCode promoCode : promoCodeList) {
 						responseBean.setMessage("Success");
 						responseBean.setPromoCodeId(promoCode.getPromoCodeId());
 						responseBean.setSellerId(promoCode.getSellerId());
@@ -2225,52 +2229,48 @@ public class EngageSellerManager {
 						responseBean.setExpiryDate(promoCode.getExpiryDate());
 						responseBean.setActive(promoCode.isActive());
 					}
-				}
-				else{
+				} else {
 					responseBean.setMessage("Invalid Promo Code");
 				}
-			}
-			else{
+			} else {
 				responseBean.setMessage("Invalid Promo Code");
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("adding new promo code failed : " + re);
 			throw re;
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}
 		}
 		return responseBean;
 	}
-	
-	public void deactivatePromoCodes() throws Exception{
+
+	public void deactivatePromoCodes() throws Exception {
 		log.debug("deactivating promo codes");
 		Session session = null;
 		Transaction transaction = null;
-		try{
+		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			
+
 			Criteria criteria = session.createCriteria(SellerPromoCode.class);
 			criteria.add(Restrictions.eq("isActive", true));
 			List<SellerPromoCode> promoCodeList = criteria.list();
 			log.debug("promo code list size : " + promoCodeList.size());
-			if(promoCodeList.size()>0){
-				for(SellerPromoCode promoCode : promoCodeList){
+			if (promoCodeList.size() > 0) {
+				for (SellerPromoCode promoCode : promoCodeList) {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date expiryDate = sdf.parse(promoCode.getExpiryDate());
 					Date todayDate = new Date();
-					if(expiryDate.before(todayDate)){
+					if (expiryDate.before(todayDate)) {
 						SellerPromoCode code = (SellerPromoCode) session
 								.get("com.limitless.services.engage.dao.SellerPromoCode", promoCode.getPromoCodeId());
-						if(code!=null){
+						if (code != null) {
 							code.setActive(false);
 							session.update(code);
 						}
@@ -2278,15 +2278,13 @@ public class EngageSellerManager {
 				}
 			}
 			transaction.commit();
-		}
-		catch(RuntimeException re){
+		} catch (RuntimeException re) {
 			if (transaction != null) {
 				transaction.rollback();
 			}
 			log.error("deactivating promo codes failed : " + re);
 			throw re;
-		}
-		finally {
+		} finally {
 			if (session != null && session.isOpen()) {
 				session.close();
 			}

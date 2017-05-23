@@ -6,8 +6,10 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -18,91 +20,93 @@ import javax.persistence.Version;
  */
 @Entity
 @Table(name = "engage_seller", catalog = "llcdb")
+@SqlResultSetMapping(name = "engage_seller", entities = @EntityResult(entityClass = EngageSeller.class))
 public class EngageSeller implements java.io.Serializable {
-	
-	@Id @GeneratedValue
-	@Column(name="SELLER_ID")
+
+	@Id
+	@GeneratedValue
+	@Column(name = "SELLER_ID")
+
 	private int sellerId;
-	@Column(name="SELLER_NAME")
+	@Column(name = "SELLER_NAME")
 	private String sellerName;
-	@Column(name="SELLER_EMAIL99")
+	@Column(name = "SELLER_EMAIL99")
 	private String sellerEmail99;
-	@Column(name="SELLER_PASSWD99")
+	@Column(name = "SELLER_PASSWD99")
 	private String sellerPasswd99;
-	@Column(name="SELLER_COUNTRY_CODE")
+	@Column(name = "SELLER_COUNTRY_CODE")
 	private String sellerCountryCode;
-	@Column(name="SELLER_MOBILE_NUMBER")
+	@Column(name = "SELLER_MOBILE_NUMBER")
 	private String sellerMobileNumber;
-	@Column(name="SELLER_COUNTRY")
+	@Column(name = "SELLER_COUNTRY")
 	private String sellerCountry;
-	@Column(name="SELLER_CITY")
+	@Column(name = "SELLER_CITY")
 	private String sellerCity;
-	@Column(name="SELLER_ADDRESS")
+	@Column(name = "SELLER_ADDRESS")
 	private String sellerAddress;
-	@Column(name="SELLER_DEVICE_ID")
+	@Column(name = "SELLER_DEVICE_ID")
 	private String sellerDeviceId;
-	@Column(name="SELLER_LOCATION_LATITUDE")
-	private Float sellerLocationLatitude;
-	@Column(name="SELLER_LOCATION_LONGITUDE")
-	private Float sellerLocationLongitude;
-	@Column(name="SELLER_KYC_DOC_TYPE")
+	@Column(name = "SELLER_LOCATION_LATITUDE")
+	private double sellerLocationLatitude;
+	@Column(name = "SELLER_LOCATION_LONGITUDE")
+	private double sellerLocationLongitude;
+	@Column(name = "SELLER_KYC_DOC_TYPE")
 	private String sellerKycDocType;
-	@Column(name="SELLER_KYC_DOC_VALUE")
+	@Column(name = "SELLER_KYC_DOC_VALUE")
 	private String sellerKycDocValue;
-	@Column(name="SELLER_CREATED_TIME", insertable = false, updatable = false)
+	@Column(name = "SELLER_CREATED_TIME", insertable = false, updatable = false)
 	private Date sellerCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="SELLER_UPDATED_TIME")
+	@Column(name = "SELLER_UPDATED_TIME")
 	@Version
 	private Date sellerUpdatedTime;
-	@Column(name="SELLER_TYPE")
+	@Column(name = "SELLER_TYPE")
 	private String sellerType;
-	@Column(name="SELLER_SHOP_NAME")
+	@Column(name = "SELLER_SHOP_NAME")
 	private String sellerShopName;
-	@Column(name="SELLER_ROLE")
+	@Column(name = "SELLER_ROLE")
 	private String sellerRole;
-	@Column(name="AMBASSADOR_MOBILE")
+	@Column(name = "AMBASSADOR_MOBILE")
 	private String ambassadorMobile;
-	@Column(name="SELLER_SETTLE_PREF")
+	@Column(name = "SELLER_SETTLE_PREF")
 	private int sellerSettlePref;
-/*	@Column(name="KYC_DOC_IMG")
-	private String kycDocImage;*/
-	@Column(name="ISACTIVE")
+	/*
+	 * @Column(name="KYC_DOC_IMG") private String kycDocImage;
+	 */
+	@Column(name = "ISACTIVE")
 	private int isActive;
-	@Column(name="MOBILE_ALIAS")
+	@Column(name = "MOBILE_ALIAS")
 	private String mobileAlias;
-	@Column(name="BRANDING_URL")
+	@Column(name = "BRANDING_URL")
 	private String branding_url;
-	@Column(name="BUSINESS_TYPE")
+	@Column(name = "BUSINESS_TYPE")
 	private String businessType;
-	@Column(name="IS_DELETED")
+	@Column(name = "IS_DELETED")
 	private Integer isDeleted;
-	@Column(name="EXTRA_EMAILS")
+	@Column(name = "EXTRA_EMAILS")
 	private String extraEmails;
-	@Column(name="TAG")
+	@Column(name = "TAG")
 	private String tag;
-	@Column(name="BUSINESS_CATEGORY")
-	private String businessCategory;	
-	@Column(name="MAP_MARKER_NAME")
+	@Column(name = "BUSINESS_CATEGORY")
+	private String businessCategory;
+	@Column(name = "MAP_MARKER_NAME")
 	private String mapMarkerName;
-	@Column(name="ABOUT_SELLER")
+	@Column(name = "ABOUT_SELLER")
 	private String aboutSeller;
-	@Column(name="COBRANDING", nullable=false, columnDefinition="TINYINT(1)")
+	@Column(name = "COBRANDING", nullable = false, columnDefinition = "TINYINT(1)")
 	private boolean cobranding = true;
-	@Column(name="SELLER_ICON_URL")
+	@Column(name = "SELLER_ICON_URL")
 	private String sellerIconURL;
-	@Column(name="ECOM_PAYMENT")
+	@Column(name = "ECOM_PAYMENT")
 	private Integer ecomPayment;
-	
+
 	public EngageSeller() {
 	}
 
-	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99,
-			String sellerPasswd99, String sellerCountryCode,
-			String sellerMobileNumber, String sellerCountry, String sellerCity,
-			String sellerAddress, float sellerSplitPercent,
-			Date sellerCreatedTime, Date sellerUpdatedTime) {
-		//this.citrusSellerId = citrusSellerId;
+	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99, String sellerPasswd99,
+			String sellerCountryCode, String sellerMobileNumber, String sellerCountry, String sellerCity,
+			String sellerAddress, float sellerSplitPercent, Date sellerCreatedTime, Date sellerUpdatedTime) {
+		// this.citrusSellerId = citrusSellerId;
 		this.sellerName = sellerName;
 		this.sellerEmail99 = sellerEmail99;
 		this.sellerPasswd99 = sellerPasswd99;
@@ -115,14 +119,12 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerUpdatedTime = sellerUpdatedTime;
 	}
 
-	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99,
-			String sellerPasswd99, String sellerCountryCode,
-			String sellerMobileNumber, String sellerCountry, String sellerCity,
-			String sellerAddress, String sellerDeviceId, Float sellerLocationLatitude,
-			Float sellerLocationLongitude, float sellerSplitPercent,
-			String sellerKycDocType, String sellerKycDocValue,
-			Date sellerCreatedTime, Date sellerUpdatedTime) {
-		//this.citrusSellerId = citrusSellerId;
+	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99, String sellerPasswd99,
+			String sellerCountryCode, String sellerMobileNumber, String sellerCountry, String sellerCity,
+			String sellerAddress, String sellerDeviceId, double sellerLocationLatitude, double sellerLocationLongitude,
+			float sellerSplitPercent, String sellerKycDocType, String sellerKycDocValue, Date sellerCreatedTime,
+			Date sellerUpdatedTime) {
+		// this.citrusSellerId = citrusSellerId;
 		this.sellerName = sellerName;
 		this.sellerEmail99 = sellerEmail99;
 		this.sellerPasswd99 = sellerPasswd99;
@@ -212,19 +214,19 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerAddress = sellerAddress;
 	}
 
-	public Float getSellerLocationLatitude() {
+	public double getSellerLocationLatitude() {
 		return this.sellerLocationLatitude;
 	}
 
-	public void setSellerLocationLatitude(Float sellerLocationLatitude) {
+	public void setSellerLocationLatitude(double sellerLocationLatitude) {
 		this.sellerLocationLatitude = sellerLocationLatitude;
 	}
 
-	public Float getSellerLocationLongitude() {
+	public double getSellerLocationLongitude() {
 		return this.sellerLocationLongitude;
 	}
 
-	public void setSellerLocationLongitude(Float sellerLocationLongitude) {
+	public void setSellerLocationLongitude(double sellerLocationLongitude) {
 		this.sellerLocationLongitude = sellerLocationLongitude;
 	}
 
@@ -300,13 +302,12 @@ public class EngageSeller implements java.io.Serializable {
 		this.sellerSettlePref = sellerSettlePref;
 	}
 
-/*	public String getKycDocImage() {
-		return kycDocImage;
-	}
-
-	public void setKycDocImage(String kycDocImage) {
-		this.kycDocImage = kycDocImage;
-	}*/
+	/*
+	 * public String getKycDocImage() { return kycDocImage; }
+	 * 
+	 * public void setKycDocImage(String kycDocImage) { this.kycDocImage =
+	 * kycDocImage; }
+	 */
 
 	public int getIsActive() {
 		return isActive;
@@ -375,6 +376,7 @@ public class EngageSeller implements java.io.Serializable {
 	public String getBusinessCategory() {
 		return businessCategory == null || businessCategory.equalsIgnoreCase("") ? "Shop" : businessCategory;
 	}
+
 	public void setBusinessCategory(String businessCategory) {
 		this.businessCategory = businessCategory;
 	}
@@ -418,5 +420,5 @@ public class EngageSeller implements java.io.Serializable {
 	public void setEcomPayment(Integer ecomPayment) {
 		this.ecomPayment = ecomPayment;
 	}
-	
+
 }
