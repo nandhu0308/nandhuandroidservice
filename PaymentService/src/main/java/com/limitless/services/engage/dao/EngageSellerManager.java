@@ -2089,61 +2089,22 @@ public class EngageSellerManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			Criteria criteria = session.createCriteria(EngageSeller.class);
-			criteria.add(Restrictions.ne("businessCategory", ""))
-					.setProjection(Projections.distinct(Projections.property("businessCategory")));
-			criteria.addOrder(Order.asc("businessCategory"));
-			List<String> categoryList = criteria.list();
-			log.debug("category list : " + categoryList.size());
-			if (categoryList.size() > 0) {
+			if (coordsBean.getCategoryName() != null && !coordsBean.getCategoryName().equalsIgnoreCase("")) {
 				sellerCategoryList = new ArrayList<SellerBusinessCategoryBean>();
-				for (String category : categoryList) {
-					List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
-
-					SQLQuery query = session.createSQLQuery(
-							"SELECT * , ACOS( SIN( RADIANS( 'seller_location_latitude' ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( 'seller_location_latitude' ) )* COS( RADIANS( :lon )) * COS( RADIANS( 'seller_location_longitude' ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
-					// query.setEntity("alias", EngageSeller.class);
-					query.setParameter("lat", "'" + String.valueOf(coordsBean.getLatitude()) + "'");
-					query.setParameter("lon", "'" + String.valueOf(coordsBean.getLongitude()) + "'");
-					query.setParameter("cat", category);
-					query.addEntity(EngageSeller.class);
-					query.setResultSetMapping("engage_seller");
-					query.setFirstResult(coordsBean.getIndex());
-					query.setMaxResults(15);
-
-					List<EngageSeller> sellersList = query.list();
-					SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
-					if (sellersList.size() > 0) {
-						categoryBean.setSellerBusinessCategory(category);
-						for (EngageSeller seller : sellersList) {
-							SellerMinBean bean = new SellerMinBean();
-							// bean.setSellerId(Integer.valueOf((String)
-							// seller[0]));
-							// bean.setSellerName((String) seller[1]);
-							// bean.setSellerShopName((String) seller[2]);
-							// bean.setSellerMobileNumber((String) seller[3]);
-							// bean.setSellerCity((String) seller[4]);
-							// bean.setSellerBrandingUrl((String) seller[5]);
-							// bean.setSellerIconUrl((String) seller[6]);
-							// bean.setSellerTags((String) seller[7]);
-
-							bean.setSellerId(seller.getSellerId());
-							bean.setSellerName(seller.getSellerName());
-							bean.setSellerShopName(seller.getSellerShopName());
-							bean.setSellerMobileNumber(seller.getSellerMobileNumber());
-							bean.setSellerCity(seller.getSellerCity());
-							bean.setSellerBrandingUrl(seller.getBranding_url());
-							bean.setSellerIconUrl(seller.getSellerIconURL());
-							bean.setSellerTags(seller.getTag());
-							beanList.add(bean);
-							bean = null;
-						}
+				getSellerListForCategoryAndLocation(coordsBean, sellerCategoryList, session,
+						coordsBean.getCategoryName());
+			} else {
+				Criteria criteria = session.createCriteria(EngageSeller.class);
+				criteria.add(Restrictions.ne("businessCategory", ""))
+						.setProjection(Projections.distinct(Projections.property("businessCategory")));
+				criteria.addOrder(Order.asc("businessCategory"));
+				List<String> categoryList = criteria.list();
+				log.debug("category list : " + categoryList.size());
+				if (categoryList.size() > 0) {
+					sellerCategoryList = new ArrayList<SellerBusinessCategoryBean>();
+					for (String category : categoryList) {
+						getSellerListForCategoryAndLocation(coordsBean, sellerCategoryList, session, category);
 					}
-					if (beanList != null && beanList.size() > 0) {
-						categoryBean.setSellerList(beanList);
-						sellerCategoryList.add(categoryBean);
-					}
-					categoryBean = null;
 				}
 			}
 			transaction.commit();
@@ -2159,6 +2120,56 @@ public class EngageSellerManager {
 			}
 		}
 		return sellerCategoryList;
+	}
+
+	private void getSellerListForCategoryAndLocation(CustomerCoordsBean coordsBean,
+			List<SellerBusinessCategoryBean> sellerCategoryList, Session session, String category) {
+		List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
+
+		SQLQuery query = session.createSQLQuery(
+				"SELECT * , ACOS( SIN( RADIANS( 'seller_location_latitude' ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( 'seller_location_latitude' ) )* COS( RADIANS( :lon )) * COS( RADIANS( 'seller_location_longitude' ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
+		// query.setEntity("alias", EngageSeller.class);
+		query.setParameter("lat", "'" + String.valueOf(coordsBean.getLatitude()) + "'");
+		query.setParameter("lon", "'" + String.valueOf(coordsBean.getLongitude()) + "'");
+		query.setParameter("cat", category);
+		query.addEntity(EngageSeller.class);
+		query.setResultSetMapping("engage_seller");
+		query.setFirstResult(coordsBean.getIndex());
+		query.setMaxResults(15);
+
+		List<EngageSeller> sellersList = query.list();
+		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
+		if (sellersList.size() > 0) {
+			categoryBean.setSellerBusinessCategory(category);
+			for (EngageSeller seller : sellersList) {
+				SellerMinBean bean = new SellerMinBean();
+				// bean.setSellerId(Integer.valueOf((String)
+				// seller[0]));
+				// bean.setSellerName((String) seller[1]);
+				// bean.setSellerShopName((String) seller[2]);
+				// bean.setSellerMobileNumber((String) seller[3]);
+				// bean.setSellerCity((String) seller[4]);
+				// bean.setSellerBrandingUrl((String) seller[5]);
+				// bean.setSellerIconUrl((String) seller[6]);
+				// bean.setSellerTags((String) seller[7]);
+
+				bean.setSellerId(seller.getSellerId());
+				bean.setSellerName(seller.getSellerName());
+				bean.setSellerShopName(seller.getSellerShopName());
+				bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+				bean.setSellerCity(seller.getSellerCity());
+				bean.setSellerBrandingUrl(seller.getBranding_url());
+				bean.setSellerIconUrl(seller.getSellerIconURL());
+				bean.setSellerTags(seller.getTag());
+				beanList.add(bean);
+				bean = null;
+			}
+		}
+		if (beanList != null && beanList.size() > 0) {
+			categoryBean.setSellerList(beanList);
+			sellerCategoryList.add(categoryBean);
+		}
+		categoryBean = null;
 	}
 
 	public NewPromoCodeResponseBean addNewPromoCode(NewPromoCodeRequestBean requestBean) {
