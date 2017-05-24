@@ -120,24 +120,22 @@ public class EngageSellerResource {
 				System.out.println("Seller Id: " + seller.getSellerId());
 				sellerResp.setStatus(1);
 				sellerResp.setMessage("Success");
-				
+
 				SellerPayamentsConfiguration payConfig = new SellerPayamentsConfiguration();
 				payConfig.setSellerId(seller.getSellerId());
 				payConfig.setCitrusSellerId(bean.getCitrusSellerId());
 				payConfig.setSplitPercent(bean.getSplitPerent());
-				if(bean.isPodAvailable()){
+				if (bean.isPodAvailable()) {
 					payConfig.setPayOnDelivery(1);
-				}
-				else if(!bean.isPodAvailable()){
+				} else if (!bean.isPodAvailable()) {
 					payConfig.setPayOnDelivery(0);
 				}
 				payConfig.setDevliveryMInAmt(bean.getDeliveryMinAmount());
 				payConfig.setDeliveryRadius(bean.getDeliveryRadius());
 				payConfig.setDeliveryFee(bean.getDeliveryFee());
-				if(bean.isConvenienceFee()){
+				if (bean.isConvenienceFee()) {
 					payConfig.setConvenienceFee(1);
-				}
-				else if(!bean.isConvenienceFee()){
+				} else if (!bean.isConvenienceFee()) {
 					payConfig.setConvenienceFee(0);
 				}
 				manager.sellerPaymentConfigAdd(payConfig);
@@ -269,12 +267,12 @@ public class EngageSellerResource {
 					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
 							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
-				}
-				else if(responseBean.getBusinessType().equalsIgnoreCase("broadcaster")){
+				} else if (responseBean.getBusinessType().equalsIgnoreCase("broadcaster")) {
 					BroadcasterChannelRequestBean channelRequestBean = new BroadcasterChannelRequestBean();
 					channelRequestBean.setBroadcasterName(responseBean.getSellerName());
 					BroadcasterManager broadcasterManager = new BroadcasterManager();
-					BroadcasterChannelResponseBean channelResponseBean = broadcasterManager.getBroadcasterChannel(channelRequestBean);
+					BroadcasterChannelResponseBean channelResponseBean = broadcasterManager
+							.getBroadcasterChannel(channelRequestBean);
 					responseBean.setChannelBean(channelResponseBean);
 				}
 
@@ -304,7 +302,7 @@ public class EngageSellerResource {
 					List<SellerRestaurantListBean> restaurantListBeans = restaurantManager
 							.getSellerRestaurants(responseBean.getSellerId());
 					responseBean.setRestaurants(restaurantListBeans);
-				} 
+				}
 				SellerContactsResponseBean contactsResponseBean = manager.addSearchMapper(customerId,
 						responseBean.getSellerId());
 			}
@@ -581,154 +579,168 @@ public class EngageSellerResource {
 		}
 		return restaurantsBean;
 	}
-	
+
 	@GET
 	@Path("/ads")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerAdsListBean getSellerAds() throws Exception{
+	public SellerAdsListBean getSellerAds() throws Exception {
 		SellerAdsListBean listBean = new SellerAdsListBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			listBean = manager.getSellerAds();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
 	}
-	
+
 	@GET
 	@Path("/list/business/category")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerBusinessCategoryListBean getBusinessCategoryList() throws Exception{
+	public SellerBusinessCategoryListBean getBusinessCategoryList() throws Exception {
 		SellerBusinessCategoryListBean listBean = new SellerBusinessCategoryListBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			listBean = manager.getSellerBusinessCategoryList();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
 	}
-	
+
 	@GET
 	@Path("/get/business/category/{categoryName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerBusinessCategoryBean getBusinessCategorySellerList(@PathParam("categoryName") String categoryName) throws Exception{
+	public SellerBusinessCategoryBean getBusinessCategorySellerList(@PathParam("categoryName") String categoryName)
+			throws Exception {
 		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			categoryBean = manager.getBusinessCategorySellerList(categoryName);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return categoryBean;
 	}
-	
+
 	@GET
 	@Path("/get/business/category/{categoryName}/{count}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerBusinessCategoryBean getBusinessCategorySellerListPagination(@PathParam("categoryName") String categoryName,
-			@PathParam("count") int count) throws Exception{
+	public SellerBusinessCategoryBean getBusinessCategorySellerListPagination(
+			@PathParam("categoryName") String categoryName, @PathParam("count") int count) throws Exception {
 		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			categoryBean = manager.getSellerBusinessCategoryPagination(categoryName, count);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return categoryBean;
 	}
-	
+
 	@GET
 	@Path("/list/seller/business/category")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getSellerBusinessCategoryList(){
+	public Response getSellerBusinessCategoryList() {
 		EngageSellerManager manager = new EngageSellerManager();
 		List<SellerBusinessCategoryBean> categoryList = manager.getSellerCategoryList();
-		if(categoryList!=null && !(categoryList.isEmpty())){
+		if (categoryList != null && !(categoryList.isEmpty())) {
 			return Response.status(200).entity(categoryList).build();
 		}
 		return Response.status(404).build();
 	}
-	
+
 	@GET
 	@Path("/brand/promotion")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SellerBrandPromotionListBean getSellerPromotionList() throws Exception{
+	public SellerBrandPromotionListBean getSellerPromotionList() throws Exception {
 		SellerBrandPromotionListBean listBean = new SellerBrandPromotionListBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			listBean = manager.getSellerBrandPromotionsList();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return listBean;
 	}
-	
+
+	@POST
+	@Path("/brand/promotion/video")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSellerPromotionListForVideo(CustomerCoordsBean requestBean) throws Exception {
+		SellerBrandPromotionListBean listBean = new SellerBrandPromotionListBean();
+		try {
+			EngageSellerManager manager = new EngageSellerManager();
+			listBean = manager.getVideoBrandPromotionsList(requestBean);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+
+		if (listBean != null && listBean.getPromotionList() != null && listBean.getPromotionList().size() > 0) {
+			return Response.status(200).entity(listBean).build();
+		}
+		return Response.status(404).build();
+
+	}
+
 	@POST
 	@Path("/list/seller/business/category")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getSellerBusinessCategoryListLocation(CustomerCoordsBean coordsBean) throws Exception{
+	public Response getSellerBusinessCategoryListLocation(CustomerCoordsBean coordsBean) throws Exception {
 		EngageSellerManager manager = new EngageSellerManager();
 		List<SellerBusinessCategoryBean> categoryList = manager.getSellerCategoryWithLocation(coordsBean);
-		if(categoryList!=null && !(categoryList.isEmpty())){
+		if (categoryList != null && !(categoryList.isEmpty())) {
 			return Response.status(200).entity(categoryList).build();
 		}
 		return Response.status(404).build();
 	}
-	
+
 	@POST
 	@Path("/promo/new")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public NewPromoCodeResponseBean newPromoCode(NewPromoCodeRequestBean requestBean) throws Exception{
+	public NewPromoCodeResponseBean newPromoCode(NewPromoCodeRequestBean requestBean) throws Exception {
 		NewPromoCodeResponseBean responseBean = new NewPromoCodeResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.addNewPromoCode(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@POST
 	@Path("/promo/get")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public PromoCodeResponseBean getPromoCode(PromoCodeRequestBean requestBean) throws Exception{
+	public PromoCodeResponseBean getPromoCode(PromoCodeRequestBean requestBean) throws Exception {
 		PromoCodeResponseBean responseBean = new PromoCodeResponseBean();
-		try{
+		try {
 			EngageSellerManager manager = new EngageSellerManager();
 			responseBean = manager.getPromoCode(requestBean);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
 		}
 		return responseBean;
 	}
-	
+
 	@PUT
 	@Path("/promo/deactivate")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deactivatePromos() throws Exception{
+	public Response deactivatePromos() throws Exception {
 		EngageSellerManager manager = new EngageSellerManager();
 		manager.deactivatePromoCodes();
 		return Response.status(200).build();
 	}
-	
+
 }

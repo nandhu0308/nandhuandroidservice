@@ -6,9 +6,16 @@ public class CustomerCoordsBean {
 	private double longitude;
 	private double radius;
 	private int index = 0;
+	private int videoId = 0;
 	private String categoryName;
-	
-	
+
+	public int getVideoId() {
+		return videoId;
+	}
+
+	public void setVideoId(int videoId) {
+		this.videoId = videoId;
+	}
 
 	public String getCategoryName() {
 		return categoryName;

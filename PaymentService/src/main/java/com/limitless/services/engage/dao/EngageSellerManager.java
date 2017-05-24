@@ -76,6 +76,7 @@ import com.limitless.services.engage.SellerRestaurantListBean;
 import com.limitless.services.engage.SellerRestaurantsBean;
 import com.limitless.services.engage.SellerUpdateRequestBean;
 import com.limitless.services.engage.SellerUpdateResponseBean;
+import com.limitless.services.engage.entertainment.dao.VideoBrandPromotion;
 import com.limitless.services.engage.restaurants.dao.Restaurants;
 import com.limitless.services.engage.sellers.SubMerchantBean;
 import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
@@ -2021,6 +2022,61 @@ public class EngageSellerManager {
 						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
 						if (bean.getSellerBrandingUrl() == null || bean.getSellerBrandingUrl().equalsIgnoreCase("")) {
 							bean.setSellerBrandingUrl(seller.getBranding_url());
+						}
+					}
+
+					beanList.add(bean);
+					bean = null;
+				}
+				listBean.setPromotionList(beanList);
+				listBean.setMessage("Success");
+			} else if (promotionList.isEmpty()) {
+				listBean.setMessage("Failed");
+			}
+			transaction.commit();
+		} catch (
+
+		RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting promotion list failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return listBean;
+	}
+
+	public SellerBrandPromotionListBean getVideoBrandPromotionsList(CustomerCoordsBean requestBean) {
+		log.debug("getting promotion list");
+		SellerBrandPromotionListBean listBean = new SellerBrandPromotionListBean();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(VideoBrandPromotion.class);
+			criteria.add(Restrictions.eq("isActive", true));
+			List<VideoBrandPromotion> promotionList = criteria.list();
+			log.debug("promo size : " + promotionList.size());
+			if (promotionList.size() > 0) {
+				List<SellerBrandPromotionBean> beanList = new ArrayList<SellerBrandPromotionBean>();
+				for (VideoBrandPromotion promo : promotionList) {
+					SellerBrandPromotionBean bean = new SellerBrandPromotionBean();
+					bean.setSbpId(promo.getVbpId());
+					bean.setSellerId(promo.getSellerId());
+					bean.setSellerBrandingUrl(promo.getAdUrl());
+					EngageSeller seller = (EngageSeller) session.get("com.limitless.services.engage.dao.EngageSeller",
+							promo.getSellerId());
+					if (seller != null) {
+						bean.setSellerName(seller.getSellerName());
+						bean.setSellerShopName(seller.getSellerShopName());
+						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
+						if (bean.getSellerBrandingUrl() == null || bean.getSellerBrandingUrl().equalsIgnoreCase("")) {
+							bean.setSellerBrandingUrl("");
 						}
 					}
 
