@@ -2151,8 +2151,8 @@ public class EngageSellerManager {
 						coordsBean.getCategoryName());
 			} else {
 				Criteria criteria = session.createCriteria(EngageSeller.class);
-				criteria.add(Restrictions.ne("businessCategory", ""))
-						.setProjection(Projections.distinct(Projections.property("businessCategory")));
+				criteria.add(Restrictions.ne("businessCategory", ""));				
+				criteria.add(Restrictions.ne("businessCategory", "TV")).setProjection(Projections.distinct(Projections.property("businessCategory")));
 				criteria.addOrder(Order.asc("businessCategory"));
 				List<String> categoryList = criteria.list();
 				log.debug("category list : " + categoryList.size());
