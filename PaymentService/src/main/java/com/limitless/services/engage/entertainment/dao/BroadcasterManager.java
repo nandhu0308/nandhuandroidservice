@@ -268,6 +268,14 @@ public class BroadcasterManager {
 						videoBean.setVideoUrl(video.getVideoUrl());
 						videoBean.setYoutube(video.isYoutube());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
+						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
+						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
+						ProjectionList projectionList = Projections.projectionList();
+						projectionList.add(Projections.groupProperty("viewDate"));
+						projectionList.add(Projections.groupProperty("customerId"));
+						criteria2.setProjection(projectionList);
+						List<ViewersTrack> trackList2 = criteria2.list();						
+						videoBean.setTotalViewCount(trackList2.size());
 						videoList.add(videoBean);
 						videoBean = null;
 					}
