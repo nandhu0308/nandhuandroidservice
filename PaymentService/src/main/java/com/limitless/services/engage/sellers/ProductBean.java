@@ -35,6 +35,7 @@ public class ProductBean {
 	private boolean pod;
 	private boolean addToCart;
 	private String mobileNumber;
+	private boolean showProducts;
 	
 	public String getProductName() {
 		return productName;
@@ -227,5 +228,11 @@ public class ProductBean {
 	}
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
+	}
+	public boolean isShowProducts() {
+		return showProducts;
+	}
+	public void setShowProducts(boolean showProducts) {
+		this.showProducts = showProducts;
 	}
 }

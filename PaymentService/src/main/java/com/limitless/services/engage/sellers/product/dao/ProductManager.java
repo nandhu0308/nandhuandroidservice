@@ -13,6 +13,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -611,10 +612,11 @@ public class ProductManager {
 				}
 
 				Criteria criteria = session.createCriteria(Product.class);
-				Criterion catIdCriterion = Restrictions.eq("categoryId", requestBean.getCatId());
-				Criterion subcatIdCRiterion = Restrictions.eq("subcategoryId", requestBean.getSubcatId());
-				LogicalExpression logExp = Restrictions.and(catIdCriterion, subcatIdCRiterion);
-				criteria.add(logExp);
+				Junction condition = Restrictions.conjunction()
+						.add(Restrictions.eq("categoryId", requestBean.getCatId()))
+						.add(Restrictions.eq("subcategoryId", requestBean.getSubcatId()))
+						.add(Restrictions.eq("showProducts", true));
+				criteria.add(condition);
 				List<Product> products = criteria.list();
 				log.debug("products size : " + products.size());
 				if (products.size() > 0) {
@@ -650,6 +652,7 @@ public class ProductManager {
 						bean.setPod(product.getPod());
 						bean.setAddToCart(product.isAddToCart());
 						bean.setGroupId(product.getGroupId());
+						bean.setShowProducts(product.isShowProducts());
 						if(product.getMobileNumber()!=null){
 							bean.setMobileNumber(product.getMobileNumber());
 						}

@@ -34,6 +34,8 @@ public class Product {
 	private Integer subcategoryId;
 	@Column(name="PRODUCT_SIZE_TEXT")
 	private String productSizeText;
+	@Column(name="SHOW_PRODUCTS", nullable=false, columnDefinition="TINYINT(1)")
+	private boolean showProducts;
 	@Column(name="PRODUCT_SIZE_NUMBER")
 	private Integer productSizeNumber;
 	@Column(name="PRODUCT_COLOR")
@@ -244,5 +246,11 @@ public class Product {
 	}
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
+	}
+	public boolean isShowProducts() {
+		return showProducts;
+	}
+	public void setShowProducts(boolean showProducts) {
+		this.showProducts = showProducts;
 	}
 }
