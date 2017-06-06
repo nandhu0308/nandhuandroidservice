@@ -614,8 +614,8 @@ public class ProductManager {
 				Criteria criteria = session.createCriteria(Product.class);
 				Junction condition = Restrictions.conjunction()
 						.add(Restrictions.eq("categoryId", requestBean.getCatId()))
-						.add(Restrictions.eq("subcategoryId", requestBean.getSubcatId()))
-						.add(Restrictions.eq("showProducts", true));
+						.add(Restrictions.eq("subcategoryId", requestBean.getSubcatId()));
+						//.add(Restrictions.eq("showProducts", true));
 				criteria.add(condition);
 				List<Product> products = criteria.list();
 				log.debug("products size : " + products.size());
