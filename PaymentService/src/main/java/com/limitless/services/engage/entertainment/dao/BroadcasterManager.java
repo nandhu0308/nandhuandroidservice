@@ -18,6 +18,7 @@ import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.entertainment.AdRollBean;
 import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryRequestBean;
@@ -252,7 +253,6 @@ public class BroadcasterManager {
 					criteria.setMaxResults(15);
 				}
 				criteria.addOrder(Order.asc("rank"));
-				
 
 				List<BroadcasterVideo> videosList = criteria.list();
 				log.debug("video size : " + videosList.size());
@@ -274,8 +274,75 @@ public class BroadcasterManager {
 						projectionList.add(Projections.groupProperty("viewDate"));
 						projectionList.add(Projections.groupProperty("customerId"));
 						criteria2.setProjection(projectionList);
-						List<ViewersTrack> trackList2 = criteria2.list();						
+						List<ViewersTrack> trackList2 = criteria2.list();
 						videoBean.setTotalViewCount(trackList2.size());
+						List<VideoAds> videoAds = new ArrayList<VideoAds>();
+						Criteria criteriaVideoAds = session.createCriteria(VideoAds.class);
+						criteriaVideoAds.add(Restrictions.eq("videoId", video.getVideosId()));
+						videoAds = criteriaVideoAds.list();
+						List<AdRollBean> midRolls = new ArrayList<AdRollBean>();
+						for (VideoAds videoAd : videoAds) {
+							AdRollBean adRoll = new AdRollBean();
+							adRoll.setUrl(videoAd.getPreRollUrl());
+							adRoll.setShopCode(videoAd.getPreRollCode());
+							videoBean.setPreRoll(adRoll);
+
+							AdRollBean m1 = new AdRollBean();
+							m1.setUrl(videoAd.getMidRollUrl_1());
+							m1.setShopCode(videoAd.getMidRollUrl_1_code());
+							midRolls.add(m1);
+
+							AdRollBean m2 = new AdRollBean();
+							m2.setUrl(videoAd.getMidRollUrl_2());
+							m2.setShopCode(videoAd.getMidRollUrl_2_code());
+							midRolls.add(m2);
+
+							AdRollBean m3 = new AdRollBean();
+							m3.setUrl(videoAd.getMidRollUrl_3());
+							m3.setShopCode(videoAd.getMidRollUrl_3_code());
+							midRolls.add(m3);
+
+							AdRollBean m4 = new AdRollBean();
+							m4.setUrl(videoAd.getMidRollUrl_4());
+							m4.setShopCode(videoAd.getMidRollUrl_4_code());
+							midRolls.add(m4);
+
+							AdRollBean m5 = new AdRollBean();
+							m5.setUrl(videoAd.getMidRollUrl_5());
+							m5.setShopCode(videoAd.getMidRollUrl_5_code());
+							midRolls.add(m5);
+
+							AdRollBean m6 = new AdRollBean();
+							m6.setUrl(videoAd.getMidRollUrl_6());
+							m6.setShopCode(videoAd.getMidRollUrl_6_code());
+							midRolls.add(m6);
+
+							AdRollBean m7 = new AdRollBean();
+							m7.setUrl(videoAd.getMidRollUrl_7());
+							m7.setShopCode(videoAd.getMidRollUrl_7_code());
+							midRolls.add(m7);
+
+							AdRollBean m8 = new AdRollBean();
+							m8.setUrl(videoAd.getMidRollUrl_8());
+							m8.setShopCode(videoAd.getMidRollUrl_8_code());
+							midRolls.add(m8);
+
+							AdRollBean m9 = new AdRollBean();
+							m9.setUrl(videoAd.getMidRollUrl_9());
+							m9.setShopCode(videoAd.getMidRollUrl_9_code());
+							midRolls.add(m9);
+
+							AdRollBean m10 = new AdRollBean();
+							m10.setUrl(videoAd.getMidRollUrl_10());
+							m10.setShopCode(videoAd.getMidRollUrl_10_code());
+							midRolls.add(m10);
+
+							videoBean.setMidRolls(midRolls);
+
+							m1 = m2 = m3 = m4 = m5 = m6 = m7 = m8 = m9 = m10 = null;
+							midRolls = null;
+
+						}
 						videoList.add(videoBean);
 						videoBean = null;
 					}

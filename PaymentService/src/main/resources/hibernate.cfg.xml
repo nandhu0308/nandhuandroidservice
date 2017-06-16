@@ -70,5 +70,6 @@
   <mapping class="com.limitless.services.engage.entertainment.dao.BroadcasterCategory"/>
   <mapping class="com.limitless.services.engage.dao.SellerPromoCode"/>
   <mapping class="com.limitless.services.engage.entertainment.dao.VideoBrandPromotion"/>
+  <mapping class="com.limitless.services.engage.entertainment.dao.VideoAds"/>
  </session-factory>
 </hibernate-configuration>
