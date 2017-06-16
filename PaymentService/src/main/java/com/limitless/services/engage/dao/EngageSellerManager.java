@@ -2183,10 +2183,10 @@ public class EngageSellerManager {
 		List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
 
 		SQLQuery query = session.createSQLQuery(
-				"SELECT * , ACOS( SIN( RADIANS( 'seller_location_latitude' ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( 'seller_location_latitude' ) )* COS( RADIANS( :lon )) * COS( RADIANS( 'seller_location_longitude' ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
+				"SELECT * , ACOS( SIN( RADIANS( seller_location_latitude ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( seller_location_latitude ) )* COS( RADIANS( :lon )) * COS( RADIANS( seller_location_longitude ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
 		// query.setEntity("alias", EngageSeller.class);
-		query.setParameter("lat", "'" + String.valueOf(coordsBean.getLatitude()) + "'");
-		query.setParameter("lon", "'" + String.valueOf(coordsBean.getLongitude()) + "'");
+		query.setParameter("lat", coordsBean.getLatitude());
+		query.setParameter("lon", coordsBean.getLongitude());
 		query.setParameter("cat", category);
 		query.addEntity(EngageSeller.class);
 		query.setResultSetMapping("engage_seller");

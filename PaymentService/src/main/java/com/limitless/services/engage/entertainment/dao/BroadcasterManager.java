@@ -283,63 +283,92 @@ public class BroadcasterManager {
 						List<AdRollBean> midRolls = new ArrayList<AdRollBean>();
 						for (VideoAds videoAd : videoAds) {
 							AdRollBean adRoll = new AdRollBean();
-							adRoll.setUrl(videoAd.getPreRollUrl());
-							adRoll.setShopCode(videoAd.getPreRollCode());
-							videoBean.setPreRoll(adRoll);
+							if (videoAd.getPreRollUrl() != null && !videoAd.getPreRollUrl().isEmpty()) {
+								adRoll.setUrl(videoAd.getPreRollUrl());
+								adRoll.setShopCode(videoAd.getPreRollCode());
+								videoBean.setPreRoll(adRoll);
+								adRoll = null;
+							}
+							if (videoAd.getMidRollUrl_1() != null && !videoAd.getMidRollUrl_1().isEmpty()) {
+								AdRollBean m1 = new AdRollBean();
+								m1.setUrl(videoAd.getMidRollUrl_1());
+								m1.setShopCode(videoAd.getMidRollUrl_1_code());
+								midRolls.add(m1);
+								m1 = null;
+							}
 
-							AdRollBean m1 = new AdRollBean();
-							m1.setUrl(videoAd.getMidRollUrl_1());
-							m1.setShopCode(videoAd.getMidRollUrl_1_code());
-							midRolls.add(m1);
+							if (videoAd.getMidRollUrl_2() != null && !videoAd.getMidRollUrl_2().isEmpty()) {
+								AdRollBean m2 = new AdRollBean();
+								m2.setUrl(videoAd.getMidRollUrl_2());
+								m2.setShopCode(videoAd.getMidRollUrl_2_code());
+								midRolls.add(m2);
+								m2 = null;
+							}
 
-							AdRollBean m2 = new AdRollBean();
-							m2.setUrl(videoAd.getMidRollUrl_2());
-							m2.setShopCode(videoAd.getMidRollUrl_2_code());
-							midRolls.add(m2);
+							if (videoAd.getMidRollUrl_3() != null && !videoAd.getMidRollUrl_3().isEmpty()) {
+								AdRollBean m3 = new AdRollBean();
+								m3.setUrl(videoAd.getMidRollUrl_3());
+								m3.setShopCode(videoAd.getMidRollUrl_3_code());
+								midRolls.add(m3);
+								m3 = null;
+							}
 
-							AdRollBean m3 = new AdRollBean();
-							m3.setUrl(videoAd.getMidRollUrl_3());
-							m3.setShopCode(videoAd.getMidRollUrl_3_code());
-							midRolls.add(m3);
+							if (videoAd.getMidRollUrl_4() != null && !videoAd.getMidRollUrl_4().isEmpty()) {
+								AdRollBean m4 = new AdRollBean();
+								m4.setUrl(videoAd.getMidRollUrl_4());
+								m4.setShopCode(videoAd.getMidRollUrl_4_code());
+								midRolls.add(m4);
+								m4 = null;
+							}
 
-							AdRollBean m4 = new AdRollBean();
-							m4.setUrl(videoAd.getMidRollUrl_4());
-							m4.setShopCode(videoAd.getMidRollUrl_4_code());
-							midRolls.add(m4);
+							if (videoAd.getMidRollUrl_5() != null && !videoAd.getMidRollUrl_5().isEmpty()) {
+								AdRollBean m5 = new AdRollBean();
+								m5.setUrl(videoAd.getMidRollUrl_5());
+								m5.setShopCode(videoAd.getMidRollUrl_5_code());
+								midRolls.add(m5);
+								m5 = null;
+							}
 
-							AdRollBean m5 = new AdRollBean();
-							m5.setUrl(videoAd.getMidRollUrl_5());
-							m5.setShopCode(videoAd.getMidRollUrl_5_code());
-							midRolls.add(m5);
+							if (videoAd.getMidRollUrl_6() != null && !videoAd.getMidRollUrl_6().isEmpty()) {
+								AdRollBean m6 = new AdRollBean();
+								m6.setUrl(videoAd.getMidRollUrl_6());
+								m6.setShopCode(videoAd.getMidRollUrl_6_code());
+								midRolls.add(m6);
+								m6 = null;
+							}
 
-							AdRollBean m6 = new AdRollBean();
-							m6.setUrl(videoAd.getMidRollUrl_6());
-							m6.setShopCode(videoAd.getMidRollUrl_6_code());
-							midRolls.add(m6);
+							if (videoAd.getMidRollUrl_7() != null && !videoAd.getMidRollUrl_7().isEmpty()) {
+								AdRollBean m7 = new AdRollBean();
+								m7.setUrl(videoAd.getMidRollUrl_7());
+								m7.setShopCode(videoAd.getMidRollUrl_7_code());
+								midRolls.add(m7);
+								m7 = null;
+							}
 
-							AdRollBean m7 = new AdRollBean();
-							m7.setUrl(videoAd.getMidRollUrl_7());
-							m7.setShopCode(videoAd.getMidRollUrl_7_code());
-							midRolls.add(m7);
+							if (videoAd.getMidRollUrl_8() != null && !videoAd.getMidRollUrl_8().isEmpty()) {
+								AdRollBean m8 = new AdRollBean();
+								m8.setUrl(videoAd.getMidRollUrl_8());
+								m8.setShopCode(videoAd.getMidRollUrl_8_code());
+								midRolls.add(m8);
+								m8 = null;
+							}
 
-							AdRollBean m8 = new AdRollBean();
-							m8.setUrl(videoAd.getMidRollUrl_8());
-							m8.setShopCode(videoAd.getMidRollUrl_8_code());
-							midRolls.add(m8);
+							if (videoAd.getMidRollUrl_9() != null && !videoAd.getMidRollUrl_9().isEmpty()) {
+								AdRollBean m9 = new AdRollBean();
+								m9.setUrl(videoAd.getMidRollUrl_9());
+								m9.setShopCode(videoAd.getMidRollUrl_9_code());
+								midRolls.add(m9);
+								m9 = null;
+							}
 
-							AdRollBean m9 = new AdRollBean();
-							m9.setUrl(videoAd.getMidRollUrl_9());
-							m9.setShopCode(videoAd.getMidRollUrl_9_code());
-							midRolls.add(m9);
-
-							AdRollBean m10 = new AdRollBean();
-							m10.setUrl(videoAd.getMidRollUrl_10());
-							m10.setShopCode(videoAd.getMidRollUrl_10_code());
-							midRolls.add(m10);
-
+							if (videoAd.getMidRollUrl_10() != null && !videoAd.getMidRollUrl_10().isEmpty()) {
+								AdRollBean m10 = new AdRollBean();
+								m10.setUrl(videoAd.getMidRollUrl_10());
+								m10.setShopCode(videoAd.getMidRollUrl_10_code());
+								midRolls.add(m10);
+								m10 = null;
+							}
 							videoBean.setMidRolls(midRolls);
-
-							m1 = m2 = m3 = m4 = m5 = m6 = m7 = m8 = m9 = m10 = null;
 							midRolls = null;
 
 						}
