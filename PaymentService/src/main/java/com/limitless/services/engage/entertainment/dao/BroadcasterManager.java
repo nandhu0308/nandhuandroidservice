@@ -277,101 +277,7 @@ public class BroadcasterManager {
 						List<ViewersTrack> trackList2 = criteria2.list();
 						videoBean.setTotalViewCount(trackList2.size());
 						List<VideoAds> videoAds = new ArrayList<VideoAds>();
-						Criteria criteriaVideoAds = session.createCriteria(VideoAds.class);
-						criteriaVideoAds.add(Restrictions.eq("videoId", video.getVideosId()));
-						videoAds = criteriaVideoAds.list();
-						List<AdRollBean> midRolls = new ArrayList<AdRollBean>();
-						for (VideoAds videoAd : videoAds) {
-							AdRollBean adRoll = new AdRollBean();
-							if (videoAd.getPreRollUrl() != null && !videoAd.getPreRollUrl().isEmpty()) {
-								adRoll.setUrl(videoAd.getPreRollUrl());
-								adRoll.setShopCode(videoAd.getPreRollCode());
-								videoBean.setPreRoll(adRoll);
-								adRoll = null;
-							}
-							if (videoAd.getMidRollUrl_1() != null && !videoAd.getMidRollUrl_1().isEmpty()) {
-								AdRollBean m1 = new AdRollBean();
-								m1.setUrl(videoAd.getMidRollUrl_1());
-								m1.setShopCode(videoAd.getMidRollUrl_1_code());
-								midRolls.add(m1);
-								m1 = null;
-							}
-
-							if (videoAd.getMidRollUrl_2() != null && !videoAd.getMidRollUrl_2().isEmpty()) {
-								AdRollBean m2 = new AdRollBean();
-								m2.setUrl(videoAd.getMidRollUrl_2());
-								m2.setShopCode(videoAd.getMidRollUrl_2_code());
-								midRolls.add(m2);
-								m2 = null;
-							}
-
-							if (videoAd.getMidRollUrl_3() != null && !videoAd.getMidRollUrl_3().isEmpty()) {
-								AdRollBean m3 = new AdRollBean();
-								m3.setUrl(videoAd.getMidRollUrl_3());
-								m3.setShopCode(videoAd.getMidRollUrl_3_code());
-								midRolls.add(m3);
-								m3 = null;
-							}
-
-							if (videoAd.getMidRollUrl_4() != null && !videoAd.getMidRollUrl_4().isEmpty()) {
-								AdRollBean m4 = new AdRollBean();
-								m4.setUrl(videoAd.getMidRollUrl_4());
-								m4.setShopCode(videoAd.getMidRollUrl_4_code());
-								midRolls.add(m4);
-								m4 = null;
-							}
-
-							if (videoAd.getMidRollUrl_5() != null && !videoAd.getMidRollUrl_5().isEmpty()) {
-								AdRollBean m5 = new AdRollBean();
-								m5.setUrl(videoAd.getMidRollUrl_5());
-								m5.setShopCode(videoAd.getMidRollUrl_5_code());
-								midRolls.add(m5);
-								m5 = null;
-							}
-
-							if (videoAd.getMidRollUrl_6() != null && !videoAd.getMidRollUrl_6().isEmpty()) {
-								AdRollBean m6 = new AdRollBean();
-								m6.setUrl(videoAd.getMidRollUrl_6());
-								m6.setShopCode(videoAd.getMidRollUrl_6_code());
-								midRolls.add(m6);
-								m6 = null;
-							}
-
-							if (videoAd.getMidRollUrl_7() != null && !videoAd.getMidRollUrl_7().isEmpty()) {
-								AdRollBean m7 = new AdRollBean();
-								m7.setUrl(videoAd.getMidRollUrl_7());
-								m7.setShopCode(videoAd.getMidRollUrl_7_code());
-								midRolls.add(m7);
-								m7 = null;
-							}
-
-							if (videoAd.getMidRollUrl_8() != null && !videoAd.getMidRollUrl_8().isEmpty()) {
-								AdRollBean m8 = new AdRollBean();
-								m8.setUrl(videoAd.getMidRollUrl_8());
-								m8.setShopCode(videoAd.getMidRollUrl_8_code());
-								midRolls.add(m8);
-								m8 = null;
-							}
-
-							if (videoAd.getMidRollUrl_9() != null && !videoAd.getMidRollUrl_9().isEmpty()) {
-								AdRollBean m9 = new AdRollBean();
-								m9.setUrl(videoAd.getMidRollUrl_9());
-								m9.setShopCode(videoAd.getMidRollUrl_9_code());
-								midRolls.add(m9);
-								m9 = null;
-							}
-
-							if (videoAd.getMidRollUrl_10() != null && !videoAd.getMidRollUrl_10().isEmpty()) {
-								AdRollBean m10 = new AdRollBean();
-								m10.setUrl(videoAd.getMidRollUrl_10());
-								m10.setShopCode(videoAd.getMidRollUrl_10_code());
-								midRolls.add(m10);
-								m10 = null;
-							}
-							videoBean.setMidRolls(midRolls);
-							midRolls = null;
-
-						}
+						fillAds(session, video, videoBean);
 						videoList.add(videoBean);
 						videoBean = null;
 					}
@@ -393,6 +299,105 @@ public class BroadcasterManager {
 			}
 		}
 		return albumBean;
+	}
+
+	private void fillAds(Session session, BroadcasterVideo video, VideoBean videoBean) {
+		List<VideoAds> videoAds;
+		Criteria criteriaVideoAds = session.createCriteria(VideoAds.class);
+		criteriaVideoAds.add(Restrictions.eq("videoId", video.getVideosId()));
+		videoAds = criteriaVideoAds.list();
+		List<AdRollBean> midRolls = new ArrayList<AdRollBean>();
+		for (VideoAds videoAd : videoAds) {
+			AdRollBean adRoll = new AdRollBean();
+			if (videoAd.getPreRollUrl() != null && !videoAd.getPreRollUrl().isEmpty()) {
+				adRoll.setUrl(videoAd.getPreRollUrl());
+				adRoll.setShopCode(videoAd.getPreRollCode());
+				videoBean.setPreRoll(adRoll);
+				adRoll = null;
+			}
+			if (videoAd.getMidRollUrl_1() != null && !videoAd.getMidRollUrl_1().isEmpty()) {
+				AdRollBean m1 = new AdRollBean();
+				m1.setUrl(videoAd.getMidRollUrl_1());
+				m1.setShopCode(videoAd.getMidRollUrl_1_code());
+				midRolls.add(m1);
+				m1 = null;
+			}
+
+			if (videoAd.getMidRollUrl_2() != null && !videoAd.getMidRollUrl_2().isEmpty()) {
+				AdRollBean m2 = new AdRollBean();
+				m2.setUrl(videoAd.getMidRollUrl_2());
+				m2.setShopCode(videoAd.getMidRollUrl_2_code());
+				midRolls.add(m2);
+				m2 = null;
+			}
+
+			if (videoAd.getMidRollUrl_3() != null && !videoAd.getMidRollUrl_3().isEmpty()) {
+				AdRollBean m3 = new AdRollBean();
+				m3.setUrl(videoAd.getMidRollUrl_3());
+				m3.setShopCode(videoAd.getMidRollUrl_3_code());
+				midRolls.add(m3);
+				m3 = null;
+			}
+
+			if (videoAd.getMidRollUrl_4() != null && !videoAd.getMidRollUrl_4().isEmpty()) {
+				AdRollBean m4 = new AdRollBean();
+				m4.setUrl(videoAd.getMidRollUrl_4());
+				m4.setShopCode(videoAd.getMidRollUrl_4_code());
+				midRolls.add(m4);
+				m4 = null;
+			}
+
+			if (videoAd.getMidRollUrl_5() != null && !videoAd.getMidRollUrl_5().isEmpty()) {
+				AdRollBean m5 = new AdRollBean();
+				m5.setUrl(videoAd.getMidRollUrl_5());
+				m5.setShopCode(videoAd.getMidRollUrl_5_code());
+				midRolls.add(m5);
+				m5 = null;
+			}
+
+			if (videoAd.getMidRollUrl_6() != null && !videoAd.getMidRollUrl_6().isEmpty()) {
+				AdRollBean m6 = new AdRollBean();
+				m6.setUrl(videoAd.getMidRollUrl_6());
+				m6.setShopCode(videoAd.getMidRollUrl_6_code());
+				midRolls.add(m6);
+				m6 = null;
+			}
+
+			if (videoAd.getMidRollUrl_7() != null && !videoAd.getMidRollUrl_7().isEmpty()) {
+				AdRollBean m7 = new AdRollBean();
+				m7.setUrl(videoAd.getMidRollUrl_7());
+				m7.setShopCode(videoAd.getMidRollUrl_7_code());
+				midRolls.add(m7);
+				m7 = null;
+			}
+
+			if (videoAd.getMidRollUrl_8() != null && !videoAd.getMidRollUrl_8().isEmpty()) {
+				AdRollBean m8 = new AdRollBean();
+				m8.setUrl(videoAd.getMidRollUrl_8());
+				m8.setShopCode(videoAd.getMidRollUrl_8_code());
+				midRolls.add(m8);
+				m8 = null;
+			}
+
+			if (videoAd.getMidRollUrl_9() != null && !videoAd.getMidRollUrl_9().isEmpty()) {
+				AdRollBean m9 = new AdRollBean();
+				m9.setUrl(videoAd.getMidRollUrl_9());
+				m9.setShopCode(videoAd.getMidRollUrl_9_code());
+				midRolls.add(m9);
+				m9 = null;
+			}
+
+			if (videoAd.getMidRollUrl_10() != null && !videoAd.getMidRollUrl_10().isEmpty()) {
+				AdRollBean m10 = new AdRollBean();
+				m10.setUrl(videoAd.getMidRollUrl_10());
+				m10.setShopCode(videoAd.getMidRollUrl_10_code());
+				midRolls.add(m10);
+				m10 = null;
+			}
+			videoBean.setMidRolls(midRolls);
+			midRolls = null;
+
+		}
 	}
 
 	public VideoBean getVideoById(VideoRequestBean requestBean) {
@@ -455,6 +460,7 @@ public class BroadcasterManager {
 				List<ViewersTrack> trackList2 = criteria2.list();
 				log.debug("total view count :" + trackList2.size());
 				videoBean.setTotalViewCount(trackList2.size());
+				fillAds(session, video, videoBean);
 			} else {
 				videoBean.setMessage("Failed");
 			}
