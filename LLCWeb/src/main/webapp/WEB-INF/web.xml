@@ -29,6 +29,11 @@
 		<servlet-name>limitlessru</servlet-name>
 		<jsp-file>/limitlessru.jsp</jsp-file>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>psurl</servlet-name>
+		<jsp-file>/psurl.jsp</jsp-file>
+	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>limitlessru</servlet-name>
@@ -38,6 +43,11 @@
 	<servlet-mapping>
 		<servlet-name>limitlessbg</servlet-name>
 		<url-pattern>/limitlessbg</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>psurl</servlet-name>
+		<url-pattern>/psurl</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
