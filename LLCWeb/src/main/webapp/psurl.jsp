@@ -8,7 +8,7 @@
 </head>
 <body>
 <%
-String params = request.getParameter("params");
+String params = request.getParameter("referrer");
 response.sendRedirect("https://play.google.com/store/apps/details?id=com.autodidact.android.paylimitless&referrer="+params);
 %>
 </body>
