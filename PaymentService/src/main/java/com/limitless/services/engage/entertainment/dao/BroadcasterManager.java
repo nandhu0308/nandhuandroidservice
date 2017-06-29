@@ -267,6 +267,7 @@ public class BroadcasterManager {
 						videoBean.setVideoThumbnail(video.getVideoThumbnail());
 						videoBean.setVideoUrl(video.getVideoUrl());
 						videoBean.setYoutube(video.isYoutube());
+						videoBean.setLive(video.isLive());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
 						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
@@ -418,6 +419,7 @@ public class BroadcasterManager {
 				videoBean.setVideoThumbnail(video.getVideoThumbnail());
 				videoBean.setVideoUrl(video.getVideoUrl());
 				videoBean.setYoutube(video.isYoutube());
+				videoBean.setLive(video.isLive());
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
 

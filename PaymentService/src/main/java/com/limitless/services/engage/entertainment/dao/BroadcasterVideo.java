@@ -40,7 +40,8 @@ public class BroadcasterVideo {
 	private Integer rank;
 	@Column(name = "isActive")
 	private boolean isActive;
-	
+	@Column(name="ISLIVE", nullable=false, columnDefinition="TINYINT(1)")
+	private boolean islive;
 	
 	
 	public Integer getRank() {
@@ -108,6 +109,13 @@ public class BroadcasterVideo {
 	}
 	public void setYoutube(boolean isYoutube) {
 		this.isYoutube = isYoutube;
+	}
+	
+	public boolean isLive() {
+		return islive;
+	}
+	public void setLive(boolean isLive) {
+		this.islive = isLive;
 	}
 	
 }

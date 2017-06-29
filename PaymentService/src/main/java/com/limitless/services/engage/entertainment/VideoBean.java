@@ -12,6 +12,9 @@ public class VideoBean {
 	private String videoThumbnail;
 	private String videoUrl;
 	private boolean isYoutube;
+	private boolean isLive;
+	
+
 	private String videoCreated;
 	private int vtId;
 	private long liveViewCount;
@@ -137,6 +140,13 @@ public class VideoBean {
 
 	public void setMidRolls(List<AdRollBean> midRolls) {
 		this.midRolls = midRolls;
+	}
+	public boolean isLive() {
+		return isLive;
+	}
+
+	public void setLive(boolean isLive) {
+		this.isLive = isLive;
 	}
 	
 }
