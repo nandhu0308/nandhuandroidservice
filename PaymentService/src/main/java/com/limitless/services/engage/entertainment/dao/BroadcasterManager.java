@@ -101,7 +101,7 @@ public class BroadcasterManager {
 		return responseBean;
 	}
 
-	public List<BroadcasterChannelCategoryResponseBean> getAllBroadcasters() {
+	public List<BroadcasterChannelCategoryResponseBean> getAllBroadcasters(int categoryId) {
 		log.debug("getting categories and channels");
 		List<BroadcasterChannelCategoryResponseBean> categories = new ArrayList<BroadcasterChannelCategoryResponseBean>();
 		Session session = null;
@@ -112,6 +112,8 @@ public class BroadcasterManager {
 			Criteria criteria = session.createCriteria(BroadcasterCategory.class);
 			criteria.addOrder(Order.asc("rank"));
 			criteria.addOrder(Order.asc("name"));
+			if (categoryId > 0)
+				criteria.add(Restrictions.eq("id", categoryId));
 			List<BroadcasterCategory> businessCategories = criteria.list();
 			if (businessCategories.size() > 0) {
 				List<BroadcasterChannelResponseBean> channels = null;
@@ -138,6 +140,7 @@ public class BroadcasterManager {
 						}
 						BroadcasterChannelCategoryResponseBean responseBean = new BroadcasterChannelCategoryResponseBean();
 						responseBean.setCategoryName(category.getName());
+						responseBean.setId(category.getId());
 						responseBean.setChannelList(channels);
 						categories.add(responseBean);
 					}

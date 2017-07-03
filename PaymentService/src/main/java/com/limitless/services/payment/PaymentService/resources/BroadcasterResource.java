@@ -136,13 +136,32 @@ public class BroadcasterResource {
 		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getAllBroadcasters();
+			responseBean = manager.getAllBroadcasters(-1);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			responseBean.clear();
 		}
 		if (responseBean != null && !(responseBean.isEmpty())) {
 			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+
+	@Path("/channel/category/get/{id}")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCategoryByFilter(@PathParam("id") int id) throws Exception {
+		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.getAllBroadcasters(id);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			responseBean.clear();
+		}
+		if (responseBean != null && !(responseBean.isEmpty()) && responseBean.size() > 0) {
+			return Response.status(200).entity(responseBean.get(0)).build();
 		}
 		return Response.status(404).build();
 
