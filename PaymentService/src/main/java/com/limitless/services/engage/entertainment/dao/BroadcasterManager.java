@@ -12,12 +12,15 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.dao.EngageSeller;
+import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.entertainment.AdRollBean;
 import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryResponseBean;
@@ -305,6 +308,36 @@ public class BroadcasterManager {
 		return albumBean;
 	}
 
+	private void setAdRollAdditionalDetails(Session session, AdRollBean adrollBean) {
+		String searchString = adrollBean.getShopCode();
+		if (searchString != null && !searchString.trim().isEmpty()) {
+			int sellerId = 0;
+			if (EngageSellerManager.isInteger(searchString) && searchString.length() <= 7)
+				sellerId = Integer.parseInt(searchString);
+			Criteria criteriaSeller = session.createCriteria(EngageSeller.class);
+			Junction condition1 = Restrictions.disjunction().add(Restrictions.eq("sellerMobileNumber", searchString))
+					.add(Restrictions.eq("mobileAlias", searchString)).add(Restrictions.eq("sellerName", searchString))
+					.add(Restrictions.eq("sellerShopName", searchString)).add(Restrictions.eq("sellerId", sellerId))
+					.add(Restrictions.eq("sellerEmail99", searchString)).add(Restrictions.like("tag", searchString));
+			Junction condition2 = Restrictions.conjunction().add(condition1).add(Restrictions.ne("isDeleted", 1));
+			criteriaSeller.add(condition2);
+			List<EngageSeller> sellerList = criteriaSeller.list();
+			log.debug("Size : " + sellerList.size());
+			if (sellerList.size() >= 1) {
+				EngageSeller seller = sellerList.get(0);
+				adrollBean.setContactNumber(seller.getSellerMobileNumber());
+				Criteria cVideoBrandPromotion = session.createCriteria(VideoBrandPromotion.class);
+				cVideoBrandPromotion.add(Restrictions.eq("sellerId", seller.getSellerId()));
+				List<VideoBrandPromotion> listVbp = cVideoBrandPromotion.list();
+				if (listVbp.size() >= 1) {
+					adrollBean.setBannerUrl(listVbp.get(0).getAdUrl());
+				}
+			} else {
+				adrollBean.setContactNumber(adrollBean.getShopCode());
+			}
+		}
+	}
+
 	private void fillAds(Session session, BroadcasterVideo video, VideoBean videoBean) {
 		List<VideoAds> videoAds;
 		Criteria criteriaVideoAds = session.createCriteria(VideoAds.class);
@@ -316,6 +349,7 @@ public class BroadcasterManager {
 			if (videoAd.getPreRollUrl() != null && !videoAd.getPreRollUrl().isEmpty()) {
 				adRoll.setUrl(videoAd.getPreRollUrl());
 				adRoll.setShopCode(videoAd.getPreRollCode());
+				setAdRollAdditionalDetails(session, adRoll);
 				videoBean.setPreRoll(adRoll);
 				adRoll = null;
 			}
@@ -323,6 +357,7 @@ public class BroadcasterManager {
 				AdRollBean m1 = new AdRollBean();
 				m1.setUrl(videoAd.getMidRollUrl_1());
 				m1.setShopCode(videoAd.getMidRollUrl_1_code());
+				setAdRollAdditionalDetails(session, m1);
 				midRolls.add(m1);
 				m1 = null;
 			}
@@ -331,6 +366,7 @@ public class BroadcasterManager {
 				AdRollBean m2 = new AdRollBean();
 				m2.setUrl(videoAd.getMidRollUrl_2());
 				m2.setShopCode(videoAd.getMidRollUrl_2_code());
+				setAdRollAdditionalDetails(session, m2);
 				midRolls.add(m2);
 				m2 = null;
 			}
@@ -339,6 +375,7 @@ public class BroadcasterManager {
 				AdRollBean m3 = new AdRollBean();
 				m3.setUrl(videoAd.getMidRollUrl_3());
 				m3.setShopCode(videoAd.getMidRollUrl_3_code());
+				setAdRollAdditionalDetails(session, m3);
 				midRolls.add(m3);
 				m3 = null;
 			}
@@ -347,6 +384,7 @@ public class BroadcasterManager {
 				AdRollBean m4 = new AdRollBean();
 				m4.setUrl(videoAd.getMidRollUrl_4());
 				m4.setShopCode(videoAd.getMidRollUrl_4_code());
+				setAdRollAdditionalDetails(session, m4);
 				midRolls.add(m4);
 				m4 = null;
 			}
@@ -355,6 +393,7 @@ public class BroadcasterManager {
 				AdRollBean m5 = new AdRollBean();
 				m5.setUrl(videoAd.getMidRollUrl_5());
 				m5.setShopCode(videoAd.getMidRollUrl_5_code());
+				setAdRollAdditionalDetails(session, m5);
 				midRolls.add(m5);
 				m5 = null;
 			}
@@ -363,6 +402,7 @@ public class BroadcasterManager {
 				AdRollBean m6 = new AdRollBean();
 				m6.setUrl(videoAd.getMidRollUrl_6());
 				m6.setShopCode(videoAd.getMidRollUrl_6_code());
+				setAdRollAdditionalDetails(session, m6);
 				midRolls.add(m6);
 				m6 = null;
 			}
@@ -371,6 +411,7 @@ public class BroadcasterManager {
 				AdRollBean m7 = new AdRollBean();
 				m7.setUrl(videoAd.getMidRollUrl_7());
 				m7.setShopCode(videoAd.getMidRollUrl_7_code());
+				setAdRollAdditionalDetails(session, m7);
 				midRolls.add(m7);
 				m7 = null;
 			}
@@ -379,6 +420,7 @@ public class BroadcasterManager {
 				AdRollBean m8 = new AdRollBean();
 				m8.setUrl(videoAd.getMidRollUrl_8());
 				m8.setShopCode(videoAd.getMidRollUrl_8_code());
+				setAdRollAdditionalDetails(session, m8);
 				midRolls.add(m8);
 				m8 = null;
 			}
@@ -387,6 +429,7 @@ public class BroadcasterManager {
 				AdRollBean m9 = new AdRollBean();
 				m9.setUrl(videoAd.getMidRollUrl_9());
 				m9.setShopCode(videoAd.getMidRollUrl_9_code());
+				setAdRollAdditionalDetails(session, m9);
 				midRolls.add(m9);
 				m9 = null;
 			}
@@ -395,6 +438,7 @@ public class BroadcasterManager {
 				AdRollBean m10 = new AdRollBean();
 				m10.setUrl(videoAd.getMidRollUrl_10());
 				m10.setShopCode(videoAd.getMidRollUrl_10_code());
+				setAdRollAdditionalDetails(session, m10);
 				midRolls.add(m10);
 				m10 = null;
 			}
