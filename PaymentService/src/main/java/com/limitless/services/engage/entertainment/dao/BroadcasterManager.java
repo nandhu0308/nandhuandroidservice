@@ -326,6 +326,7 @@ public class BroadcasterManager {
 			if (sellerList.size() >= 1) {
 				EngageSeller seller = sellerList.get(0);
 				adrollBean.setContactNumber(seller.getSellerMobileNumber());
+				adrollBean.setShopName(seller.getSellerShopName());
 				Criteria cVideoBrandPromotion = session.createCriteria(VideoBrandPromotion.class);
 				cVideoBrandPromotion.add(Restrictions.eq("sellerId", seller.getSellerId()));
 				List<VideoBrandPromotion> listVbp = cVideoBrandPromotion.list();

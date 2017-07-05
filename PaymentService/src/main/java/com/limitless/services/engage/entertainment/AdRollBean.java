@@ -1,10 +1,18 @@
 package com.limitless.services.engage.entertainment;
 
 public class AdRollBean {
-	private  String url,shopCode,contactNumber,bannerUrl;
+	private String url, shopCode, contactNumber, bannerUrl, shopName;
 	
 
-    public String getContactNumber() {
+	public String getShopName() {
+		return shopName;
+	}
+
+	public void setShopName(String shopName) {
+		this.shopName = shopName;
+	}
+
+	public String getContactNumber() {
 		return contactNumber;
 	}
 
@@ -21,18 +29,18 @@ public class AdRollBean {
 	}
 
 	public String getUrl() {
-        return url;
-    }
+		return url;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public String getShopCode() {
-        return shopCode;
-    }
+	public String getShopCode() {
+		return shopCode;
+	}
 
-    public void setShopCode(String shopCode) {
-        this.shopCode = shopCode;
-    }
+	public void setShopCode(String shopCode) {
+		this.shopCode = shopCode;
+	}
 }
