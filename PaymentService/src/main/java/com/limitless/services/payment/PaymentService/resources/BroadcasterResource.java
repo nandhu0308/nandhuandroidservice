@@ -29,7 +29,7 @@ import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
 public class BroadcasterResource {
 	final static Logger logger = Logger.getLogger(BroadcasterResource.class);
 
-	@Path("/channel/get")
+@Path("/channel/get")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -38,6 +38,22 @@ public class BroadcasterResource {
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			responseBean = manager.getBroadcasterChannel(requestBean);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return responseBean;
+	}
+
+	@Path("/channel/get/{broadcasterId}")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BroadcasterChannelResponseBean getChannel(@PathParam("broadcasterId") int broadcasterId) throws Exception {
+		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.getBroadcasterChannel(broadcasterId);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -79,6 +95,8 @@ public class BroadcasterResource {
 		}
 		return albumBean;
 	}
+
+	
 
 	@Path("/video/pagelist/{albumId}/{videoId}")
 	@GET
