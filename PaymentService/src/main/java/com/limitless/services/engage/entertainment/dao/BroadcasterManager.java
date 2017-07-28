@@ -65,6 +65,7 @@ public class BroadcasterManager {
 					responseBean.setChannelName(broadcaster.getBroadcasterChannelName());
 					responseBean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
 					responseBean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
+					SocialEntityManager.setSocialEntity(responseBean, session);
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumList = new ArrayList<AlbumBean>();
 					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
@@ -82,6 +83,7 @@ public class BroadcasterManager {
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
 							bean.setAlbumThumbnail(album.getAlbumThumbnail());
+							SocialEntityManager.setSocialEntity(bean, session);
 							albumList.add(bean);
 							count++;
 							bean = null;
@@ -144,6 +146,7 @@ public class BroadcasterManager {
 							albumBean.setAlbumDescription(album.getAlbumDescription());
 							albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
 							albumBean.setAlbumVideoCount(album.getAlbumVideos());
+							SocialEntityManager.setSocialEntity(albumBean, session);
 							List<VideoBean> videoList = new ArrayList<VideoBean>();
 							Criteria vCriteria = session.createCriteria(BroadcasterVideo.class);
 							vCriteria.add(Restrictions.eq("albumId", album.getAlbumId()));
@@ -165,6 +168,7 @@ public class BroadcasterManager {
 									videoBean.setVideoUrl(video.getVideoUrl());
 									videoBean.setYoutube(video.isYoutube());
 									videoBean.setLive(video.isLive());
+									SocialEntityManager.setSocialEntity(videoBean, session);
 									videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 									Criteria vtCriteria = session.createCriteria(ViewersTrack.class);
 									vtCriteria.add(Restrictions.eq("videoId", video.getVideosId()));
@@ -189,10 +193,12 @@ public class BroadcasterManager {
 					}
 					responseBean.setAlbumList(albumBeanList);
 				}
+			} else {
 				responseBean.setMessage("Failed");
 			}
 			transaction.commit();
 		} catch (RuntimeException re) {
+			responseBean.setMessage("Failed");
 			if (transaction != null) {
 				transaction.rollback();
 			}
@@ -240,6 +246,7 @@ public class BroadcasterManager {
 							bean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
 							bean.setSellerId(broadcaster.getSellerId());
 							bean.setBroadcasterImage(broadcaster.getBroadcasterImage());
+							SocialEntityManager.setSocialEntity(bean, session);
 							channels.add(bean);
 							bean = null;
 						}
@@ -304,6 +311,7 @@ public class BroadcasterManager {
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
 							bean.setAlbumThumbnail(album.getAlbumThumbnail());
+							SocialEntityManager.setSocialEntity(bean, session);
 							albumsBean.add(bean);
 							bean = null;
 						}
@@ -351,6 +359,7 @@ public class BroadcasterManager {
 				albumBean.setAlbumDescription(album.getAlbumDescription());
 				albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
 				albumBean.setAlbumVideoCount(album.getAlbumVideos());
+				SocialEntityManager.setSocialEntity(albumBean, session);
 				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
 				criteria.add(Restrictions.eq("albumId", albumId));
@@ -376,9 +385,6 @@ public class BroadcasterManager {
 						videoBean.setYoutube(video.isYoutube());
 						videoBean.setLive(video.isLive());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
-						SocialEntityRequestBean req = new SocialEntityRequestBean();
-						req.setEntityId(video.getVideosId());
-						req.setEntityType(SocialEntityType.V.toString());
 						SocialEntityManager.setSocialEntity(videoBean, session);
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
 						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
@@ -574,6 +580,7 @@ public class BroadcasterManager {
 				videoBean.setVideoUrl(video.getVideoUrl());
 				videoBean.setYoutube(video.isYoutube());
 				videoBean.setLive(video.isLive());
+				SocialEntityManager.setSocialEntity(videoBean, session);
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
 

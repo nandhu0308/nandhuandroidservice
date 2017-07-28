@@ -13,6 +13,7 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
@@ -104,6 +105,14 @@ public class SocialEntityManager {
 		responseBean.setFollowers(totalFollowers != null ? totalFollowers.toString() : "");
 		responseBean.setShares(totalShares != null ? totalShares.toString() : "");
 		return responseBean;
+	}
+
+	public static void setSocialEntity(AlbumBean bean, Session session) {
+		SocialEntityRequestBean SocialEntityRequestBean = new SocialEntityRequestBean();
+		SocialEntityRequestBean.setEntityId(bean.getAlbumId());
+		SocialEntityRequestBean.setEntityType(SocialEntityType.C.toString());
+		bean.setSocialEntity(SocialEntityManager.getInstance().processRequest(SocialEntityRequestBean, session));
+
 	}
 
 }
