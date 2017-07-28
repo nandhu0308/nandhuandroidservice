@@ -71,5 +71,9 @@
   <mapping class="com.limitless.services.engage.dao.SellerPromoCode"/>
   <mapping class="com.limitless.services.engage.entertainment.dao.VideoBrandPromotion"/>
   <mapping class="com.limitless.services.engage.entertainment.dao.VideoAds"/>
+  <mapping class="com.limitless.services.socialentity.dao.EntityFollow"/>
+  <mapping class="com.limitless.services.socialentity.dao.EntityLike"/>
+  <mapping class="com.limitless.services.socialentity.dao.EntityShare"/>
+  <mapping class="com.limitless.services.socialentity.dao.EntityViewers"/>
  </session-factory>
 </hibernate-configuration>
