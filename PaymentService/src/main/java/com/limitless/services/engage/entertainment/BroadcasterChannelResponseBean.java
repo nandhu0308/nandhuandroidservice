@@ -2,6 +2,8 @@ package com.limitless.services.engage.entertainment;
 
 import java.util.List;
 
+import com.limitless.services.socialentity.SocialEntityResponseBean;
+
 public class BroadcasterChannelResponseBean {
 	private String message;
 	private int broadcasterId;
@@ -12,6 +14,16 @@ public class BroadcasterChannelResponseBean {
 	private int sellerId;
 	private String broadcasterImage;
 	private List<AlbumBean> albumList;
+	private SocialEntityResponseBean socialEntity;
+	
+
+	public SocialEntityResponseBean getSocialEntity() {
+		return socialEntity;
+	}
+
+	public void setSocialEntity(SocialEntityResponseBean socialEntity) {
+		this.socialEntity = socialEntity;
+	}
 
 	public int getBroadcasterId() {
 		return broadcasterId;

@@ -32,6 +32,9 @@ import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
+import com.limitless.services.socialentity.SocialEntityRequestBean;
+import com.limitless.services.socialentity.dao.SocialEntityManager;
+import com.limitless.services.socialentity.dao.SocialEntityType;
 import com.sun.jersey.api.client.Client;
 
 public class BroadcasterManager {
@@ -85,6 +88,7 @@ public class BroadcasterManager {
 						}
 						responseBean.setAlbumList(albumList);
 					}
+					SocialEntityManager.setSocialEntity(responseBean, session);
 				}
 			} else if (broadcasterList.isEmpty()) {
 				responseBean.setMessage("Failed");
@@ -124,6 +128,7 @@ public class BroadcasterManager {
 					responseBean.setChannelName(broadcaster.getBroadcasterChannelName());
 					responseBean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
 					responseBean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
+					SocialEntityManager.setSocialEntity(responseBean, session);
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumBeanList = new ArrayList<AlbumBean>();
 					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
@@ -171,6 +176,7 @@ public class BroadcasterManager {
 									videoBean.setTotalViewCount(trackList2.size());
 									List<VideoAds> videoAds = new ArrayList<VideoAds>();
 									fillAds(session, video, videoBean);
+									SocialEntityManager.setSocialEntity(videoBean, session);
 									videoList.add(videoBean);
 									videoBean = null;
 								}
@@ -370,6 +376,10 @@ public class BroadcasterManager {
 						videoBean.setYoutube(video.isYoutube());
 						videoBean.setLive(video.isLive());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
+						SocialEntityRequestBean req = new SocialEntityRequestBean();
+						req.setEntityId(video.getVideosId());
+						req.setEntityType(SocialEntityType.V.toString());
+						SocialEntityManager.setSocialEntity(videoBean, session);
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
 						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
 						ProjectionList projectionList = Projections.projectionList();
@@ -380,6 +390,7 @@ public class BroadcasterManager {
 						videoBean.setTotalViewCount(trackList2.size());
 						List<VideoAds> videoAds = new ArrayList<VideoAds>();
 						fillAds(session, video, videoBean);
+
 						videoList.add(videoBean);
 						videoBean = null;
 					}

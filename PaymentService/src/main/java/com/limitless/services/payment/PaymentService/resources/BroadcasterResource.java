@@ -24,12 +24,15 @@ import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBea
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
+import com.limitless.services.socialentity.SocialEntityRequestBean;
+import com.limitless.services.socialentity.dao.SocialEntityManager;
+import com.limitless.services.socialentity.dao.SocialEntityType;
 
 @Path("/broadcast")
 public class BroadcasterResource {
 	final static Logger logger = Logger.getLogger(BroadcasterResource.class);
 
-@Path("/channel/get")
+	@Path("/channel/get")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -37,7 +40,8 @@ public class BroadcasterResource {
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getBroadcasterChannel(requestBean);
+			responseBean = manager.getBroadcasterChannel(requestBean);			
+
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -53,7 +57,7 @@ public class BroadcasterResource {
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getBroadcasterChannel(broadcasterId);
+			responseBean = manager.getBroadcasterChannel(broadcasterId);			
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -95,8 +99,6 @@ public class BroadcasterResource {
 		}
 		return albumBean;
 	}
-
-	
 
 	@Path("/video/pagelist/{albumId}/{videoId}")
 	@GET

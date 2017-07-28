@@ -2,6 +2,8 @@ package com.limitless.services.engage.entertainment;
 
 import java.util.List;
 
+import com.limitless.services.socialentity.SocialEntityResponseBean;
+
 public class VideoBean {
 	private String message;
 	private int videoId;
@@ -20,7 +22,17 @@ public class VideoBean {
 	private long liveViewCount;
 	private long totalViewCount;
 	private AdRollBean preRoll;
-	List<AdRollBean> midRolls;
+	List<AdRollBean> midRolls;	
+	private SocialEntityResponseBean socialEntity;
+	
+
+	public SocialEntityResponseBean getSocialEntity() {
+		return socialEntity;
+	}
+
+	public void setSocialEntity(SocialEntityResponseBean socialEntity) {
+		this.socialEntity = socialEntity;
+	}
 
 	public int getVideoId() {
 		return videoId;
