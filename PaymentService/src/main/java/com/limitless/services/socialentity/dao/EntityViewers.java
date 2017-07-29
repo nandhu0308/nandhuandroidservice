@@ -31,7 +31,7 @@ public class EntityViewers {
 	@Column(name = "VIEWING")
 	private Boolean viewing;
 	@Column(name = "VIEW_DATE")
-	private Boolean viewDate;
+	private String viewDate;
 	@Column(name = "CREATED_TIME", insertable = false, updatable = false)
 	private Date createdTime;
 	@Temporal(TemporalType.TIMESTAMP)
@@ -87,11 +87,11 @@ public class EntityViewers {
 		this.viewing = viewing;
 	}
 
-	public Boolean getViewDate() {
+	public String getViewDate() {
 		return viewDate;
 	}
 
-	public void setViewDate(Boolean viewDate) {
+	public void setViewDate(String viewDate) {
 		this.viewDate = viewDate;
 	}
 

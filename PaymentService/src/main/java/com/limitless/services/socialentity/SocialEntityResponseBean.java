@@ -2,10 +2,10 @@ package com.limitless.services.socialentity;
 
 public class SocialEntityResponseBean {
 	
-	public String totalViews;
-	public String likes;
-	public String shares;
-	public String followers;
+	private String totalViews;
+	private String likes;
+	private String shares;
+	private String followers;
 	
 	public String getTotalViews() {
 		return totalViews;

@@ -20,6 +20,8 @@ public class EntityFollow {
     private Integer customerId;
     @Column(name="CUSTOMER_LOGGED_IN")
     private Boolean customerLoggedIn;
+    @Column(name="FOLLOWED")
+    private Boolean Followed;
     @Column(name="ENTITY_ID")
     private Integer entityId;
     @Column(name="ENTITY_TYPE")
@@ -31,9 +33,15 @@ public class EntityFollow {
     @Column(name="UPDATED_TIME")
     private Date updatedTime;
 
+    public Boolean getFollowed() {
+		return Followed;
+	}
 
+	public void setFollowed(Boolean followed) {
+		Followed = followed;
+	}
 
-    public Integer getCustomerId() {
+	public Integer getCustomerId() {
         return customerId;
     }
 
