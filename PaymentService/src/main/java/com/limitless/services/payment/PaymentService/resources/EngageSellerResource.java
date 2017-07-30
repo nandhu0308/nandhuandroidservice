@@ -270,6 +270,8 @@ public class EngageSellerResource {
 				} else if (responseBean.getBusinessType().equalsIgnoreCase("broadcaster")) {
 					BroadcasterChannelRequestBean channelRequestBean = new BroadcasterChannelRequestBean();
 					channelRequestBean.setBroadcasterName(responseBean.getSellerName());
+					channelRequestBean.setCustomerId(requestBean.getCustomerId());
+					channelRequestBean.setIsLoggedIn(requestBean.getIsLoggedIn());
 					BroadcasterManager broadcasterManager = new BroadcasterManager();
 					BroadcasterChannelResponseBean channelResponseBean = broadcasterManager
 							.getBroadcasterChannel(channelRequestBean);

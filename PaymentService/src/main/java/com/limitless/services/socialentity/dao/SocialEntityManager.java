@@ -31,19 +31,23 @@ public class SocialEntityManager {
 
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-	public static void setSocialEntity(BroadcasterChannelResponseBean broadcasterChannelResponseBean, Session session) {
-		SocialEntityRequestBean SocialEntityRequestBean = new SocialEntityRequestBean();
-		SocialEntityRequestBean.setEntityId(broadcasterChannelResponseBean.getBroadcasterId());
-		SocialEntityRequestBean.setEntityType(SocialEntityType.B.toString());
+	public static void setSocialEntity(BroadcasterChannelResponseBean broadcasterChannelResponseBean, Session session, int customerId, boolean isLoggedIn) {
+		SocialEntityRequestBean socialEntityRequestBean = new SocialEntityRequestBean();
+		socialEntityRequestBean.setEntityId(broadcasterChannelResponseBean.getBroadcasterId());
+		socialEntityRequestBean.setEntityType(SocialEntityType.B.toString());
+		socialEntityRequestBean.setCustomerId(customerId);
+		socialEntityRequestBean.setIsLoggedIn(isLoggedIn);
 		broadcasterChannelResponseBean
-				.setSocialEntity(SocialEntityManager.getInstance().processRequest(SocialEntityRequestBean, session));
+				.setSocialEntity(SocialEntityManager.getInstance().processRequest(socialEntityRequestBean, session));
 	}
 
-	public static void setSocialEntity(VideoBean videoBean, Session session) {
-		SocialEntityRequestBean SocialEntityRequestBean = new SocialEntityRequestBean();
-		SocialEntityRequestBean.setEntityId(videoBean.getVideoId());
-		SocialEntityRequestBean.setEntityType(SocialEntityType.V.toString());
-		videoBean.setSocialEntity(SocialEntityManager.getInstance().processRequest(SocialEntityRequestBean, session));
+	public static void setSocialEntity(VideoBean videoBean, Session session, int customerId, boolean isLoggedIn) {
+		SocialEntityRequestBean socialEntityRequestBean = new SocialEntityRequestBean();
+		socialEntityRequestBean.setEntityId(videoBean.getVideoId());
+		socialEntityRequestBean.setEntityType(SocialEntityType.V.toString());
+		socialEntityRequestBean.setCustomerId(customerId);
+		socialEntityRequestBean.setIsLoggedIn(isLoggedIn);
+		videoBean.setSocialEntity(SocialEntityManager.getInstance().processRequest(socialEntityRequestBean, session));
 	}
 
 	private SocialEntityResponseBean getSocialEntityResponse(SocialEntityRequestBean requestbean) {
@@ -75,7 +79,8 @@ public class SocialEntityManager {
 		SocialEntityResponseBean responseBean = new SocialEntityResponseBean();
 		Criterion entityIdCriteria = Restrictions.eq("entityId", requestbean.getEntityId());
 		Criterion entityTypeCriteria = Restrictions.eq("entityType", requestbean.getEntityType());
-
+		Criterion customerIdCriteria = Restrictions.eq("customerId", requestbean.getCustomerId());
+		Long actionCount = null;
 		Criteria entityViewersCriteria = session.createCriteria(EntityViewers.class);
 		entityViewersCriteria.add(entityIdCriteria);
 		entityViewersCriteria.add(entityTypeCriteria);
@@ -85,14 +90,22 @@ public class SocialEntityManager {
 		Criteria entityLikeCriteria = session.createCriteria(EntityLike.class);
 		entityLikeCriteria.add(entityIdCriteria);
 		entityLikeCriteria.add(entityTypeCriteria);
+		entityLikeCriteria.add(Restrictions.eq("liked", true));
 		entityLikeCriteria.setProjection(Projections.rowCount());
 		Long totalLikes = (Long) entityLikeCriteria.uniqueResult();
+		entityLikeCriteria.add(customerIdCriteria);		
+		actionCount = (Long) entityLikeCriteria.uniqueResult();
+		responseBean.setLike(actionCount != null && actionCount > 0);
 
 		Criteria entityFollowCriteria = session.createCriteria(EntityFollow.class);
 		entityFollowCriteria.add(entityIdCriteria);
 		entityFollowCriteria.add(entityTypeCriteria);
+		entityFollowCriteria.add(Restrictions.eq("followed", true));
 		entityFollowCriteria.setProjection(Projections.rowCount());
 		Long totalFollowers = (Long) entityFollowCriteria.uniqueResult();
+		entityFollowCriteria.add(customerIdCriteria);		
+		actionCount = (Long) entityFollowCriteria.uniqueResult();
+		responseBean.setFollow(actionCount != null && actionCount > 0);
 
 		Criteria entityShareCriteria = session.createCriteria(EntityShare.class);
 		entityShareCriteria.add(entityIdCriteria);

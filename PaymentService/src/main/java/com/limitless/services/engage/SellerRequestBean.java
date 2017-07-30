@@ -3,6 +3,7 @@ package com.limitless.services.engage;
 public class SellerRequestBean {
 private int customerId;
 private String searchString;
+private boolean isLoggedIn;
 
 public int getCustomerId() {
 	return customerId;
@@ -16,5 +17,13 @@ public String getSearchString() {
 public void setSearchString(String searchString) {
 	this.searchString = searchString;
 }
+public boolean getIsLoggedIn() {
+	return isLoggedIn;
+}
+
+public void setIsLoggedIn(boolean isLoggedIn) {
+	this.isLoggedIn = isLoggedIn;
+}
+
 
 }

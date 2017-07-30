@@ -34,9 +34,11 @@ public class BroadcasterSocialEntityResource {
 	public Response likeBroadcaster(SocialEntityRequestBean requestBean) throws Exception {
 		SocialEntityResultBean responseBean = null;
 		try {
-			requestBean.setEntityType(SocialEntityType.B.toString());
-			BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
-			responseBean = manager.like(requestBean);
+			if (requestBean.getIsLoggedIn()) {
+				requestBean.setEntityType(SocialEntityType.B.toString());
+				BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
+				responseBean = manager.like(requestBean);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 		}
@@ -72,9 +74,11 @@ public class BroadcasterSocialEntityResource {
 	public Response followBroadcaster(SocialEntityRequestBean requestBean) throws Exception {
 		SocialEntityResultBean responseBean = null;
 		try {
-			requestBean.setEntityType(SocialEntityType.B.toString());
-			BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
-			responseBean = manager.follow(requestBean);
+			if (requestBean.getIsLoggedIn()) {
+				requestBean.setEntityType(SocialEntityType.B.toString());
+				BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
+				responseBean = manager.follow(requestBean);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 		}
@@ -83,7 +87,7 @@ public class BroadcasterSocialEntityResource {
 		}
 		return Response.status(404).build();
 	}
-	
+
 	@Path("/channel/like")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -91,9 +95,11 @@ public class BroadcasterSocialEntityResource {
 	public Response likeChannel(SocialEntityRequestBean requestBean) throws Exception {
 		SocialEntityResultBean responseBean = null;
 		try {
-			requestBean.setEntityType(SocialEntityType.C.toString());
-			BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
-			responseBean = manager.like(requestBean);
+			if (requestBean.getIsLoggedIn()) {
+				requestBean.setEntityType(SocialEntityType.C.toString());
+				BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
+				responseBean = manager.like(requestBean);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 		}
@@ -129,9 +135,11 @@ public class BroadcasterSocialEntityResource {
 	public Response followChannel(SocialEntityRequestBean requestBean) throws Exception {
 		SocialEntityResultBean responseBean = null;
 		try {
-			requestBean.setEntityType(SocialEntityType.C.toString());
-			BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
-			responseBean = manager.follow(requestBean);
+			if (requestBean.getIsLoggedIn()) {
+				requestBean.setEntityType(SocialEntityType.C.toString());
+				BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
+				responseBean = manager.follow(requestBean);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 		}
@@ -140,8 +148,7 @@ public class BroadcasterSocialEntityResource {
 		}
 		return Response.status(404).build();
 	}
-	
-	
+
 	@Path("/video/like")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -149,9 +156,11 @@ public class BroadcasterSocialEntityResource {
 	public Response likeVideo(SocialEntityRequestBean requestBean) throws Exception {
 		SocialEntityResultBean responseBean = null;
 		try {
-			requestBean.setEntityType(SocialEntityType.V.toString());
-			BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
-			responseBean = manager.like(requestBean);
+			if (requestBean.getIsLoggedIn()) {
+				requestBean.setEntityType(SocialEntityType.V.toString());
+				BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
+				responseBean = manager.like(requestBean);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 		}
@@ -187,9 +196,11 @@ public class BroadcasterSocialEntityResource {
 	public Response followVideo(SocialEntityRequestBean requestBean) throws Exception {
 		SocialEntityResultBean responseBean = null;
 		try {
-			requestBean.setEntityType(SocialEntityType.V.toString());
-			BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
-			responseBean = manager.follow(requestBean);
+			if (requestBean.getIsLoggedIn()) {
+				requestBean.setEntityType(SocialEntityType.V.toString());
+				BroadcasterSocialEntityManager manager = new BroadcasterSocialEntityManager();
+				responseBean = manager.follow(requestBean);
+			}
 		} catch (Exception e) {
 			logger.error("API Error", e);
 		}
@@ -198,8 +209,6 @@ public class BroadcasterSocialEntityResource {
 		}
 		return Response.status(404).build();
 	}
-	
-	
 
 	@Path("/video/view")
 	@POST

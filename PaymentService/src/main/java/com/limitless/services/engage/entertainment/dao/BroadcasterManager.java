@@ -65,7 +65,8 @@ public class BroadcasterManager {
 					responseBean.setChannelName(broadcaster.getBroadcasterChannelName());
 					responseBean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
 					responseBean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
-					SocialEntityManager.setSocialEntity(responseBean, session);
+					SocialEntityManager.setSocialEntity(responseBean, session, requestBean.getCustomerId(),
+							requestBean.getIsLoggedIn());
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumList = new ArrayList<AlbumBean>();
 					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
@@ -90,7 +91,8 @@ public class BroadcasterManager {
 						}
 						responseBean.setAlbumList(albumList);
 					}
-					SocialEntityManager.setSocialEntity(responseBean, session);
+					SocialEntityManager.setSocialEntity(responseBean, session, requestBean.getCustomerId(),
+							requestBean.getIsLoggedIn());
 				}
 			} else if (broadcasterList.isEmpty()) {
 				responseBean.setMessage("Failed");
@@ -110,7 +112,7 @@ public class BroadcasterManager {
 		return responseBean;
 	}
 
-	public BroadcasterChannelResponseBean getBroadcasterChannel(int broadcasterId) {
+	public BroadcasterChannelResponseBean getBroadcasterChannel(int broadcasterId, int customerId, boolean isLoggedIn) {
 		log.debug("getting channles");
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		Session session = null;
@@ -130,7 +132,7 @@ public class BroadcasterManager {
 					responseBean.setChannelName(broadcaster.getBroadcasterChannelName());
 					responseBean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
 					responseBean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
-					SocialEntityManager.setSocialEntity(responseBean, session);
+					SocialEntityManager.setSocialEntity(responseBean, session, customerId, isLoggedIn);
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumBeanList = new ArrayList<AlbumBean>();
 					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
@@ -168,7 +170,6 @@ public class BroadcasterManager {
 									videoBean.setVideoUrl(video.getVideoUrl());
 									videoBean.setYoutube(video.isYoutube());
 									videoBean.setLive(video.isLive());
-									SocialEntityManager.setSocialEntity(videoBean, session);
 									videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 									Criteria vtCriteria = session.createCriteria(ViewersTrack.class);
 									vtCriteria.add(Restrictions.eq("videoId", video.getVideosId()));
@@ -180,7 +181,7 @@ public class BroadcasterManager {
 									videoBean.setTotalViewCount(trackList2.size());
 									List<VideoAds> videoAds = new ArrayList<VideoAds>();
 									fillAds(session, video, videoBean);
-									SocialEntityManager.setSocialEntity(videoBean, session);
+									SocialEntityManager.setSocialEntity(videoBean, session, customerId, isLoggedIn);
 									videoList.add(videoBean);
 									videoBean = null;
 								}
@@ -212,7 +213,8 @@ public class BroadcasterManager {
 		return responseBean;
 	}
 
-	public List<BroadcasterChannelCategoryResponseBean> getAllBroadcasters(int categoryId) {
+	public List<BroadcasterChannelCategoryResponseBean> getAllBroadcasters(int categoryId, int customerId,
+			boolean isLoggedIn) {
 		log.debug("getting categories and channels");
 		List<BroadcasterChannelCategoryResponseBean> categories = new ArrayList<BroadcasterChannelCategoryResponseBean>();
 		Session session = null;
@@ -246,7 +248,7 @@ public class BroadcasterManager {
 							bean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
 							bean.setSellerId(broadcaster.getSellerId());
 							bean.setBroadcasterImage(broadcaster.getBroadcasterImage());
-							SocialEntityManager.setSocialEntity(bean, session);
+							SocialEntityManager.setSocialEntity(bean, session, customerId, isLoggedIn);
 							channels.add(bean);
 							bean = null;
 						}
@@ -342,7 +344,8 @@ public class BroadcasterManager {
 		return categories;
 	}
 
-	public AlbumBean getBroadcasterAlbumVideoList(int albumId, int beginingVideoId) {
+	public AlbumBean getBroadcasterAlbumVideoList(int albumId, int beginingVideoId, int customerId,
+			boolean isLoggedIn) {
 		log.debug("getting album video list");
 		AlbumBean albumBean = new AlbumBean();
 		Session session = null;
@@ -385,7 +388,7 @@ public class BroadcasterManager {
 						videoBean.setYoutube(video.isYoutube());
 						videoBean.setLive(video.isLive());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
-						SocialEntityManager.setSocialEntity(videoBean, session);
+						SocialEntityManager.setSocialEntity(videoBean, session, customerId, isLoggedIn);
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
 						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
 						ProjectionList projectionList = Projections.projectionList();
@@ -580,15 +583,17 @@ public class BroadcasterManager {
 				videoBean.setVideoUrl(video.getVideoUrl());
 				videoBean.setYoutube(video.isYoutube());
 				videoBean.setLive(video.isLive());
-				SocialEntityManager.setSocialEntity(videoBean, session);
+
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
 
 				int customerId = 0;
 				if (requestBean.getCustomerId() > 0) {
 					customerId = requestBean.getCustomerId();
+					SocialEntityManager.setSocialEntity(videoBean, session, customerId, true);
 				} else if (requestBean.getGuestId() > 0) {
 					customerId = requestBean.getGuestId();
+					SocialEntityManager.setSocialEntity(videoBean, session, customerId, false);
 				}
 
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

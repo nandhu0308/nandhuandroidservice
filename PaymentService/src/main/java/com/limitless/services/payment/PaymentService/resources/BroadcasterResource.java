@@ -16,11 +16,13 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.limitless.services.engage.entertainment.AlbumBean;
+import com.limitless.services.engage.entertainment.AlbumVideoRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
+import com.limitless.services.engage.entertainment.CategoryRequestBean;
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
@@ -40,7 +42,7 @@ public class BroadcasterResource {
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getBroadcasterChannel(requestBean);			
+			responseBean = manager.getBroadcasterChannel(requestBean);
 
 		} catch (Exception e) {
 			logger.error("API Error", e);
@@ -57,7 +59,7 @@ public class BroadcasterResource {
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getBroadcasterChannel(broadcasterId);			
+			responseBean = manager.getBroadcasterChannel(broadcasterId, 100018, true);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -92,7 +94,24 @@ public class BroadcasterResource {
 		AlbumBean albumBean = new AlbumBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			albumBean = manager.getBroadcasterAlbumVideoList(albumId, -1);
+			albumBean = manager.getBroadcasterAlbumVideoList(albumId, -1, 0, false);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return albumBean;
+	}
+
+	@Path("/video/pagelist")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public AlbumBean getAlbumVideoListPost(AlbumVideoRequestBean requestBean) throws Exception {
+		AlbumBean albumBean = new AlbumBean();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			albumBean = manager.getBroadcasterAlbumVideoList(requestBean.getAlbumId(), requestBean.getVideoId(),
+					requestBean.getCustomerId(), requestBean.getIsLoggedIn());
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -109,7 +128,7 @@ public class BroadcasterResource {
 		AlbumBean albumBean = new AlbumBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			albumBean = manager.getBroadcasterAlbumVideoList(albumId, videoId);
+			albumBean = manager.getBroadcasterAlbumVideoList(albumId, videoId, 0, false);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -156,7 +175,27 @@ public class BroadcasterResource {
 		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getAllBroadcasters(-1);
+			responseBean = manager.getAllBroadcasters(-1, 0, false);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			responseBean.clear();
+		}
+		if (responseBean != null && !(responseBean.isEmpty())) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+
+	@Path("/channel/categories")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCategories(CategoryRequestBean requestBean) throws Exception {
+		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.getAllBroadcasters(requestBean.getCategoryId(), requestBean.getCustomerId(),
+					requestBean.getIsLoggedIn());
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			responseBean.clear();
@@ -175,7 +214,7 @@ public class BroadcasterResource {
 		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getAllBroadcasters(id);
+			responseBean = manager.getAllBroadcasters(id, 0, false);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			responseBean.clear();
