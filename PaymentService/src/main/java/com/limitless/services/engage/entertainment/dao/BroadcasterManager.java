@@ -84,7 +84,7 @@ public class BroadcasterManager {
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
 							bean.setAlbumThumbnail(album.getAlbumThumbnail());
-							SocialEntityManager.setSocialEntity(bean, session);
+							SocialEntityManager.setSocialEntity(bean, requestBean.getCustomerId(), session);
 							albumList.add(bean);
 							count++;
 							bean = null;
@@ -148,7 +148,7 @@ public class BroadcasterManager {
 							albumBean.setAlbumDescription(album.getAlbumDescription());
 							albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
 							albumBean.setAlbumVideoCount(album.getAlbumVideos());
-							SocialEntityManager.setSocialEntity(albumBean, session);
+							SocialEntityManager.setSocialEntity(albumBean, customerId, session);
 							List<VideoBean> videoList = new ArrayList<VideoBean>();
 							Criteria vCriteria = session.createCriteria(BroadcasterVideo.class);
 							vCriteria.add(Restrictions.eq("albumId", album.getAlbumId()));
@@ -170,6 +170,13 @@ public class BroadcasterManager {
 									videoBean.setVideoUrl(video.getVideoUrl());
 									videoBean.setYoutube(video.isYoutube());
 									videoBean.setLive(video.isLive());
+									videoBean.setUrl(video.getUrl());
+									videoBean.setVideoType(video.getVideoType());
+									videoBean.setP160(video.isP160());
+									videoBean.setP360(video.isP360());
+									videoBean.setP720(video.isP720());
+									videoBean.setP1080(video.isP1080());
+									videoBean.setpUhd(video.ispUhd());
 									videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 									Criteria vtCriteria = session.createCriteria(ViewersTrack.class);
 									vtCriteria.add(Restrictions.eq("videoId", video.getVideosId()));
@@ -313,7 +320,7 @@ public class BroadcasterManager {
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
 							bean.setAlbumThumbnail(album.getAlbumThumbnail());
-							SocialEntityManager.setSocialEntity(bean, session);
+							SocialEntityManager.setSocialEntity(bean, requestBean.getCustomerId(), session);
 							albumsBean.add(bean);
 							bean = null;
 						}
@@ -362,7 +369,7 @@ public class BroadcasterManager {
 				albumBean.setAlbumDescription(album.getAlbumDescription());
 				albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
 				albumBean.setAlbumVideoCount(album.getAlbumVideos());
-				SocialEntityManager.setSocialEntity(albumBean, session);
+				SocialEntityManager.setSocialEntity(albumBean, customerId, session);
 				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
 				criteria.add(Restrictions.eq("albumId", albumId));
@@ -387,6 +394,14 @@ public class BroadcasterManager {
 						videoBean.setVideoUrl(video.getVideoUrl());
 						videoBean.setYoutube(video.isYoutube());
 						videoBean.setLive(video.isLive());
+						videoBean.setUrl(video.getUrl());
+						videoBean.setVideoType(video.getVideoType());
+						videoBean.setP160(video.isP160());
+						videoBean.setP360(video.isP360());
+						videoBean.setP720(video.isP720());
+						videoBean.setP1080(video.isP1080());
+						videoBean.setpUhd(video.ispUhd());
+
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 						SocialEntityManager.setSocialEntity(videoBean, session, customerId, isLoggedIn);
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
@@ -583,7 +598,13 @@ public class BroadcasterManager {
 				videoBean.setVideoUrl(video.getVideoUrl());
 				videoBean.setYoutube(video.isYoutube());
 				videoBean.setLive(video.isLive());
-
+				videoBean.setUrl(video.getUrl());
+				videoBean.setVideoType(video.getVideoType());
+				videoBean.setP160(video.isP160());
+				videoBean.setP360(video.isP360());
+				videoBean.setP720(video.isP720());
+				videoBean.setP1080(video.isP1080());
+				videoBean.setpUhd(video.ispUhd());
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
 

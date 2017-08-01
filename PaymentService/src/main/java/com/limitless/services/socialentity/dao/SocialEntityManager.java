@@ -31,7 +31,8 @@ public class SocialEntityManager {
 
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-	public static void setSocialEntity(BroadcasterChannelResponseBean broadcasterChannelResponseBean, Session session, int customerId, boolean isLoggedIn) {
+	public static void setSocialEntity(BroadcasterChannelResponseBean broadcasterChannelResponseBean, Session session,
+			int customerId, boolean isLoggedIn) {
 		SocialEntityRequestBean socialEntityRequestBean = new SocialEntityRequestBean();
 		socialEntityRequestBean.setEntityId(broadcasterChannelResponseBean.getBroadcasterId());
 		socialEntityRequestBean.setEntityType(SocialEntityType.B.toString());
@@ -90,20 +91,20 @@ public class SocialEntityManager {
 		Criteria entityLikeCriteria = session.createCriteria(EntityLike.class);
 		entityLikeCriteria.add(entityIdCriteria);
 		entityLikeCriteria.add(entityTypeCriteria);
-		entityLikeCriteria.add(Restrictions.eq("liked", true));
 		entityLikeCriteria.setProjection(Projections.rowCount());
 		Long totalLikes = (Long) entityLikeCriteria.uniqueResult();
-		entityLikeCriteria.add(customerIdCriteria);		
+		entityLikeCriteria.add(customerIdCriteria);
+		entityLikeCriteria.add(Restrictions.eq("liked", true));
 		actionCount = (Long) entityLikeCriteria.uniqueResult();
 		responseBean.setLike(actionCount != null && actionCount > 0);
 
 		Criteria entityFollowCriteria = session.createCriteria(EntityFollow.class);
 		entityFollowCriteria.add(entityIdCriteria);
 		entityFollowCriteria.add(entityTypeCriteria);
-		entityFollowCriteria.add(Restrictions.eq("followed", true));
 		entityFollowCriteria.setProjection(Projections.rowCount());
 		Long totalFollowers = (Long) entityFollowCriteria.uniqueResult();
-		entityFollowCriteria.add(customerIdCriteria);		
+		entityFollowCriteria.add(customerIdCriteria);
+		entityFollowCriteria.add(Restrictions.eq("followed", true));
 		actionCount = (Long) entityFollowCriteria.uniqueResult();
 		responseBean.setFollow(actionCount != null && actionCount > 0);
 
@@ -120,12 +121,14 @@ public class SocialEntityManager {
 		return responseBean;
 	}
 
-	public static void setSocialEntity(AlbumBean bean, Session session) {
+	public static void setSocialEntity(AlbumBean bean, int customerId, Session session) {
 		SocialEntityRequestBean SocialEntityRequestBean = new SocialEntityRequestBean();
 		SocialEntityRequestBean.setEntityId(bean.getAlbumId());
 		SocialEntityRequestBean.setEntityType(SocialEntityType.C.toString());
+		SocialEntityRequestBean.setCustomerId(customerId);
 		bean.setSocialEntity(SocialEntityManager.getInstance().processRequest(SocialEntityRequestBean, session));
 
 	}
+
 
 }

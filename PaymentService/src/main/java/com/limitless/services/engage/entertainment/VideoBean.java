@@ -15,16 +15,20 @@ public class VideoBean {
 	private String videoUrl;
 	private boolean isYoutube;
 	private boolean isLive;
-	
-
 	private String videoCreated;
 	private int vtId;
 	private long liveViewCount;
 	private long totalViewCount;
 	private AdRollBean preRoll;
-	List<AdRollBean> midRolls;	
+	List<AdRollBean> midRolls;
+	private String url;
+	private String videoType;
+	private boolean p160;
+	private boolean p360;
+	private boolean p720;
+	private boolean p1080;
+	private boolean pUhd;
 	private SocialEntityResponseBean socialEntity;
-	
 
 	public SocialEntityResponseBean getSocialEntity() {
 		return socialEntity;
@@ -153,6 +157,7 @@ public class VideoBean {
 	public void setMidRolls(List<AdRollBean> midRolls) {
 		this.midRolls = midRolls;
 	}
+
 	public boolean isLive() {
 		return isLive;
 	}
@@ -160,5 +165,61 @@ public class VideoBean {
 	public void setLive(boolean isLive) {
 		this.isLive = isLive;
 	}
-	
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public void setVideoType(String videoType) {
+		this.videoType = videoType;
+	}
+
+	public boolean isP160() {
+		return p160;
+	}
+
+	public void setP160(boolean p160) {
+		this.p160 = p160;
+	}
+
+	public boolean isP360() {
+		return p360;
+	}
+
+	public void setP360(boolean p360) {
+		this.p360 = p360;
+	}
+
+	public boolean isP720() {
+		return p720;
+	}
+
+	public void setP720(boolean p720) {
+		this.p720 = p720;
+	}
+
+	public boolean isP1080() {
+		return p1080;
+	}
+
+	public void setP1080(boolean p1080) {
+		this.p1080 = p1080;
+	}
+
+	public boolean ispUhd() {
+		return pUhd;
+	}
+
+	public void setpUhd(boolean pUhd) {
+		this.pUhd = pUhd;
+	}
+
 }
