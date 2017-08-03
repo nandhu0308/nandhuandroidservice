@@ -29,6 +29,16 @@ public class VideoBean {
 	private boolean p1080;
 	private boolean pUhd;
 	private SocialEntityResponseBean socialEntity;
+	private int duration;
+	
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
 
 	public SocialEntityResponseBean getSocialEntity() {
 		return socialEntity;

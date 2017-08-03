@@ -177,6 +177,7 @@ public class BroadcasterManager {
 									videoBean.setP720(video.isP720());
 									videoBean.setP1080(video.isP1080());
 									videoBean.setpUhd(video.ispUhd());
+									videoBean.setDuration(video.getDuration());
 									videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 									Criteria vtCriteria = session.createCriteria(ViewersTrack.class);
 									vtCriteria.add(Restrictions.eq("videoId", video.getVideosId()));
@@ -401,7 +402,7 @@ public class BroadcasterManager {
 						videoBean.setP720(video.isP720());
 						videoBean.setP1080(video.isP1080());
 						videoBean.setpUhd(video.ispUhd());
-
+						videoBean.setDuration(video.getDuration());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 						SocialEntityManager.setSocialEntity(videoBean, session, customerId, isLoggedIn);
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
@@ -605,6 +606,7 @@ public class BroadcasterManager {
 				videoBean.setP720(video.isP720());
 				videoBean.setP1080(video.isP1080());
 				videoBean.setpUhd(video.ispUhd());
+				videoBean.setDuration(video.getDuration());
 				videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 				videoBean.setMessage("Success");
 

@@ -56,6 +56,16 @@ public class BroadcasterVideo {
 	private boolean isActive;
 	@Column(name = "ISLIVE", nullable = false, columnDefinition = "TINYINT(1)")
 	private boolean islive;
+	@Column(name = "duration")
+	private int duration;
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
 
 	public Integer getRank() {
 		return rank;
@@ -208,6 +218,5 @@ public class BroadcasterVideo {
 	public void setpUhd(boolean pUhd) {
 		this.pUhd = pUhd;
 	}
-	
 
 }

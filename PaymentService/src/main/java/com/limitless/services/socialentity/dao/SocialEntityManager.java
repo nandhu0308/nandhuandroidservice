@@ -48,7 +48,8 @@ public class SocialEntityManager {
 		socialEntityRequestBean.setEntityType(SocialEntityType.V.toString());
 		socialEntityRequestBean.setCustomerId(customerId);
 		socialEntityRequestBean.setIsLoggedIn(isLoggedIn);
-		videoBean.setSocialEntity(SocialEntityManager.getInstance().processRequest(socialEntityRequestBean, session));
+		videoBean.setSocialEntity(SocialEntityManager.getInstance().processRequest(socialEntityRequestBean,
+				videoBean.getAlbumId(), session));
 	}
 
 	private SocialEntityResponseBean getSocialEntityResponse(SocialEntityRequestBean requestbean) {
@@ -76,7 +77,21 @@ public class SocialEntityManager {
 
 	}
 
-	private SocialEntityResponseBean processRequest(SocialEntityRequestBean requestbean, Session session) {
+	public static void setSocialEntity(AlbumBean bean, int customerId, Session session) {
+		SocialEntityRequestBean SocialEntityRequestBean = new SocialEntityRequestBean();
+		SocialEntityRequestBean.setEntityId(bean.getAlbumId());
+		SocialEntityRequestBean.setEntityType(SocialEntityType.C.toString());
+		SocialEntityRequestBean.setCustomerId(customerId);
+		bean.setSocialEntity(SocialEntityManager.getInstance().processRequest(SocialEntityRequestBean, session));
+
+	}
+
+	private SocialEntityResponseBean processRequest(SocialEntityRequestBean socialEntityRequestBean, Session session) {
+		return processRequest(socialEntityRequestBean, 0, session);
+	}
+
+	private SocialEntityResponseBean processRequest(SocialEntityRequestBean requestbean, int parentEntityId,
+			Session session) {
 		SocialEntityResponseBean responseBean = new SocialEntityResponseBean();
 		Criterion entityIdCriteria = Restrictions.eq("entityId", requestbean.getEntityId());
 		Criterion entityTypeCriteria = Restrictions.eq("entityType", requestbean.getEntityType());
@@ -99,8 +114,14 @@ public class SocialEntityManager {
 		responseBean.setLike(actionCount != null && actionCount > 0);
 
 		Criteria entityFollowCriteria = session.createCriteria(EntityFollow.class);
-		entityFollowCriteria.add(entityIdCriteria);
-		entityFollowCriteria.add(entityTypeCriteria);
+
+		if (requestbean.getEntityType().equalsIgnoreCase(SocialEntityType.V.toString())) {
+			entityFollowCriteria.add(Restrictions.eq("entityType", SocialEntityType.C.toString()));
+			entityFollowCriteria.add(Restrictions.eq("entityId", parentEntityId));
+		} else {
+			entityFollowCriteria.add(entityIdCriteria);
+			entityFollowCriteria.add(entityTypeCriteria);
+		}
 		entityFollowCriteria.setProjection(Projections.rowCount());
 		Long totalFollowers = (Long) entityFollowCriteria.uniqueResult();
 		entityFollowCriteria.add(customerIdCriteria);
@@ -120,15 +141,5 @@ public class SocialEntityManager {
 		responseBean.setShares(totalShares != null ? totalShares.toString() : "");
 		return responseBean;
 	}
-
-	public static void setSocialEntity(AlbumBean bean, int customerId, Session session) {
-		SocialEntityRequestBean SocialEntityRequestBean = new SocialEntityRequestBean();
-		SocialEntityRequestBean.setEntityId(bean.getAlbumId());
-		SocialEntityRequestBean.setEntityType(SocialEntityType.C.toString());
-		SocialEntityRequestBean.setCustomerId(customerId);
-		bean.setSocialEntity(SocialEntityManager.getInstance().processRequest(SocialEntityRequestBean, session));
-
-	}
-
 
 }
