@@ -1047,7 +1047,7 @@ public class PaymentTxnManager {
 
 				if(txnStatus.equals("PAYMENT_SUCCESSFUL")){
 					String authkey = "129194Aa6NwGoQsVt580d9a57";
-					String senderId = "LLCTXN";
+					String senderId = "HAAPPY";
 					String route = "4";
 					String mainUrl="http://api.msg91.com/api/sendhttp.php?";
 
@@ -1105,7 +1105,7 @@ public class PaymentTxnManager {
 				}
 				else if(txnStatus.equals("PAYMENT_FAILED")){
 					String authkey = "129194Aa6NwGoQsVt580d9a57";
-					String senderId = "LLCTXN";
+					String senderId = "HAAPPY";
 					String route = "4";
 					String mainUrl="http://api.msg91.com/api/sendhttp.php?";
 
