@@ -24,6 +24,7 @@ import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.dao.EngageSellerManager;
 import com.limitless.services.engage.entertainment.AdRollBean;
 import com.limitless.services.engage.entertainment.AlbumBean;
+import com.limitless.services.engage.entertainment.AlbumVideoRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryResponseBean;
 import com.limitless.services.engage.entertainment.BroadcasterAlbumCategoryRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryResponseBean;
@@ -43,7 +44,8 @@ public class BroadcasterManager {
 	private static final Log log = LogFactory.getLog(BroadcasterManager.class);
 	Client client = RestClientUtil.createClient();
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-	private final int maxResults = 2;
+	private final int broadcasterMaxResults = 5;
+	private final int videoMaxResults=10;
 
 	public BroadcasterChannelResponseBean getBroadcasterChannel(BroadcasterChannelRequestBean requestBean,
 			boolean addSocialEntity) {
@@ -252,7 +254,7 @@ public class BroadcasterManager {
 			if (requestBean.isEnablePage()) {
 				if (requestBean.getIsVerticalPage()) {
 					criteria.setFirstResult(requestBean.getVerticalIndex());
-					criteria.setMaxResults(maxResults);
+					criteria.setMaxResults(broadcasterMaxResults);
 				} else {
 					criteria.add(Restrictions.eq("id", requestBean.getCategoryId()));
 				}
@@ -270,7 +272,7 @@ public class BroadcasterManager {
 					broadcasterCriteria.add(Restrictions.eq("isActive", true));
 					if (requestBean.isEnablePage()) {
 						broadcasterCriteria.setFirstResult(requestBean.getHorizontalIndex());
-						broadcasterCriteria.setMaxResults(maxResults);
+						broadcasterCriteria.setMaxResults(broadcasterMaxResults);
 
 					}
 					broadcasterCriteria.addOrder(Order.asc("rank"));
@@ -387,6 +389,92 @@ public class BroadcasterManager {
 		return categories;
 	}
 
+	public AlbumBean getBroadcasterAlbumVideoList(AlbumVideoRequestBean requestBean) {
+		log.debug("getting album video list");
+		AlbumBean albumBean = new AlbumBean();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			BroadcasterAlbum album = (BroadcasterAlbum) session
+					.get("com.limitless.services.engage.entertainment.dao.BroadcasterAlbum", requestBean.getAlbumId());
+			if (album != null) {
+				albumBean.setMessage("Success");
+				albumBean.setAlbumId(album.getAlbumId());
+				albumBean.setAlbumName(album.getAlbumName());
+				albumBean.setAlbumDescription(album.getAlbumDescription());
+				albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
+				albumBean.setAlbumVideoCount(album.getAlbumVideos());
+				SocialEntityManager.setSocialEntity(albumBean, requestBean.getCustomerId(), session);
+				List<VideoBean> videoList = new ArrayList<VideoBean>();
+				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
+				criteria.add(Restrictions.eq("albumId", album.getAlbumId()));
+				criteria.add(Restrictions.eq("isActive", true));
+				criteria.setFirstResult(requestBean.getVideoIndex());
+				criteria.setMaxResults(videoMaxResults);
+				criteria.addOrder(Order.asc("rank"));
+
+				List<BroadcasterVideo> videosList = criteria.list();
+				log.debug("video size : " + videosList.size());
+				if (videosList.size() > 0) {
+					for (BroadcasterVideo video : videosList) {
+						VideoBean videoBean = new VideoBean();
+						videoBean.setVideoId(video.getVideosId());
+						videoBean.setVideoName(video.getVideoName());
+						videoBean.setAlbumId(video.getAlbumId());
+						videoBean.setAlbumName(album.getAlbumDescription());
+						videoBean.setVideoDescription(video.getVideoDescription());
+						videoBean.setVideoThumbnail(video.getVideoThumbnail());
+						videoBean.setVideoUrl(video.getVideoUrl());
+						videoBean.setYoutube(video.isYoutube());
+						videoBean.setLive(video.isLive());
+						videoBean.setUrl(video.getUrl());
+						videoBean.setVideoType(video.getVideoType());
+						videoBean.setP160(video.isP160());
+						videoBean.setP360(video.isP360());
+						videoBean.setP720(video.isP720());
+						videoBean.setP1080(video.isP1080());
+						videoBean.setpUhd(video.ispUhd());
+						videoBean.setDuration(video.getDuration());
+						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
+						SocialEntityManager.setSocialEntity(videoBean, session, requestBean.getCustomerId(),
+								requestBean.getIsLoggedIn());
+						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
+						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
+						ProjectionList projectionList = Projections.projectionList();
+						projectionList.add(Projections.groupProperty("viewDate"));
+						projectionList.add(Projections.groupProperty("customerId"));
+						criteria2.setProjection(projectionList);
+						List<ViewersTrack> trackList2 = criteria2.list();
+						videoBean.setTotalViewCount(trackList2.size());
+						List<VideoAds> videoAds = new ArrayList<VideoAds>();
+						fillAds(session, video, videoBean);
+
+						videoList.add(videoBean);
+						videoBean = null;
+					}
+					albumBean.setVideoList(videoList);
+				}
+			} else {
+				albumBean.setMessage("Failed");
+			}
+			transaction.commit();
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting album failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return albumBean;
+	}
+
+	@Deprecated
 	public AlbumBean getBroadcasterAlbumVideoList(int albumId, int beginingVideoId, int customerId,
 			boolean isLoggedIn) {
 		log.debug("getting album video list");

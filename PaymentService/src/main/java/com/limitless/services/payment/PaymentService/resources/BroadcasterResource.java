@@ -110,8 +110,7 @@ public class BroadcasterResource {
 		AlbumBean albumBean = new AlbumBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			albumBean = manager.getBroadcasterAlbumVideoList(requestBean.getAlbumId(), requestBean.getVideoId(),
-					requestBean.getCustomerId(), requestBean.getIsLoggedIn());
+			albumBean = manager.getBroadcasterAlbumVideoList(requestBean);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
