@@ -14,8 +14,7 @@ public class BroadcasterChannelResponseBean {
 	private int sellerId;
 	private String broadcasterImage;
 	private List<AlbumBean> albumList;
-	private SocialEntityResponseBean socialEntity;
-	
+	private SocialEntityResponseBean socialEntity = new SocialEntityResponseBean();
 
 	public SocialEntityResponseBean getSocialEntity() {
 		return socialEntity;

@@ -2,11 +2,11 @@ package com.limitless.services.socialentity;
 
 public class SocialEntityResponseBean {
 
-	private String totalViews;
-	private String likes;
+	private String totalViews = "0";
+	private String likes = "0";
 	private boolean like;
-	private String shares;
-	private String followers;
+	private String shares = "0";
+	private String followers = "0";
 	private boolean follow;
 
 	public boolean isLike() {

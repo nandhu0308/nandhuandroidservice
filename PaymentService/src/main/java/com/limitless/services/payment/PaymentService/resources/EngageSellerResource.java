@@ -274,7 +274,7 @@ public class EngageSellerResource {
 					channelRequestBean.setIsLoggedIn(requestBean.getIsLoggedIn());
 					BroadcasterManager broadcasterManager = new BroadcasterManager();
 					BroadcasterChannelResponseBean channelResponseBean = broadcasterManager
-							.getBroadcasterChannel(channelRequestBean);
+							.getBroadcasterChannel(channelRequestBean, false);
 					responseBean.setChannelBean(channelResponseBean);
 				}
 

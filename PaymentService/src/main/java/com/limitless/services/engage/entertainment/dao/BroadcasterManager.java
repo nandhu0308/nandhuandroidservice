@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -42,7 +43,8 @@ public class BroadcasterManager {
 	Client client = RestClientUtil.createClient();
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-	public BroadcasterChannelResponseBean getBroadcasterChannel(BroadcasterChannelRequestBean requestBean) {
+	public BroadcasterChannelResponseBean getBroadcasterChannel(BroadcasterChannelRequestBean requestBean,
+			boolean addSocialEntity) {
 		log.debug("getting channles");
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		Session session = null;
@@ -65,8 +67,9 @@ public class BroadcasterManager {
 					responseBean.setChannelName(broadcaster.getBroadcasterChannelName());
 					responseBean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
 					responseBean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
-					SocialEntityManager.setSocialEntity(responseBean, session, requestBean.getCustomerId(),
-							requestBean.getIsLoggedIn());
+					if (addSocialEntity)
+						SocialEntityManager.setSocialEntity(responseBean, session, requestBean.getCustomerId(),
+								requestBean.getIsLoggedIn());
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumList = new ArrayList<AlbumBean>();
 					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
@@ -84,15 +87,17 @@ public class BroadcasterManager {
 							bean.setAlbumDescription(album.getAlbumDescription());
 							bean.setAlbumVideoCount(album.getAlbumVideos());
 							bean.setAlbumThumbnail(album.getAlbumThumbnail());
-							SocialEntityManager.setSocialEntity(bean, requestBean.getCustomerId(), session);
+							if (addSocialEntity)
+								SocialEntityManager.setSocialEntity(bean, requestBean.getCustomerId(), session);
 							albumList.add(bean);
 							count++;
 							bean = null;
 						}
 						responseBean.setAlbumList(albumList);
 					}
-					SocialEntityManager.setSocialEntity(responseBean, session, requestBean.getCustomerId(),
-							requestBean.getIsLoggedIn());
+					if (addSocialEntity)
+						SocialEntityManager.setSocialEntity(responseBean, session, requestBean.getCustomerId(),
+								requestBean.getIsLoggedIn());
 				}
 			} else if (broadcasterList.isEmpty()) {
 				responseBean.setMessage("Failed");
@@ -237,7 +242,7 @@ public class BroadcasterManager {
 				criteria.add(Restrictions.eq("id", categoryId));
 			List<BroadcasterCategory> businessCategories = criteria.list();
 			if (businessCategories.size() > 0) {
-				List<BroadcasterChannelResponseBean> channels = null;
+			List<BroadcasterChannelResponseBean> channels = null;
 				for (BroadcasterCategory category : businessCategories) {
 					Criteria broadcasterCriteria = session.createCriteria(Broadcaster.class);
 					broadcasterCriteria.add(Restrictions.eq("categoryId", category.getId()));
@@ -245,27 +250,27 @@ public class BroadcasterManager {
 					broadcasterCriteria.addOrder(Order.asc("rank"));
 					broadcasterCriteria.addOrder(Order.asc("broadcasterChannelName"));
 					List<Broadcaster> broadcasters = broadcasterCriteria.list();
-					if (broadcasters.size() > 0) {
-						channels = new ArrayList<BroadcasterChannelResponseBean>();
-						for (Broadcaster broadcaster : broadcasters) {
-							BroadcasterChannelResponseBean bean = new BroadcasterChannelResponseBean();
-							bean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
-							bean.setBroadcasterId(broadcaster.getBroadcasterId());
-							bean.setBroadcasterName(broadcaster.getBroadcasterName());
-							bean.setChannelName(broadcaster.getBroadcasterChannelName());
-							bean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
-							bean.setSellerId(broadcaster.getSellerId());
-							bean.setBroadcasterImage(broadcaster.getBroadcasterImage());
-							SocialEntityManager.setSocialEntity(bean, session, customerId, isLoggedIn);
-							channels.add(bean);
-							bean = null;
-						}
+			if (broadcasters.size() > 0) {
+				channels = new ArrayList<BroadcasterChannelResponseBean>();
+				for (Broadcaster broadcaster : broadcasters) {
+					BroadcasterChannelResponseBean bean = new BroadcasterChannelResponseBean();
+					bean.setBroadcasterDescription(broadcaster.getBroadcasterDescription());
+					bean.setBroadcasterId(broadcaster.getBroadcasterId());
+					bean.setBroadcasterName(broadcaster.getBroadcasterName());
+					bean.setChannelName(broadcaster.getBroadcasterChannelName());
+					bean.setTotalVideos(broadcaster.getBroadcasterTotalVideos());
+					bean.setSellerId(broadcaster.getSellerId());
+					bean.setBroadcasterImage(broadcaster.getBroadcasterImage());
+					SocialEntityManager.setSocialEntity(bean, session, customerId, isLoggedIn);
+					channels.add(bean);
+					bean = null;
+				}
 						BroadcasterChannelCategoryResponseBean responseBean = new BroadcasterChannelCategoryResponseBean();
 						responseBean.setCategoryName(category.getName());
 						responseBean.setId(category.getId());
 						responseBean.setChannelList(channels);
 						categories.add(responseBean);
-					}
+			}
 				}
 			}
 

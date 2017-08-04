@@ -28,7 +28,7 @@ public class VideoBean {
 	private boolean p720;
 	private boolean p1080;
 	private boolean pUhd;
-	private SocialEntityResponseBean socialEntity;
+	private SocialEntityResponseBean socialEntity = new SocialEntityResponseBean();
 	private int duration;
 	
 

@@ -12,7 +12,7 @@ public class AlbumBean {
 	private int albumVideoCount;
 	private String albumThumbnail;
 	private List<VideoBean> videoList;
-	private SocialEntityResponseBean socialEntity;
+	private SocialEntityResponseBean socialEntity = new SocialEntityResponseBean();
 
 	public SocialEntityResponseBean getSocialEntity() {
 		return socialEntity;

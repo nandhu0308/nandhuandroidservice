@@ -42,7 +42,7 @@ public class BroadcasterResource {
 		BroadcasterChannelResponseBean responseBean = new BroadcasterChannelResponseBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getBroadcasterChannel(requestBean);
+			responseBean = manager.getBroadcasterChannel(requestBean, true);
 
 		} catch (Exception e) {
 			logger.error("API Error", e);

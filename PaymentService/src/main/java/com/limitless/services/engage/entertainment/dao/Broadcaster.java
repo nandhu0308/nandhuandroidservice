@@ -4,15 +4,20 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import com.limitless.services.engage.dao.EngageSeller;
+
 @Entity
 @Table(name = "broadcasters", catalog = "llcdb")
+@SqlResultSetMapping(name = "broadcasters", entities = @EntityResult(entityClass = Broadcaster.class))
 public class Broadcaster {
 	@Id
 	@GeneratedValue

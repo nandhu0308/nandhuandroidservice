@@ -1,10 +1,14 @@
 package com.limitless.services.socialentity.dao;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.SqlResultSetMapping;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -13,6 +17,7 @@ import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
+import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
@@ -22,6 +27,17 @@ import com.limitless.services.socialentity.SocialEntityResponseBean;
 import com.sun.jersey.api.client.Client;
 
 public class SocialEntityManager {
+
+	private static final String sqlQuery = " SELECT COALESCE( SUM(CASE " + "WHEN l.customer_id =:cid THEN 1 "
+			+ "ELSE 0 " + "  END),0) AS customerSuccess, " + "count(*) AS totalSuccess "
+			+ "FROM llcdb.entity_like l where liked=1 and entity_id=:eid and entity_type=:et " + "union all "
+			+ "SELECT COALESCE( SUM(CASE " + "WHEN f.customer_id =:cid THEN 1 " + "ELSE 0 "
+			+ "END),0) AS customerSuccess, " + "count(*) AS totalSuccess "
+			+ "FROM llcdb.entity_follow f where followed=1 and entity_id=:veid and entity_type=:vet " + "union all "
+			+ "SELECT COALESCE( SUM(CASE  " + " WHEN v.viewing =1 THEN 1 " + " ELSE 0 " + "END),0) AS customerSuccess, "
+			+ "count(*) AS totalSuccess " + "FROM llcdb.entity_viewers v where  entity_id=:eid and entity_type=:et "
+			+ " union all " + " SELECT COALESCE(0) AS customerSuccess, " + "  count(*) AS totalSuccess "
+			+ "FROM llcdb.entity_share v where  entity_id=:eid and entity_type=:et  ";
 
 	public static SocialEntityManager getInstance() {
 		return new SocialEntityManager();
@@ -93,52 +109,45 @@ public class SocialEntityManager {
 	private SocialEntityResponseBean processRequest(SocialEntityRequestBean requestbean, int parentEntityId,
 			Session session) {
 		SocialEntityResponseBean responseBean = new SocialEntityResponseBean();
-		Criterion entityIdCriteria = Restrictions.eq("entityId", requestbean.getEntityId());
-		Criterion entityTypeCriteria = Restrictions.eq("entityType", requestbean.getEntityType());
-		Criterion customerIdCriteria = Restrictions.eq("customerId", requestbean.getCustomerId());
-		Long actionCount = null;
-		Criteria entityViewersCriteria = session.createCriteria(EntityViewers.class);
-		entityViewersCriteria.add(entityIdCriteria);
-		entityViewersCriteria.add(entityTypeCriteria);
-		entityViewersCriteria.setProjection(Projections.rowCount());
-		Long totalViewers = (Long) entityViewersCriteria.uniqueResult();
-
-		Criteria entityLikeCriteria = session.createCriteria(EntityLike.class);
-		entityLikeCriteria.add(entityIdCriteria);
-		entityLikeCriteria.add(entityTypeCriteria);
-		entityLikeCriteria.setProjection(Projections.rowCount());
-		Long totalLikes = (Long) entityLikeCriteria.uniqueResult();
-		entityLikeCriteria.add(customerIdCriteria);
-		entityLikeCriteria.add(Restrictions.eq("liked", true));
-		actionCount = (Long) entityLikeCriteria.uniqueResult();
-		responseBean.setLike(actionCount != null && actionCount > 0);
-
-		Criteria entityFollowCriteria = session.createCriteria(EntityFollow.class);
-
+		SQLQuery query = session.createSQLQuery(sqlQuery);
+		// query.setEntity("alias", EngageSeller.class);
+		query.setParameter("cid", requestbean.getCustomerId());
+		query.setParameter("eid", requestbean.getEntityId());
+		query.setParameter("et", requestbean.getEntityType());
 		if (requestbean.getEntityType().equalsIgnoreCase(SocialEntityType.V.toString())) {
-			entityFollowCriteria.add(Restrictions.eq("entityType", SocialEntityType.C.toString()));
-			entityFollowCriteria.add(Restrictions.eq("entityId", parentEntityId));
+			query.setParameter("veid", parentEntityId);
+			query.setParameter("vet", SocialEntityType.C.toString());
 		} else {
-			entityFollowCriteria.add(entityIdCriteria);
-			entityFollowCriteria.add(entityTypeCriteria);
+			query.setParameter("veid", requestbean.getEntityId());
+			query.setParameter("vet", requestbean.getEntityType());
 		}
-		entityFollowCriteria.setProjection(Projections.rowCount());
-		Long totalFollowers = (Long) entityFollowCriteria.uniqueResult();
-		entityFollowCriteria.add(customerIdCriteria);
-		entityFollowCriteria.add(Restrictions.eq("followed", true));
-		actionCount = (Long) entityFollowCriteria.uniqueResult();
-		responseBean.setFollow(actionCount != null && actionCount > 0);
+		List<Object[]> records = query.list();
 
-		Criteria entityShareCriteria = session.createCriteria(EntityShare.class);
-		entityShareCriteria.add(entityIdCriteria);
-		entityShareCriteria.add(entityTypeCriteria);
-		entityShareCriteria.setProjection(Projections.rowCount());
-		Long totalShares = (Long) entityShareCriteria.uniqueResult();
+		int counter = 0;
+		for (Object[] record : records) {
+			SocialEntityResult result = new SocialEntityResult();
+			switch (counter) {
+			case 0:
+				responseBean.setLike(record[0] != null && !record[0].toString().equalsIgnoreCase("0"));
+				responseBean.setLikes(record[1].toString());
 
-		responseBean.setTotalViews(totalViewers != null ? totalViewers.toString() : "");
-		responseBean.setLikes(totalLikes != null ? totalLikes.toString() : "");
-		responseBean.setFollowers(totalFollowers != null ? totalFollowers.toString() : "");
-		responseBean.setShares(totalShares != null ? totalShares.toString() : "");
+				break;
+			case 1:
+				responseBean.setFollow(record[0] != null && !record[0].toString().equalsIgnoreCase("0"));
+				responseBean.setFollowers(record[1].toString());
+
+				break;
+			case 2:
+				responseBean.setTotalViews(record[1].toString());
+				break;
+			case 3:
+				responseBean.setShares(record[1].toString());
+				break;
+			}
+
+			counter++;
+		}
+
 		return responseBean;
 	}
 
