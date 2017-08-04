@@ -186,7 +186,7 @@ public class BroadcasterResource {
 		return Response.status(404).build();
 	}
 
-	@Path("/channel/categories")
+	@Path("/broadcaster/categories")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -194,8 +194,7 @@ public class BroadcasterResource {
 		List<BroadcasterChannelCategoryResponseBean> responseBean = new ArrayList<BroadcasterChannelCategoryResponseBean>();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
-			responseBean = manager.getAllBroadcasters(requestBean.getCategoryId(), requestBean.getCustomerId(),
-					requestBean.getIsLoggedIn());
+			responseBean = manager.getAllBroadcasters(requestBean);
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			responseBean.clear();
