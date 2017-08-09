@@ -30,7 +30,7 @@ public class VideoBean {
 	private boolean pUhd;
 	private SocialEntityResponseBean socialEntity = new SocialEntityResponseBean();
 	private int duration;
-	
+	private boolean liveAds;
 
 	public int getDuration() {
 		return duration;
@@ -230,6 +230,14 @@ public class VideoBean {
 
 	public void setpUhd(boolean pUhd) {
 		this.pUhd = pUhd;
+	}
+
+	public boolean getLiveAds() {
+		return liveAds;
+	}
+
+	public void setLiveAds(boolean liveAds) {
+		this.liveAds = liveAds;
 	}
 
 }

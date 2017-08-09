@@ -58,6 +58,17 @@ public class BroadcasterVideo {
 	private boolean islive;
 	@Column(name = "duration")
 	private int duration;
+	@Column(name = "live_ads", nullable = false, columnDefinition = "TINYINT(1)")
+	private boolean liveAds;
+
+	
+	public boolean isLiveAds() {
+		return liveAds;
+	}
+
+	public void setLiveAds(boolean liveAds) {
+		this.liveAds = liveAds;
+	}
 
 	public int getDuration() {
 		return duration;
