@@ -48,7 +48,7 @@ public class BroadcasterSocialEntityManager {
 			like.setEntityId(requestBean.getEntityId());
 			like.setCustomerId(requestBean.getCustomerId());
 			like.setLiked(requestBean.isAction());
-			like.setEntityType(requestBean.getEntityType());			
+			like.setEntityType(requestBean.getEntityType());
 			session.saveOrUpdate(like);
 			response = new SocialEntityResultBean();
 			response.setMessage("success");
@@ -148,25 +148,31 @@ public class BroadcasterSocialEntityManager {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
 			EntityViewers viewers = null;
-			Criteria criteria = session.createCriteria(EntityViewers.class);
-			criteria.add(Restrictions.eq("customerId", requestBean.getCustomerId()));
-			criteria.add(Restrictions.eq("entityId", requestBean.getEntityId()));
-			criteria.add(Restrictions.eq("entityType", requestBean.getEntityType()));
-			List<EntityViewers> list = criteria.list();
-			if (list != null && list.size() > 0)
-				viewers = list.get(0);
-			if (viewers == null)
-				viewers = new EntityViewers();
-			viewers.setEntityId(requestBean.getEntityId());
-			viewers.setCustomerId(requestBean.getCustomerId());
-			viewers.setViewing(requestBean.isAction());
-			viewers.setEntityType(requestBean.getEntityType());
-			viewers.setCustomerLoggedIn(requestBean.getIsLoggedIn());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date date = new Date();
 			String viewDate = sdf.format(date);
-			viewers.setViewDate(viewDate);
-			session.save(viewers);
+			if (!requestBean.isAction()) {
+				Criteria criteria = session.createCriteria(EntityViewers.class);
+				criteria.add(Restrictions.eq("customerId", requestBean.getCustomerId()));
+				criteria.add(Restrictions.eq("entityId", requestBean.getEntityId()));
+				criteria.add(Restrictions.eq("entityType", requestBean.getEntityType()));
+				criteria.add(Restrictions.eq("viewing", true));
+				criteria.add(Restrictions.eq("viewDate", viewDate));
+				List<EntityViewers> list = criteria.list();
+				if (list != null && list.size() > 0)
+					viewers = list.get(0);
+				viewers.setViewing(false);
+				session.saveOrUpdate(viewers);
+			} else {
+				viewers = new EntityViewers();
+				viewers.setEntityId(requestBean.getEntityId());
+				viewers.setCustomerId(requestBean.getCustomerId());
+				viewers.setViewing(requestBean.isAction());
+				viewers.setEntityType(requestBean.getEntityType());
+				viewers.setCustomerLoggedIn(requestBean.getIsLoggedIn());
+				viewers.setViewDate(viewDate);
+				session.save(viewers);
+			}
 			response = new SocialEntityResultBean();
 			response.setMessage("success");
 			transaction.commit();
