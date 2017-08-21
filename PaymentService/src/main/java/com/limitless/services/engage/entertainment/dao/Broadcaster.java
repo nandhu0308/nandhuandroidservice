@@ -21,7 +21,7 @@ import com.limitless.services.engage.dao.EngageSeller;
 public class Broadcaster {
 	@Id
 	@GeneratedValue
-	@Column(name = "BROADCASTERS_ID")
+	@Column(name = "ID")
 	private Integer broadcasterId;
 	@Column(name = "BROADCASTER_NAME")
 	private String broadcasterName;
@@ -39,6 +39,16 @@ public class Broadcaster {
 	private String broadcasterTags;
 	@Column(name = "BROADCASTER_TOTAL_VIDEOS")
 	private Integer broadcasterTotalVideos;
+
+	@Column(name = "BROADCASTER_LOC_LATITUDE")
+	private double broadcasterLocationLatitude;
+	@Column(name = "BROADCASTER_LOC_LONGITUDE")
+	private double broadcasterLocationLongitude;
+	@Column(name = "BROADCASTER_KYC_DOC_TYPE")
+	private String broadcasterKycDocType;
+	@Column(name = "BROADCASTER_KYC_DOC_VALUE")
+	private String broadcasterKycDocValue;
+
 	@Column(name = "BROADCASTER_CREATED_TIME", insertable = false, updatable = false)
 	private Date broadcasterCreatedTime;
 	@Temporal(TemporalType.TIMESTAMP)
@@ -55,10 +65,9 @@ public class Broadcaster {
 	@Column(name = "RANK")
 	private Integer rank;
 
-	@Column(name = "isActive")
+	@Column(name = "IS_ACTIVE")
 	private boolean isActive;
 
-	
 	public boolean isActive() {
 		return isActive;
 	}
@@ -178,4 +187,38 @@ public class Broadcaster {
 	public void setBroadcasterChannelName(String broadcasterChannelName) {
 		this.broadcasterChannelName = broadcasterChannelName;
 	}
+
+	public double getBroadcasterLocationLatitude() {
+		return broadcasterLocationLatitude;
+	}
+
+	public void setBroadcasterLocationLatitude(double broadcasterLocationLatitude) {
+		this.broadcasterLocationLatitude = broadcasterLocationLatitude;
+	}
+
+	public double getBroadcasterLocationLongitude() {
+		return broadcasterLocationLongitude;
+	}
+
+	public void setBroadcasterLocationLongitude(double broadcasterLocationLongitude) {
+		this.broadcasterLocationLongitude = broadcasterLocationLongitude;
+	}
+
+	public String getBroadcasterKycDocType() {
+		return broadcasterKycDocType;
+	}
+
+	public void setBroadcasterKycDocType(String broadcasterKycDocType) {
+		this.broadcasterKycDocType = broadcasterKycDocType;
+	}
+
+	public String getBroadcasterKycDocValue() {
+		return broadcasterKycDocValue;
+	}
+
+	public void setBroadcasterKycDocValue(String broadcasterKycDocValue) {
+		this.broadcasterKycDocValue = broadcasterKycDocValue;
+	}
+	
+	
 }

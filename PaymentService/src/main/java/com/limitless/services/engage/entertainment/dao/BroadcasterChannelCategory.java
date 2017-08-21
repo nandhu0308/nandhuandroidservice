@@ -7,13 +7,13 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "broadcaster_album_category", catalog = "llcdb")
-public class BroadcasterAlbumCategory {
+@Table(name = "broadcaster_channel_category", catalog = "llcdb")
+public class BroadcasterChannelCategory {
 	@Id
 	@GeneratedValue
 	@Column(name = "ID")
 	private Integer id;
-	@Column(name = "NAME")
+	@Column(name = "CATEGORY_NAME")
 	private String name;
 	@Column(name = "RANK")
 	private Integer rank;

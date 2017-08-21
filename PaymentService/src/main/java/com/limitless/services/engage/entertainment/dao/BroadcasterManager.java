@@ -76,21 +76,21 @@ public class BroadcasterManager {
 								requestBean.getIsLoggedIn());
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumList = new ArrayList<AlbumBean>();
-					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
+					Criteria criteria2 = session.createCriteria(BroadcasterChannel.class);
 					criteria2.add(Restrictions.eq("broadcasterId", broadcaster.getBroadcasterId()));
-					List<BroadcasterAlbum> albumsList = criteria2.list();
+					List<BroadcasterChannel> albumsList = criteria2.list();
 					log.debug("album size : " + albumsList.size());
 					int count = 0;
 					if (albumsList.size() > 0) {
-						for (BroadcasterAlbum album : albumsList) {
+						for (BroadcasterChannel album : albumsList) {
 							if (count > 10)
 								break;
 							AlbumBean bean = new AlbumBean();
-							bean.setAlbumId(album.getAlbumId());
-							bean.setAlbumName(album.getAlbumName());
-							bean.setAlbumDescription(album.getAlbumDescription());
-							bean.setAlbumVideoCount(album.getAlbumVideos());
-							bean.setAlbumThumbnail(album.getAlbumThumbnail());
+							bean.setAlbumId(album.getChannelId());
+							bean.setAlbumName(album.getChannelName());
+							bean.setAlbumDescription(album.getChannelDescription());
+							bean.setAlbumVideoCount(0);
+							bean.setAlbumThumbnail(album.getChannelThumbnail());
 							if (addSocialEntity)
 								SocialEntityManager.setSocialEntity(bean, requestBean.getCustomerId(), session);
 							albumList.add(bean);
@@ -144,23 +144,23 @@ public class BroadcasterManager {
 					SocialEntityManager.setSocialEntity(responseBean, session, customerId, isLoggedIn);
 					responseBean.setMessage("Success");
 					List<AlbumBean> albumBeanList = new ArrayList<AlbumBean>();
-					Criteria criteria2 = session.createCriteria(BroadcasterAlbum.class);
+					Criteria criteria2 = session.createCriteria(BroadcasterChannel.class);
 					criteria2.add(Restrictions.eq("broadcasterId", broadcaster.getBroadcasterId()));
-					List<BroadcasterAlbum> albumsList = criteria2.list();
+					List<BroadcasterChannel> albumsList = criteria2.list();
 					log.debug("album size : " + albumsList.size());
 					if (albumsList.size() > 0) {
-						for (BroadcasterAlbum album : albumsList) {
+						for (BroadcasterChannel album : albumsList) {
 							AlbumBean albumBean = new AlbumBean();
 							albumBean.setMessage("Success");
-							albumBean.setAlbumId(album.getAlbumId());
-							albumBean.setAlbumName(album.getAlbumName());
-							albumBean.setAlbumDescription(album.getAlbumDescription());
-							albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
-							albumBean.setAlbumVideoCount(album.getAlbumVideos());
+							albumBean.setAlbumId(album.getChannelId());
+							albumBean.setAlbumName(album.getChannelName());
+							albumBean.setAlbumDescription(album.getChannelDescription());
+							albumBean.setAlbumThumbnail(album.getChannelThumbnail());
+							albumBean.setAlbumVideoCount(0);
 							SocialEntityManager.setSocialEntity(albumBean, customerId, session);
 							List<VideoBean> videoList = new ArrayList<VideoBean>();
 							Criteria vCriteria = session.createCriteria(BroadcasterVideo.class);
-							vCriteria.add(Restrictions.eq("albumId", album.getAlbumId()));
+							vCriteria.add(Restrictions.eq("Id", album.getChannelId()));
 							vCriteria.add(Restrictions.eq("isActive", true));
 							vCriteria.add(Restrictions.gt("videosId", 0));
 							vCriteria.setMaxResults(15);
@@ -170,10 +170,10 @@ public class BroadcasterManager {
 							if (videosList.size() > 0) {
 								for (BroadcasterVideo video : videosList) {
 									VideoBean videoBean = new VideoBean();
-									videoBean.setVideoId(video.getVideosId());
+									videoBean.setVideoId(video.getId());
 									videoBean.setVideoName(video.getVideoName());
-									videoBean.setAlbumId(video.getAlbumId());
-									videoBean.setAlbumName(album.getAlbumDescription());
+									videoBean.setAlbumId(video.getChannelId());
+									videoBean.setAlbumName(album.getChannelDescription());
 									videoBean.setVideoDescription(video.getVideoDescription());
 									videoBean.setVideoThumbnail(video.getVideoThumbnail());
 									videoBean.setVideoUrl(video.getVideoUrl());
@@ -190,7 +190,7 @@ public class BroadcasterManager {
 									videoBean.setLiveAds(video.isLiveAds());
 									videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 									Criteria vtCriteria = session.createCriteria(ViewersTrack.class);
-									vtCriteria.add(Restrictions.eq("videoId", video.getVideosId()));
+									vtCriteria.add(Restrictions.eq("videoId", video.getId()));
 									ProjectionList projectionList = Projections.projectionList();
 									projectionList.add(Projections.groupProperty("viewDate"));
 									projectionList.add(Projections.groupProperty("customerId"));
@@ -336,29 +336,29 @@ public class BroadcasterManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			Criteria criteria = session.createCriteria(BroadcasterAlbumCategory.class);
+			Criteria criteria = session.createCriteria(BroadcasterChannelCategory.class);
 			criteria.addOrder(Order.asc("rank"));
 			criteria.addOrder(Order.asc("name"));
-			List<BroadcasterAlbumCategory> albumCategories = criteria.list();
+			List<BroadcasterChannelCategory> albumCategories = criteria.list();
 			if (albumCategories.size() > 0) {
 				List<AlbumBean> albumsBean = null;
-				for (BroadcasterAlbumCategory category : albumCategories) {
-					Criteria albumCriteria = session.createCriteria(BroadcasterAlbum.class);
-					albumCriteria.add(Restrictions.eq("broadcasterAlbumCategoryId", category.getId()));
+				for (BroadcasterChannelCategory category : albumCategories) {
+					Criteria albumCriteria = session.createCriteria(BroadcasterChannel.class);
+					albumCriteria.add(Restrictions.eq("broadcasterChannelCategoryId", category.getId()));
 					albumCriteria.add(Restrictions.eq("broadcasterId", requestBean.getBroadcasterId()));
 					albumCriteria.add(Restrictions.eq("isActive", true));
 					albumCriteria.addOrder(Order.asc("rank"));
-					albumCriteria.addOrder(Order.asc("albumName"));
-					List<BroadcasterAlbum> albums = albumCriteria.list();
+					albumCriteria.addOrder(Order.asc("channelName"));
+					List<BroadcasterChannel> albums = albumCriteria.list();
 					if (albums.size() > 0) {
 						albumsBean = new ArrayList<AlbumBean>();
-						for (BroadcasterAlbum album : albums) {
+						for (BroadcasterChannel album : albums) {
 							AlbumBean bean = new AlbumBean();
-							bean.setAlbumId(album.getAlbumId());
-							bean.setAlbumName(album.getAlbumName());
-							bean.setAlbumDescription(album.getAlbumDescription());
-							bean.setAlbumVideoCount(album.getAlbumVideos());
-							bean.setAlbumThumbnail(album.getAlbumThumbnail());
+							bean.setAlbumId(album.getChannelId());
+							bean.setAlbumName(album.getChannelName());
+							bean.setAlbumDescription(album.getChannelDescription());
+							bean.setAlbumVideoCount(0);
+							bean.setAlbumThumbnail(album.getChannelThumbnail());
 							SocialEntityManager.setSocialEntity(bean, requestBean.getCustomerId(), session);
 							albumsBean.add(bean);
 							bean = null;
@@ -398,19 +398,19 @@ public class BroadcasterManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			BroadcasterAlbum album = (BroadcasterAlbum) session
-					.get("com.limitless.services.engage.entertainment.dao.BroadcasterAlbum", requestBean.getAlbumId());
+			BroadcasterChannel album = (BroadcasterChannel) session
+					.get("com.limitless.services.engage.entertainment.dao.BroadcasterChannel", requestBean.getAlbumId());
 			if (album != null) {
 				albumBean.setMessage("Success");
-				albumBean.setAlbumId(album.getAlbumId());
-				albumBean.setAlbumName(album.getAlbumName());
-				albumBean.setAlbumDescription(album.getAlbumDescription());
-				albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
-				albumBean.setAlbumVideoCount(album.getAlbumVideos());
+				albumBean.setAlbumId(album.getChannelId());
+				albumBean.setAlbumName(album.getChannelName());
+				albumBean.setAlbumDescription(album.getChannelDescription());
+				albumBean.setAlbumThumbnail(album.getChannelThumbnail());
+				albumBean.setAlbumVideoCount(0);
 				SocialEntityManager.setSocialEntity(albumBean, requestBean.getCustomerId(), session);
 				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
-				criteria.add(Restrictions.eq("albumId", album.getAlbumId()));
+				criteria.add(Restrictions.eq("channelId", album.getChannelId()));
 				criteria.add(Restrictions.eq("isActive", true));
 				criteria.setFirstResult(requestBean.getVideoIndex());
 				criteria.setMaxResults(videoMaxResults);
@@ -421,10 +421,10 @@ public class BroadcasterManager {
 				if (videosList.size() > 0) {
 					for (BroadcasterVideo video : videosList) {
 						VideoBean videoBean = new VideoBean();
-						videoBean.setVideoId(video.getVideosId());
+						videoBean.setVideoId(video.getId());
 						videoBean.setVideoName(video.getVideoName());
-						videoBean.setAlbumId(video.getAlbumId());
-						videoBean.setAlbumName(album.getAlbumDescription());
+						videoBean.setAlbumId(video.getChannelId());
+						videoBean.setAlbumName(album.getChannelDescription());
 						videoBean.setVideoDescription(video.getVideoDescription());
 						videoBean.setVideoThumbnail(video.getVideoThumbnail());
 						videoBean.setVideoUrl(video.getVideoUrl());
@@ -443,7 +443,7 @@ public class BroadcasterManager {
 						SocialEntityManager.setSocialEntity(videoBean, session, requestBean.getCustomerId(),
 								requestBean.getIsLoggedIn());
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
-						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
+						criteria2.add(Restrictions.eq("videoId", video.getId()));
 						ProjectionList projectionList = Projections.projectionList();
 						projectionList.add(Projections.groupProperty("viewDate"));
 						projectionList.add(Projections.groupProperty("customerId"));
@@ -486,19 +486,19 @@ public class BroadcasterManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			BroadcasterAlbum album = (BroadcasterAlbum) session
-					.get("com.limitless.services.engage.entertainment.dao.BroadcasterAlbum", albumId);
+			BroadcasterChannel album = (BroadcasterChannel) session
+					.get("com.limitless.services.engage.entertainment.dao.BroadcasterChannel", albumId);
 			if (album != null) {
 				albumBean.setMessage("Success");
 				albumBean.setAlbumId(albumId);
-				albumBean.setAlbumName(album.getAlbumName());
-				albumBean.setAlbumDescription(album.getAlbumDescription());
-				albumBean.setAlbumThumbnail(album.getAlbumThumbnail());
-				albumBean.setAlbumVideoCount(album.getAlbumVideos());
+				albumBean.setAlbumName(album.getChannelName());
+				albumBean.setAlbumDescription(album.getChannelDescription());
+				albumBean.setAlbumThumbnail(album.getChannelThumbnail());
+				albumBean.setAlbumVideoCount(0);
 				SocialEntityManager.setSocialEntity(albumBean, customerId, session);
 				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(BroadcasterVideo.class);
-				criteria.add(Restrictions.eq("albumId", albumId));
+				criteria.add(Restrictions.eq("channelId", albumId));
 				criteria.add(Restrictions.eq("isActive", true));
 				if (beginingVideoId > -1) {
 					criteria.add(Restrictions.gt("videosId", beginingVideoId));
@@ -511,10 +511,10 @@ public class BroadcasterManager {
 				if (videosList.size() > 0) {
 					for (BroadcasterVideo video : videosList) {
 						VideoBean videoBean = new VideoBean();
-						videoBean.setVideoId(video.getVideosId());
+						videoBean.setVideoId(video.getId());
 						videoBean.setVideoName(video.getVideoName());
-						videoBean.setAlbumId(video.getAlbumId());
-						videoBean.setAlbumName(album.getAlbumDescription());
+						videoBean.setAlbumId(video.getChannelId());
+						videoBean.setAlbumName(album.getChannelDescription());
 						videoBean.setVideoDescription(video.getVideoDescription());
 						videoBean.setVideoThumbnail(video.getVideoThumbnail());
 						videoBean.setVideoUrl(video.getVideoUrl());
@@ -532,7 +532,7 @@ public class BroadcasterManager {
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 						SocialEntityManager.setSocialEntity(videoBean, session, customerId, isLoggedIn);
 						Criteria criteria2 = session.createCriteria(ViewersTrack.class);
-						criteria2.add(Restrictions.eq("videoId", video.getVideosId()));
+						criteria2.add(Restrictions.eq("videoId", video.getId()));
 						ProjectionList projectionList = Projections.projectionList();
 						projectionList.add(Projections.groupProperty("viewDate"));
 						projectionList.add(Projections.groupProperty("customerId"));
@@ -599,7 +599,7 @@ public class BroadcasterManager {
 	private void fillAds(Session session, BroadcasterVideo video, VideoBean videoBean) {
 		List<VideoAds> videoAds;
 		Criteria criteriaVideoAds = session.createCriteria(VideoAds.class);
-		criteriaVideoAds.add(Restrictions.eq("videoId", video.getVideosId()));
+		criteriaVideoAds.add(Restrictions.eq("videoId", video.getId()));
 		videoAds = criteriaVideoAds.list();
 		List<AdRollBean> midRolls = new ArrayList<AdRollBean>();
 		for (VideoAds videoAd : videoAds) {

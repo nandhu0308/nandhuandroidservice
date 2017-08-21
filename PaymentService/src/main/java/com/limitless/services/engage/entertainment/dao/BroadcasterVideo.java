@@ -16,17 +16,20 @@ import javax.persistence.Version;
 public class BroadcasterVideo {
 	@Id
 	@GeneratedValue
-	@Column(name = "VIDEOS_ID")
-	private Integer videosId;
-	@Column(name = "ALBUM_ID")
-	private Integer albumId;
+	@Column(name = "ID")
+	private Integer id;
+	
+	@Column(name = "BROADCASTER_CHANNEL_ID")
+	private Integer channelId;
+	
 	@Column(name = "VIDEO_NAME")
 	private String videoName;
+	
 	@Column(name = "VIDEO_DESCRIPTION")
 	private String videoDescription;
 	@Column(name = "VIDEO_THUMBNAIL")
 	private String videoThumbnail;
-	@Column(name = "VIDEO_URL")
+	@Column(name = "URL" , insertable=false , updatable=false)
 	private String videoUrl;
 	@Column(name = "URL")
 	private String url;
@@ -52,9 +55,9 @@ public class BroadcasterVideo {
 	private boolean isYoutube;
 	@Column(name = "RANK")
 	private Integer rank;
-	@Column(name = "isActive")
+	@Column(name = "IS_ACTIVE")
 	private boolean isActive;
-	@Column(name = "ISLIVE", nullable = false, columnDefinition = "TINYINT(1)")
+	@Column(name = "IS_LIVE", nullable = false, columnDefinition = "TINYINT(1)")
 	private boolean islive;
 	@Column(name = "duration")
 	private int duration;
@@ -94,20 +97,20 @@ public class BroadcasterVideo {
 		this.isActive = isActive;
 	}
 
-	public Integer getVideosId() {
-		return videosId;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setVideosId(Integer videosId) {
-		this.videosId = videosId;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
-	public Integer getAlbumId() {
-		return albumId;
+	public Integer getChannelId() {
+		return channelId;
 	}
 
-	public void setAlbumId(Integer albumId) {
-		this.albumId = albumId;
+	public void setChannelId(Integer channelId) {
+		this.channelId = channelId;
 	}
 
 	public String getVideoName() {
