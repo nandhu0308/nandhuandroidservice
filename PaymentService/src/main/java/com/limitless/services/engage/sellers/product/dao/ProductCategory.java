@@ -11,7 +11,7 @@ import javax.persistence.Table;
 public class ProductCategory {
 	@Id
 	@GeneratedValue
-	@Column(name="PRODUCT_CATEGORY_ID")
+	@Column(name="ID")
 	private int productCategoryId;
 	@Column(name="PRODUCT_CATEGORY_NAME")
 	private String productCategoryName;

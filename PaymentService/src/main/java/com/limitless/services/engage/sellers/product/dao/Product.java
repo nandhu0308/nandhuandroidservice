@@ -12,7 +12,7 @@ public class Product {
 	
 	@Id
 	@GeneratedValue
-	@Column(name="PRODUCT_ID")
+	@Column(name="ID")
 	private Integer productId;
 	@Column(name="SELLER_ID")
 	private Integer sellerId;
