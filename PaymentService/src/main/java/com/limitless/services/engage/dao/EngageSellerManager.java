@@ -15,6 +15,8 @@ import java.util.Date;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -84,6 +86,9 @@ import com.limitless.services.engage.sellers.dao.SellerVersion;
 import com.limitless.services.engage.sellers.product.dao.ProductCategory;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.payment.PaymentService.util.RestClientUtil;
+import com.limitless.services.socialentity.SocialEntityRatingRequestBean;
+import com.limitless.services.socialentity.SocialEntityResultBean;
+import com.limitless.services.socialentity.dao.EntityRating;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -299,6 +304,7 @@ public class EngageSellerManager {
 					respBean.setSellerId(seller.getSellerId());
 					sellerId = seller.getSellerId();
 					respBean.setSellerName(seller.getSellerShopName());
+					respBean.setRating(seller.getRating());
 					respBean.setMobileNumber(seller.getSellerMobileNumber());
 					respBean.setSellerAddress(seller.getSellerAddress());
 					respBean.setSellerCity(seller.getSellerCity());
@@ -462,6 +468,7 @@ public class EngageSellerManager {
 			for (EngageSeller seller : sellers) {
 				CoordinatesResponseBean bean = new CoordinatesResponseBean();
 				bean.setSellerId(seller.getSellerId());
+				bean.setRating(seller.getRating());
 				bean.setSellerName(seller.getSellerName());
 				bean.setShopName(seller.getSellerShopName());
 				bean.setSellerMobile(seller.getSellerMobileNumber());
@@ -532,6 +539,7 @@ public class EngageSellerManager {
 			if (sellerList.size() == 1) {
 				for (EngageSeller seller : sellerList) {
 					responseBean.setSellerId(seller.getSellerId());
+					responseBean.setRating(seller.getRating());
 					responseBean.setSellerName(seller.getSellerShopName());
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
@@ -629,6 +637,7 @@ public class EngageSellerManager {
 				EngageSeller seller = sellerList.get(0);
 				{
 					responseBean.setSellerId(seller.getSellerId());
+					responseBean.setRating(seller.getRating());
 					responseBean.setSellerName(seller.getSellerShopName());
 					responseBean.setSellerType(seller.getSellerType());
 					responseBean.setBrandingUrl(seller.getBranding_url());
@@ -836,6 +845,7 @@ public class EngageSellerManager {
 				for (EngageSeller seller : sellerList) {
 					MerchantRequestListBean bean = new MerchantRequestListBean();
 					bean.setSellerId(seller.getSellerId());
+					bean.setRating(seller.getRating());
 					bean.setSellerName(seller.getSellerName());
 					bean.setSellerShopName(seller.getSellerShopName());
 					bean.setSellerEmailId(seller.getSellerEmail99());
@@ -1827,6 +1837,7 @@ public class EngageSellerManager {
 					for (EngageSeller seller : sellersList) {
 						SellerMinBean bean = new SellerMinBean();
 						bean.setSellerId(seller.getSellerId());
+						bean.setRating(seller.getRating());
 						bean.setSellerName(seller.getSellerName());
 						bean.setSellerShopName(seller.getSellerShopName());
 						bean.setSellerMobileNumber(seller.getSellerMobileNumber());
@@ -1904,6 +1915,7 @@ public class EngageSellerManager {
 				for (EngageSeller seller : sellersList) {
 					SellerMinBean bean = new SellerMinBean();
 					bean.setSellerId(seller.getSellerId());
+					bean.setRating(seller.getRating());
 					bean.setSellerName(seller.getSellerName());
 					bean.setSellerShopName(seller.getSellerShopName());
 					bean.setSellerMobileNumber(seller.getSellerMobileNumber());
@@ -1964,6 +1976,7 @@ public class EngageSellerManager {
 						for (EngageSeller seller : sellerList) {
 							SellerMinBean bean = new SellerMinBean();
 							bean.setSellerId(seller.getSellerId());
+							bean.setRating(seller.getRating());
 							bean.setSellerName(seller.getSellerName());
 							bean.setSellerShopName(seller.getSellerShopName());
 							bean.setSellerMobileNumber(seller.getSellerMobileNumber());
@@ -2151,8 +2164,9 @@ public class EngageSellerManager {
 						coordsBean.getCategoryName());
 			} else {
 				Criteria criteria = session.createCriteria(EngageSeller.class);
-				criteria.add(Restrictions.ne("businessCategory", ""));				
-				criteria.add(Restrictions.ne("businessCategory", "TV")).setProjection(Projections.distinct(Projections.property("businessCategory")));
+				criteria.add(Restrictions.ne("businessCategory", ""));
+				criteria.add(Restrictions.ne("businessCategory", "TV"))
+						.setProjection(Projections.distinct(Projections.property("businessCategory")));
 				criteria.addOrder(Order.asc("businessCategory"));
 				List<String> categoryList = criteria.list();
 				log.debug("category list : " + categoryList.size());
@@ -2210,6 +2224,7 @@ public class EngageSellerManager {
 				// bean.setSellerTags((String) seller[7]);
 
 				bean.setSellerId(seller.getSellerId());
+				bean.setRating(seller.getRating());
 				bean.setSellerName(seller.getSellerName());
 				bean.setSellerShopName(seller.getSellerShopName());
 				bean.setSellerMobileNumber(seller.getSellerMobileNumber());
@@ -2356,6 +2371,44 @@ public class EngageSellerManager {
 				session.close();
 			}
 		}
+	}
+
+	public boolean processRating(SocialEntityRatingRequestBean requestBean) {
+		boolean result = false;
+		log.debug("rate");
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(EntityRating.class);
+			criteria.add(Restrictions.eq("customerId", requestBean.getCustomerId()));
+			criteria.add(Restrictions.eq("entityId", requestBean.getEntityId()));
+			criteria.add(Restrictions.eq("entityType", requestBean.getEntityType()));
+			List<EntityRating> list = criteria.list();
+			EntityRating rating = null;
+			;
+			if (list != null && list.size() > 0)
+				rating = list.get(0);
+			if (rating == null)
+				rating = new EntityRating();
+			rating.setReview(requestBean.getReview());
+			rating.setRating(requestBean.getRating());
+			session.saveOrUpdate(rating);			
+			transaction.commit();
+			result = true;
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("rating failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return result;
 	}
 
 	/*

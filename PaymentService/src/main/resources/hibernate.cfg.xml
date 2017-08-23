@@ -77,5 +77,6 @@
   <mapping class="com.limitless.services.socialentity.dao.EntityLike"/>
   <mapping class="com.limitless.services.socialentity.dao.EntityShare"/>
   <mapping class="com.limitless.services.socialentity.dao.EntityViewers"/>
+  <mapping class="com.limitless.services.socialentity.dao.EntityRating"/>
  </session-factory>
 </hibernate-configuration>

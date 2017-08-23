@@ -62,12 +62,17 @@ import com.limitless.services.engage.dao.SellerTempManager;
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
+import com.limitless.services.engage.entertainment.dao.BroadcasterSocialEntityManager;
 import com.limitless.services.engage.restaurants.dao.RestaurantManager;
 import com.limitless.services.engage.sellers.ProductBean;
 import com.limitless.services.engage.sellers.SubMerchantListResponseBean;
 import com.limitless.services.engage.sellers.product.dao.Product;
 import com.limitless.services.engage.sellers.product.dao.ProductManager;
 import com.limitless.services.payment.PaymentService.PaymentTxnBean;
+import com.limitless.services.socialentity.SocialEntityRatingRequestBean;
+import com.limitless.services.socialentity.SocialEntityRequestBean;
+import com.limitless.services.socialentity.SocialEntityResultBean;
+import com.limitless.services.socialentity.dao.SocialEntityType;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/merchant")
@@ -743,6 +748,27 @@ public class EngageSellerResource {
 		EngageSellerManager manager = new EngageSellerManager();
 		manager.deactivatePromoCodes();
 		return Response.status(200).build();
+	}
+
+	@Path("/shop/rate")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response likeBroadcaster(SocialEntityRatingRequestBean requestBean) throws Exception {
+		Response responseBean = null;
+		boolean result = false;
+		try {
+			requestBean.setEntityType(SocialEntityType.S.toString());
+			EngageSellerManager manager = new EngageSellerManager();
+			result = manager.processRating(requestBean);
+
+		} catch (Exception e) {
+			logger.error("API Error", e);
+		}
+		if (result) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
 	}
 
 }

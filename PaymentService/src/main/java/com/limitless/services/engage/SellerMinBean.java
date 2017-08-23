@@ -9,6 +9,14 @@ public class SellerMinBean {
 	private String sellerBrandingUrl;
 	private String sellerIconUrl;
 	private String sellerTags;
+	private float rating;
+	
+	public float getRating() {
+		return rating;
+	}
+	public void setRating(float rating) {
+		this.rating = rating;
+	}
 	public int getSellerId() {
 		return sellerId;
 	}
