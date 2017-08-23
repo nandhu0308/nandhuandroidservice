@@ -754,11 +754,32 @@ public class EngageSellerResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response likeBroadcaster(SocialEntityRatingRequestBean requestBean) throws Exception {
+	public Response rateShop(SocialEntityRatingRequestBean requestBean) throws Exception {
 		Response responseBean = null;
 		boolean result = false;
 		try {
 			requestBean.setEntityType(SocialEntityType.S.toString());
+			EngageSellerManager manager = new EngageSellerManager();
+			result = manager.processRating(requestBean);
+
+		} catch (Exception e) {
+			logger.error("API Error", e);
+		}
+		if (result) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+	
+	@Path("/product/rate")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response rateProduct(SocialEntityRatingRequestBean requestBean) throws Exception {
+		Response responseBean = null;
+		boolean result = false;
+		try {
+			requestBean.setEntityType(SocialEntityType.P.toString());
 			EngageSellerManager manager = new EngageSellerManager();
 			result = manager.processRating(requestBean);
 

@@ -161,7 +161,8 @@ public class BroadcasterSocialEntityManager {
 				List<EntityViewers> list = criteria.list();
 				if (list != null && list.size() > 0)
 					viewers = list.get(0);
-				viewers.setViewing(false);
+				if (viewers != null)
+					viewers.setViewing(false);
 				session.saveOrUpdate(viewers);
 			} else {
 				viewers = new EntityViewers();

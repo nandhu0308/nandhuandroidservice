@@ -89,6 +89,7 @@ import com.limitless.services.payment.PaymentService.util.RestClientUtil;
 import com.limitless.services.socialentity.SocialEntityRatingRequestBean;
 import com.limitless.services.socialentity.SocialEntityResultBean;
 import com.limitless.services.socialentity.dao.EntityRating;
+import com.limitless.services.socialentity.dao.EntityViewers;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -2195,19 +2196,23 @@ public class EngageSellerManager {
 	private void getSellerListForCategoryAndLocation(CustomerCoordsBean coordsBean,
 			List<SellerBusinessCategoryBean> sellerCategoryList, Session session, String category) {
 		List<SellerMinBean> beanList = new ArrayList<SellerMinBean>();
-
-		SQLQuery query = session.createSQLQuery(
-				"SELECT * , ACOS( SIN( RADIANS( seller_location_latitude ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( seller_location_latitude ) )* COS( RADIANS( :lon )) * COS( RADIANS( seller_location_longitude ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
-		// query.setEntity("alias", EngageSeller.class);
-		query.setParameter("lat", coordsBean.getLatitude());
-		query.setParameter("lon", coordsBean.getLongitude());
-		query.setParameter("cat", category);
-		query.addEntity(EngageSeller.class);
-		query.setResultSetMapping("engage_seller");
-		query.setFirstResult(coordsBean.getIndex());
-		query.setMaxResults(15);
-
-		List<EngageSeller> sellersList = query.list();
+		Criteria criteria = session.createCriteria(EngageSeller.class);
+		criteria.add(Restrictions.eq("businessCategory", category));
+		criteria.add(Restrictions.eq("isActive", 1));
+		criteria.add(Restrictions.eq("isDeleted", 0));
+		criteria.add(Restrictions.eq("ecomPayment", 1));
+//		SQLQuery query = session.createSQLQuery(
+//				"SELECT seller_id , ACOS( SIN( RADIANS( seller_location_latitude ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( seller_location_latitude ) )* COS( RADIANS( :lon )) * COS( RADIANS( seller_location_longitude ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
+//		// query.setEntity("alias", EngageSeller.class);
+//		query.setParameter("lat", coordsBean.getLatitude());
+//		query.setParameter("lon", coordsBean.getLongitude());
+//		query.setParameter("cat", category);
+//		query.addEntity(EngageSeller.class);
+//		query.setResultSetMapping("engage_seller");
+//		query.setFirstResult(coordsBean.getIndex());
+//		query.setMaxResults(15);
+		List<EngageSeller> sellersList = criteria.list();
+		sellersList.sort(new DistanceFromMeComparator(coordsBean));
 		SellerBusinessCategoryBean categoryBean = new SellerBusinessCategoryBean();
 		if (sellersList.size() > 0) {
 			categoryBean.setSellerBusinessCategory(category);
@@ -2394,7 +2399,7 @@ public class EngageSellerManager {
 				rating = new EntityRating();
 			rating.setReview(requestBean.getReview());
 			rating.setRating(requestBean.getRating());
-			session.saveOrUpdate(rating);			
+			session.saveOrUpdate(rating);
 			transaction.commit();
 			result = true;
 		} catch (RuntimeException re) {

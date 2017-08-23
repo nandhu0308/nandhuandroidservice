@@ -19,6 +19,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Formula;
@@ -109,10 +110,10 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerIconURL;
 	@Column(name = "ECOM_PAYMENT")
 	private Integer ecomPayment;
-
 	@Formula("(SELECT avg(R.rating)  FROM llcdb.entity_rating R where R.entity_id= seller_id and  R.entity_type='S')")
 	private Float rating = 0f;
 
+	
 	public EngageSeller() {
 	}
 
@@ -436,10 +437,6 @@ public class EngageSeller implements java.io.Serializable {
 
 	public Float getRating() {
 		return rating == null ? 0 : rating;
-	}
-
-	public void setRating(Float rating) {
-		this.rating = rating ;
 	}
 
 }
