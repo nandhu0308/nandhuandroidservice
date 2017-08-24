@@ -23,6 +23,8 @@ import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryRes
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.CategoryRequestBean;
+import com.limitless.services.engage.entertainment.ChannelRequestBean;
+import com.limitless.services.engage.entertainment.ChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
@@ -43,7 +45,6 @@ public class BroadcasterResource {
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			responseBean = manager.getBroadcasterChannel(requestBean, true);
-
 		} catch (Exception e) {
 			logger.error("API Error", e);
 			throw new Exception("Internal Server Error");
@@ -223,4 +224,24 @@ public class BroadcasterResource {
 		return Response.status(404).build();
 
 	}
+
+	@Path("/channels/search")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response searchChannels(ChannelRequestBean requestBean) throws Exception {
+		List<ChannelResponseBean> responseBean = new ArrayList<ChannelResponseBean>();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.searchChannels(requestBean);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			responseBean.clear();
+		}
+		if (responseBean != null && !(responseBean.isEmpty())) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+
 }

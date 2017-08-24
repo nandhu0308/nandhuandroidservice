@@ -31,6 +31,8 @@ import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryRes
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.CategoryRequestBean;
+import com.limitless.services.engage.entertainment.ChannelRequestBean;
+import com.limitless.services.engage.entertainment.ChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
@@ -45,7 +47,8 @@ public class BroadcasterManager {
 	Client client = RestClientUtil.createClient();
 	private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 	private final int broadcasterMaxResults = 5;
-	private final int videoMaxResults=10;
+	private final int videoMaxResults = 10;
+	private final int channelMaxResults = 10;
 
 	public BroadcasterChannelResponseBean getBroadcasterChannel(BroadcasterChannelRequestBean requestBean,
 			boolean addSocialEntity) {
@@ -398,8 +401,8 @@ public class BroadcasterManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			BroadcasterChannel album = (BroadcasterChannel) session
-					.get("com.limitless.services.engage.entertainment.dao.BroadcasterChannel", requestBean.getAlbumId());
+			BroadcasterChannel album = (BroadcasterChannel) session.get(
+					"com.limitless.services.engage.entertainment.dao.BroadcasterChannel", requestBean.getAlbumId());
 			if (album != null) {
 				albumBean.setMessage("Success");
 				albumBean.setAlbumId(album.getChannelId());
@@ -825,6 +828,65 @@ public class BroadcasterManager {
 				session.close();
 			}
 		}
+	}
+
+	public List<ChannelResponseBean> searchChannels(ChannelRequestBean requestBean) {
+		log.debug("getting channles");
+		List<ChannelResponseBean> responseBean = new ArrayList<ChannelResponseBean>();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+
+			Criteria criteria = session.createCriteria(Channel.class);
+			if (requestBean.getBroadcasterId() > 0)
+				criteria.add(Restrictions.eq("broadcasterId", requestBean.getBroadcasterId()));
+			if (requestBean.getCategoryId() > 0)
+				criteria.add(Restrictions.eq("categoryId", requestBean.getCategoryId()));
+			if (requestBean.getLanguageId() > 0)
+				criteria.add(Restrictions.eq("languageId", requestBean.getLanguageId()));
+			if (requestBean.getChannelName() != null && !requestBean.getChannelName().isEmpty()) {
+				criteria.add(Restrictions.like("channelName", requestBean.getChannelName()));
+			}
+			criteria.add(Restrictions.eq("deprecated", false));
+			criteria.add(Restrictions.eq("isActive", true));
+			criteria.addOrder(Order.asc("rank"));
+			criteria.addOrder(Order.asc("channelName"));
+			criteria.setFirstResult(requestBean.getStartIndex());
+			criteria.setMaxResults(channelMaxResults);
+			List<BroadcasterChannel> channelList = criteria.list();
+			log.debug("Channel size : " + channelList.size());
+			if (channelList.size() > 0) {
+				for (BroadcasterChannel channel : channelList) {
+					ChannelResponseBean channelBean = new ChannelResponseBean();
+					channelBean.setChannelId(channel.getChannelId());
+					channelBean.setBroadcasterId(channel.getBroadcasterId());
+					channelBean.setCategoryId(channel.getBroadcasterChannelCategoryId());
+					channelBean.setLanguageId(channel.getLanguageId());
+					channelBean.setChannelName(channel.getChannelName());
+					channelBean.setChannelDescription(channel.getChannelDescription());
+					channelBean.setChannelThumbnail(channel.getHaChannelThumbnail());
+					channelBean.setHd(channel.isHd());
+					SocialEntityManager.setSocialEntity(channelBean, session, requestBean.getCustomerId(),
+							requestBean.getIsLoggedIn());
+					responseBean.add(channelBean);
+					channelBean = null;
+				}
+				transaction.commit();
+			}
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting channels failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
 	}
 
 }

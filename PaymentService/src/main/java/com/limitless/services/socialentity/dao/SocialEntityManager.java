@@ -20,6 +20,7 @@ import org.hibernate.criterion.Restrictions;
 import com.limitless.services.engage.dao.EngageSeller;
 import com.limitless.services.engage.entertainment.AlbumBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
+import com.limitless.services.engage.entertainment.ChannelResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.socialentity.SocialEntityRequestBean;
@@ -58,6 +59,17 @@ public class SocialEntityManager {
 				.setSocialEntity(SocialEntityManager.getInstance().processRequest(socialEntityRequestBean, session));
 	}
 
+	
+	public static void setSocialEntity(ChannelResponseBean channelResponseBean, Session session,
+			int customerId, boolean isLoggedIn) {
+		SocialEntityRequestBean socialEntityRequestBean = new SocialEntityRequestBean();
+		socialEntityRequestBean.setEntityId(channelResponseBean.getChannelId());
+		socialEntityRequestBean.setEntityType(SocialEntityType.C.toString());
+		socialEntityRequestBean.setCustomerId(customerId);
+		socialEntityRequestBean.setIsLoggedIn(isLoggedIn);
+		channelResponseBean
+				.setSocialEntity(SocialEntityManager.getInstance().processRequest(socialEntityRequestBean, session));
+	}
 	public static void setSocialEntity(VideoBean videoBean, Session session, int customerId, boolean isLoggedIn) {
 		SocialEntityRequestBean socialEntityRequestBean = new SocialEntityRequestBean();
 		socialEntityRequestBean.setEntityId(videoBean.getVideoId());

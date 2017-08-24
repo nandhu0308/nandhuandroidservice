@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+@Deprecated
 @Entity
 @Table(name = "broadcaster_channel_category", catalog = "llcdb")
 public class BroadcasterChannelCategory {
