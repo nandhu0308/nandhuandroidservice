@@ -25,6 +25,7 @@ import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBea
 import com.limitless.services.engage.entertainment.CategoryRequestBean;
 import com.limitless.services.engage.entertainment.ChannelRequestBean;
 import com.limitless.services.engage.entertainment.ChannelResponseBean;
+
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.engage.entertainment.dao.BroadcasterManager;
@@ -244,4 +245,20 @@ public class BroadcasterResource {
 		return Response.status(404).build();
 	}
 
+	
+	@Path("/video/page")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public AlbumBean getChannelVideoListPost(AlbumVideoRequestBean requestBean) throws Exception {
+		AlbumBean albumBean = new AlbumBean();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			albumBean = manager.getBroadcasterChannelVideoList(requestBean);
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			throw new Exception("Internal Server Error");
+		}
+		return albumBean;
+	}
 }

@@ -14,9 +14,18 @@ public class ChannelResponseBean {
 	private String channelDescription;
 	private String channelThumbnail;
 	private boolean isHd;
+	private VideoBean liveVideo;
 	private SocialEntityResponseBean socialEntity = new SocialEntityResponseBean();
 
 	
+	public VideoBean getLiveVideo() {
+		return liveVideo;
+	}
+
+	public void setLiveVideo(VideoBean liveVideo) {
+		this.liveVideo = liveVideo;
+	}
+
 	public int getLanguageId() {
 		return languageId;
 	}

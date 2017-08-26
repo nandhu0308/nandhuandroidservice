@@ -4,8 +4,11 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -19,6 +22,7 @@ public class BroadcasterVideo {
 	@Column(name = "ID")
 	private Integer id;
 	
+
 	@Column(name = "BROADCASTER_CHANNEL_ID")
 	private Integer channelId;
 	
@@ -62,8 +66,9 @@ public class BroadcasterVideo {
 	@Column(name = "duration")
 	private int duration;
 	@Column(name = "live_ads", nullable = false, columnDefinition = "TINYINT(1)")
-	private boolean liveAds;
-
+	private boolean liveAds;	
+	
+	
 	
 	public boolean isLiveAds() {
 		return liveAds;

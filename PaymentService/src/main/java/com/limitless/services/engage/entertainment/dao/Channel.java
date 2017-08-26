@@ -1,17 +1,31 @@
 package com.limitless.services.engage.entertainment.dao;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "broadcaster_channel", catalog = "llcdb")
@@ -52,7 +66,21 @@ public class Channel {
 	private boolean deprecated;
 	
 	
-	
+	private List<BroadcasterVideo> videos;
+
+	@Access(AccessType.PROPERTY)
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass=BroadcasterVideo.class)
+	@JoinColumn(name = "broadcaster_channel_id")
+	@Where(clause = "is_live = 1")
+	public List<BroadcasterVideo> getVideos() {
+		return videos;
+	}
+
+	public void setVideos(List<BroadcasterVideo> videos) {
+		this.videos = videos;
+	}
+
 	public boolean isDeprecated() {
 		return deprecated;
 	}
@@ -172,6 +200,5 @@ public class Channel {
 	public void setHaChannelThumbnail(String haChannelThumbnail) {
 		this.haChannelThumbnail = haChannelThumbnail;
 	}
-	
 
 }
