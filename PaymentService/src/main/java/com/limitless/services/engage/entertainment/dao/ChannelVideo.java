@@ -15,8 +15,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "broadcaster_videos_old", catalog = "llcdb")
-public class BroadcasterVideo {
+@Table(name = "broadcaster_videos", catalog = "llcdb")
+public class ChannelVideo {
 	@Id
 	@GeneratedValue
 	@Column(name = "ID")

@@ -3,6 +3,8 @@ package com.limitless.services.engage.entertainment;
 public class AlbumVideoRequestBean {
 	int albumId;
 	int videoIndex;
+	private int customerId;
+	private boolean isLoggedIn;
 
 	public int getAlbumId() {
 		return albumId;
@@ -22,8 +24,7 @@ public class AlbumVideoRequestBean {
 	}
 
 
-	private int customerId;
-	private boolean isLoggedIn;
+	
 
 	public int getCustomerId() {
 		return customerId;

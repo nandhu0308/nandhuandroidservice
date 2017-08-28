@@ -42,7 +42,7 @@ public class BroadcasterChannel {
 	private int broadcasterChannelCategoryId;
 	@Column(name = "HA_RANK")
 	private Integer rank;
-	@Column(name = "HA_IS_ACTIVE")
+	@Column(name = "IS_ACTIVE")
 	private boolean isActive;
 	@Column(name = "IS_HD")
 	private boolean isHd;
