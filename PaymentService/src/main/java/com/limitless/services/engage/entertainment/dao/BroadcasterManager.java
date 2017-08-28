@@ -31,8 +31,10 @@ import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryRes
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.CategoryRequestBean;
+import com.limitless.services.engage.entertainment.ChannelFilterResponseBean;
 import com.limitless.services.engage.entertainment.ChannelRequestBean;
 import com.limitless.services.engage.entertainment.ChannelResponseBean;
+import com.limitless.services.engage.entertainment.FilterResponseBean;
 import com.limitless.services.engage.entertainment.VideoBean;
 import com.limitless.services.engage.entertainment.VideoRequestBean;
 import com.limitless.services.payment.PaymentService.util.HibernateUtil;
@@ -916,7 +918,6 @@ public class BroadcasterManager {
 		return responseBean;
 	}
 
-	
 	public AlbumBean getBroadcasterChannelVideoList(AlbumVideoRequestBean requestBean) {
 		log.debug("getting channel video list");
 		AlbumBean albumBean = new AlbumBean();
@@ -925,8 +926,8 @@ public class BroadcasterManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
-			Channel album = (Channel) session.get(
-					"com.limitless.services.engage.entertainment.dao.Channel", requestBean.getAlbumId());
+			Channel album = (Channel) session.get("com.limitless.services.engage.entertainment.dao.Channel",
+					requestBean.getAlbumId());
 			if (album != null) {
 				albumBean.setMessage("Success");
 				albumBean.setAlbumId(album.getChannelId());
@@ -968,7 +969,7 @@ public class BroadcasterManager {
 						videoBean.setLiveAds(video.isLiveAds());
 						videoBean.setVideoCreated(video.getVideoCreatedTime().toString());
 						SocialEntityManager.setSocialEntity(videoBean, session, requestBean.getCustomerId(),
-								requestBean.getIsLoggedIn());						
+								requestBean.getIsLoggedIn());
 						List<VideoAds> videoAds = new ArrayList<VideoAds>();
 						fillAds(session, video, videoBean);
 
@@ -995,6 +996,68 @@ public class BroadcasterManager {
 		return albumBean;
 	}
 
-	
-	
+	public ChannelFilterResponseBean getChannelFilters() {
+		log.debug("getting channles");
+		ChannelFilterResponseBean responseBean = new ChannelFilterResponseBean();
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			transaction = session.beginTransaction();
+			Criteria criteria = session.createCriteria(ChannelCategory.class);
+			criteria.addOrder(Order.asc("rank"));
+			criteria.addOrder(Order.asc("name"));
+			List<ChannelCategory> categories = criteria.list();
+			if (categories != null && categories.size() > 0) {
+				for (ChannelCategory cat : categories) {
+					FilterResponseBean bean = new FilterResponseBean();
+					bean.setId(cat.getId());
+					bean.setName(cat.getName());
+					responseBean.getCategories().add(bean);
+					bean = null;
+				}
+			}
+
+			
+			Criteria criteriaLang = session.createCriteria(ChannelLanguage.class);			
+			criteriaLang.addOrder(Order.asc("lang_name"));
+			List<ChannelLanguage> languages = criteriaLang.list();
+			if (languages != null && languages.size() > 0) {
+				for (ChannelLanguage lan : languages) {
+					FilterResponseBean bean = new FilterResponseBean();
+					bean.setId(lan.getId());
+					bean.setName(lan.getLang_name());
+					responseBean.getLanguages().add(bean);
+					bean = null;
+				}
+			}
+			
+			Criteria criteriaBc = session.createCriteria(Broadcaster.class);			
+			criteriaBc.addOrder(Order.asc("broadcasterName"));
+			List<Broadcaster> broadcasters = criteriaBc.list();
+			if (broadcasters != null && broadcasters.size() > 0) {
+				for (Broadcaster bc : broadcasters) {
+					FilterResponseBean bean = new FilterResponseBean();
+					bean.setId(bc.getBroadcasterId());
+					bean.setName(bc.getBroadcasterName());
+					bean.setImageUrl(bc.getBroadcasterImage());
+					responseBean.getBroadcasters().add(bean);
+					bean = null;
+				}
+			}
+		} catch (RuntimeException re) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			log.error("getting album failed : " + re);
+			throw re;
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return responseBean;
+
+	}
+
 }

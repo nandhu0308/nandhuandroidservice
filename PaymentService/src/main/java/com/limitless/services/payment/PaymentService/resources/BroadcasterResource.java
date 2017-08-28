@@ -23,6 +23,7 @@ import com.limitless.services.engage.entertainment.BroadcasterChannelCategoryRes
 import com.limitless.services.engage.entertainment.BroadcasterChannelRequestBean;
 import com.limitless.services.engage.entertainment.BroadcasterChannelResponseBean;
 import com.limitless.services.engage.entertainment.CategoryRequestBean;
+import com.limitless.services.engage.entertainment.ChannelFilterResponseBean;
 import com.limitless.services.engage.entertainment.ChannelRequestBean;
 import com.limitless.services.engage.entertainment.ChannelResponseBean;
 
@@ -245,20 +246,42 @@ public class BroadcasterResource {
 		return Response.status(404).build();
 	}
 
-	
 	@Path("/video/page")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public AlbumBean getChannelVideoListPost(AlbumVideoRequestBean requestBean) throws Exception {
+	public Response getChannelVideoListPost(AlbumVideoRequestBean requestBean) throws Exception {
 		AlbumBean albumBean = new AlbumBean();
 		try {
 			BroadcasterManager manager = new BroadcasterManager();
 			albumBean = manager.getBroadcasterChannelVideoList(requestBean);
 		} catch (Exception e) {
 			logger.error("API Error", e);
-			throw new Exception("Internal Server Error");
+			albumBean = null;
 		}
-		return albumBean;
+		if (albumBean != null) {
+			return Response.status(200).entity(albumBean).build();
+		}
+		return Response.status(404).build();
 	}
+
+	@Path("/channel/filters")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getChannelFilters() throws Exception {
+		ChannelFilterResponseBean responseBean = new ChannelFilterResponseBean();
+		try {
+			BroadcasterManager manager = new BroadcasterManager();
+			responseBean = manager.getChannelFilters();
+		} catch (Exception e) {
+			logger.error("API Error", e);
+			responseBean = null;
+		}
+		if (responseBean != null) {
+			return Response.status(200).entity(responseBean).build();
+		}
+		return Response.status(404).build();
+	}
+
 }
