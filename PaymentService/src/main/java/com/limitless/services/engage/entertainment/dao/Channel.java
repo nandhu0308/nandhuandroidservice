@@ -72,9 +72,8 @@ public class Channel {
 	@Access(AccessType.PROPERTY)
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @ElementCollection(targetClass=BroadcasterVideo.class)
-	@JoinColumn(name = "broadcaster_channel_id")	
-	@OrderBy("is_live DESC")	
-	@Where(clause="id = (select max(v.id) from broadcaster_videos v where is_active = 1 and v.broadcaster_channel_id = this_.id)")  
+	@JoinColumn(name = "broadcaster_channel_id")		
+	@Where(clause="id = (select max(v.id) from broadcaster_videos v where is_active = 1 and v.broadcaster_channel_id = this_.id order by is_live desc)")  
 	public List<BroadcasterVideo> getVideos() {
 		return videos;
 	}
