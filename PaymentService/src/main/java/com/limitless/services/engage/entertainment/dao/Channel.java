@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -71,8 +72,9 @@ public class Channel {
 	@Access(AccessType.PROPERTY)
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     @ElementCollection(targetClass=BroadcasterVideo.class)
-	@JoinColumn(name = "broadcaster_channel_id")
-	@Where(clause = "is_live = 1")
+	@JoinColumn(name = "broadcaster_channel_id")	
+	@OrderBy("is_live DESC")	
+	@Where(clause="id = (select max(v.id) from broadcaster_videos v where is_active = 1 and v.broadcaster_channel_id = this_.id)")  
 	public List<BroadcasterVideo> getVideos() {
 		return videos;
 	}
