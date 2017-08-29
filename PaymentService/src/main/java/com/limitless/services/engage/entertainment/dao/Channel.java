@@ -25,6 +25,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Where;
 
@@ -67,18 +68,18 @@ public class Channel {
 	private boolean deprecated;
 	
 	
-	private List<BroadcasterVideo> videos;
+	private List<ChannelVideo> videos;
 
 	@Access(AccessType.PROPERTY)
-	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER)
-    @ElementCollection(targetClass=BroadcasterVideo.class)
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
+    @ElementCollection(targetClass=ChannelVideo.class)
 	@JoinColumn(name = "broadcaster_channel_id")		
-	@Where(clause="id = (select max(v.id) from broadcaster_videos v where is_active = 1 and v.broadcaster_channel_id = this_.id order by is_live desc)")  
-	public List<BroadcasterVideo> getVideos() {
+	@BatchSize(size=1)  
+	public List<ChannelVideo> getVideos() {
 		return videos;
 	}
 
-	public void setVideos(List<BroadcasterVideo> videos) {
+	public void setVideos(List<ChannelVideo> videos) {
 		this.videos = videos;
 	}
 

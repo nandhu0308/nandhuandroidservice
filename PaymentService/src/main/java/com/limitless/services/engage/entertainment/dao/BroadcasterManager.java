@@ -982,7 +982,8 @@ public class BroadcasterManager {
 					channelBean.setChannelThumbnail(channel.getHaChannelThumbnail());
 					channelBean.setHd(channel.isHd());
 					if (channel.getVideos() != null && channel.getVideos().size() > 0) {
-						BroadcasterVideo video = channel.getVideos().get(0);
+//						log.info("Video Size: "+ channel.getVideos().size());
+						ChannelVideo video = channel.getVideos().get(0);
 						VideoBean videoBean = new VideoBean();
 						videoBean.setVideoId(video.getId());
 						videoBean.setVideoName(video.getVideoName());
