@@ -61,6 +61,8 @@ public class ChannelVideo {
 	private Integer rank;
 	@Column(name = "IS_ACTIVE")
 	private boolean isActive;
+	@Column(name = "IS_PRIMARY")
+	private boolean isPrimary;
 	@Column(name = "IS_LIVE", nullable = false, columnDefinition = "TINYINT(1)")
 	private boolean islive;
 	@Column(name = "duration")
@@ -70,6 +72,14 @@ public class ChannelVideo {
 	
 	
 	
+	public boolean isPrimary() {
+		return isPrimary;
+	}
+
+	public void setPrimary(boolean isPrimary) {
+		this.isPrimary = isPrimary;
+	}
+
 	public boolean isLiveAds() {
 		return liveAds;
 	}

@@ -75,6 +75,7 @@ public class Channel {
     @ElementCollection(targetClass=ChannelVideo.class)
 	@JoinColumn(name = "broadcaster_channel_id")		
 	@BatchSize(size=1)  
+	@Where(clause=" is_primary=1 ")
 	public List<ChannelVideo> getVideos() {
 		return videos;
 	}
