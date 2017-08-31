@@ -5,6 +5,16 @@ public class AlbumVideoRequestBean {
 	int videoIndex;
 	private int customerId;
 	private boolean isLoggedIn;
+	int videoId;
+	
+
+	public int getVideoId() {
+		return videoId;
+	}
+
+	public void setVideoId(int videoId) {
+		this.videoId = videoId;
+	}
 
 	public int getAlbumId() {
 		return albumId;

@@ -3,11 +3,19 @@ package com.limitless.services.engage.entertainment;
 public class ChannelRequestBean {
 	private int broadcasterId;
 	private int categoryId;
+	private int channelId;
 	private int languageId;
 	private String channelName;
 	private int customerId;
 	private boolean isLoggedIn;
 	private int startIndex;
+	
+	public int getChannelId() {
+		return channelId;
+	}
+	public void setChannelId(int channelId) {
+		this.channelId = channelId;
+	}
 	public int getBroadcasterId() {
 		return broadcasterId;
 	}

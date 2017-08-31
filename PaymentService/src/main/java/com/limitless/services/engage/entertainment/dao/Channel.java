@@ -63,19 +63,18 @@ public class Channel {
 	@Column(name = "IS_HD")
 	private boolean isHd;
 	@Column(name = "LANG_ID")
-	private int languageId;
+	private Integer languageId;
 	@Column(name = "deprecated")
 	private boolean deprecated;
-	
-	
+
 	private List<ChannelVideo> videos;
 
 	@Access(AccessType.PROPERTY)
-	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-    @ElementCollection(targetClass=ChannelVideo.class)
-	@JoinColumn(name = "broadcaster_channel_id")		
-	@BatchSize(size=1)  
-	@Where(clause=" is_primary=1 ")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ElementCollection(targetClass = ChannelVideo.class)
+	@JoinColumn(name = "broadcaster_channel_id")
+	@BatchSize(size = 1)
+	@Where(clause = " is_primary=1 ")
 	public List<ChannelVideo> getVideos() {
 		return videos;
 	}
@@ -189,7 +188,7 @@ public class Channel {
 	}
 
 	public int getLanguageId() {
-		return languageId;
+		return languageId == null ? 1 : languageId;
 	}
 
 	public void setLanguageId(int languageId) {

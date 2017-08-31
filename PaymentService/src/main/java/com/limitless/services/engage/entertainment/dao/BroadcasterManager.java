@@ -957,6 +957,8 @@ public class BroadcasterManager {
 				criteria.add(Restrictions.eq("broadcasterId", requestBean.getBroadcasterId()));
 			if (requestBean.getCategoryId() > 0)
 				criteria.add(Restrictions.eq("categoryId", requestBean.getCategoryId()));
+			if (requestBean.getChannelId() > 0)
+				criteria.add(Restrictions.eq("channelId", requestBean.getChannelId()));
 			if (requestBean.getLanguageId() > 0)
 				criteria.add(Restrictions.eq("languageId", requestBean.getLanguageId()));
 			if (requestBean.getChannelName() != null && !requestBean.getChannelName().isEmpty()) {
@@ -982,7 +984,7 @@ public class BroadcasterManager {
 					channelBean.setChannelThumbnail(channel.getHaChannelThumbnail());
 					channelBean.setHd(channel.isHd());
 					if (channel.getVideos() != null && channel.getVideos().size() > 0) {
-//						log.info("Video Size: "+ channel.getVideos().size());
+						// log.info("Video Size: "+ channel.getVideos().size());
 						ChannelVideo video = channel.getVideos().get(0);
 						VideoBean videoBean = new VideoBean();
 						videoBean.setVideoId(video.getId());
@@ -1037,6 +1039,7 @@ public class BroadcasterManager {
 		try {
 			session = sessionFactory.getCurrentSession();
 			transaction = session.beginTransaction();
+
 			Channel album = (Channel) session.get("com.limitless.services.engage.entertainment.dao.Channel",
 					requestBean.getAlbumId());
 			if (album != null) {
@@ -1047,6 +1050,14 @@ public class BroadcasterManager {
 				albumBean.setAlbumThumbnail(album.getChannelThumbnail());
 				albumBean.setAlbumVideoCount(0);
 				SocialEntityManager.setSocialEntity(albumBean, requestBean.getCustomerId(), session);
+
+			} else if (requestBean.getVideoId() > 0) {
+				albumBean = new AlbumBean();
+			} else {
+				albumBean = null;
+			}
+
+			if (albumBean != null) {
 				List<VideoBean> videoList = new ArrayList<VideoBean>();
 				Criteria criteria = session.createCriteria(ChannelVideo.class);
 				criteria.add(Restrictions.eq("channelId", album.getChannelId()));
@@ -1090,8 +1101,10 @@ public class BroadcasterManager {
 					albumBean.setVideoList(videoList);
 				}
 			} else {
+				albumBean = new AlbumBean();
 				albumBean.setMessage("Failed");
 			}
+
 			transaction.commit();
 		} catch (RuntimeException re) {
 			if (transaction != null) {
@@ -1129,8 +1142,7 @@ public class BroadcasterManager {
 				}
 			}
 
-			
-			Criteria criteriaLang = session.createCriteria(ChannelLanguage.class);			
+			Criteria criteriaLang = session.createCriteria(ChannelLanguage.class);
 			criteriaLang.addOrder(Order.asc("lang_name"));
 			List<ChannelLanguage> languages = criteriaLang.list();
 			if (languages != null && languages.size() > 0) {
@@ -1142,8 +1154,8 @@ public class BroadcasterManager {
 					bean = null;
 				}
 			}
-			
-			Criteria criteriaBc = session.createCriteria(Broadcaster.class);			
+
+			Criteria criteriaBc = session.createCriteria(Broadcaster.class);
 			criteriaBc.addOrder(Order.asc("broadcasterName"));
 			List<Broadcaster> broadcasters = criteriaBc.list();
 			if (broadcasters != null && broadcasters.size() > 0) {
