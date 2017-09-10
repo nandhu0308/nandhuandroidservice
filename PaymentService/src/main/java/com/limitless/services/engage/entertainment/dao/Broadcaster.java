@@ -16,7 +16,7 @@ import javax.persistence.Version;
 import com.limitless.services.engage.dao.EngageSeller;
 
 @Entity
-@Table(name = "broadcasters", catalog = "llcdb")
+@Table(name = "broadcasters")
 @SqlResultSetMapping(name = "broadcasters", entities = @EntityResult(entityClass = Broadcaster.class))
 public class Broadcaster {
 	@Id

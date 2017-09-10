@@ -21,7 +21,7 @@ import javax.persistence.Version;
  */
 
 @Entity
-@Table(name = "payment_txn", catalog = "llcdb")
+@Table(name = "payment_txn")
 public class PaymentTxn implements java.io.Serializable {
 	
 	@Id @GeneratedValue

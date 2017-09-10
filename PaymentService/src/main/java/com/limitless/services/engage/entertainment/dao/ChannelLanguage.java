@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "language_info", catalog = "llcdb")
+@Table(name = "language_info")
 public class ChannelLanguage {
 	@Id
 	@GeneratedValue	

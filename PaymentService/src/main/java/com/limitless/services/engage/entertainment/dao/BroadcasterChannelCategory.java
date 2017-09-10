@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Deprecated
 @Entity
-@Table(name = "broadcaster_channel_category_old", catalog = "llcdb")
+@Table(name = "broadcaster_channel_category_old")
 public class BroadcasterChannelCategory {
 	@Id
 	@GeneratedValue

@@ -12,7 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name="circle_notify", catalog="llcdb")
+@Table(name="circle_notify")
 public class CircleNotify {
 	@Id
 	@GeneratedValue

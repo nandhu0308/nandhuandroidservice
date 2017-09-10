@@ -12,7 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "entity_rating", catalog = "llcdb")
+@Table(name = "entity_rating")
 public class EntityRating {
 	@Id
 	@GeneratedValue

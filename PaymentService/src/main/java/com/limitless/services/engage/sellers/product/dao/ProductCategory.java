@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="product_category", catalog="llcdb")
+@Table(name="product_category")
 public class ProductCategory {
 	@Id
 	@GeneratedValue

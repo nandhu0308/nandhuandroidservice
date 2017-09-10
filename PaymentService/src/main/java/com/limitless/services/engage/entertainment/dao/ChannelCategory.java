@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table(name = "broadcaster_channel_category", catalog = "llcdb")
+@Table(name = "broadcaster_channel_category")
 public class ChannelCategory {
 	@Id
 	@GeneratedValue

@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table(name = "donation", catalog = "llcdb")
+@Table(name = "donation")
 public class Donation implements Serializable {
 	@Id
 	@GeneratedValue

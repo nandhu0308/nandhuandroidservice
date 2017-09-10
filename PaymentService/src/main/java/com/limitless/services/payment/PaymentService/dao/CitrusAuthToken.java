@@ -12,7 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name="citrus_auth_token", catalog="llcdb")
+@Table(name="citrus_auth_token")
 public class CitrusAuthToken {
 	@Id
 	@GeneratedValue

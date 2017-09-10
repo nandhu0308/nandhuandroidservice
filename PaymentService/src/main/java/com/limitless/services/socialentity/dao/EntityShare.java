@@ -11,7 +11,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "entity_share", catalog = "llcdb")
+@Table(name = "entity_share")
 public class EntityShare {
 
 	@Id

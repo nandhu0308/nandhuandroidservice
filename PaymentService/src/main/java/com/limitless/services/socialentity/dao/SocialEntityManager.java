@@ -31,14 +31,14 @@ public class SocialEntityManager {
 
 	private static final String sqlQuery = " SELECT COALESCE( SUM(CASE " + "WHEN l.customer_id =:cid THEN 1 "
 			+ "ELSE 0 " + "  END),0) AS customerSuccess, " + "count(*) AS totalSuccess "
-			+ "FROM llcdb.entity_like l where liked=1 and entity_id=:eid and entity_type=:et " + "union all "
+			+ "FROM {h-schema}entity_like l where liked=1 and entity_id=:eid and entity_type=:et " + "union all "
 			+ "SELECT COALESCE( SUM(CASE " + "WHEN f.customer_id =:cid THEN 1 " + "ELSE 0 "
 			+ "END),0) AS customerSuccess, " + "count(*) AS totalSuccess "
-			+ "FROM llcdb.entity_follow f where followed=1 and entity_id=:veid and entity_type=:vet " + "union all "
+			+ "FROM {h-schema}entity_follow f where followed=1 and entity_id=:veid and entity_type=:vet " + "union all "
 			+ "SELECT COALESCE( SUM(CASE  " + " WHEN v.viewing =1 THEN 1 " + " ELSE 0 " + "END),0) AS customerSuccess, "
-			+ "count(*) AS totalSuccess " + "FROM llcdb.entity_viewers v where  entity_id=:eid and entity_type=:et "
+			+ "count(*) AS totalSuccess " + "FROM {h-schema}entity_viewers v where  entity_id=:eid and entity_type=:et "
 			+ " union all " + " SELECT COALESCE(0) AS customerSuccess, " + "  count(*) AS totalSuccess "
-			+ "FROM llcdb.entity_share v where  entity_id=:eid and entity_type=:et  ";
+			+ "FROM {h-schema}entity_share v where  entity_id=:eid and entity_type=:et  ";
 
 	public static SocialEntityManager getInstance() {
 		return new SocialEntityManager();

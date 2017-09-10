@@ -14,7 +14,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "broadcaster_channel_old", catalog = "llcdb")
+@Table(name = "broadcaster_channel_old")
 public class BroadcasterChannel {
 	@Id
 	@GeneratedValue

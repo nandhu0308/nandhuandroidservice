@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="seller_fee_rate", catalog="llcdb")
+@Table(name="seller_fee_rate")
 public class SellerFeeRates {
 	@Id
 	@GeneratedValue

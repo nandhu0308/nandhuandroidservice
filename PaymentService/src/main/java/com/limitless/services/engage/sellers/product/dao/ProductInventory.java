@@ -11,7 +11,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name="product_inventory", catalog="llcdb")
+@Table(name="product_inventory")
 public class ProductInventory {
 	@Id
 	@Column(name="PRODUCT_ID")

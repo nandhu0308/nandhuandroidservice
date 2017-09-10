@@ -12,7 +12,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name="payment_settle", catalog = "llcdb")
+@Table(name="payment_settle")
 public class PaymentSettlement implements java.io.Serializable {
 	@Id
 	@GeneratedValue

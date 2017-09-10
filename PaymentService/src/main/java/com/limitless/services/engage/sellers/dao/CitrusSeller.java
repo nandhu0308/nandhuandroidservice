@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="citrus_seller", catalog="llcdb")
+@Table(name="citrus_seller")
 public class CitrusSeller {
 	@Id
 	@Column(name="CITRUS_ID")

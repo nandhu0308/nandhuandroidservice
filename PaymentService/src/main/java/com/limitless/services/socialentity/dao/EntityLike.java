@@ -11,7 +11,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "entity_like", catalog = "llcdb")
+@Table(name = "entity_like")
 public class EntityLike {
 	@Id
 	@GeneratedValue

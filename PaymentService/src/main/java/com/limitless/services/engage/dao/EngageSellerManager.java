@@ -2202,7 +2202,7 @@ public class EngageSellerManager {
 		criteria.add(Restrictions.eq("isDeleted", 0));
 		criteria.add(Restrictions.eq("ecomPayment", 1));
 //		SQLQuery query = session.createSQLQuery(
-//				"SELECT seller_id , ACOS( SIN( RADIANS( seller_location_latitude ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( seller_location_latitude ) )* COS( RADIANS( :lon )) * COS( RADIANS( seller_location_longitude ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM llcdb.engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
+//				"SELECT seller_id , ACOS( SIN( RADIANS( seller_location_latitude ) ) * SIN( RADIANS( :lat ) ) + COS( RADIANS( seller_location_latitude ) )* COS( RADIANS( :lon )) * COS( RADIANS( seller_location_longitude ) - RADIANS( :lon )) ) * 6380 AS 'distance' FROM {h-schema}engage_seller where business_category=:cat and isActive=1 and is_deleted=0 and ecom_payment=1 ORDER BY 'distance'  ");
 //		// query.setEntity("alias", EngageSeller.class);
 //		query.setParameter("lat", coordsBean.getLatitude());
 //		query.setParameter("lon", coordsBean.getLongitude());

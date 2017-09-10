@@ -15,7 +15,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "broadcaster_videos", catalog = "llcdb")
+@Table(name = "broadcaster_videos")
 public class ChannelVideo {
 	@Id
 	@GeneratedValue

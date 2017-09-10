@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="sessions", catalog="llcdb")
+@Table(name="sessions")
 public class SessionKeys {
 	@Id
 	@GeneratedValue

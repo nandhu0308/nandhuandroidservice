@@ -30,7 +30,7 @@ import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Where;
 
 @Entity
-@Table(name = "broadcaster_channel", catalog = "llcdb")
+@Table(name = "broadcaster_channel")
 public class Channel {
 	@Id
 	@GeneratedValue
