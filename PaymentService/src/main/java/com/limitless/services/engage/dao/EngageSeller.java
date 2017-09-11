@@ -22,8 +22,11 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.annotations.Formula;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
+import com.limitless.services.payment.PaymentService.util.HibernateUtil;
 import com.limitless.services.socialentity.dao.*;
 
 /**
@@ -110,11 +113,11 @@ public class EngageSeller implements java.io.Serializable {
 	private String sellerIconURL;
 	@Column(name = "ECOM_PAYMENT")
 	private Integer ecomPayment;
-	@Formula("(SELECT avg(R.rating)  FROM {h-schema}entity_rating R where R.entity_id= seller_id and  R.entity_type='S')")
+	@Formula("(SELECT avg(R.rating)  FROM localtvdb.entity_rating R where R.entity_id= seller_id and  R.entity_type='S')")
 	private Float rating = 0f;
 
-	
 	public EngageSeller() {
+
 	}
 
 	public EngageSeller(int citrusSellerId, String sellerName, String sellerEmail99, String sellerPasswd99,
